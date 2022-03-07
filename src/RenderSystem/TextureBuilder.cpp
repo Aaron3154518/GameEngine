@@ -38,7 +38,7 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
 	RectData r;
 	r.color = bkgrnd;
 	r.blendMode = SDL_BLENDMODE_BLEND;
-	drawRect(r.set());
+	draw(r.set());
 }
 
 // Draw textures/text
@@ -140,7 +140,7 @@ void TextureBuilder::endDrawShape() {
 	Renderer::resetBlendMode();
 	Renderer::resetRenderTarget();
 }
-void TextureBuilder::drawRect(const RectData& data) {
+void TextureBuilder::draw(const RectData& data) {
 	startDrawShape(data);
 	Rect bounds = getShapeBounds(data);
 	if (!bounds.empty()) {
@@ -171,7 +171,7 @@ void TextureBuilder::drawRect(const RectData& data) {
 	}
 	endDrawShape();
 }
-void TextureBuilder::drawCircle(const CircleData& data) {
+void TextureBuilder::draw(const CircleData& data) {
 	startDrawShape(data);
 	Rect bounds = getShapeBounds(data);
 	if (!bounds.empty()) {
@@ -201,18 +201,18 @@ void TextureBuilder::drawCircle(const CircleData& data) {
 	}
 	endDrawShape();
 }
-void TextureBuilder::drawProgressBar(const ProgressBar& data) {
+void TextureBuilder::draw(const ProgressBar& data) {
 	startDrawShape(data);
 	Rect bounds = getShapeBounds(data);
 	if (!bounds.empty()) {
 		RectData r;
 		r.copy(data);
 		r.color = data.bkgrnd;
-		drawRect(r.set(data.r));
-		Rect progR(data.r.x, data.r.y, data.r.w * data.perc, data.r.h);
+		draw(r.set(data.rect));
+		Rect progR(data.rect.x, data.rect.y, data.rect.w * data.perc, data.rect.h);
 		if (!progR.empty()) {
 			r.color = data.color;
-			drawRect(r.set(progR));
+			draw(r.set(progR));
 		}
 	}
 	endDrawShape();
@@ -225,7 +225,7 @@ void TextureBuilder::brighten(Uint8 strength) {
 		RectData r;
 		r.color = SDL_Color{ strength,strength,strength,255 };
 		r.blendMode = SDL_BLENDMODE_ADD;
-		drawRect(r.set());
+		draw(r.set());
 	} else {
 #ifndef RENDER_DEBUG
 		std::cerr << "brighten: "

@@ -48,8 +48,8 @@ CircleData& CircleData::set(SDL_Point _c, int r, int thickness, bool center) {
 }
 
 // ProgressBar
-ProgressBar& ProgressBar::set(const Rect& rect) {
-	r = rect;
+ProgressBar& ProgressBar::set(const Rect& r) {
+	rect = r;
 	return *this;
 }
 ProgressBar& ProgressBar::set(SDL_Color foreground, SDL_Color background) {

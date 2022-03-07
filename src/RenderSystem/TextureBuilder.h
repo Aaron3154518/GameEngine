@@ -29,9 +29,9 @@ public:
 
 	// Draw textures/text
 	void draw(const RenderData& data);
-	void drawRect(const RectData& data);
-	void drawCircle(const CircleData& data);
-	void drawProgressBar(const ProgressBar& data);
+	void draw(const RectData& data);
+	void draw(const CircleData& data);
+	void draw(const ProgressBar& data);
 
 	// Brighten texture
 	void brighten(Uint8 strength);
