@@ -51,6 +51,8 @@ int main(int argc, char* argv[]) {
 	int delay = 1000 / 60;
 	Uint32 time = SDL_GetTicks();
 
+	double frac = 0.;
+
 	Event e;
 
 	while (true) {
@@ -70,6 +72,12 @@ int main(int argc, char* argv[]) {
 			if (e[m].clicked()) {
 				miceStatus[m * 3 + 2] = !miceStatus[m * 3 + 2];
 			}
+		}
+
+		if (frac > 0.) {
+			frac = fmax(0., frac - (double)dt/1000);
+		} else if (frac < 0.) {
+			frac = fmin(0., frac + (double)dt/1000);
 		}
 
 		// Rendering
@@ -94,6 +102,20 @@ int main(int argc, char* argv[]) {
 			SDL_RenderFillRect(renderer, &r);
 			r.x += mouseW;
 		}
+
+		r = SDL_Rect{ 0, mouseW, w / 2, mouseW};
+		if (e.scroll != 0) {
+			frac = (double)e.scroll / 2.;
+		}
+		if (frac >= 0.) {
+			double val = sqrt(fmin(1, frac));
+			SDL_SetRenderDrawColor(renderer, 255 * val, 0, 255 * (1 - val), 255);
+		} else {
+			double val = sqrt(fmin(1, -frac));
+			SDL_SetRenderDrawColor(renderer, 0, 255 * val, 255 * (1 - val), 255);
+		}
+		SDL_RenderFillRect(renderer, &r);
+
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 		SDL_RenderPresent(renderer);
