@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 	int delay = 1000 / 60;
 	Uint32 time = SDL_GetTicks();
 
-	double frac = 0.;
+	double sFrac = 0., dFrac = 0.;
 
 	Event e;
 
@@ -74,15 +74,20 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		if (frac > 0.) {
-			frac = fmax(0., frac - (double)dt/1000);
-		} else if (frac < 0.) {
-			frac = fmin(0., frac + (double)dt/1000);
+		if (sFrac > 0.) {
+			sFrac = fmax(0., sFrac - (double)dt / 1000);
+		} else if (sFrac < 0.) {
+			sFrac = fmin(0., sFrac + (double)dt / 1000);
+		}
+
+		if (dFrac > 0.) {
+			dFrac = fmax(0., dFrac - (double)dt / 1000);
 		}
 
 		// Rendering
 		SDL_RenderClear(renderer);
 
+		// Mouse
 		SDL_Rect r{ 0, 0, mouseW, mouseW };
 		for (auto& m : mice) {
 			SDL_Color c = miceStatus[m * 3] ? BLUE : YELLOW;
@@ -103,17 +108,28 @@ int main(int argc, char* argv[]) {
 			r.x += mouseW;
 		}
 
+		// Scroll
 		r = SDL_Rect{ 0, mouseW, w / 2, mouseW};
 		if (e.scroll != 0) {
-			frac = (double)e.scroll / 2.;
+			sFrac = (double)e.scroll / 2.;
 		}
-		if (frac >= 0.) {
-			double val = sqrt(fmin(1, frac));
+		if (sFrac >= 0.) {
+			double val = sqrt(fmin(1, sFrac));
 			SDL_SetRenderDrawColor(renderer, 255 * val, 0, 255 * (1 - val), 255);
 		} else {
-			double val = sqrt(fmin(1, -frac));
+			double val = sqrt(fmin(1, -sFrac));
 			SDL_SetRenderDrawColor(renderer, 0, 255 * val, 255 * (1 - val), 255);
 		}
+		SDL_RenderFillRect(renderer, &r);
+
+		// Drag
+		r.x += w / 2;
+		double d = sqrt(e.mouseDx * e.mouseDx + e.mouseDy * e.mouseDy);
+		if (d != 0.) {
+			dFrac = d / 250.;
+		}
+		double val = sqrt(fmin(1, dFrac));
+		SDL_SetRenderDrawColor(renderer, 255, 255 * (1 - val), 255 * val, 255);
 		SDL_RenderFillRect(renderer, &r);
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
