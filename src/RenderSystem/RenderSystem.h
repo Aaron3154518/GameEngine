@@ -25,4 +25,9 @@ typedef std::unique_ptr<SDL_Window, void(*)(SDL_Window*)> WindowPtr;
 void initRenderSystem(int w, int h, std::string name = "Game");
 void teardownRenderSystem();
 
+void clearScreen(SDL_Color bkgrnd = BLACK);
+void presentScreen();
+
+void enforceFPS(int fps);
+
 #endif

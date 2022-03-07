@@ -40,3 +40,28 @@ void teardownRenderSystem() {
 		std::cerr << "SDL_TTF Uninitialized" << std::endl;
 	}
 }
+
+void clearScreen(SDL_Color bkgrnd) {
+	SDL_RenderClear(Renderer::get());
+	if (bkgrnd != BLACK) {
+		RectData r;
+		r.color = bkgrnd;
+		TextureBuilder().draw(r.set());
+	}
+}
+
+void presentScreen() {
+	SDL_RenderPresent(Renderer::get());
+}
+
+void enforceFPS(int fps) {
+	static Uint32 time = 0;
+	if (SDL_WasInit(SDL_INIT_EVERYTHING)) {
+		int delay = 1000 / fps;
+		Uint32 dt = SDL_GetTicks() - time;
+		if (dt < delay) {
+			SDL_Delay(delay - dt);
+		}
+		time = SDL_GetTicks();
+	}
+}

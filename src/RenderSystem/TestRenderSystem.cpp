@@ -9,9 +9,6 @@ int main(int argc, char* argv[]) {
 
 	TextureBuilder screen;
 
-	RectData bkgrnd;
-	bkgrnd.color = WHITE;
-
 	RenderData image;
 	image.texture = am.getTexture("res/wizards/Catalyst.png");
 	image.dest = Rect(125, 100, 250, 250);
@@ -60,7 +57,6 @@ int main(int argc, char* argv[]) {
 	shapesTex.draw(rd.set(rdR));
 
 	Uint32 time = SDL_GetTicks();
-	int delay = 1000 / 60;
 
 	bool running = true;
 	while (running) {
@@ -71,10 +67,9 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 		}
-		// Rendering
-		SDL_RenderClear(Renderer::get());
 
-		screen.draw(bkgrnd);
+		// Rendering
+		clearScreen(LGRAY);
 
 		pb.set(pbVal, 1000);
 		screen.draw(pb);
@@ -85,10 +80,13 @@ int main(int argc, char* argv[]) {
 		screen.draw(image);
 		screen.draw(pp);
 
- 		SDL_RenderPresent(Renderer::get());
+		presentScreen();
 
 		// Updating
-		pbVal += delay;
+		Uint32 dt = SDL_GetTicks() - time;
+		time += dt;
+
+		pbVal += dt;
 		while (pbVal > 1000.) {
 			pbVal -= 1000.;
 
@@ -109,12 +107,8 @@ int main(int argc, char* argv[]) {
 			pp.fitToTexture();
 		}
 
-		// Framerate
-		Uint32 dt = SDL_GetTicks() - time;
-		if (dt < delay) {
-			SDL_Delay(delay - dt);
-		}
-		time = SDL_GetTicks();
+		// FPS
+		enforceFPS(60);
 	}
 
 	teardownRenderSystem();
