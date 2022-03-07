@@ -189,11 +189,13 @@ Texture TextData::renderTextWrapped() {
 }
 
 // RenderData
-void RenderData::fitToAsset() {
-	dest = Rect::getMinRect(texture.get(), dest.w, dest.h);
+void RenderData::fitToTexture(Rect::Align align) {
+	fitToTexture(dest.w, dest.h, align);
 }
-void RenderData::fitToAsset(int maxW, int maxH) {
+void RenderData::fitToTexture(int maxW, int maxH, Rect::Align align) {
+	Rect tmp = dest;
 	dest = Rect::getMinRect(texture.get(), maxW, maxH);
+	dest.setPos(tmp, align);
 }
 
 // TextRenderData

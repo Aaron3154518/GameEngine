@@ -62,8 +62,8 @@ struct RenderData {
 	SharedTexture texture;
 	Rect dest, area, boundary;
 
-	void fitToAsset();
-	void fitToAsset(int maxW, int maxH);
+	void fitToTexture(Rect::Align align = Rect::Align::CENTER);
+	void fitToTexture(int maxW, int maxH, Rect::Align align = Rect::Align::CENTER);
 };
 
 // To draw a texture from text

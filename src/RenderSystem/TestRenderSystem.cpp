@@ -5,11 +5,28 @@
 int main(int argc, char* argv[]) {
 	initRenderSystem(500, 500, "Render System Test");
 
+	AssetManager am;
+
 	TextureBuilder screen;
 
+	RectData bkgrnd;
+	bkgrnd.color = WHITE;
+
+	RenderData image;
+	image.texture = am.getTexture("res/wizards/Crystal.png");
+	image.dest = Rect(125, 100, 250, 250);
+	image.fitToTexture();
+
+	TextRenderData pp;
+
 	ProgressBar pb;
-	pb.set(RED, BLACK).set(Rect(100, 400, 200, 50));
+	pb.set(RED, LGRAY).set(Rect(100, 400, 300, 50));
 	double pbVal = 0.;
+
+	TextRenderData timer;
+
+	Uint32 time = SDL_GetTicks();
+	int delay = 1000 / 60;
 
 	bool running = true;
 	while (running) {
@@ -22,12 +39,22 @@ int main(int argc, char* argv[]) {
 		}
 		SDL_RenderClear(Renderer::get());
 
-		pb.set(pbVal, 100.);
+		screen.drawRect(bkgrnd);
+
+		pb.set(pbVal, 1000);
 		screen.drawProgressBar(pb);
 
-		SDL_RenderPresent(Renderer::get());
+		screen.draw(image);
 
-		pbVal = fmod((pbVal + 1), 100);
+ 		SDL_RenderPresent(Renderer::get());
+
+		pbVal = fmod((pbVal + delay), 1000.);
+
+		Uint32 dt = SDL_GetTicks() - time;
+		if (dt < delay) {
+			SDL_Delay(delay - dt);
+		}
+		time = SDL_GetTicks();
 	}
 
 	teardownRenderSystem();

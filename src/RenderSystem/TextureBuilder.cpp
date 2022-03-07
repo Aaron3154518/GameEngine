@@ -1,5 +1,7 @@
 #include "TextureBuilder.h"
 
+#define RENDER_DEBUG
+
 // TextureBuilder
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
 	reset(w, h, bkgrnd);
@@ -99,7 +101,7 @@ void TextureBuilder::draw(const RenderData& data) {
 #endif
 		return;
 	}
-	Rect areaRect = data.area.invalid() ? Rect(0, 0, w, h) : data.area;
+	Rect areaRect = data.area.empty() ? Rect(0, 0, w, h) : data.area;
 	Rect texRect = Rect(areaRect.x + areaRect.w * leftFrac,
 		areaRect.y + areaRect.h * topFrac,
 		areaRect.w * (1. - leftFrac - rightFrac),
