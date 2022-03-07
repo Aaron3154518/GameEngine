@@ -1,0 +1,54 @@
+/*
+This file contains structs for drawing shapes and other visual items.
+Each struct contains data for rendering the item and functions to set the data.
+*/
+
+#ifndef SHAPES_H
+#define SHAPES_H
+
+#include <cmath>
+
+#include <SDL.h>
+
+#include "Colors.h"
+#include "Rect.h"
+
+// Shape rendering struct
+struct ShapeData {
+	SDL_Color color = BLACK;
+	Rect boundary;
+	SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
+
+	void copy(const ShapeData& data);
+};
+
+// Rectangle
+struct RectData : public ShapeData {
+	RectData& set();
+	RectData& set(const Rect& r);
+	RectData& set(Rect r, int thickness, bool center = false);
+
+	Rect r1, r2;
+};
+
+// Circle
+struct CircleData : public ShapeData {
+	CircleData& set(SDL_Point _c, int r);
+	CircleData& set(SDL_Point _c, int r, int thickness, bool center = false);
+
+	SDL_Point c{ 0,0 };
+	int r1 = 0, r2 = 0;
+};
+
+struct ProgressBar : public ShapeData {
+	ProgressBar& set(const Rect& rect);
+	ProgressBar& set(SDL_Color foreground, SDL_Color background);
+	ProgressBar& set(double amnt, double cap, bool log = false);
+	ProgressBar& set(double percent);
+
+	Rect r;
+	double perc = 0.;
+	SDL_Color bkgrnd = GRAY;
+};
+
+#endif
