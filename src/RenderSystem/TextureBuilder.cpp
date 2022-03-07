@@ -207,8 +207,11 @@ void TextureBuilder::drawProgressBar(const ProgressBar& data) {
 		r.copy(data);
 		r.color = data.bkgrnd;
 		drawRect(r.set(data.r));
-		r.color = data.color;
-		drawRect(r.set(Rect(data.r.x, data.r.y, data.r.w * data.perc, data.r.h)));
+		Rect progR(data.r.x, data.r.y, data.r.w * data.perc, data.r.h);
+		if (!progR.empty()) {
+			r.color = data.color;
+			drawRect(r.set(progR));
+		}
 	}
 	endDrawShape();
 }
