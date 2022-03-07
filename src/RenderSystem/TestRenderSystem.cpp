@@ -23,7 +23,14 @@ int main(int argc, char* argv[]) {
 	pb.set(RED, LGRAY).set(Rect(100, 400, 300, 50));
 	double pbVal = 0.;
 
+	int timerVal = 1;
 	TextRenderData timer;
+	timer.dest = Rect(250, 450, 0, 50);
+	timer.tData.font = am.getFont(FontData{-1, 25, "|"});
+	timer.tData.color = BLUE;
+	timer.tData.text = std::to_string(timerVal);
+	timer.renderText();
+	timer.fitToTexture(0, timer.dest.h);
 
 	Uint32 time = SDL_GetTicks();
 	int delay = 1000 / 60;
@@ -44,11 +51,20 @@ int main(int argc, char* argv[]) {
 		pb.set(pbVal, 1000);
 		screen.drawProgressBar(pb);
 
+		screen.draw(timer);
+
 		screen.draw(image);
 
  		SDL_RenderPresent(Renderer::get());
 
-		pbVal = fmod((pbVal + delay), 1000.);
+		pbVal += delay;
+		while (pbVal > 1000.) {
+			pbVal -= 1000.;
+			timerVal *= 2;
+			timer.tData.text = std::to_string(timerVal);
+			timer.renderText();
+			timer.fitToTexture(0, timer.dest.h);
+		}
 
 		Uint32 dt = SDL_GetTicks() - time;
 		if (dt < delay) {

@@ -69,6 +69,7 @@ void AssetManager::getFontSize(std::string fileName, int size, int* w, int* h) {
 	Font font = makeFont(TTF_OpenFont(fileName.c_str(), size));
 	TTF_SizeText(font.get(), "_", w, NULL);
 	if (h) { *h = TTF_FontHeight(font.get()); }
+	font.reset();
 }
 void AssetManager::getTextSize(std::string fileName, int size,
 	std::string sampleText, int* w, int* h) {

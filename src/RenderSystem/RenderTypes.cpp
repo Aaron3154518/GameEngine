@@ -1,5 +1,13 @@
 #include "RenderTypes.h"
 
+// Because TTF is stupid and needs to be initialized to close fonts
+// Fonts will not be closed after quitting TTF however this only happens when the program is about to end
+void safeCloseFont(TTF_Font* font) {
+	if (TTF_WasInit()) {
+		TTF_CloseFont(font);
+	}
+}
+
 // Memory management functions
 Surface makeSurface(SDL_Surface* surf) {
 	return Surface(surf, SDL_FreeSurface);
@@ -16,10 +24,10 @@ SharedTexture makeSharedTexture(SDL_Texture* tex) {
 }
 
 Font makeFont(TTF_Font* font) {
-	return Font(font, TTF_CloseFont);
+	return Font(font, safeCloseFont);
 }
 SharedFont makeSharedFont(TTF_Font* font) {
-	return SharedFont(font, TTF_CloseFont);
+	return SharedFont(font, safeCloseFont);
 }
 
 // Helper function to split text for wrapping
