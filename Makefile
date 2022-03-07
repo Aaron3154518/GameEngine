@@ -20,6 +20,10 @@ RenderTest: $(call OBJS,src/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS,src/RenderSystem/TestRenderSystem.cpp)
 
+EventTest: $(call OBJS,src/EventSystem/TestEventSystem.cpp)
+	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+-include $(call DEPS,src/EventSystem/TestEventSystem.cpp)
+
 $(OBJ)/%.o: %.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
