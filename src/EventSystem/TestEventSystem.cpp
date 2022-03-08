@@ -62,7 +62,12 @@ int main(int argc, char* argv[]) {
 	Uint32 time = SDL_GetTicks();
 	while (true) {
 		e.update();
-		if (e.quit) { break; }
+		if (e.quit()) { break; }
+		if (e.resized()) {
+			mouseW = fmin(e.newW(), e.newH()) / 12;
+			TTF_CloseFont(font);
+			font = TTF_OpenFont("res/fonts/times.ttf", mouseW);
+		}
 
 		for (auto& m : mice) {
 			if (e[m].pressed()) {
@@ -77,28 +82,29 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (sFrac > 0.) {
-			sFrac = fmax(0., sFrac - (double)e.dt / 1000);
+			sFrac = fmax(0., sFrac - (double)e.dt() / 1000);
 		} else if (sFrac < 0.) {
-			sFrac = fmin(0., sFrac + (double)e.dt / 1000);
+			sFrac = fmin(0., sFrac + (double)e.dt() / 1000);
 		}
 
 		if (dFrac > 0.) {
-			dFrac = fmax(0., dFrac - (double)e.dt / 1000);
+			dFrac = fmax(0., dFrac - (double)e.dt() / 1000);
 		}
 
 		std::stringstream pr, re, he;
 		pr << "Pressed: ";
 		re << "Released: ";
 		he << "Held: ";
-		for (auto& pair : e.keyButtons) {
-			if (pair.second.pressed()) {
-				pr << pair.first << " ";
+		for (auto& key : e.keys()) {
+			const Event::KeyButton& kb = e[key];
+			if (kb.pressed()) {
+				pr << SDL_GetKeyName(key) << " ";
 			}
-			if (pair.second.released()) {
-				re << pair.first << " ";
+			if (kb.released()) {
+				re << SDL_GetKeyName(key) << " ";
 			}
-			if (pair.second.held()) {
-				he << pair.first << " ";
+			if (kb.held()) {
+				he << SDL_GetKeyName(key) << " ";
 			}
 		}
 
@@ -128,8 +134,8 @@ int main(int argc, char* argv[]) {
 
 		// Scroll
 		r = SDL_Rect{ 0, mouseW, w / 2, mouseW };
-		if (e.scroll != 0) {
-			sFrac = (double)e.scroll / 2.;
+		if (e.scroll() != 0) {
+			sFrac = (double)e.scroll() / 2.;
 		}
 		if (sFrac >= 0.) {
 			double val = sqrt(fmin(1, sFrac));
@@ -142,7 +148,7 @@ int main(int argc, char* argv[]) {
 
 		// Drag
 		r.x += w / 2;
-		double d = sqrt(e.mouseDx * e.mouseDx + e.mouseDy * e.mouseDy);
+		double d = sqrt(e.mouseDx() * e.mouseDx() + e.mouseDy() * e.mouseDy());
 		if (d != 0.) {
 			dFrac = d / 250.;
 		}
