@@ -144,7 +144,7 @@ const Event::MouseButton& Event::operator[](Uint8 sdlButton) const {
 const Event::MouseButton& Event::operator[](Event::Mouse button) const {
 	return mouseButtons[button];
 }
-const Event::KeyButton& Event::operator[](Key key) const {
+const Event::KeyButton& Event::operator[](SDL_KeyCode key) const {
 	auto it = keyButtons.find(key);
 	if (it != keyButtons.end()) {
 		return it->second;

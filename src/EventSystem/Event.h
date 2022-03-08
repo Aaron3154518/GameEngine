@@ -16,7 +16,6 @@ public:
 	~Event() = default;
 
     typedef uint8_t Status;
-    typedef SDL_KeyCode Key;
     enum Mouse : uint8_t {
         LEFT = 0, RIGHT, MIDDLE
     };
@@ -60,7 +59,7 @@ public:
     // Getters
     const MouseButton& operator[](Uint8 sdlButton) const;
     const MouseButton& operator[](Event::Mouse button) const;
-    const KeyButton& operator[](Key key) const;
+    const KeyButton& operator[](SDL_KeyCode key) const;
     static const KeyButton& unusedKey();
 
     // Doesn't belong in Event
@@ -85,7 +84,7 @@ public:
     std::string inputText;
 
     std::array<MouseButton, 3> mouseButtons;
-    std::unordered_map<Key, KeyButton> keyButtons;
+    std::unordered_map<SDL_KeyCode, KeyButton> keyButtons;
 
     static Mouse toMouse(Uint8 sdlButtonType);
 };
