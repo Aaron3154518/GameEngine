@@ -54,18 +54,14 @@ int main(int argc, char* argv[]) {
 
 	TTF_Font* font = TTF_OpenFont("res/fonts/times.ttf", mouseW);
 
-	int delay = 1000 / 60;
-	Uint32 time = SDL_GetTicks();
-
 	double sFrac = 0., dFrac = 0.;
 
 	Event e;
 
+	int delay = 1000 / 60;
+	Uint32 time = SDL_GetTicks();
 	while (true) {
-		Uint32 dt = SDL_GetTicks() - time;
-		time = SDL_GetTicks();
-
-		e.update(Time(dt));
+		e.update();
 		if (e.quit) { break; }
 
 		for (auto& m : mice) {
@@ -81,13 +77,13 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (sFrac > 0.) {
-			sFrac = fmax(0., sFrac - (double)dt / 1000);
+			sFrac = fmax(0., sFrac - (double)e.dt / 1000);
 		} else if (sFrac < 0.) {
-			sFrac = fmin(0., sFrac + (double)dt / 1000);
+			sFrac = fmin(0., sFrac + (double)e.dt / 1000);
 		}
 
 		if (dFrac > 0.) {
-			dFrac = fmax(0., dFrac - (double)dt / 1000);
+			dFrac = fmax(0., dFrac - (double)e.dt / 1000);
 		}
 
 		std::stringstream pr, re, he;
@@ -178,9 +174,11 @@ int main(int argc, char* argv[]) {
 
 		SDL_RenderPresent(renderer);
 
+		uint32_t dt = SDL_GetTicks() - time;
 		if (dt < delay) {
 			SDL_Delay(delay - dt);
 		}
+		time = SDL_GetTicks();
 	}
 
 	TTF_CloseFont(font);

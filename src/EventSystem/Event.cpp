@@ -1,9 +1,10 @@
 #include "Event.h"
 
-void Event::update(Time ts) {
+void Event::update() {
+	static uint32_t time = 0;
 	// Reset/update variables
-	dt = ts;
-	uint32_t ms = dt.ms();
+	dt = time == 0 ? 0 : SDL_GetTicks() - time;
+	time = SDL_GetTicks();
 	// Reset event flags
 	quit = resize = false;
 	// Reset text editing
@@ -15,7 +16,7 @@ void Event::update(Time ts) {
 	scroll = 0;
 	// Update mouse buttons
 	for (auto& b : mouseButtons) {
-		if (bitsSet(b.status, Button::HELD)) { b.duration += ms; }
+		if (bitsSet(b.status, Button::HELD)) { b.duration += dt; }
 		// Reset pressed/released
 		b.status &= Button::HELD;
 	}
@@ -23,7 +24,7 @@ void Event::update(Time ts) {
 	for (auto it = keyButtons.begin(); it != keyButtons.end(); ++it) {
 		auto& b = it->second;
 		if (bitsSet(b.status, Button::HELD)) {
-			b.duration += ms;
+			b.duration += dt;
 			// Reset pressed/released
 			b.status = Button::HELD;
 		} else {

@@ -8,8 +8,6 @@
 
 #include <SDL.h>
 
-#include "Time.h"
-
 class Event {
 public:
 	Event() = default;
@@ -37,7 +35,7 @@ public:
     struct MouseButton {
         Status status = 0;
         SDL_Point clickPos{ 0,0 };
-        Time duration;
+        uint32_t duration;
 
         bool pressed() const;
         bool released() const;
@@ -46,14 +44,14 @@ public:
     };
     struct KeyButton {
         Status status = 0;
-        Time duration;
+        uint32_t duration;
 
         bool pressed() const;
         bool released() const;
         bool held() const;
     };
 
-    void update(Time ts);
+    void update();
     void update(SDL_Event& e);
 
     // Getters
@@ -69,7 +67,7 @@ public:
     // Vars
     static constexpr int MAX_CLICK_DIFF = 10;
 
-    Time dt;
+    uint32_t dt;
 
     bool quit = false;
     bool resize = false;
