@@ -42,12 +42,11 @@ void teardownRenderSystem() {
 }
 
 void clearScreen(SDL_Color bkgrnd) {
+	SDL_Color tmp;
+	SDL_GetRenderDrawColor(Renderer::get(), &tmp.r, &tmp.g, &tmp.b, &tmp.a);
+	SDL_SetRenderDrawColor(Renderer::get(), bkgrnd.r, bkgrnd.g, bkgrnd.b, bkgrnd.a);
 	SDL_RenderClear(Renderer::get());
-	if (bkgrnd != BLACK) {
-		RectData r;
-		r.color = bkgrnd;
-		TextureBuilder().draw(r.set());
-	}
+	SDL_SetRenderDrawColor(Renderer::get(), tmp.r, tmp.g, tmp.b, tmp.a);
 }
 
 void presentScreen() {
@@ -56,12 +55,10 @@ void presentScreen() {
 
 void enforceFPS(int fps) {
 	static Uint32 time = 0;
-	if (SDL_WasInit(SDL_INIT_EVERYTHING)) {
-		int delay = 1000 / fps;
-		Uint32 dt = SDL_GetTicks() - time;
-		if (dt < delay) {
-			SDL_Delay(delay - dt);
-		}
-		time = SDL_GetTicks();
+	int delay = 1000 / fps;
+	Uint32 dt = SDL_GetTicks() - time;
+	if (dt < delay) {
+		SDL_Delay(delay - dt);
 	}
+	time = SDL_GetTicks();
 }
