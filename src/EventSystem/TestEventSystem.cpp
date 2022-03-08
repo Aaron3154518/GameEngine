@@ -1,10 +1,14 @@
 #define SDL_MAIN_HANDLED
 
 #include <iostream>
+#include <sstream>
+
+#include <SDL_ttf.h>
 
 #include "EventSystem.h"
 
 constexpr SDL_Color WHITE{ 255,255,255,255 };
+constexpr SDL_Color BLACK{ 0,0,0,255 };
 constexpr SDL_Color GREEN{ 0,255,0,255 };
 constexpr SDL_Color RED{ 255,0,0,255 };
 constexpr SDL_Color BLUE{ 0,0,255,255 };
@@ -34,19 +38,21 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	/*if (!TTF_WasInit()) {
+	if (!TTF_WasInit()) {
 		// Initialize SDL fonts module
 		if (TTF_Init() == 0) {
 			std::cerr << "SDL_TTF Initialized" << std::endl;
 		} else {
 			return 1;
 		}
-	}*/
+	}
 
 	int mouseW = w / 12;
 	std::array<Event::Mouse, 3> mice = {
 		Event::Mouse::LEFT, Event::Mouse::MIDDLE, Event::Mouse::RIGHT};
 	std::array<bool, 3 * 3> miceStatus = { false };
+
+	TTF_Font* font = TTF_OpenFont("res/fonts/times.ttf", mouseW);
 
 	int delay = 1000 / 60;
 	Uint32 time = SDL_GetTicks();
@@ -84,6 +90,22 @@ int main(int argc, char* argv[]) {
 			dFrac = fmax(0., dFrac - (double)dt / 1000);
 		}
 
+		std::stringstream pr, re, he;
+		pr << "Pressed: ";
+		re << "Released: ";
+		he << "Held: ";
+		for (auto& pair : e.keyButtons) {
+			if (pair.second.pressed()) {
+				pr << pair.first << " ";
+			}
+			if (pair.second.released()) {
+				re << pair.first << " ";
+			}
+			if (pair.second.held()) {
+				he << pair.first << " ";
+			}
+		}
+
 		// Rendering
 		SDL_RenderClear(renderer);
 
@@ -109,7 +131,7 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Scroll
-		r = SDL_Rect{ 0, mouseW, w / 2, mouseW};
+		r = SDL_Rect{ 0, mouseW, w / 2, mouseW };
 		if (e.scroll != 0) {
 			sFrac = (double)e.scroll / 2.;
 		}
@@ -132,15 +154,37 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 255, 255 * (1 - val), 255 * val, 255);
 		SDL_RenderFillRect(renderer, &r);
 
+		// Keys
+		r = SDL_Rect{ 0, mouseW * 2, w, mouseW };
+		SDL_Surface* surf = TTF_RenderText_Solid(font, pr.str().c_str(), BLACK);
+		SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+		SDL_RenderCopy(renderer, tex, NULL, &r);
+		SDL_FreeSurface(surf);
+		SDL_DestroyTexture(tex);
+		r.y += mouseW;
+		surf = TTF_RenderText_Solid(font, re.str().c_str(), BLACK);
+		tex = SDL_CreateTextureFromSurface(renderer, surf);
+		SDL_RenderCopy(renderer, tex, NULL, &r);
+		SDL_FreeSurface(surf);
+		SDL_DestroyTexture(tex);
+		r.y += mouseW;
+		surf = TTF_RenderText_Solid(font, he.str().c_str(), BLACK);
+		tex = SDL_CreateTextureFromSurface(renderer, surf);
+		SDL_RenderCopy(renderer, tex, NULL, &r);
+		SDL_FreeSurface(surf);
+		SDL_DestroyTexture(tex);
+
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 		SDL_RenderPresent(renderer);
-		
+
 		if (dt < delay) {
 			SDL_Delay(delay - dt);
 		}
 	}
 
+	TTF_CloseFont(font);
+	TTF_Quit();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
