@@ -19,7 +19,7 @@ SOURCES = $(shell realpath --relative-to ./ $(patsubst %.h,%.cpp,$(filter %.h, $
 EXIST = $(filter $(foreach file,$(call SOURCES,$1),$(wildcard $(file))),$(call SOURCES,$1))
 # Compute .d and .h dependencies
 DEPS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$(call EXIST,$1))
-OBJS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(call EXIST,$1))
+OBJS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$1) $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(call EXIST,$1))
 
 all: RenderTest
 
@@ -28,18 +28,19 @@ test: RenderTest EventTest ServiceTest
 	$(BIN)/EventTest
 	$(BIN)/ServiceTest
 
+.PHONY: clean
 clean:
-	@rm obj/* -r
+	@find $(OBJ) -type f \( -name "*.o" -o -name "*.d" \) -delete
 
-RenderTest: #$(call OBJS,src/RenderSystem/TestRenderSystem.cpp)
+RenderTest: $(call OBJS,src/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS,src/RenderSystem/TestRenderSystem.cpp)
 
-EventTest: #$(call OBJS,src/EventSystem/TestEventSystem.cpp)
+EventTest: $(call OBJS,src/EventSystem/TestEventSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS,src/EventSystem/TestEventSystem.cpp)
 
-ServiceTest: #$(call OBJS,src/Services/TestServiceSystem.cpp)
+ServiceTest: $(call OBJS,src/Services/TestServiceSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS,src/Services/TestServiceSystem.cpp)
 
