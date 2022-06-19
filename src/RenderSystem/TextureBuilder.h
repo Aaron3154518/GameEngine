@@ -12,9 +12,10 @@ It contains various drawing functions for shapes in Shapes.h as well as other vi
 #include "Colors.h"
 #include "RenderTypes.h"
 #include "Shapes.h"
-#include "Rect.h"
+#include "../Utils/Rect/Rect.h"
 
-class TextureBuilder {
+class TextureBuilder
+{
 public:
 	TextureBuilder() = default;
 	TextureBuilder(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
@@ -28,21 +29,21 @@ public:
 	void reset(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
 
 	// Draw textures/text
-	void draw(const RenderData& data);
-	void draw(const RectData& data);
-	void draw(const CircleData& data);
-	void draw(const ProgressBar& data);
+	void draw(const RenderData &data);
+	void draw(const RectData &data);
+	void draw(const CircleData &data);
+	void draw(const ProgressBar &data);
 
 	// Brighten texture
 	void brighten(Uint8 strength);
 
-	static bool getTextureSize(SDL_Texture* tex, int* w, int* h);
+	static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
 
 private:
 	SharedTexture mTex = makeSharedTexture();
 
-	void startDrawShape(const ShapeData& data);
-	Rect getShapeBounds(const ShapeData& data);
+	void startDrawShape(const ShapeData &data);
+	Rect getShapeBounds(const ShapeData &data);
 	void endDrawShape();
 };
 

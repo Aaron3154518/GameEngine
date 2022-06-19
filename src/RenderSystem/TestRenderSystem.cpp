@@ -2,7 +2,8 @@
 
 #include "RenderSystem.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 	initRenderSystem(500, 500, "Render System Test");
 
 	AssetManager am;
@@ -16,10 +17,10 @@ int main(int argc, char* argv[]) {
 
 	TextRenderData pp;
 	pp.dest = image.dest;
-	pp.tData.font = am.getFont(FontData{ -1, 25, "|" });
+	pp.tData.font = am.getFont(FontData{-1, 25, "|"});
 	pp.tData.text = "According to all known laws of aviation, there is no way a bee should be able to fly.\n"
-		"Its wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway"
-		"because bees don't care what humans think is impossible.";
+					"Its wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway"
+					"because bees don't care what humans think is impossible.";
 	pp.tData.color = RED;
 	pp.tData.w = pp.dest.w;
 	pp.tData.align = Rect::Align::TOP_LEFT;
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
 	CircleData cd;
 	cd.color = BLUE;
 	int halfW = shapes.dest.w / 2;
-	shapesTex.draw(cd.set(SDL_Point{ halfW, halfW }, halfW));
+	shapesTex.draw(cd.set(SDL_Point{halfW, halfW}, halfW));
 	RectData rd;
 	rd.color = GREEN;
 	int w = cd.r2 * sqrt(2) * .9;
@@ -59,10 +60,13 @@ int main(int argc, char* argv[]) {
 	Uint32 time = SDL_GetTicks();
 
 	bool running = true;
-	while (running) {
+	while (running)
+	{
 		SDL_Event e;
-		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) {
+		while (SDL_PollEvent(&e))
+		{
+			if (e.type == SDL_QUIT)
+			{
 				running = false;
 				break;
 			}
@@ -87,7 +91,8 @@ int main(int argc, char* argv[]) {
 		time += dt;
 
 		pbVal += dt;
-		while (pbVal > 1000.) {
+		while (pbVal > 1000.)
+		{
 			pbVal -= 1000.;
 
 			timerVal *= 2;
@@ -95,13 +100,17 @@ int main(int argc, char* argv[]) {
 			timer.renderText();
 			timer.fitToTexture(0, timer.dest.h);
 
-			switch (pp.tData.align) {
-				case Rect::Align::TOP_LEFT:
-					pp.tData.align = Rect::Align::CENTER; break;
-				case Rect::Align::CENTER:
-					pp.tData.align = Rect::Align::BOT_RIGHT; break;
-				default:
-					pp.tData.align = Rect::Align::TOP_LEFT; break;
+			switch (pp.tData.align)
+			{
+			case Rect::Align::TOP_LEFT:
+				pp.tData.align = Rect::Align::CENTER;
+				break;
+			case Rect::Align::CENTER:
+				pp.tData.align = Rect::Align::BOT_RIGHT;
+				break;
+			default:
+				pp.tData.align = Rect::Align::TOP_LEFT;
+				break;
 			}
 			pp.renderText();
 			pp.fitToTexture();

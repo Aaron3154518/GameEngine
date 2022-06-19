@@ -9,24 +9,30 @@
 
 #include <SDL.h>
 
-class Event {
+class Event
+{
 public:
-	Event() = default;
-	~Event() = default;
+    Event() = default;
+    ~Event() = default;
 
-    enum Mouse : uint8_t {
-        LEFT = 0, RIGHT, MIDDLE
+    enum Mouse : uint8_t
+    {
+        LEFT = 0,
+        RIGHT,
+        MIDDLE
     };
-    enum Button : uint8_t {
+    enum Button : uint8_t
+    {
         PRESSED = 0x01,
         RELEASED = 0x02,
         HELD = 0x04,
         CLICKED = 0x08 // For mouse buttons
     };
 
-    struct MouseButton {
+    struct MouseButton
+    {
         uint8_t status = 0;
-        SDL_Point clickPos{ 0,0 };
+        SDL_Point clickPos{0, 0};
         uint32_t duration;
 
         bool pressed() const;
@@ -34,7 +40,8 @@ public:
         bool held() const;
         bool clicked() const;
     };
-    struct KeyButton {
+    struct KeyButton
+    {
         uint8_t status = 0;
         uint32_t duration;
 
@@ -44,7 +51,7 @@ public:
     };
 
     void update();
-    void update(SDL_Event& e);
+    void update(SDL_Event &e);
 
     // Getters
     uint32_t dt() const;
@@ -62,11 +69,11 @@ public:
 
     std::string textInput() const;
 
-    const MouseButton& operator[](Uint8 sdlButton) const;
-    const MouseButton& operator[](Event::Mouse button) const;
-    const KeyButton& operator[](SDL_KeyCode key) const;
+    const MouseButton &operator[](Uint8 sdlButton) const;
+    const MouseButton &operator[](Event::Mouse button) const;
+    const KeyButton &operator[](SDL_KeyCode key) const;
     std::vector<SDL_KeyCode> keys() const;
-    static const KeyButton& unusedKey();
+    static const KeyButton &unusedKey();
 
     static Mouse toMouse(Uint8 sdlButtonType);
 

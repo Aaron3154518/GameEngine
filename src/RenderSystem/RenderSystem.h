@@ -15,13 +15,15 @@ This files contains the entry point to this module
 #include "Renderer.h"
 #include "TextureBuilder.h"
 
-class InitException : public std::exception {
-	virtual const char* what() const throw() {
+class InitException : public std::exception
+{
+	virtual const char *what() const throw()
+	{
 		return "Error attempting to initialize SDL systems";
 	}
 };
 
-typedef std::unique_ptr<SDL_Window, void(*)(SDL_Window*)> WindowPtr;
+typedef std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> WindowPtr;
 void initRenderSystem(int w, int h, std::string name = "Game");
 void teardownRenderSystem();
 

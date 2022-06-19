@@ -14,32 +14,33 @@ This file contains structs that hold data necessary for rendering text and textu
 #include <SDL_ttf.h>
 
 #include "Renderer.h"
-#include "Rect.h"
+#include "../Utils/Rect/Rect.h"
 
 // Memory management for surfaces
-typedef std::unique_ptr<SDL_Surface, void(*)(SDL_Surface*)> Surface;
+typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> Surface;
 typedef std::shared_ptr<SDL_Surface> SharedSurface;
-Surface makeSurface(SDL_Surface* surf = NULL);
-SharedSurface makeSharedSurface(SDL_Surface* surf = NULL);
+Surface makeSurface(SDL_Surface *surf = NULL);
+SharedSurface makeSharedSurface(SDL_Surface *surf = NULL);
 
 // Memory management for textures
-typedef std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)> Texture;
+typedef std::unique_ptr<SDL_Texture, void (*)(SDL_Texture *)> Texture;
 typedef std::shared_ptr<SDL_Texture> SharedTexture;
-Texture makeTexture(SDL_Texture* tex = NULL);
-SharedTexture makeSharedTexture(SDL_Texture* tex = NULL);
+Texture makeTexture(SDL_Texture *tex = NULL);
+SharedTexture makeSharedTexture(SDL_Texture *tex = NULL);
 
 // Memory management for fonts
-typedef std::unique_ptr<TTF_Font, void(*)(TTF_Font*)> Font;
+typedef std::unique_ptr<TTF_Font, void (*)(TTF_Font *)> Font;
 typedef std::shared_ptr<TTF_Font> SharedFont;
-Font makeFont(TTF_Font* font = NULL);
-SharedFont makeSharedFont(TTF_Font* font = NULL);
+Font makeFont(TTF_Font *font = NULL);
+SharedFont makeSharedFont(TTF_Font *font = NULL);
 
 // Helper function to split text for wrapping
-std::vector<std::string> splitText(const std::string& text,
-	SharedFont font, int maxW);
+std::vector<std::string> splitText(const std::string &text,
+								   SharedFont font, int maxW);
 
 // To render text
-struct TextData {
+struct TextData
+{
 	std::string text = "";
 	SDL_Color color = BLACK;
 	SDL_Color bkgrnd = TRANSPARENT;
@@ -58,7 +59,8 @@ struct TextData {
 };
 
 // To draw a texture
-struct RenderData {
+struct RenderData
+{
 	SharedTexture texture;
 	Rect dest, area, boundary;
 
@@ -67,7 +69,8 @@ struct RenderData {
 };
 
 // To draw a texture from text
-struct TextRenderData : public RenderData {
+struct TextRenderData : public RenderData
+{
 	TextData tData;
 
 	void renderText();
