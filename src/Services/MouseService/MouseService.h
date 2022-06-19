@@ -1,33 +1,21 @@
 #ifndef MOUSE_SERVICE_H
 #define MOUSE_SERVICE_H
 
-#include <map>
-#include <memory>
+#include "../Component.h"
+#include "MouseObservable.h"
 
-#include <SDL.h>
+// Forward declarations
+struct GameStruct;
 
-#include "../../EventSystem/Event.h"
-#include "../../Utils/Observable/Observable.h"
-#include "../../Utils/Rect/Rect.h"
-
-struct UIComponent
-{
-    Rect rect = Rect();
-    int elevation = 0;
-};
-
-class MouseService : private BaseObservable<Event::MouseButton>
+class MouseService : public Component
 {
 public:
-    Unsubscribe subscribe(Subscription sub, std::shared_ptr<UIComponent> comp);
+    MouseService() = default;
+    ~MouseService() = default;
 
-    void next(Event::MouseButton mouse);
+    void init(GameStruct &gs);
 
-private:
-    void sort();
-
-    typedef std::pair<std::shared_ptr<UIComponent>, Subscription> Component;
-    std::vector<Component> mComponents;
+    MouseObservable mouse$;
 };
 
 #endif
