@@ -1,47 +1,44 @@
 #include "Game.h"
 
-Game Game::game;
+bool Game::initialized = false;
+std::vector<Component *> Game::toInit;
 
-const Game &Game::Get()
+GameStruct &Game::gameStruct()
 {
-    return game;
-}
-
-GameStruct &Game::getGameStruct()
-{
-    return game.mGameStruct;
+    static GameStruct GAME_STRUCT;
+    return GAME_STRUCT;
 }
 
 void Game::registerComponent(Component *comp)
 {
-    game.mComponents.push_back(comp);
-    if (game.initialized)
+    if (initialized)
     {
-        comp->init(game.mGameStruct);
+        comp->init(gameStruct());
     }
-}
-
-void Game::unregisterComponent(Component *comp)
-{
-    auto it = std::find_if(game.mComponents.begin(), game.mComponents.end(), [comp](const Component *c) -> bool
-                           { return c == comp; });
-    if (it != game.mComponents.end())
+    else
     {
-        game.mComponents.erase(it);
+        toInit.push_back(comp);
     }
 }
 
 void Game::init()
 {
-    if (game.initialized)
+    if (initialized)
     {
         return;
     }
 
-    for (Component *comp : game.mComponents)
-    {
-        comp->init(game.mGameStruct);
-    }
+    std::cerr << "Initialize Game" << std::endl;
 
-    game.initialized = true;
+    // GameStruct must be initialized before initialized=true
+    GameStruct &gs = gameStruct();
+
+    // Set initialized to true so that any new components automatically get initialized
+    initialized = true;
+
+    for (Component *comp : toInit)
+    {
+        comp->init(gs);
+    }
+    toInit.clear();
 }

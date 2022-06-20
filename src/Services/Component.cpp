@@ -1,17 +1,6 @@
 #include "Component.h"
 #include "Game.h"
 
-Component::Component()
-{
-    Game::registerComponent(this);
-}
+Component::~Component() {}
 
-Component::Component(const Component &c)
-{
-    Game::registerComponent(this);
-}
-
-Component::~Component()
-{
-    Game::unregisterComponent(this);
-}
+void Component::init(GameStruct &gs) {}

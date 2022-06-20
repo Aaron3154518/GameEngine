@@ -10,6 +10,8 @@ struct GameStruct;
 class MouseService : public Component
 {
 public:
+    MouseService();
+
     void init(GameStruct &gs);
 
     MouseObservable mouse$;

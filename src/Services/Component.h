@@ -11,12 +11,10 @@ class Component
     friend class Game;
 
 public:
-    Component();
-    Component(const Component &c);
-    ~Component();
+    virtual ~Component();
 
 protected:
-    virtual void init(GameStruct &gs) {}
+    virtual void init(GameStruct &gs);
 };
 
 #endif

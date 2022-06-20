@@ -22,12 +22,15 @@ constexpr SDL_Color PURPLE{255, 0, 255, 255};
 class TestComponent : public Component
 {
 public:
-	TestComponent(Rect r, int e) : Component(), mPos(std::make_shared<UIComponent>(r, e)) {}
+	TestComponent(Rect r, int e, bool _type) : mPos(std::make_shared<UIComponent>(r, e)), type(_type)
+	{
+		Game::registerComponent(this);
+	}
 
-	void init(GameStruct &gs)
+	virtual void init(GameStruct &gs)
 	{
 		std::function<void(Event::MouseButton, bool)> func =
-			std::bind(onClick, this, std::placeholders::_1, std::placeholders::_2);
+			std::bind(type ? &onClick1 : &onClick2, this, std::placeholders::_1, std::placeholders::_2);
 		mMouseSub = gs.mServices.mouseService.mouse$.subscribe(func, mPos);
 	}
 
@@ -43,15 +46,24 @@ public:
 
 	SDL_Color getColor() const
 	{
-		return color ? GREEN : RED;
+		return type ? (color ? GREEN : RED) : (color ? BLUE : YELLOW);
 	}
 
 private:
-	void onClick(Event::MouseButton b, bool clicked)
+	void onClick1(Event::MouseButton b, bool clicked)
 	{
 		color = clicked;
 	}
 
+	void onClick2(Event::MouseButton b, bool clicked)
+	{
+		if (clicked)
+		{
+			color = !color;
+		}
+	}
+
+	bool type = false;
 	bool color = false;
 	std::shared_ptr<UIComponent> mPos;
 	MouseObservable::SubscriptionPtr mMouseSub;
@@ -61,6 +73,16 @@ typedef std::unique_ptr<TestComponent> TestComponentPtr;
 bool compareTC(const TestComponentPtr &lhs, const TestComponentPtr &rhs)
 {
 	return lhs->getElevation() <= rhs->getElevation();
+}
+
+TestComponentPtr randomTestComponent(int w, int h)
+{
+	Rect r;
+	r.x = rand() % w - 10;
+	r.y = rand() % h - 10;
+	r.w = rand() % (w - r.x);
+	r.h = rand() % (h - r.y);
+	return std::make_unique<TestComponent>(r, rand() % 20 - 10, rand() % 2 == 0);
 }
 
 int main(int argc, char *argv[])
@@ -105,11 +127,11 @@ int main(int argc, char *argv[])
 	}
 
 	std::vector<TestComponentPtr> components;
+
 	// Test before init
 	for (int i = 0; i < 5; i++)
 	{
-		Rect r(rand() % w, rand() % h, rand() % w, rand() % h);
-		components.push_back(std::make_unique<TestComponent>(r, rand() % 100));
+		components.push_back(randomTestComponent(w, h));
 	}
 
 	Game::init();
@@ -117,9 +139,7 @@ int main(int argc, char *argv[])
 	// Test after init
 	for (int i = 5; i < 10; i++)
 	{
-		Rect r(rand() % w, rand() % h, rand() % w, rand() % h);
-		// TestComponent tmp(r, rand() % 20 - 10);
-		// components.push_back(tmp);
+		components.push_back(randomTestComponent(w, h));
 	}
 
 	std::sort(components.begin(), components.end(), compareTC);
@@ -139,7 +159,7 @@ int main(int argc, char *argv[])
 		{
 		}
 		// std::cerr << "Next" << std::endl;
-		Game::getGameStruct().mServices.eventService.event$.next(e);
+		Game::gameStruct().mServices.eventService.event$.next(e);
 
 		// Rendering
 		SDL_RenderClear(renderer);

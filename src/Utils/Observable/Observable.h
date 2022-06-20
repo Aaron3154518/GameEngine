@@ -79,11 +79,10 @@ public:
 
     virtual void next(T val)
     {
-        // std::cerr << "Called Next" << std::endl;
+        // std::cerr << "Called Next: " << mSubscriptions.size() << std::endl;
         if constexpr (std::is_same<typename Subscription::Function,
                                    typename ::Subscription<Data, RetT, T>::Function>::value)
         {
-            // std::cerr << "Default" << std::endl;
             forEachSubscription([&](SubscriptionPtr s) -> bool
                                 { (*s)(val); return true; });
         }

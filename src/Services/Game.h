@@ -10,23 +10,18 @@
 class Game
 {
 public:
-    static const Game &Get();
-    static GameStruct &getGameStruct();
+    static GameStruct &gameStruct();
 
     static void registerComponent(Component *comp);
-    static void unregisterComponent(Component *comp);
 
     static void init();
 
 private:
-    Game() = default;
-    ~Game() = default;
+    Game() = delete;
+    ~Game() = delete;
 
-    static Game game;
-
-    std::vector<Component *> mComponents;
-    GameStruct mGameStruct;
-    bool initialized = false;
+    static std::vector<Component *> toInit;
+    static bool initialized;
 };
 
 #endif
