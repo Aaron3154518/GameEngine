@@ -57,6 +57,7 @@ public:
 private:
 	void onClick(Event::MouseButton b, bool clicked)
 	{
+		std::cerr << "Click" << std::endl;
 		if (clicked)
 		{
 			color = !color;

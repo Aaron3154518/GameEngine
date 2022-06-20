@@ -8,5 +8,5 @@ void MouseService::init(GameStruct &gs)
                                                 std::cerr << "Event" << std::endl;
         if (e[Event::LEFT].clicked()) {
             mouse$.next(e[Event::LEFT]);
-        } });
+        } std::cerr << "End Event" << std::endl; });
 }

@@ -99,6 +99,7 @@ protected:
                 break;
             }
         }
+        std::cerr << "End Foreach" << std::endl;
     }
 
     SubscriptionIterator &nextSubscription(SubscriptionIterator &current)
@@ -109,7 +110,7 @@ protected:
         }
 
         ++current;
-        if (!*current)
+        if (current != mSubscriptions.end() && !*current)
         {
             current = mSubscriptions.erase(current);
         }
