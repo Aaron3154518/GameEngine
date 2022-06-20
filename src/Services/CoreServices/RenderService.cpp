@@ -2,39 +2,12 @@
 
 #include "../Game.h"
 
-// RenderObservable
-RenderObservable::SubscriptionPtr RenderObservable::subscribe(Subscription::Function func, UIComponentPtr data) {
-    SubscriptionPtr retVal =
-        Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>::subscribe(func, data);
-    Game::gameStruct().mServices.renderService.addComponent(data);
-    return retVal;
-}
-
-bool RenderObservable::unsubscribe(SubscriptionPtr sub) {
-    Game::gameStruct().mServices.renderService.removeComponent(sub->data);
-    return true;
-}
-
-void RenderObservable::sort(const std::vector<UIComponentPtr> &order) {
-    std::unordered_map<SubscriptionPtr, int> idxs;
-
-    // Map out the order position of each subscription
-    for (auto sub : mSubscriptions) {
-        idxs[sub] = std::find(order.begin(), order.end(), sub->data) - order.begin();
-    }
-
-    // Sort the subcription by ascending order position
-    mSubscriptions.sort([&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
-        return idxs.at(a) <= idxs.at(b);
-    });
-}
-
 // RenderOrderObservable
 void RenderOrderObservable::sort() {
-    std::sort(mRenderOrder.begin(), mRenderOrder.end(),
-              [](const UIComponentPtr &a, const UIComponentPtr &b) {
-                  return a->elevation <= b->elevation;
-              });
+    std::stable_sort(mRenderOrder.begin(), mRenderOrder.end(),
+                     [](const UIComponentPtr &a, const UIComponentPtr &b) {
+                         return a->elevation < b->elevation;
+                     });
     next(mRenderOrder);
 }
 
@@ -62,6 +35,33 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
             mRefCounts.erase(refIt);
         }
     }
+}
+
+// RenderObservable
+RenderObservable::SubscriptionPtr RenderObservable::subscribe(Subscription::Function func, UIComponentPtr data) {
+    SubscriptionPtr retVal =
+        Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>::subscribe(func, data);
+    Game::gameStruct().mServices.renderService.addComponent(data);
+    return retVal;
+}
+
+bool RenderObservable::unsubscribe(SubscriptionPtr sub) {
+    Game::gameStruct().mServices.renderService.removeComponent(sub->data);
+    return true;
+}
+
+void RenderObservable::sort(const std::vector<UIComponentPtr> &order) {
+    std::unordered_map<SubscriptionPtr, int> idxs;
+
+    // Map out the order position of each subscription
+    for (auto sub : mSubscriptions) {
+        idxs[sub] = std::find(order.begin(), order.end(), sub->data) - order.begin();
+    }
+
+    // Sort the subcription by ascending order position
+    mSubscriptions.sort([&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
+        return idxs.at(a) <= idxs.at(b);
+    });
 }
 
 // RenderService

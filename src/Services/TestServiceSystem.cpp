@@ -41,7 +41,7 @@ class TestComponent : public Component {
     void init(GameStruct &gs) {
         mMouseSub = gs.mServices.mouseService.mouse$.subscribe(
             std::bind(type ? &onClick1 : &onClick2, this, std::placeholders::_1, std::placeholders::_2), mPos);
-        gs.mServices.renderService.render$.subscribe(
+        mRenderSub = gs.mServices.renderService.render$.subscribe(
             std::bind(&onRender, this, std::placeholders::_1), mPos);
     }
 
@@ -61,6 +61,13 @@ class TestComponent : public Component {
     void onClick2(Event::MouseButton b, bool clicked) {
         if (clicked) {
             color = !color;
+            if (mRenderSub) {
+                mRenderSub->unsubscribe();
+                mRenderSub.reset();
+            } else {
+                mRenderSub = Game::gameStruct().mServices.renderService.render$.subscribe(
+                    std::bind(&onRender, this, std::placeholders::_1), mPos);
+            }
         }
     }
 
@@ -68,6 +75,7 @@ class TestComponent : public Component {
     bool color = false;
     std::shared_ptr<UIComponent> mPos;
     MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
 };
 typedef std::unique_ptr<TestComponent> TestComponentPtr;
 

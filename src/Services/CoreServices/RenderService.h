@@ -26,18 +26,6 @@ struct UIComponentCompare {
     }
 };
 
-class RenderObservable : public Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> {
-    friend class RenderService;
-
-   public:
-    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
-
-   private:
-    bool unsubscribe(SubscriptionPtr sub);
-
-    void sort(const std::vector<UIComponentPtr> &order);
-};
-
 class RenderOrderObservable : public Observable<const std::vector<UIComponentPtr> &, void(const std::vector<UIComponentPtr> &)> {
     friend class RenderService;
 
@@ -48,6 +36,18 @@ class RenderOrderObservable : public Observable<const std::vector<UIComponentPtr
 
     std::vector<UIComponentPtr> mRenderOrder;
     std::unordered_map<UIComponentPtr, int> mRefCounts;
+};
+
+class RenderObservable : public Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> {
+    friend class RenderService;
+
+   public:
+    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
+
+   private:
+    bool unsubscribe(SubscriptionPtr sub);
+
+    void sort(const std::vector<UIComponentPtr> &order);
 };
 
 class RenderService : public Component {
