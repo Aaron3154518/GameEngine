@@ -11,11 +11,12 @@ class Game
 {
 public:
     static const Game &Get();
+    static GameStruct &getGameStruct();
 
     static void registerComponent(Component *comp);
     static void unregisterComponent(Component *comp);
 
-    void init();
+    static void init();
 
 private:
     Game() = default;

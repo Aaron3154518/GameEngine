@@ -7,6 +7,11 @@ const Game &Game::Get()
     return game;
 }
 
+GameStruct &Game::getGameStruct()
+{
+    return game.mGameStruct;
+}
+
 void Game::registerComponent(Component *comp)
 {
     game.mComponents.push_back(comp);
@@ -28,15 +33,15 @@ void Game::unregisterComponent(Component *comp)
 
 void Game::init()
 {
-    if (initialized)
+    if (game.initialized)
     {
         return;
     }
 
-    for (Component *comp : mComponents)
+    for (Component *comp : game.mComponents)
     {
-        comp->init(mGameStruct);
+        comp->init(game.mGameStruct);
     }
 
-    initialized = true;
+    game.initialized = true;
 }

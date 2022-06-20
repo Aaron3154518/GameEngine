@@ -1,10 +1,14 @@
 #define SDL_MAIN_HANDLED
 
+#include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include <SDL_ttf.h>
 
+#include "Component.h"
+#include "../EventSystem/Event.h"
 #include "Game.h"
 
 constexpr SDL_Color WHITE{255, 255, 255, 255};
@@ -14,6 +18,56 @@ constexpr SDL_Color RED{255, 0, 0, 255};
 constexpr SDL_Color BLUE{0, 0, 255, 255};
 constexpr SDL_Color YELLOW{255, 255, 0, 255};
 constexpr SDL_Color PURPLE{255, 0, 255, 255};
+
+class TestComponent : public Component
+{
+public:
+	TestComponent(Rect r, int e) : Component(), mPos(std::make_shared<UIComponent>(r, e)) {}
+	/*TestComponent(const TestComponent &tc) : Component(tc), color(tc.color),
+											 mPos(std::make_shared<UIComponent>(
+												 tc.mPos->rect, tc.mPos->elevation)) {}
+	TestComponent operator=(const TestComponent &tc)
+	{
+		return TestComponent(tc);
+	}*/
+
+	void init(GameStruct &gs)
+	{
+		std::function<void(Event::MouseButton, bool)> func =
+			std::bind(&TestComponent::onClick, this, std::placeholders::_1, std::placeholders::_2);
+		std::cerr << "Mouse Subscribe" << std::endl;
+		mMouseSub = gs.mServices.mouseService.mouse$.subscribe(func, mPos);
+	}
+
+	const Rect &getRect() const
+	{
+		return mPos->rect;
+	}
+
+	int getElevation() const
+	{
+		return mPos->elevation;
+	}
+
+	SDL_Color getColor() const
+	{
+		return color ? GREEN : RED;
+	}
+
+private:
+	void onClick(Event::MouseButton b, bool clicked)
+	{
+		if (clicked)
+		{
+			color = !color;
+		}
+		color = clicked;
+	}
+
+	bool color = false;
+	std::shared_ptr<UIComponent> mPos;
+	MouseObservable::Subscription mMouseSub;
+};
 
 int main(int argc, char *argv[])
 {
@@ -56,9 +110,28 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	int textH = w / 12;
+	std::vector<TestComponent> components;
+	// Test before init
+	for (int i = 0; i < 5; i++)
+	{
+		Rect r(rand() % w, rand() % h, rand() % w, rand() % h);
+		TestComponent tmp(r, rand() % 20 - 10);
+		components.push_back(tmp);
+	}
 
-	TTF_Font *font = TTF_OpenFont("res/fonts/times.ttf", textH);
+	Game::init();
+
+	// Test after init
+	for (int i = 5; i < 10; i++)
+	{
+		Rect r(rand() % w, rand() % h, rand() % w, rand() % h);
+		// TestComponent tmp(r, rand() % 20 - 10);
+		// components.push_back(tmp);
+	}
+
+	std::sort(components.begin(), components.end(),
+			  [](const TestComponent &a, const TestComponent &b) -> bool
+			  { return a.getElevation() < b.getElevation(); });
 
 	Event e;
 
@@ -73,21 +146,23 @@ int main(int argc, char *argv[])
 		}
 		if (e.resized())
 		{
-			textH = fmin(e.newW(), e.newH()) / 12;
-			TTF_CloseFont(font);
-			font = TTF_OpenFont("res/fonts/times.ttf", textH);
 		}
+		// std::cerr << "Next" << std::endl;
+		Game::getGameStruct().mServices.eventService.event$.next(e);
 
 		// Rendering
 		SDL_RenderClear(renderer);
 
-		// Mouse
-		SDL_Rect r{0, 0, textH, textH};
-		SDL_Surface *surf = TTF_RenderText_Solid(font, "Hello World", BLACK);
-		SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surf);
-		SDL_RenderCopy(renderer, tex, NULL, &r);
-		SDL_FreeSurface(surf);
-		SDL_DestroyTexture(tex);
+		// Draw test components
+		for (auto &component : components)
+		{
+			SDL_Color c = component.getColor();
+			SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
+			SDL_RenderFillRect(renderer, &component.getRect());
+			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+			SDL_RenderDrawRect(renderer, &component.getRect());
+		}
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 		SDL_RenderPresent(renderer);
 
@@ -99,7 +174,6 @@ int main(int argc, char *argv[])
 		time = SDL_GetTicks();
 	}
 
-	TTF_CloseFont(font);
 	TTF_Quit();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

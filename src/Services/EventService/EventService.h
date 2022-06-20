@@ -10,7 +10,7 @@ public:
     EventService() = default;
     ~EventService() = default;
 
-    Observable<Event> event$;
+    Observable<Event, void(Event)> event$;
 };
 
 #endif

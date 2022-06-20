@@ -1,30 +1,30 @@
 #include "MouseObservable.h"
 
-Unsubscribe MouseObservable::subscribe(MouseObservable::Subscription sub, std::shared_ptr<UIComponent> comp)
-{
-    mComponents.push_back(std::make_pair(comp, sub));
-    return Unsubscribe{[this, comp]()
-                       {
-                           std::remove_if(mComponents.begin(), mComponents.end(), [comp](const Component &c) -> bool
-                                          { return c.first == comp; });
-                       }};
-}
-
 void MouseObservable::next(Event::MouseButton mouse)
 {
     sort();
-    for (auto &pair : mComponents)
-    {
-        if (SDL_PointInRect(&mouse.clickPos, &pair.first->rect))
+
+    bool foundTop = false;
+    std::cerr << "Here" << std::endl;
+    std::cerr << mSubscriptions.size() << std::endl;
+    forEachSubscription(
+        [&](Subscription &sub) -> bool
         {
-            pair.second(mouse);
-        }
-    }
+            if (!foundTop && SDL_PointInRect(&mouse.clickPos, &sub.data->rect))
+            {
+                sub(mouse, true);
+                foundTop = true;
+            }
+            else
+            {
+                sub(mouse, false);
+            }
+            return true;
+        });
 }
 
 void MouseObservable::sort()
 {
-    std::sort(mComponents.begin(), mComponents.end(),
-              [](const Component &a, const Component &b) -> bool
-              { return a.first->elevation > b.first->elevation; });
+    mSubscriptions.sort([](const auto &a, const auto &b) -> bool
+                        { return a.data->elevation > b.data->elevation; });
 }

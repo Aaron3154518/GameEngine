@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := 
+CXXFLAGS := -std=c++2a 
 
 INC := include
 BIN := bin
@@ -13,17 +13,15 @@ INCLUDE_PATHS := -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL
 LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL_LIB) -L$(INC)/SDL2_ttf-2.0.15/$(SDL_LIB)
 LINKER_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 
-# Get all header file dependencies relative to ./
+# Get all header file dependencies relative to ./ and convert to .cpp
 SOURCES = $(shell realpath --relative-to ./ $(patsubst %.h,%.cpp,$(filter %.h, $(shell $(CXX) -MM $1))))
-# Convert to .cpp files and filter out missing .cpp files
+# Filter out missing .cpp files
 EXIST = $(filter $(foreach file,$(call SOURCES,$1),$(wildcard $(file))),$(call SOURCES,$1))
 # Compute .d and .h dependencies
-DEPS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$(call EXIST,$1))
+DEPS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$1) $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$(call EXIST,$1))
 OBJS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$1) $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(call EXIST,$1))
 
-all: RenderTest
-
-test: RenderTest EventTest ServiceTest
+all: RenderTest EventTest ServiceTest
 	$(BIN)/RenderTest
 	$(BIN)/EventTest
 	$(BIN)/ServiceTest
@@ -49,3 +47,6 @@ $(OBJ)/%.o: $(SRC)/%.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 
 nothing:
+
+test: test.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)

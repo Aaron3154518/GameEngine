@@ -10,9 +10,6 @@ struct GameStruct;
 class MouseService : public Component
 {
 public:
-    MouseService() = default;
-    ~MouseService() = default;
-
     void init(GameStruct &gs);
 
     MouseObservable mouse$;
