@@ -61,37 +61,38 @@ class Observable<T, RetT(ArgTs...), Data>
 {
 public:
     typedef Subscription<std::shared_ptr<Data>, RetT, ArgTs...> Subscription;
-    typedef std::list<Subscription> SubscriptionList;
+    typedef std::shared_ptr<Subscription> SubscriptionPtr;
+    typedef std::list<SubscriptionPtr> SubscriptionList;
     typedef typename SubscriptionList::iterator SubscriptionIterator;
 
-    Observable() { std::cerr << "Partial Specializtion" << std::endl; }
+    Observable() = default; //{ std::cerr << "Partial Specializtion" << std::endl; }
     ~Observable() = default;
 
-    Subscription subscribe(Subscription::Function func, std::shared_ptr<Data> data = nullptr)
+    SubscriptionPtr subscribe(Subscription::Function func, std::shared_ptr<Data> data = nullptr)
     {
-        Subscription sub(func);
-        sub.data = data;
+        SubscriptionPtr sub = std::make_shared<Subscription>(func);
+        sub->data = data;
         mSubscriptions.push_back(sub);
-        std::cerr << "Subscribe" << std::endl;
+        // std::cerr << "Subscribe" << std::endl;
         return sub;
     }
 
     virtual void next(T val)
     {
-        std::cerr << "Called Next" << std::endl;
+        // std::cerr << "Called Next" << std::endl;
         if constexpr (std::is_same<typename Subscription::Function,
                                    typename ::Subscription<Data, RetT, T>::Function>::value)
         {
-            std::cerr << "Default" << std::endl;
-            forEachSubscription([&](Subscription &s) -> bool
-                                { s(val); return true; });
+            // std::cerr << "Default" << std::endl;
+            forEachSubscription([&](SubscriptionPtr s) -> bool
+                                { (*s)(val); return true; });
         }
     }
 
 protected:
-    void forEachSubscription(const std::function<bool(Subscription &)> &func)
+    void forEachSubscription(const std::function<bool(SubscriptionPtr)> &func)
     {
-        std::cerr << "For Each" << std::endl;
+        // std::cerr << "For Each" << std::endl;
         for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); it = nextSubscription(it))
         {
             if (!func(*it))
@@ -99,7 +100,7 @@ protected:
                 break;
             }
         }
-        std::cerr << "End Foreach" << std::endl;
+        // std::cerr << "End Foreach" << std::endl;
     }
 
     SubscriptionIterator &nextSubscription(SubscriptionIterator &current)
@@ -110,7 +111,7 @@ protected:
         }
 
         ++current;
-        if (current != mSubscriptions.end() && !*current)
+        if (current != mSubscriptions.end() && !**current)
         {
             current = mSubscriptions.erase(current);
         }

@@ -5,19 +5,18 @@ void MouseObservable::next(Event::MouseButton mouse)
     sort();
 
     bool foundTop = false;
-    std::cerr << "Here" << std::endl;
-    std::cerr << mSubscriptions.size() << std::endl;
+    // std::cerr << "Mouse Next" << std::endl;
     forEachSubscription(
-        [&](Subscription &sub) -> bool
+        [&](SubscriptionPtr sub) -> bool
         {
-            if (!foundTop && SDL_PointInRect(&mouse.clickPos, &sub.data->rect))
+            if (!foundTop && SDL_PointInRect(&mouse.clickPos, &sub->data->rect))
             {
-                sub(mouse, true);
+                (*sub)(mouse, true);
                 foundTop = true;
             }
             else
             {
-                sub(mouse, false);
+                (*sub)(mouse, false);
             }
             return true;
         });
@@ -25,6 +24,6 @@ void MouseObservable::next(Event::MouseButton mouse)
 
 void MouseObservable::sort()
 {
-    mSubscriptions.sort([](const auto &a, const auto &b) -> bool
-                        { return a.data->elevation > b.data->elevation; });
+    mSubscriptions.sort([](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool
+                        { return a->data->elevation > b->data->elevation; });
 }

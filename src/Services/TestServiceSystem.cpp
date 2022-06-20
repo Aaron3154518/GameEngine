@@ -23,19 +23,11 @@ class TestComponent : public Component
 {
 public:
 	TestComponent(Rect r, int e) : Component(), mPos(std::make_shared<UIComponent>(r, e)) {}
-	/*TestComponent(const TestComponent &tc) : Component(tc), color(tc.color),
-											 mPos(std::make_shared<UIComponent>(
-												 tc.mPos->rect, tc.mPos->elevation)) {}
-	TestComponent operator=(const TestComponent &tc)
-	{
-		return TestComponent(tc);
-	}*/
 
 	void init(GameStruct &gs)
 	{
 		std::function<void(Event::MouseButton, bool)> func =
-			std::bind(&TestComponent::onClick, this, std::placeholders::_1, std::placeholders::_2);
-		std::cerr << "Mouse Subscribe" << std::endl;
+			std::bind(onClick, this, std::placeholders::_1, std::placeholders::_2);
 		mMouseSub = gs.mServices.mouseService.mouse$.subscribe(func, mPos);
 	}
 
@@ -57,18 +49,19 @@ public:
 private:
 	void onClick(Event::MouseButton b, bool clicked)
 	{
-		std::cerr << "Click" << std::endl;
-		if (clicked)
-		{
-			color = !color;
-		}
 		color = clicked;
 	}
 
 	bool color = false;
 	std::shared_ptr<UIComponent> mPos;
-	MouseObservable::Subscription mMouseSub;
+	MouseObservable::SubscriptionPtr mMouseSub;
 };
+typedef std::unique_ptr<TestComponent> TestComponentPtr;
+
+bool compareTC(const TestComponentPtr &lhs, const TestComponentPtr &rhs)
+{
+	return lhs->getElevation() <= rhs->getElevation();
+}
 
 int main(int argc, char *argv[])
 {
@@ -111,13 +104,12 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	std::vector<TestComponent> components;
+	std::vector<TestComponentPtr> components;
 	// Test before init
 	for (int i = 0; i < 5; i++)
 	{
 		Rect r(rand() % w, rand() % h, rand() % w, rand() % h);
-		TestComponent tmp(r, rand() % 20 - 10);
-		components.push_back(tmp);
+		components.push_back(std::make_unique<TestComponent>(r, rand() % 100));
 	}
 
 	Game::init();
@@ -130,9 +122,7 @@ int main(int argc, char *argv[])
 		// components.push_back(tmp);
 	}
 
-	std::sort(components.begin(), components.end(),
-			  [](const TestComponent &a, const TestComponent &b) -> bool
-			  { return a.getElevation() < b.getElevation(); });
+	std::sort(components.begin(), components.end(), compareTC);
 
 	Event e;
 
@@ -157,11 +147,11 @@ int main(int argc, char *argv[])
 		// Draw test components
 		for (auto &component : components)
 		{
-			SDL_Color c = component.getColor();
+			SDL_Color c = component->getColor();
 			SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
-			SDL_RenderFillRect(renderer, &component.getRect());
+			SDL_RenderFillRect(renderer, &component->getRect());
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-			SDL_RenderDrawRect(renderer, &component.getRect());
+			SDL_RenderDrawRect(renderer, &component->getRect());
 		}
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
