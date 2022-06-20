@@ -6,14 +6,13 @@
 // Forward declaration
 struct GameStruct;
 
-class Component
-{
+class Component {
     friend class Game;
 
-public:
+   public:
     virtual ~Component();
 
-protected:
+   protected:
     virtual void init(GameStruct &gs);
 };
 

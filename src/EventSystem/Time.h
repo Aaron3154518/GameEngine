@@ -3,9 +3,8 @@
 
 #include <SDL.h>
 
-class Time
-{
-public:
+class Time {
+   public:
     Time(uint32_t time = 0);
     ~Time() = default;
 
@@ -17,7 +16,7 @@ public:
     Time &operator+=(const uint32_t &rhs);
     Time &operator+=(const Time &rhs);
 
-private:
+   private:
     uint32_t mTime;
 };
 

@@ -1,23 +1,22 @@
 #ifndef NUMBER_h
 #define NUMBER_h
 
-#include <iostream>
-#include <iomanip>
-#include <cmath>
 #include <array>
-#include <string>
-#include <sstream>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
-class Number
-{
-public:
+class Number {
+   public:
     Number() = default;
-    Number(int layer, double exp, int sign); // From tetration notation
-    Number(double val);                      // From a double
-    Number(double val, int exp);             // From scientific notation
-    Number(std::string str);                 // From string
+    Number(int layer, double exp, int sign);  // From tetration notation
+    Number(double val);                       // From a double
+    Number(double val, int exp);              // From scientific notation
+    Number(std::string str);                  // From string
     ~Number() = default;
 
     double toDouble() const;
@@ -30,44 +29,38 @@ public:
 
     // Math operators
     // -n
-    Number &negate()
-    {
+    Number &negate() {
         mSign *= -1;
         return *this;
     }
     Number operator-() const { return copy().negate(); }
     // n + m
     Number &add(const Number &num);
-    Number &operator+=(const Number &rhs)
-    {
+    Number &operator+=(const Number &rhs) {
         add(rhs);
         return *this;
     }
     // n - m
     Number &subtract(const Number &num);
-    Number &operator-=(const Number &rhs)
-    {
+    Number &operator-=(const Number &rhs) {
         subtract(rhs);
         return *this;
     }
     // n * m
     Number &multiply(const Number &num);
-    Number &operator*=(const Number &rhs)
-    {
+    Number &operator*=(const Number &rhs) {
         multiply(rhs);
         return *this;
     }
     // n / m
     Number &divide(const Number &num);
-    Number &operator/=(const Number &rhs)
-    {
+    Number &operator/=(const Number &rhs) {
         divide(rhs);
         return *this;
     }
     // n ^ m
     Number &power(const Number &num);
-    Number &operator^=(const Number &rhs)
-    {
+    Number &operator^=(const Number &rhs) {
         power(rhs);
         return *this;
     }
@@ -79,8 +72,7 @@ public:
     // 1/n
     Number &getReciprocal();
     // |n|
-    Number &absVal()
-    {
+    Number &absVal() {
         mSign *= mSign;
         return *this;
     }
@@ -108,8 +100,7 @@ public:
     bool less(const Number &other) const;
 
     void printAll() const;
-    std::string toString() const
-    {
+    std::string toString() const {
         std::stringstream ss;
         ss << *this;
         return ss.str();
@@ -117,7 +108,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const Number &rhs);
 
-private:
+   private:
     // Default value = 0
     double mExp = 0.;
     int mLayer = 0, mSign = 0;

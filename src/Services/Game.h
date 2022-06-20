@@ -4,19 +4,18 @@
 #include <algorithm>
 #include <vector>
 
-#include "GameStruct.h"
 #include "Component.h"
+#include "GameStruct.h"
 
-class Game
-{
-public:
+class Game {
+   public:
     static GameStruct &gameStruct();
 
     static void registerComponent(Component *comp);
 
     static void init();
 
-private:
+   private:
     Game() = delete;
     ~Game() = delete;
 

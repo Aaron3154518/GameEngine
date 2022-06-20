@@ -6,15 +6,15 @@ This file contains structs that hold data necessary for rendering text and textu
 #ifndef RENDER_TYPES_H
 #define RENDER_TYPES_H
 
+#include <SDL.h>
+#include <SDL_ttf.h>
+
 #include <memory>
 #include <sstream>
 #include <vector>
 
-#include <SDL.h>
-#include <SDL_ttf.h>
-
-#include "Renderer.h"
 #include "../Utils/Rect/Rect.h"
+#include "Renderer.h"
 
 // Memory management for surfaces
 typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> Surface;
@@ -36,44 +36,41 @@ SharedFont makeSharedFont(TTF_Font *font = NULL);
 
 // Helper function to split text for wrapping
 std::vector<std::string> splitText(const std::string &text,
-								   SharedFont font, int maxW);
+                                   SharedFont font, int maxW);
 
 // To render text
-struct TextData
-{
-	std::string text = "";
-	SDL_Color color = BLACK;
-	SDL_Color bkgrnd = TRANSPARENT;
+struct TextData {
+    std::string text = "";
+    SDL_Color color = BLACK;
+    SDL_Color bkgrnd = TRANSPARENT;
 
-	// For wrapping text
-	// w > 0 will wrap text
-	int w = 0;
-	Rect::Align align = Rect::Align::CENTER;
+    // For wrapping text
+    // w > 0 will wrap text
+    int w = 0;
+    Rect::Align align = Rect::Align::CENTER;
 
-	SharedFont font = makeSharedFont();
+    SharedFont font = makeSharedFont();
 
-	// Functions to render text to a texture
-	Texture renderText();
-	Texture renderTextLine();
-	Texture renderTextWrapped();
+    // Functions to render text to a texture
+    Texture renderText();
+    Texture renderTextLine();
+    Texture renderTextWrapped();
 };
 
 // To draw a texture
-struct RenderData
-{
-	SharedTexture texture;
-	Rect dest, area, boundary;
+struct RenderData {
+    SharedTexture texture;
+    Rect dest, area, boundary;
 
-	void fitToTexture(Rect::Align align = Rect::Align::CENTER);
-	void fitToTexture(int maxW, int maxH, Rect::Align align = Rect::Align::CENTER);
+    void fitToTexture(Rect::Align align = Rect::Align::CENTER);
+    void fitToTexture(int maxW, int maxH, Rect::Align align = Rect::Align::CENTER);
 };
 
 // To draw a texture from text
-struct TextRenderData : public RenderData
-{
-	TextData tData;
+struct TextRenderData : public RenderData {
+    TextData tData;
 
-	void renderText();
+    void renderText();
 };
 
 #endif

@@ -3,8 +3,7 @@
 
 #include "ServiceHandler.h"
 
-struct GameStruct
-{
+struct GameStruct {
     ServiceHandler mServices;
 };
 

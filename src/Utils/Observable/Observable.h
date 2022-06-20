@@ -7,69 +7,60 @@
 #include <memory>
 #include <type_traits>
 
-struct NoData
-{
+struct NoData {
 };
 
 template <class Data, class RetT, class... ArgTs>
-class Subscription
-{
-public:
+class Subscription {
+   public:
     typedef std::function<RetT(ArgTs...)> Function;
 
     Subscription()
         : subscription([](ArgTs... args) {}), status(std::make_shared<bool>(false)) {}
     Subscription(Function func)
         : subscription(func), status(std::make_shared<bool>(true)) {}
-    ~Subscription()
-    {
+    ~Subscription() {
         // unsubscribe();
     }
 
-    void unsubscribe()
-    {
+    void unsubscribe() {
         *status = false;
     }
 
-    operator bool() const
-    {
+    operator bool() const {
         return *status;
     }
 
-    RetT operator()(ArgTs... args) const
-    {
+    RetT operator()(ArgTs... args) const {
         return subscription(args...);
     }
 
     Data data;
 
-private:
+   private:
     Function subscription;
 
     std::shared_ptr<bool> status;
 };
 
 template <class T, class RetT, class Data = NoData, class... ArgTs>
-class Observable
-{
+class Observable {
     Observable() { std::cerr << "Full Template" << std::endl; }
     ~Observable() = default;
 };
 
 template <class T, class RetT, class Data, class... ArgTs>
-class Observable<T, RetT(ArgTs...), Data>
-{
-public:
+class Observable<T, RetT(ArgTs...), Data> {
+   public:
     typedef Subscription<std::shared_ptr<Data>, RetT, ArgTs...> Subscription;
     typedef std::shared_ptr<Subscription> SubscriptionPtr;
     typedef std::list<SubscriptionPtr> SubscriptionList;
     typedef typename SubscriptionList::iterator SubscriptionIterator;
 
-    Observable() = default; //{ std::cerr << "Partial Specializtion" << std::endl; }
+    Observable() = default;  //{ std::cerr << "Partial Specializtion" << std::endl; }
     ~Observable() = default;
 
-    SubscriptionPtr subscribe(Subscription::Function func, std::shared_ptr<Data> data = nullptr)
-    {
+    SubscriptionPtr subscribe(Subscription::Function func, std::shared_ptr<Data> data = nullptr) {
         SubscriptionPtr sub = std::make_shared<Subscription>(func);
         sub->data = data;
         mSubscriptions.push_back(sub);
@@ -77,41 +68,43 @@ public:
         return sub;
     }
 
-    virtual void next(T val)
-    {
-        // std::cerr << "Called Next: " << mSubscriptions.size() << std::endl;
-        if constexpr (std::is_same<typename Subscription::Function,
-                                   typename ::Subscription<Data, RetT, T>::Function>::value)
-        {
-            forEachSubscription([&](SubscriptionPtr s) -> bool
-                                { (*s)(val); return true; });
-        }
+    virtual void next(T val) {
+        removeUnsubscribed();
+        serve(val);
     }
 
-protected:
-    void forEachSubscription(const std::function<bool(SubscriptionPtr)> &func)
-    {
-        // std::cerr << "For Each" << std::endl;
-        for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); it = nextSubscription(it))
-        {
-            if (!func(*it))
-            {
-                break;
+   protected:
+    virtual void serve(T val) {
+        if constexpr (std::is_same<typename Subscription::Function,
+                                   typename ::Subscription<Data, RetT, T>::Function>::value) {
+            for (SubscriptionPtr sub : mSubscriptions) {
+                (*sub)(val);
             }
         }
-        // std::cerr << "End Foreach" << std::endl;
     }
 
-    SubscriptionIterator &nextSubscription(SubscriptionIterator &current)
-    {
-        if (current == mSubscriptions.end())
-        {
+    virtual bool unsubscribe(SubscriptionPtr sub) {
+        return true;
+    }
+
+    void removeUnsubscribed() {
+        for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); ++it) {
+            if (!**it && unsubscribe(*it)) {
+                it = mSubscriptions.erase(it);
+                if (it == mSubscriptions.end()) {
+                    break;
+                }
+            }
+        }
+    }
+
+    SubscriptionIterator &nextSubscription(SubscriptionIterator &current) {
+        if (current == mSubscriptions.end()) {
             return current;
         }
 
         ++current;
-        if (current != mSubscriptions.end() && !**current)
-        {
+        if (current != mSubscriptions.end() && !**current) {
             current = mSubscriptions.erase(current);
         }
         return current;

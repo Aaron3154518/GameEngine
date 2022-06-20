@@ -1,16 +1,15 @@
 #ifndef EVENT_SERVICE_H
 #define EVENT_SERVICE_H
 
-#include "../../Utils/Observable/Observable.h"
 #include "../../EventSystem/Event.h"
+#include "../../Utils/Observable/Observable.h"
 
-class EventService
-{
-public:
+class EventService {
+   public:
     EventService() = default;
     ~EventService() = default;
 
-    Observable<Event, void(Event)> event$;
+    Observable<const Event &, void(const Event &)> event$;
 };
 
 #endif

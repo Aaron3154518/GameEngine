@@ -9,42 +9,41 @@ It contains various drawing functions for shapes in Shapes.h as well as other vi
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "../Utils/Rect/Rect.h"
 #include "Colors.h"
 #include "RenderTypes.h"
 #include "Shapes.h"
-#include "../Utils/Rect/Rect.h"
 
-class TextureBuilder
-{
-public:
-	TextureBuilder() = default;
-	TextureBuilder(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
-	TextureBuilder(SharedTexture src);
-	~TextureBuilder() = default;
+class TextureBuilder {
+   public:
+    TextureBuilder() = default;
+    TextureBuilder(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
+    TextureBuilder(SharedTexture src);
+    ~TextureBuilder() = default;
 
-	// Get texture
-	SharedTexture getTexture();
+    // Get texture
+    SharedTexture getTexture();
 
-	// Start new texture
-	void reset(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
+    // Start new texture
+    void reset(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
 
-	// Draw textures/text
-	void draw(const RenderData &data);
-	void draw(const RectData &data);
-	void draw(const CircleData &data);
-	void draw(const ProgressBar &data);
+    // Draw textures/text
+    void draw(const RenderData &data);
+    void draw(const RectData &data);
+    void draw(const CircleData &data);
+    void draw(const ProgressBar &data);
 
-	// Brighten texture
-	void brighten(Uint8 strength);
+    // Brighten texture
+    void brighten(Uint8 strength);
 
-	static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
+    static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
 
-private:
-	SharedTexture mTex = makeSharedTexture();
+   private:
+    SharedTexture mTex = makeSharedTexture();
 
-	void startDrawShape(const ShapeData &data);
-	Rect getShapeBounds(const ShapeData &data);
-	void endDrawShape();
+    void startDrawShape(const ShapeData &data);
+    Rect getShapeBounds(const ShapeData &data);
+    void endDrawShape();
 };
 
 #endif

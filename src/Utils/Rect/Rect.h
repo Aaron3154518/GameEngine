@@ -1,18 +1,16 @@
 #ifndef RECT_H
 #define RECT_H
 
-#include <cmath>
-#include <iostream>
-
 #include <SDL.h>
 #include <SDL_image.h>
 
+#include <cmath>
+#include <iostream>
+
 // namespace utils {
-class Rect : public SDL_Rect
-{
-public:
-    enum Align : uint8_t
-    {
+class Rect : public SDL_Rect {
+   public:
+    enum Align : uint8_t {
         TOP_LEFT = 0,
         CENTER,
         BOT_RIGHT

@@ -1,4 +1,5 @@
 #include "Component.h"
+
 #include "Game.h"
 
 Component::~Component() {}
