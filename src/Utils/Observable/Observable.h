@@ -66,11 +66,20 @@ class Observable<T, RetT(ArgTs...), Data> {
     Observable() = default;  //{ std::cerr << "Partial Specializtion" << std::endl; }
     ~Observable() = default;
 
-    SubscriptionPtr subscribe(typename SubscriptionT::Function func, std::shared_ptr<Data> data = nullptr) {
+    template <int N = 0>
+    typename std::enable_if_t<std::is_same<Data, NoData>::value && N == N, SubscriptionPtr>
+    subscribe(typename SubscriptionT::Function func) {
+        SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
+        mSubscriptions.push_back(sub);
+        return sub;
+    }
+
+    template <int N = 0>
+    typename std::enable_if_t<!std::is_same<Data, NoData>::value && N == N, SubscriptionPtr>
+    subscribe(typename SubscriptionT::Function func, std::shared_ptr<Data> data) {
         SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
         sub->data = data;
         mSubscriptions.push_back(sub);
-        // std::cerr << "Subscribe" << std::endl;
         return sub;
     }
 
@@ -116,7 +125,7 @@ class Observable<T, RetT(ArgTs...), Data> {
    private:
     // Case 1: ArgTs = T => defaultServe() will send subscribers data.
     template <int N = 0>
-    typename std::enable_if<is_simple<T, ArgTs...>::value && N == N>::type
+    typename std::enable_if_t<is_simple<T, ArgTs...>::value && N == N>
     defaultServe(T val) {
         for (auto sub : mSubscriptions) {
             (*sub)(val);
@@ -125,7 +134,7 @@ class Observable<T, RetT(ArgTs...), Data> {
 
     // Case 2: ArgTs != T => serve functionality is left to the inheritor
     template <int N = 0>
-    typename std::enable_if<!(is_simple<T, ArgTs...>::value && N == N)>::type
+    typename std::enable_if_t<!is_simple<T, ArgTs...>::value && N == N>
     defaultServe(T val) {}
 };
 
