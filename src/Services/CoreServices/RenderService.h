@@ -11,6 +11,8 @@
 #include "../../Utils/Observable/Observable.h"
 #include "../../Utils/Rect/Rect.h"
 #include "../Component.h"
+#include "../Game.h"
+#include "../ServiceHandler.h"
 
 struct UIComponent {
     UIComponent(Rect r, int e) : rect(r), elevation(e) {}
@@ -51,7 +53,7 @@ class RenderObservable : public Observable<SDL_Renderer *, void(SDL_Renderer *),
     void sort(const std::vector<UIComponentPtr> &order);
 };
 
-class RenderService : public Component {
+class RenderService : public Service, public Component {
    public:
     RenderService();
     ~RenderService() = default;
@@ -65,5 +67,7 @@ class RenderService : public Component {
    private:
     void init(GameStruct &gs);
 };
+
+REGISTER_SERVICE(RenderService);
 
 #endif

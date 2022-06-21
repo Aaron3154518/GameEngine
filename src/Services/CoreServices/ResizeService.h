@@ -6,8 +6,11 @@
 #include "../../EventSystem/Event.h"
 #include "../../Utils/Observable/Observable.h"
 #include "../Component.h"
+#include "../Game.h"
+#include "../GameStruct.h"
+#include "../ServiceHandler.h"
 
-class ResizeService : public Component {
+class ResizeService : public Service, public Component {
    public:
     ResizeService();
     ~ResizeService() = default;
@@ -17,5 +20,7 @@ class ResizeService : public Component {
    private:
     void init(GameStruct &gs);
 };
+
+REGISTER_SERVICE(ResizeService);
 
 #endif

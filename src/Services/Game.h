@@ -19,8 +19,9 @@ class Game {
     Game() = delete;
     ~Game() = delete;
 
-    static std::vector<Component *> toInit;
-    static bool initialized;
+    static bool &initialized();
+
+    static std::vector<Component *> &toInit();
 };
 
 #endif

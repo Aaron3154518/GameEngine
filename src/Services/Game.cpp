@@ -1,30 +1,30 @@
 #include "Game.h"
 
-bool Game::initialized = false;
-std::vector<Component *> Game::toInit;
-
-GameStruct &Game::gameStruct()
-{
+GameStruct &Game::gameStruct() {
     static GameStruct GAME_STRUCT;
     return GAME_STRUCT;
 }
 
-void Game::registerComponent(Component *comp)
-{
-    if (initialized)
-    {
+bool &Game::initialized() {
+    static bool INITIALIZED;
+    return INITIALIZED;
+}
+
+std::vector<Component *> &Game::toInit() {
+    static std::vector<Component *> TO_INIT;
+    return TO_INIT;
+}
+
+void Game::registerComponent(Component *comp) {
+    if (initialized()) {
         comp->init(gameStruct());
-    }
-    else
-    {
-        toInit.push_back(comp);
+    } else {
+        toInit().push_back(comp);
     }
 }
 
-void Game::init()
-{
-    if (initialized)
-    {
+void Game::init() {
+    if (initialized()) {
         return;
     }
 
@@ -34,11 +34,10 @@ void Game::init()
     GameStruct &gs = gameStruct();
 
     // Set initialized to true so that any new components automatically get initialized
-    initialized = true;
+    initialized() = true;
 
-    for (Component *comp : toInit)
-    {
+    for (Component *comp : toInit()) {
         comp->init(gs);
     }
-    toInit.clear();
+    toInit().clear();
 }

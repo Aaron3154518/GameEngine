@@ -1,18 +1,18 @@
 #include "MouseService.h"
 
-#include "../Game.h"
-#include "../GameStruct.h"
+#include "../CoreServices/EventService.h"
+#include "../CoreServices/RenderService.h"
 
 // MouseObservable
 MouseObservable::SubscriptionPtr MouseObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent>::subscribe(func, data);
-    Game::gameStruct().mServices.renderService.addComponent(data);
+    ServiceHandler::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
 bool MouseObservable::unsubscribe(SubscriptionPtr sub) {
-    Game::gameStruct().mServices.renderService.removeComponent(sub->data);
+    ServiceHandler::Get<RenderService>()->removeComponent(sub->data);
     return true;
 }
 
@@ -48,13 +48,13 @@ MouseService::MouseService() {
 }
 
 void MouseService::init(GameStruct &gs) {
-    gs.mServices.eventService.event$.subscribe(
+    ServiceHandler::Get<EventService>()->event$.subscribe(
         [this](const Event &e) {
             if (e[Event::LEFT].clicked()) {
                 mouse$.next(e[Event::LEFT]);
             }
         });
-    gs.mServices.renderService.renderOrder$.subscribe(
+    ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
         [this](const std::vector<UIComponentPtr> &order) {
             mouse$.sort(order);
         });

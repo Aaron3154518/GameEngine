@@ -11,6 +11,9 @@
 #include "../../Utils/Observable/Observable.h"
 #include "../Component.h"
 #include "../CoreServices/RenderService.h"
+#include "../Game.h"
+#include "../GameStruct.h"
+#include "../ServiceHandler.h"
 
 class MouseObservable : public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
     friend class MouseService;
@@ -26,7 +29,7 @@ class MouseObservable : public Observable<Event::MouseButton, void(Event::MouseB
     void sort(const std::vector<UIComponentPtr> &order);
 };
 
-class MouseService : public Component {
+class MouseService : public Service, public Component {
    public:
     MouseService();
 
@@ -35,5 +38,7 @@ class MouseService : public Component {
    private:
     void init(GameStruct &gs);
 };
+
+REGISTER_SERVICE(MouseService);
 
 #endif

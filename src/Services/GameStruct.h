@@ -4,7 +4,7 @@
 #include "ServiceHandler.h"
 
 struct GameStruct {
-    ServiceHandler mServices;
+    // ServiceHandler mServices;
 };
 
 #endif

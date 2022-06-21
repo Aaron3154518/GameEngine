@@ -1,6 +1,6 @@
 #include "RenderService.h"
 
-#include "../Game.h"
+#include "UpdateService.h"
 
 // RenderOrderObservable
 void RenderOrderObservable::sort() {
@@ -41,12 +41,12 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
 RenderObservable::SubscriptionPtr RenderObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>::subscribe(func, data);
-    Game::gameStruct().mServices.renderService.addComponent(data);
+    ServiceHandler::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
 bool RenderObservable::unsubscribe(SubscriptionPtr sub) {
-    Game::gameStruct().mServices.renderService.removeComponent(sub->data);
+    ServiceHandler::Get<RenderService>()->removeComponent(sub->data);
     return true;
 }
 
@@ -70,11 +70,11 @@ RenderService::RenderService() {
 }
 
 void RenderService::init(GameStruct &gs) {
-    gs.mServices.updateService.update$.subscribe(
+    ServiceHandler::Get<UpdateService>()->update$.subscribe(
         [this](Time dt) {
             renderOrder$.sort();
         });
-    gs.mServices.renderService.renderOrder$.subscribe(
+    ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
         [this](const std::vector<UIComponentPtr> &order) {
             render$.sort(order);
         });

@@ -8,8 +8,14 @@
 #include <sstream>
 
 #include "../EventSystem/Event.h"
+#include "../Utils/Rect/Rect.h"
 #include "Component.h"
+#include "CoreServices/EventService.h"
+#include "CoreServices/RenderService.h"
+#include "CoreServices/UpdateService.h"
 #include "Game.h"
+#include "MouseService/MouseService.h"
+#include "ServiceHandler.h"
 
 constexpr SDL_Color WHITE{255, 255, 255, 255};
 constexpr SDL_Color BLACK{0, 0, 0, 255};
@@ -39,11 +45,11 @@ class TestComponent : public Component {
 
    private:
     void init(GameStruct &gs) {
-        mMouseSub = gs.mServices.mouseService.mouse$.subscribe(
+        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
             std::bind(type ? &TestComponent::onClick1 : &TestComponent::onClick2,
                       this, std::placeholders::_1, std::placeholders::_2),
             mPos);
-        mRenderSub = gs.mServices.renderService.render$.subscribe(
+        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
             std::bind(&TestComponent::onRender, this, std::placeholders::_1), mPos);
     }
 
@@ -67,7 +73,7 @@ class TestComponent : public Component {
                 mRenderSub->unsubscribe();
                 mRenderSub.reset();
             } else {
-                mRenderSub = Game::gameStruct().mServices.renderService.render$.subscribe(
+                mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
                     std::bind(&TestComponent::onRender, this, std::placeholders::_1), mPos);
             }
         }
@@ -127,25 +133,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // std::vector<TestComponentPtr> components;
-
     // Test before init
-    /*for (int i = 0; i < 5; i++) {
-        components.push_back(randomTestComponent(w, h));
-    }*/
     TestComponent t1(Rect(25, 25, 200, 450), 1, true);
     TestComponent t2(Rect(50, 50, 400, 50), 3, false);
 
     Game::init();
 
     // Test after init
-    /*for (int i = 5; i < 10; i++) {
-        components.push_back(randomTestComponent(w, h));
-    }*/
     TestComponent t3(Rect(275, 25, 200, 450), 3, true);
     TestComponent t4(Rect(50, 400, 400, 50), 2, false);
-
-    // std::sort(components.begin(), components.end(), compareTC);
 
     Event e;
 
@@ -158,13 +154,13 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        Game::gameStruct().mServices.eventService.event$.next(e);
-        Game::gameStruct().mServices.updateService.update$.next(dt);
+        ServiceHandler::Get<EventService>()->event$.next(e);
+        ServiceHandler::Get<UpdateService>()->update$.next(dt);
 
         // Rendering
         SDL_RenderClear(renderer);
 
-        Game::gameStruct().mServices.renderService.render$.next(renderer);
+        ServiceHandler::Get<RenderService>()->render$.next(renderer);
 
         SDL_RenderPresent(renderer);
 
