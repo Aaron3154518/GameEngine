@@ -16,7 +16,7 @@ class MouseObservable : public Observable<Event::MouseButton, void(Event::MouseB
     friend class MouseService;
 
    public:
-    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
+    SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
     void serve(Event::MouseButton mouse);

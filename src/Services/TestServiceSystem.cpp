@@ -40,9 +40,11 @@ class TestComponent : public Component {
    private:
     void init(GameStruct &gs) {
         mMouseSub = gs.mServices.mouseService.mouse$.subscribe(
-            std::bind(type ? &onClick1 : &onClick2, this, std::placeholders::_1, std::placeholders::_2), mPos);
+            std::bind(type ? &TestComponent::onClick1 : &TestComponent::onClick2,
+                      this, std::placeholders::_1, std::placeholders::_2),
+            mPos);
         mRenderSub = gs.mServices.renderService.render$.subscribe(
-            std::bind(&onRender, this, std::placeholders::_1), mPos);
+            std::bind(&TestComponent::onRender, this, std::placeholders::_1), mPos);
     }
 
     void onRender(SDL_Renderer *renderer) {
@@ -66,7 +68,7 @@ class TestComponent : public Component {
                 mRenderSub.reset();
             } else {
                 mRenderSub = Game::gameStruct().mServices.renderService.render$.subscribe(
-                    std::bind(&onRender, this, std::placeholders::_1), mPos);
+                    std::bind(&TestComponent::onRender, this, std::placeholders::_1), mPos);
             }
         }
     }

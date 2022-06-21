@@ -4,7 +4,7 @@
 #include "../GameStruct.h"
 
 // MouseObservable
-MouseObservable::SubscriptionPtr MouseObservable::subscribe(Subscription::Function func, UIComponentPtr data) {
+MouseObservable::SubscriptionPtr MouseObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent>::subscribe(func, data);
     Game::gameStruct().mServices.renderService.addComponent(data);

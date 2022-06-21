@@ -43,6 +43,12 @@ class Subscription {
     std::shared_ptr<bool> status;
 };
 
+template <class T, class... Args>
+struct is_simple : std::false_type {};
+
+template <class T>
+struct is_simple<T, T> : std::true_type {};
+
 template <class T, class RetT, class Data = NoData, class... ArgTs>
 class Observable {
     Observable() { std::cerr << "Full Template" << std::endl; }
@@ -52,16 +58,16 @@ class Observable {
 template <class T, class RetT, class Data, class... ArgTs>
 class Observable<T, RetT(ArgTs...), Data> {
    public:
-    typedef Subscription<std::shared_ptr<Data>, RetT, ArgTs...> Subscription;
-    typedef std::shared_ptr<Subscription> SubscriptionPtr;
+    typedef Subscription<std::shared_ptr<Data>, RetT, ArgTs...> SubscriptionT;
+    typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
     typedef std::list<SubscriptionPtr> SubscriptionList;
     typedef typename SubscriptionList::iterator SubscriptionIterator;
 
     Observable() = default;  //{ std::cerr << "Partial Specializtion" << std::endl; }
     ~Observable() = default;
 
-    SubscriptionPtr subscribe(Subscription::Function func, std::shared_ptr<Data> data = nullptr) {
-        SubscriptionPtr sub = std::make_shared<Subscription>(func);
+    SubscriptionPtr subscribe(typename SubscriptionT::Function func, std::shared_ptr<Data> data = nullptr) {
+        SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
         sub->data = data;
         mSubscriptions.push_back(sub);
         // std::cerr << "Subscribe" << std::endl;
@@ -75,12 +81,7 @@ class Observable<T, RetT(ArgTs...), Data> {
 
    protected:
     virtual void serve(T val) {
-        if constexpr (std::is_same<typename Subscription::Function,
-                                   typename ::Subscription<Data, RetT, T>::Function>::value) {
-            for (SubscriptionPtr sub : mSubscriptions) {
-                (*sub)(val);
-            }
-        }
+        defaultServe(val);
     }
 
     virtual bool unsubscribe(SubscriptionPtr sub) {
@@ -111,54 +112,21 @@ class Observable<T, RetT(ArgTs...), Data> {
     }
 
     SubscriptionList mSubscriptions;
+
+   private:
+    // Case 1: ArgTs = T => defaultServe() will send subscribers data.
+    template <int N = 0>
+    typename std::enable_if<is_simple<T, ArgTs...>::value && N == N>::type
+    defaultServe(T val) {
+        for (auto sub : mSubscriptions) {
+            (*sub)(val);
+        }
+    }
+
+    // Case 2: ArgTs != T => serve functionality is left to the inheritor
+    template <int N = 0>
+    typename std::enable_if<!(is_simple<T, ArgTs...>::value && N == N)>::type
+    defaultServe(T val) {}
 };
-
-/*
-template <class T, class RetT, class... ArgTs>
-class Observable<T, Subscription<RetT, ArgTs...>, void>
-{
-public:
-    typedef Subscription<RetT, ArgTs...> Subscription;
-    typedef std::list<Subscription> SubscriptionList;
-    typedef typename SubscriptionList::iterator SubscriptionIterator;
-
-    Subscription subscribe(Subscription::Function func)
-    {
-        Subscription sub(func);
-        mSubscriptions.push_back(sub);
-        return sub;
-    }
-
-    virtual void next(T val)
-    {
-        std::cerr << mSubscriptions.size() << std::endl;
-        if constexpr (std::is_same<Subscription, ::Subscription<RetT, T>>::value)
-        {
-            for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); it = nextSubscription(it))
-            {
-                std::cerr << (it == mSubscriptions.end()) << std::endl;
-                (*it)(val);
-            }
-        }
-    }
-
-protected:
-    SubscriptionIterator &nextSubscription(SubscriptionIterator &current)
-    {
-        if (current == mSubscriptions.end())
-        {
-            return current;
-        }
-
-        ++current;
-        if (!*current)
-        {
-            current = mSubscriptions.erase(current);
-        }
-        return current;
-    }
-
-    SubscriptionList mSubscriptions;
-};*/
 
 #endif

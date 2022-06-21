@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++2a 
+CXXFLAGS :=  
 
 INC := include
 BIN := bin

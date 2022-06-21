@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 #include "../../Utils/Observable/Observable.h"
 #include "../../Utils/Rect/Rect.h"
@@ -42,7 +43,7 @@ class RenderObservable : public Observable<SDL_Renderer *, void(SDL_Renderer *),
     friend class RenderService;
 
    public:
-    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
+    SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
     bool unsubscribe(SubscriptionPtr sub);

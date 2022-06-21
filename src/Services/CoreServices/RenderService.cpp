@@ -38,7 +38,7 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
 }
 
 // RenderObservable
-RenderObservable::SubscriptionPtr RenderObservable::subscribe(Subscription::Function func, UIComponentPtr data) {
+RenderObservable::SubscriptionPtr RenderObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>::subscribe(func, data);
     Game::gameStruct().mServices.renderService.addComponent(data);
