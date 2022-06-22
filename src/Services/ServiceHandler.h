@@ -11,8 +11,6 @@
 
 class Service {};
 
-// TODO: auto index by Service type
-// TODO: eliminate classes? Hold observables directly?
 class ServiceHandler {
    public:
     template <class T>
