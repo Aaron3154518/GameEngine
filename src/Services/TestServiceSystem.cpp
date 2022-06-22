@@ -160,6 +160,49 @@ class UnsubTest : public TestBase {
     RenderObservable::SubscriptionPtr mRenderSub;
 };
 
+class UpdateTest : public TestBase {
+   public:
+    UpdateTest(Rect r, int e) : TestBase(r, e) {
+        Game::registerComponent(this);
+    }
+
+    SDL_Color getColor() const {
+        SDL_Color color = BLACK;
+        if (delayMs > 0) {
+            color.r = color.b = color.g = 255 * (std::pow(delayMs / 1500., .15) - 1);
+        }
+        return color;
+    }
+
+   private:
+    void init(GameStruct &gs) {
+        mUpdateSub = ServiceHandler::Get<UpdateService>()->update$.subscribe(
+            std::bind(&UpdateTest::onUpdate, this, std::placeholders::_1));
+        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
+            std::bind(&UpdateTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
+            mPos);
+        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+            std::bind(&UpdateTest::onRender, this, std::placeholders::_1), mPos);
+    }
+
+    void onClick(Event::MouseButton b, bool clicked) {
+        if (clicked) {
+            delayMs = 1500;
+        }
+    }
+
+    void onUpdate(Time dt) {
+        if (delayMs > 0) {
+            delayMs -= dt;
+        }
+    }
+
+    int delayMs = 0;
+    UpdateObservable::SubscriptionPtr mUpdateSub;
+    MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
+};
+
 class VisibilityTest : public TestBase {
    public:
     VisibilityTest(Rect r, int e) : TestBase(r, e) {
@@ -168,6 +211,8 @@ class VisibilityTest : public TestBase {
 
    private:
     void init(GameStruct &gs) {
+        mUpdateSub = ServiceHandler::Get<UpdateService>()->update$.subscribe(
+            std::bind(&VisibilityTest::onUpdate, this, std::placeholders::_1));
         mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
             std::bind(&VisibilityTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
             mPos);
@@ -178,17 +223,20 @@ class VisibilityTest : public TestBase {
     void onClick(Event::MouseButton b, bool clicked) {
         if (clicked) {
             mPos->visible = false;
-            delay = Time(1000);
+            delayMs = 1500;
         }
     }
 
     void onUpdate(Time dt) {
-        if (!mPos->visible) {
-            delay -= dt;
+        if (delayMs > 0) {
+            delayMs -= dt;
+            if (delayMs <= 0) {
+                mPos->visible = true;
+            }
         }
     }
 
-    Time delay;
+    int delayMs = 0;
     UpdateObservable::SubscriptionPtr mUpdateSub;
     MouseObservable::SubscriptionPtr mMouseSub;
     RenderObservable::SubscriptionPtr mRenderSub;
@@ -254,6 +302,7 @@ int main(int argc, char *argv[]) {
     // Test after init
     ClickRenderTest t3(Rect(275, 25, 200, 450), 3);
     UnsubTest t4(Rect(50, 400, 400, 50), 2);
+    UpdateTest t6(Rect(230, 180, 40, 40), 10);
 
     Event e;
 
@@ -261,13 +310,16 @@ int main(int argc, char *argv[]) {
     Uint32 time = SDL_GetTicks();
     Time dt;
     while (true) {
+        dt = SDL_GetTicks() - time;
+        time = SDL_GetTicks();
+
         e.update();
         if (e.quit()) {
             break;
         }
 
-        ServiceHandler::Get<EventService>()->event$.next(e);
         ServiceHandler::Get<UpdateService>()->update$.next(dt);
+        ServiceHandler::Get<EventService>()->event$.next(e);
 
         // Rendering
         SDL_RenderClear(renderer);
@@ -276,11 +328,10 @@ int main(int argc, char *argv[]) {
 
         SDL_RenderPresent(renderer);
 
-        dt = Time(SDL_GetTicks() - time);
-        if (dt < delay) {
-            SDL_Delay(delay - dt);
+        Uint32 loopDt = SDL_GetTicks() - time;
+        if (loopDt < delay) {
+            SDL_Delay(delay - loopDt);
         }
-        time = SDL_GetTicks();
     }
 
     TTF_Quit();
