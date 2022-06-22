@@ -7,9 +7,6 @@
 #include <memory>
 #include <type_traits>
 
-struct NoData {
-};
-
 template <class Data, class RetT, class... ArgTs>
 class Subscription {
    public:
@@ -35,7 +32,8 @@ class Subscription {
         return subscription(args...);
     }
 
-    Data data;
+    // Only include data if not void
+    std::enable_if_t<!std::is_same<Data, void>::value, Data> data;
 
    private:
     Function subscription;
@@ -49,12 +47,13 @@ struct is_simple : std::false_type {};
 template <class T>
 struct is_simple<T, T> : std::true_type {};
 
-template <class T, class RetT, class Data = NoData, class... ArgTs>
+// Full template, not usable
+template <class T, class RetT, class Data = void, class... ArgTs>
 class Observable {
-    Observable() { std::cerr << "Full Template" << std::endl; }
-    ~Observable() = default;
+    static_assert(!std::is_same<T, T>::value, "Must use specialized observable");
 };
 
+// Partially specialized template, use this
 template <class T, class RetT, class Data, class... ArgTs>
 class Observable<T, RetT(ArgTs...), Data> {
    public:
@@ -63,11 +62,11 @@ class Observable<T, RetT(ArgTs...), Data> {
     typedef std::list<SubscriptionPtr> SubscriptionList;
     typedef typename SubscriptionList::iterator SubscriptionIterator;
 
-    Observable() = default;  //{ std::cerr << "Partial Specializtion" << std::endl; }
+    Observable() = default;
     ~Observable() = default;
 
     template <int N = 0>
-    typename std::enable_if_t<std::is_same<Data, NoData>::value && N == N, SubscriptionPtr>
+    typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>
     subscribe(typename SubscriptionT::Function func) {
         SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
         mSubscriptions.push_back(sub);
@@ -75,7 +74,7 @@ class Observable<T, RetT(ArgTs...), Data> {
     }
 
     template <int N = 0>
-    typename std::enable_if_t<!std::is_same<Data, NoData>::value && N == N, SubscriptionPtr>
+    typename std::enable_if_t<!std::is_same<Data, void>::value && N == N, SubscriptionPtr>
     subscribe(typename SubscriptionT::Function func, std::shared_ptr<Data> data) {
         SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
         sub->data = data;
