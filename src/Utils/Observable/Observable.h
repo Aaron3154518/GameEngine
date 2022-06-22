@@ -16,12 +16,14 @@ class Subscription {
         : subscription([](ArgTs... args) {}), status(std::make_shared<bool>(false)) {}
     Subscription(Function func)
         : subscription(func), status(std::make_shared<bool>(true)) {}
-    ~Subscription() {
-        // unsubscribe();
-    }
+    ~Subscription() = default;
 
     void unsubscribe() {
         *status = false;
+    }
+
+    void changeSubscription(Function func) {
+        subscription = func;
     }
 
     operator bool() const {

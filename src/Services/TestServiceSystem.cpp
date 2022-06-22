@@ -23,13 +23,14 @@ constexpr SDL_Color GREEN{0, 255, 0, 255};
 constexpr SDL_Color RED{255, 0, 0, 255};
 constexpr SDL_Color BLUE{0, 0, 255, 255};
 constexpr SDL_Color YELLOW{255, 255, 0, 255};
+constexpr SDL_Color ORANGE{255, 191, 0, 255};
 constexpr SDL_Color PURPLE{255, 0, 255, 255};
 
-class TestComponent : public Component {
+class TestBase : public Component {
    public:
-    TestComponent(Rect r, int e, bool _type) : mPos(std::make_shared<UIComponent>(r, e)), type(_type) {
-        Game::registerComponent(this);
-    }
+    TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {}
+
+    virtual ~TestBase() = default;
 
     const Rect &getRect() const {
         return mPos->rect;
@@ -39,19 +40,12 @@ class TestComponent : public Component {
         return mPos->elevation;
     }
 
-    SDL_Color getColor() const {
-        return type ? (color ? GREEN : RED) : (color ? BLUE : YELLOW);
+    virtual SDL_Color getColor() const {
+        return BLACK;
     }
 
-   private:
-    void init(GameStruct &gs) {
-        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
-            std::bind(type ? &TestComponent::onClick1 : &TestComponent::onClick2,
-                      this, std::placeholders::_1, std::placeholders::_2),
-            mPos);
-        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
-            std::bind(&TestComponent::onRender, this, std::placeholders::_1), mPos);
-    }
+   protected:
+    virtual void init(GameStruct &gs) {}
 
     void onRender(SDL_Renderer *renderer) {
         SDL_Color c = getColor();
@@ -62,42 +56,124 @@ class TestComponent : public Component {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }
 
-    void onClick1(Event::MouseButton b, bool clicked) {
+    std::shared_ptr<UIComponent> mPos;
+};
+
+class ClickRenderTest : public TestBase {
+   public:
+    ClickRenderTest(Rect r, int e) : TestBase(r, e) {
+        Game::registerComponent(this);
+    }
+
+    SDL_Color getColor() const {
+        return color ? GREEN : RED;
+    }
+
+   private:
+    void init(GameStruct &gs) {
+        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
+            std::bind(&ClickRenderTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
+            mPos);
+        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+            std::bind(&ClickRenderTest::onRender, this, std::placeholders::_1), mPos);
+    }
+
+    void onClick(Event::MouseButton b, bool clicked) {
         color = clicked;
     }
 
-    void onClick2(Event::MouseButton b, bool clicked) {
+    bool color = false;
+    MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
+};
+
+class ChangeSubTest : public TestBase {
+   public:
+    ChangeSubTest(Rect r, int e) : TestBase(r, e) {
+        Game::registerComponent(this);
+    }
+
+    SDL_Color getColor() const {
+        return color ? YELLOW : BLUE;
+    }
+
+   private:
+    void init(GameStruct &gs) {
+        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
+            std::bind(&ChangeSubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
+            mPos);
+        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+            std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1), mPos);
+    }
+
+    void onClick(Event::MouseButton b, bool clicked) {
         if (clicked) {
             color = !color;
-            if (mRenderSub) {
+            if (color) {
                 mRenderSub->unsubscribe();
                 mRenderSub.reset();
             } else {
                 mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
-                    std::bind(&TestComponent::onRender, this, std::placeholders::_1), mPos);
+                    std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1), mPos);
             }
         }
     }
 
-    bool type = false;
     bool color = false;
-    std::shared_ptr<UIComponent> mPos;
     MouseObservable::SubscriptionPtr mMouseSub;
     RenderObservable::SubscriptionPtr mRenderSub;
 };
-typedef std::unique_ptr<TestComponent> TestComponentPtr;
 
-bool compareTC(const TestComponentPtr &lhs, const TestComponentPtr &rhs) {
-    return lhs->getElevation() <= rhs->getElevation();
-}
+class UnsubTest : public TestBase {
+   public:
+    UnsubTest(Rect r, int e) : TestBase(r, e) {
+        Game::registerComponent(this);
+    }
 
-TestComponentPtr randomTestComponent(int w, int h) {
+    SDL_Color getColor() const {
+        return color ? ORANGE : PURPLE;
+    }
+
+   private:
+    void init(GameStruct &gs) {
+        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
+            std::bind(&UnsubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
+            mPos);
+        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+            std::bind(&UnsubTest::onRender, this, std::placeholders::_1), mPos);
+    }
+
+    void onClick(Event::MouseButton b, bool clicked) {
+        if (clicked) {
+            color = !color;
+            if (color) {
+                mRenderSub->changeSubscription([](SDL_Renderer *) {});
+            } else {
+                mRenderSub->changeSubscription(std::bind(&UnsubTest::onRender, this, std::placeholders::_1));
+            }
+        }
+    }
+
+    bool color = false;
+    MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
+};
+
+std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;
     r.x = rand() % w - 10;
     r.y = rand() % h - 10;
     r.w = rand() % (w - r.x);
     r.h = rand() % (h - r.y);
-    return std::make_unique<TestComponent>(r, rand() % 20 - 10, rand() % 2 == 0);
+    int e = rand() % 20 - 10;
+    switch (rand() % 3) {
+        case 1:
+            return std::make_shared<ChangeSubTest>(r, e);
+        case 2:
+            return std::make_shared<UnsubTest>(r, e);
+        default:
+            return std::make_shared<ClickRenderTest>(r, e);
+    }
 }
 
 // TODO: Move init and game loop to dedicated classes
@@ -134,14 +210,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Test before init
-    TestComponent t1(Rect(25, 25, 200, 450), 1, true);
-    TestComponent t2(Rect(50, 50, 400, 50), 3, false);
+    ClickRenderTest t1(Rect(25, 25, 200, 450), 1);
+    ChangeSubTest t2(Rect(50, 50, 400, 50), 3);
 
     Game::init();
 
     // Test after init
-    TestComponent t3(Rect(275, 25, 200, 450), 3, true);
-    TestComponent t4(Rect(50, 400, 400, 50), 2, false);
+    ClickRenderTest t3(Rect(275, 25, 200, 450), 3);
+    UnsubTest t4(Rect(50, 400, 400, 50), 2);
 
     Event e;
 
