@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include "../EventSystem/Event.h"
+#include "../EventSystem/Time.h"
 #include "../Utils/Rect/Rect.h"
 #include "Component.h"
 #include "CoreServices/EventService.h"
@@ -159,6 +160,40 @@ class UnsubTest : public TestBase {
     RenderObservable::SubscriptionPtr mRenderSub;
 };
 
+class VisibilityTest : public TestBase {
+   public:
+    VisibilityTest(Rect r, int e) : TestBase(r, e) {
+        Game::registerComponent(this);
+    }
+
+   private:
+    void init(GameStruct &gs) {
+        mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
+            std::bind(&VisibilityTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
+            mPos);
+        mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+            std::bind(&VisibilityTest::onRender, this, std::placeholders::_1), mPos);
+    }
+
+    void onClick(Event::MouseButton b, bool clicked) {
+        if (clicked) {
+            mPos->visible = false;
+            delay = Time(1000);
+        }
+    }
+
+    void onUpdate(Time dt) {
+        if (!mPos->visible) {
+            delay -= dt;
+        }
+    }
+
+    Time delay;
+    UpdateObservable::SubscriptionPtr mUpdateSub;
+    MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
+};
+
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;
     r.x = rand() % w - 10;
@@ -212,6 +247,7 @@ int main(int argc, char *argv[]) {
     // Test before init
     ClickRenderTest t1(Rect(25, 25, 200, 450), 1);
     ChangeSubTest t2(Rect(50, 50, 400, 50), 3);
+    VisibilityTest t5(Rect(230, 230, 40, 40), 10);
 
     Game::init();
 

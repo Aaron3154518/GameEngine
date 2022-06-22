@@ -15,10 +15,12 @@
 #include "../ServiceHandler.h"
 
 struct UIComponent {
+    UIComponent() = default;
     UIComponent(Rect r, int e) : rect(r), elevation(e) {}
 
     Rect rect = Rect();
     int elevation = 0;
+    bool visible = true;
 };
 
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
@@ -48,6 +50,8 @@ class RenderObservable : public Observable<SDL_Renderer *, void(SDL_Renderer *),
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
+    void serve(SDL_Renderer *renderer);
+
     bool unsubscribe(SubscriptionPtr sub);
 
     void sort(const std::vector<UIComponentPtr> &order);

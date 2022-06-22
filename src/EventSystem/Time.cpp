@@ -17,30 +17,4 @@ Time &Time::operator+=(const uint32_t &rhs) {
     mTimeMs += rhs;
     return *this;
 }
-Time &Time::operator+=(const Time &rhs) {
-    return (*this += rhs.mTimeMs);
-}
-
-Time &Time::operator-=(const uint32_t &rhs) {
-    mTimeMs -= rhs;
-    return *this;
-}
-Time &Time::operator-=(const Time &rhs) {
-    return (*this -= rhs.mTimeMs);
-}
-
-Time &Time::operator*=(const uint32_t &rhs) {
-    mTimeMs *= rhs;
-    return *this;
-}
-Time &Time::operator*=(const Time &rhs) {
-    return (*this *= rhs.mTimeMs);
-}
-
-Time &Time::operator/=(const uint32_t &rhs) {
-    mTimeMs /= rhs;
-    return *this;
-}
-Time &Time::operator/=(const Time &rhs) {
-    return (*this /= rhs.mTimeMs);
-}
+Time &Time::operator+=(const Time &rhs) { return (*this += rhs.mTimeMs); }

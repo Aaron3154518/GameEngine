@@ -15,12 +15,6 @@ class Time {
 
     Time &operator+=(const uint32_t &rhs);
     Time &operator+=(const Time &rhs);
-    Time &operator-=(const uint32_t &rhs);
-    Time &operator-=(const Time &rhs);
-    Time &operator*=(const uint32_t &rhs);
-    Time &operator*=(const Time &rhs);
-    Time &operator/=(const uint32_t &rhs);
-    Time &operator/=(const Time &rhs);
 
    private:
     uint32_t mTimeMs;

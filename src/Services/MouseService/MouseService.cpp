@@ -19,6 +19,10 @@ bool MouseObservable::unsubscribe(SubscriptionPtr sub) {
 void MouseObservable::serve(Event::MouseButton mouse) {
     bool foundTop = false;
     for (SubscriptionPtr sub : mSubscriptions) {
+        if (!sub->data->visible) {
+            continue;
+        }
+
         if (!foundTop && SDL_PointInRect(&mouse.clickPos, &sub->data->rect)) {
             (*sub)(mouse, true);
             foundTop = true;

@@ -5,12 +5,14 @@
 #include "../../Utils/Observable/Observable.h"
 #include "../ServiceHandler.h"
 
+typedef Observable<Time, void(Time)> UpdateObservable;
+
 class UpdateService : public Service {
    public:
     UpdateService() = default;
     ~UpdateService() = default;
 
-    Observable<Time, void(Time)> update$;
+    UpdateObservable update$;
 };
 
 REGISTER_SERVICE(UpdateService);

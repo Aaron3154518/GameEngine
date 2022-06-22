@@ -45,6 +45,14 @@ RenderObservable::SubscriptionPtr RenderObservable::subscribe(SubscriptionT::Fun
     return retVal;
 }
 
+void RenderObservable::serve(SDL_Renderer *renderer) {
+    for (auto sub : mSubscriptions) {
+        if (sub->data->visible) {
+            (*sub)(renderer);
+        }
+    }
+}
+
 bool RenderObservable::unsubscribe(SubscriptionPtr sub) {
     ServiceHandler::Get<RenderService>()->removeComponent(sub->data);
     return true;
