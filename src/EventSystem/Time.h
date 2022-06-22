@@ -5,7 +5,7 @@
 
 class Time {
    public:
-    Time(uint32_t time = 0);
+    Time(uint32_t timeMs = 0);
     ~Time() = default;
 
     operator uint32_t() const;
@@ -17,7 +17,7 @@ class Time {
     Time &operator+=(const Time &rhs);
 
    private:
-    uint32_t mTime;
+    uint32_t mTimeMs;
 };
 
 #endif
