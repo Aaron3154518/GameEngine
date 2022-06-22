@@ -8,11 +8,11 @@ class Time {
     Time(uint32_t timeMs = 0);
     ~Time() = default;
 
-    operator uint32_t() const;
-
     float s() const;
     uint32_t ms() const;
 
+    operator uint32_t() const;
+    void operator=(const uint32_t &other);
     Time &operator+=(const uint32_t &rhs);
     Time &operator+=(const Time &rhs);
 
