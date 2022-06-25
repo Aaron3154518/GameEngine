@@ -1,6 +1,7 @@
 #ifndef OBSERVABLE_H
 #define OBSERVABLE_H
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -67,6 +68,7 @@ class Observable<T, RetT(ArgTs...), Data> {
     Observable() = default;
     ~Observable() = default;
 
+    // Used when no subscriber data
     template <int N = 0>
     typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>
     subscribe(typename SubscriptionT::Function func) {
@@ -75,12 +77,38 @@ class Observable<T, RetT(ArgTs...), Data> {
         return sub;
     }
 
+    // Takes existing subscription, creates new if null else updates existing
+    template <int N = 0>
+    typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>
+    updateSubscription(SubscriptionPtr &sub, typename SubscriptionT::Function func) {
+        auto it = std::find(mSubscriptions.begin(), mSubscriptions.end(), sub);
+        if (it == mSubscriptions.end()) {
+            sub = subscribe(func);
+        } else {
+            sub->changeSubscription(func);
+        }
+        return sub;
+    }
+
+    // Used when subscriber has data
     template <int N = 0>
     typename std::enable_if_t<!std::is_same<Data, void>::value && N == N, SubscriptionPtr>
     subscribe(typename SubscriptionT::Function func, std::shared_ptr<Data> data) {
         SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
         sub->data = data;
         mSubscriptions.push_back(sub);
+        return sub;
+    }
+
+    template <int N = 0>
+    typename std::enable_if_t<!std::is_same<Data, void>::value && N == N, SubscriptionPtr>
+    updateSubscription(SubscriptionPtr &sub, typename SubscriptionT::Function func, std::shared_ptr<Data> data) {
+        auto it = std::find(mSubscriptions.begin(), mSubscriptions.end(), sub);
+        if (it == mSubscriptions.end()) {
+            sub = subscribe(func, data);
+        } else {
+            sub->changeSubscription(func);
+        }
         return sub;
     }
 

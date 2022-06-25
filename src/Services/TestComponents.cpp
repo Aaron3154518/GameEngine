@@ -171,6 +171,64 @@ void VisibilityTest::onUpdate(Time dt) {
     }
 }
 
+// InheritanceTestBase
+InheritanceTestBase::InheritanceTestBase(Rect r, int e) : TestBase(r, e) {
+    Game::registerComponent(this);
+}
+
+SDL_Color InheritanceTestBase::getColor() const {
+    return color;
+}
+
+void InheritanceTestBase::init(GameStruct &gs) {
+    ServiceHandler::Get<MouseService>()->mouse$.updateSubscription(
+        mMouseSub,
+        [this](Event::MouseButton b, bool clicked) {
+            if (clicked) {
+                if (increaseColor) {
+                    color.r = std::min(255, color.r + colorInc);
+                    if (color.r == 255) {
+                        increaseColor = false;
+                    }
+                } else {
+                    color.r = std::max(0, color.r - colorInc);
+                    if (color.r == 0) {
+                        increaseColor = true;
+                    }
+                }
+            }
+        },
+        mPos);
+    mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+        std::bind(&InheritanceTestBase::onRender, this, std::placeholders::_1), mPos);
+}
+
+// InheritanceTestDerived
+InheritanceTestDerived::InheritanceTestDerived(Rect r, int e) : InheritanceTestBase(r, e) {
+    Game::registerComponent(this);
+}
+
+void InheritanceTestDerived::init(GameStruct &gs) {
+    ServiceHandler::Get<MouseService>()->mouse$.updateSubscription(
+        mMouseSub,
+        [this](Event::MouseButton b, bool clicked) {
+            if (clicked) {
+                if (increaseColor) {
+                    color.g = std::min(255, color.g + colorInc);
+                    if (color.g == 255) {
+                        increaseColor = false;
+                    }
+                } else {
+                    color.g = std::max(0, color.g - colorInc);
+                    if (color.g == 0) {
+                        increaseColor = true;
+                    }
+                }
+            }
+        },
+        mPos);
+}
+
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;

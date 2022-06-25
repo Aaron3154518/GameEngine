@@ -122,4 +122,29 @@ class VisibilityTest : public TestBase {
     RenderObservable::SubscriptionPtr mRenderSub;
 };
 
+class InheritanceTestBase : public TestBase {
+   public:
+    InheritanceTestBase(Rect r, int e);
+
+    SDL_Color getColor() const;
+
+   protected:
+    virtual void init(GameStruct &gs);
+
+    SDL_Color color = BLACK;
+    bool increaseColor = true;
+    static const Uint8 colorInc = 20;
+
+    MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
+};
+
+class InheritanceTestDerived : public InheritanceTestBase {
+   public:
+    InheritanceTestDerived(Rect r, int e);
+
+   private:
+    void init(GameStruct &gs);
+};
+
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

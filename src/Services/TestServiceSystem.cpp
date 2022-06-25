@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
     ClickRenderTest t1(Rect(25, 25, 200, 450), 1);
     ChangeSubTest t2(Rect(50, 50, 400, 50), 3);
     VisibilityTest t5(Rect(230, 230, 40, 40), 10);
+    InheritanceTestBase t8(Rect(230, 280, 40, 40), 5);
 
     Game::init();
 
@@ -58,6 +59,7 @@ int main(int argc, char *argv[]) {
     ClickRenderTest t3(Rect(275, 25, 200, 450), 3);
     UnsubTest t4(Rect(50, 400, 400, 50), 2);
     UpdateTest t6(Rect(230, 180, 40, 40), 10);
+    InheritanceTestDerived t7(Rect(230, 130, 40, 40), 5);
 
     Event e;
 
