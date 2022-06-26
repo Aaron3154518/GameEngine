@@ -1,7 +1,13 @@
 #include "TestComponents.h"
 
 // TestBase
-TestBase::TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {}
+TestBase::TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {
+    Game::registerComponent(this);
+}
+
+TestBase::~TestBase() {
+    unsub.unsubscribe();
+}
 
 const Rect &TestBase::getRect() const {
     return mPos->rect;
@@ -39,8 +45,10 @@ void ClickRenderTest::init(GameStruct &gs) {
     mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
         std::bind(&ClickRenderTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
+    mMouseSub->setUnsubscriber(unsub);
     mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
         std::bind(&ClickRenderTest::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
 }
 
 void ClickRenderTest::onClick(Event::MouseButton b, bool clicked) {
@@ -53,26 +61,26 @@ ChangeSubTest::ChangeSubTest(Rect r, int e) : TestBase(r, e) {
 }
 
 SDL_Color ChangeSubTest::getColor() const {
-    return color ? YELLOW : BLUE;
+    return color ? ORANGE : PURPLE;
 }
 
 void ChangeSubTest::init(GameStruct &gs) {
     mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
         std::bind(&ChangeSubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
+    mMouseSub->setUnsubscriber(unsub);
     mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
         std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
 }
 
 void ChangeSubTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
         color = !color;
         if (color) {
-            mRenderSub->unsubscribe();
-            mRenderSub.reset();
+            mRenderSub->changeSubscription([](SDL_Renderer *) {});
         } else {
-            mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
-                std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1), mPos);
+            mRenderSub->changeSubscription(std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1));
         }
     }
 }
@@ -83,24 +91,27 @@ UnsubTest::UnsubTest(Rect r, int e) : TestBase(r, e) {
 }
 
 SDL_Color UnsubTest::getColor() const {
-    return color ? ORANGE : PURPLE;
+    return color ? YELLOW : BLUE;
 }
 
 void UnsubTest::init(GameStruct &gs) {
     mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
         std::bind(&UnsubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
+    mMouseSub->setUnsubscriber(unsub);
     mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
         std::bind(&UnsubTest::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
 }
 
 void UnsubTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
         color = !color;
         if (color) {
-            mRenderSub->changeSubscription([](SDL_Renderer *) {});
+            mRenderSub->unsubscribe();
         } else {
-            mRenderSub->changeSubscription(std::bind(&UnsubTest::onRender, this, std::placeholders::_1));
+            mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+                std::bind(&UnsubTest::onRender, this, std::placeholders::_1), mPos);
         }
     }
 }
@@ -121,11 +132,14 @@ SDL_Color UpdateTest::getColor() const {
 void UpdateTest::init(GameStruct &gs) {
     mUpdateSub = ServiceHandler::Get<UpdateService>()->update$.subscribe(
         std::bind(&UpdateTest::onUpdate, this, std::placeholders::_1));
+    mUpdateSub->setUnsubscriber(unsub);
     mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
         std::bind(&UpdateTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
+    mMouseSub->setUnsubscriber(unsub);
     mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
         std::bind(&UpdateTest::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
 }
 
 void UpdateTest::onClick(Event::MouseButton b, bool clicked) {
@@ -148,11 +162,14 @@ VisibilityTest::VisibilityTest(Rect r, int e) : TestBase(r, e) {
 void VisibilityTest::init(GameStruct &gs) {
     mUpdateSub = ServiceHandler::Get<UpdateService>()->update$.subscribe(
         std::bind(&VisibilityTest::onUpdate, this, std::placeholders::_1));
+    mUpdateSub->setUnsubscriber(unsub);
     mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
         std::bind(&VisibilityTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
+    mMouseSub->setUnsubscriber(unsub);
     mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
         std::bind(&VisibilityTest::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
 }
 
 void VisibilityTest::onClick(Event::MouseButton b, bool clicked) {
@@ -172,6 +189,8 @@ void VisibilityTest::onUpdate(Time dt) {
 }
 
 // InheritanceTestBase
+const Uint8 InheritanceTestBase::COLOR_INC = 50;
+
 InheritanceTestBase::InheritanceTestBase(Rect r, int e) : TestBase(r, e) {
     Game::registerComponent(this);
 }
@@ -183,24 +202,29 @@ SDL_Color InheritanceTestBase::getColor() const {
 void InheritanceTestBase::init(GameStruct &gs) {
     ServiceHandler::Get<MouseService>()->mouse$.updateSubscription(
         mMouseSub,
-        [this](Event::MouseButton b, bool clicked) {
-            if (clicked) {
-                if (increaseColor) {
-                    color.r = std::min(255, color.r + colorInc);
-                    if (color.r == 255) {
-                        increaseColor = false;
-                    }
-                } else {
-                    color.r = std::max(0, color.r - colorInc);
-                    if (color.r == 0) {
-                        increaseColor = true;
-                    }
-                }
-            }
-        },
+        std::bind(&InheritanceTestBase::onClick, this, std::placeholders::_1, std::placeholders::_2, true),
         mPos);
+    mMouseSub->setUnsubscriber(unsub);
     mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
         std::bind(&InheritanceTestBase::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
+}
+
+void InheritanceTestBase::onClick(Event::MouseButton b, bool clicked, bool red) {
+    if (clicked) {
+        Uint8 &val = red ? color.r : color.g;
+        if (increaseColor) {
+            val = std::min(255, val + COLOR_INC);
+            if (val == 255) {
+                increaseColor = false;
+            }
+        } else {
+            val = std::max(0, val - COLOR_INC);
+            if (val == 0) {
+                increaseColor = true;
+            }
+        }
+    }
 }
 
 // InheritanceTestDerived
@@ -211,22 +235,57 @@ InheritanceTestDerived::InheritanceTestDerived(Rect r, int e) : InheritanceTestB
 void InheritanceTestDerived::init(GameStruct &gs) {
     ServiceHandler::Get<MouseService>()->mouse$.updateSubscription(
         mMouseSub,
-        [this](Event::MouseButton b, bool clicked) {
-            if (clicked) {
-                if (increaseColor) {
-                    color.g = std::min(255, color.g + colorInc);
-                    if (color.g == 255) {
-                        increaseColor = false;
-                    }
-                } else {
-                    color.g = std::max(0, color.g - colorInc);
-                    if (color.g == 0) {
-                        increaseColor = true;
-                    }
-                }
-            }
-        },
+        std::bind(&InheritanceTestDerived::onClick, this, std::placeholders::_1, std::placeholders::_2, false),
         mPos);
+}
+
+// MultiUnsubTest
+MultiUnsubTest::MultiUnsubTest(Rect r, int e) : TestBase(r, e) {
+    mUpdateSubs = std::vector<UpdateObservable::SubscriptionPtr>(3);
+    Game::registerComponent(this);
+}
+
+SDL_Color MultiUnsubTest::getColor() const {
+    return ctr == 0 ? PINK : BLUE;
+}
+
+void MultiUnsubTest::init(GameStruct &gs) {
+    for (auto updateSub : mUpdateSubs) {
+        updateSub = ServiceHandler::Get<UpdateService>()->update$.subscribe(
+            std::bind(&MultiUnsubTest::onUpdate, this, std::placeholders::_1));
+        updateSub->setUnsubscriber(updateUnsub);
+    }
+    mMouseSub = ServiceHandler::Get<MouseService>()->mouse$.subscribe(
+        std::bind(&MultiUnsubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
+        mPos);
+    mMouseSub->setUnsubscriber(unsub);
+    mRenderSub = ServiceHandler::Get<RenderService>()->render$.subscribe(
+        std::bind(&MultiUnsubTest::onRender, this, std::placeholders::_1), mPos);
+    mRenderSub->setUnsubscriber(unsub);
+}
+
+void MultiUnsubTest::onUpdate(Time dt) {
+    ctr++;
+}
+
+void MultiUnsubTest::onClick(Event::MouseButton b, bool clicked) {
+    if (clicked) {
+        if (updateUnsub) {
+            updateUnsub.unsubscribe();
+        } else {
+            updateUnsub = Unsubscriber();
+            for (auto updateSub : mUpdateSubs) {
+                updateSub = ServiceHandler::Get<UpdateService>()->update$.subscribe(
+                    std::bind(&MultiUnsubTest::onUpdate, this, std::placeholders::_1));
+                updateSub->setUnsubscriber(updateUnsub);
+            }
+        }
+    }
+}
+
+void MultiUnsubTest::onRender(SDL_Renderer *renderer) {
+    TestBase::onRender(renderer);
+    ctr = 0;
 }
 
 // Generate random test component

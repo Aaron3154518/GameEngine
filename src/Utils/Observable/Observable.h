@@ -8,19 +8,37 @@
 #include <memory>
 #include <type_traits>
 
+struct Unsubscriber {
+   public:
+    void unsubscribe();
+
+    operator bool() const;
+
+   private:
+    std::shared_ptr<bool> mSubscribed = std::make_shared<bool>(true);
+};
+
 template <class Data, class RetT, class... ArgTs>
 class Subscription {
    public:
     typedef std::function<RetT(ArgTs...)> Function;
 
-    Subscription()
-        : subscription([](ArgTs... args) {}), status(std::make_shared<bool>(false)) {}
     Subscription(Function func)
-        : subscription(func), status(std::make_shared<bool>(true)) {}
+        : subscription(func) {}
     ~Subscription() = default;
 
+    void setUnsubscriber(Unsubscriber unsub) {
+        unsubscriber = unsub;
+    }
+
+    Unsubscriber getUnsubscriber() const {
+        return unsubscriber;
+    }
+
+    // Unsubscribes only this subscription
     void unsubscribe() {
-        *status = false;
+        unsubscriber = Unsubscriber();
+        unsubscriber.unsubscribe();
     }
 
     void changeSubscription(Function func) {
@@ -28,7 +46,7 @@ class Subscription {
     }
 
     operator bool() const {
-        return *status;
+        return unsubscriber;
     }
 
     RetT operator()(ArgTs... args) const {
@@ -41,7 +59,7 @@ class Subscription {
    private:
     Function subscription;
 
-    std::shared_ptr<bool> status;
+    Unsubscriber unsubscriber;
 };
 
 template <class T, class... Args>
@@ -69,6 +87,8 @@ class Observable<T, RetT(ArgTs...), Data> {
     ~Observable() = default;
 
     // Used when no subscriber data
+
+    // Generates standard subscription
     template <int N = 0>
     typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>
     subscribe(typename SubscriptionT::Function func) {

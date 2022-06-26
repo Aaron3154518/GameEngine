@@ -16,13 +16,13 @@ constexpr SDL_Color RED{255, 0, 0, 255};
 constexpr SDL_Color BLUE{0, 0, 255, 255};
 constexpr SDL_Color YELLOW{255, 255, 0, 255};
 constexpr SDL_Color ORANGE{255, 191, 0, 255};
-constexpr SDL_Color PURPLE{255, 0, 255, 255};
+constexpr SDL_Color PINK{255, 0, 255, 255};
+constexpr SDL_Color PURPLE{175, 0, 175, 255};
 
 class TestBase : public Component {
    public:
     TestBase(Rect r, int e);
-
-    virtual ~TestBase() = default;
+    virtual ~TestBase();
 
     const Rect &getRect() const;
 
@@ -36,6 +36,7 @@ class TestBase : public Component {
     void onRender(SDL_Renderer *renderer);
 
     std::shared_ptr<UIComponent> mPos;
+    Unsubscriber unsub;
 };
 
 class ClickRenderTest : public TestBase {
@@ -131,9 +132,11 @@ class InheritanceTestBase : public TestBase {
    protected:
     virtual void init(GameStruct &gs);
 
+    void onClick(Event::MouseButton b, bool clicked, bool red);
+
     SDL_Color color = BLACK;
     bool increaseColor = true;
-    static const Uint8 colorInc = 20;
+    static const Uint8 COLOR_INC;
 
     MouseObservable::SubscriptionPtr mMouseSub;
     RenderObservable::SubscriptionPtr mRenderSub;
@@ -145,6 +148,28 @@ class InheritanceTestDerived : public InheritanceTestBase {
 
    private:
     void init(GameStruct &gs);
+};
+
+class MultiUnsubTest : public TestBase {
+   public:
+    MultiUnsubTest(Rect r, int e);
+
+    SDL_Color getColor() const;
+
+   private:
+    void init(GameStruct &gs);
+
+    void onUpdate(Time dt);
+
+    void onClick(Event::MouseButton b, bool clicked);
+
+    void onRender(SDL_Renderer *renderer);
+
+    int ctr = 0;
+    Unsubscriber updateUnsub;
+    std::vector<UpdateObservable::SubscriptionPtr> mUpdateSubs;
+    MouseObservable::SubscriptionPtr mMouseSub;
+    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);
