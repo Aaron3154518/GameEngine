@@ -64,7 +64,7 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
 }
 
 // RenderObservable
-void RenderObservable::init(GameStruct &gs) {
+void RenderObservable::init() {
     // RenderService
     renderOrderSub = ServiceHandler::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
         std::bind(&RenderObservable::onRenderOrder, this, std::placeholders::_1));

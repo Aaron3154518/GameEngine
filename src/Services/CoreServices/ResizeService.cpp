@@ -6,7 +6,7 @@ ResizeService::ResizeService() {
     Game::registerComponent(this);
 }
 
-void ResizeService::init(GameStruct &gs) {
+void ResizeService::init() {
     ServiceHandler::Get<EventService>()->event$.subscribe(
         [this](const Event &e) {
             if (e.resized()) {

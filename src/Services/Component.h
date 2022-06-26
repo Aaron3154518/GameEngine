@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "../Utils/Observable/Observable.h"
-#include "GameStruct.h"
 
 // Forward declaration
 template <class T>
@@ -21,7 +20,7 @@ class Component {
     virtual ~Component();
 
    protected:
-    virtual void init(GameStruct &gs);
+    virtual void init();
 
     Unsubscriber unsub;
 };
@@ -37,9 +36,8 @@ class ComponentFactory {
         static_assert(std::is_constructible<T, ArgTs...>::value,
                       "Component Factory cannot create Component with given arguments");
 
-        GameStruct gs;
         std::unique_ptr<T> c = std::make_unique<T>(args...);
-        ((Component *)c.get())->init(gs);
+        ((Component *)c.get())->init();
         return c;
     }
 };

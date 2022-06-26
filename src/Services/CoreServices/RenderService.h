@@ -11,7 +11,6 @@
 
 #include "../../Utils/Observable/Observable.h"
 #include "../../Utils/Rect/Rect.h"
-#include "../Game.h"
 #include "../Service.h"
 #include "../ServiceHandler.h"
 
@@ -59,7 +58,7 @@ class RenderObservable : public Component, public Observable<SDL_Renderer *, voi
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void serve(SDL_Renderer *renderer);
 

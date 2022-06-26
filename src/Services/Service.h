@@ -23,7 +23,7 @@ class ServiceBase {
     virtual ~ServiceBase() = default;
 
    protected:
-    virtual void init(GameStruct &gs);
+    virtual void init();
 };
 
 template <class... Ts>
@@ -51,9 +51,9 @@ class Service : public ServiceBase {
     }
 
    private:
-    void init(GameStruct &gs) {
+    void init() {
         for (auto comp : mComponents) {
-            comp->init(gs);
+            comp->init();
         }
     }
 

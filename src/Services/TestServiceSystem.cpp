@@ -10,7 +10,6 @@
 #include "../EventSystem/Event.h"
 #include "../EventSystem/Time.h"
 #include "../Utils/Rect/Rect.h"
-#include "Game.h"
 #include "ServiceHandler.h"
 #include "TestComponents.h"
 
@@ -47,15 +46,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Test before init
+    // Component tests
     std::unique_ptr<ClickRenderTest> t1 = ComponentFactory<ClickRenderTest>::New(Rect(25, 25, 200, 450), 1);
     std::unique_ptr<ChangeSubTest> t2 = ComponentFactory<ChangeSubTest>::New(Rect(50, 50, 400, 50), 3);
     std::unique_ptr<VisibilityTest> t3 = ComponentFactory<VisibilityTest>::New(Rect(230, 280, 40, 40), 10);
     std::unique_ptr<InheritanceTestBase> t4 = ComponentFactory<InheritanceTestBase>::New(Rect(230, 330, 40, 40), 5);
-
-    Game::init();
-
-    // Test after init
     std::unique_ptr<ClickRenderTest> t5 = ComponentFactory<ClickRenderTest>::New(Rect(275, 25, 200, 450), 3);
     std::unique_ptr<UnsubTest> t6 = ComponentFactory<UnsubTest>::New(Rect(50, 400, 400, 50), 2);
     std::unique_ptr<UpdateTest> t7 = ComponentFactory<UpdateTest>::New(Rect(230, 180, 40, 40), 10);

@@ -40,8 +40,7 @@ class ServiceHandler {
                       "ServiceHandler::Add(): the Service must be default constructible");
         std::shared_ptr<T> t = std::make_shared<T>();
         Services()[std::type_index(typeid(T))] = t;
-        GameStruct gs;
-        ((ServiceBase*)t.get())->init(gs);
+        ((ServiceBase*)t.get())->init();
         return t;
     }
 

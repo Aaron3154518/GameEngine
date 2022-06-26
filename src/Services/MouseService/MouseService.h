@@ -12,8 +12,6 @@
 #include "../Component.h"
 #include "../CoreServices/EventService.h"
 #include "../CoreServices/RenderService.h"
-#include "../Game.h"
-#include "../GameStruct.h"
 #include "../ServiceHandler.h"
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
@@ -23,7 +21,7 @@ class MouseObservable : public Component, public Observable<Event::MouseButton, 
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void serve(Event::MouseButton mouse);
 

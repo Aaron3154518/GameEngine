@@ -15,7 +15,7 @@ SDL_Color TestBase::getColor() const {
     return BLACK;
 }
 
-void TestBase::init(GameStruct &gs) {}
+void TestBase::init() {}
 
 void TestBase::onRender(SDL_Renderer *renderer) {
     SDL_Color c = getColor();
@@ -33,7 +33,7 @@ SDL_Color ClickRenderTest::getColor() const {
     return color ? GREEN : RED;
 }
 
-void ClickRenderTest::init(GameStruct &gs) {
+void ClickRenderTest::init() {
     mMouseSub = ServiceHandler::Get<MouseService>()->Get<MouseObservable>()->subscribe(
         std::bind(&ClickRenderTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
@@ -54,7 +54,7 @@ SDL_Color ChangeSubTest::getColor() const {
     return color ? ORANGE : PURPLE;
 }
 
-void ChangeSubTest::init(GameStruct &gs) {
+void ChangeSubTest::init() {
     mMouseSub = ServiceHandler::Get<MouseService>()->Get<MouseObservable>()->subscribe(
         std::bind(&ChangeSubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
@@ -82,7 +82,7 @@ SDL_Color UnsubTest::getColor() const {
     return color ? YELLOW : BLUE;
 }
 
-void UnsubTest::init(GameStruct &gs) {
+void UnsubTest::init() {
     mMouseSub = ServiceHandler::Get<MouseService>()->Get<MouseObservable>()->subscribe(
         std::bind(&UnsubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
@@ -115,7 +115,7 @@ SDL_Color UpdateTest::getColor() const {
     return color;
 }
 
-void UpdateTest::init(GameStruct &gs) {
+void UpdateTest::init() {
     mUpdateSub = ServiceHandler::Get<UpdateService>()->Get<UpdateObservable>()->subscribe(
         std::bind(&UpdateTest::onUpdate, this, std::placeholders::_1));
     mUpdateSub->setUnsubscriber(unsub);
@@ -143,7 +143,7 @@ void UpdateTest::onUpdate(Time dt) {
 // VisibilityTest
 VisibilityTest::VisibilityTest(Rect r, int e) : TestBase(r, e) {}
 
-void VisibilityTest::init(GameStruct &gs) {
+void VisibilityTest::init() {
     mUpdateSub = ServiceHandler::Get<UpdateService>()->Get<UpdateObservable>()->subscribe(
         std::bind(&VisibilityTest::onUpdate, this, std::placeholders::_1));
     mUpdateSub->setUnsubscriber(unsub);
@@ -181,7 +181,7 @@ SDL_Color InheritanceTestBase::getColor() const {
     return color;
 }
 
-void InheritanceTestBase::init(GameStruct &gs) {
+void InheritanceTestBase::init() {
     ServiceHandler::Get<MouseService>()->Get<MouseObservable>()->updateSubscription(
         mMouseSub,
         std::bind(&InheritanceTestBase::onClick, this, std::placeholders::_1, std::placeholders::_2, true),
@@ -212,8 +212,8 @@ void InheritanceTestBase::onClick(Event::MouseButton b, bool clicked, bool red) 
 // InheritanceTestDerived
 InheritanceTestDerived::InheritanceTestDerived(Rect r, int e) : InheritanceTestBase(r, e) {}
 
-void InheritanceTestDerived::init(GameStruct &gs) {
-    InheritanceTestBase::init(gs);
+void InheritanceTestDerived::init() {
+    InheritanceTestBase::init();
     ServiceHandler::Get<MouseService>()->Get<MouseObservable>()->updateSubscription(
         mMouseSub,
         std::bind(&InheritanceTestDerived::onClick, this, std::placeholders::_1, std::placeholders::_2, false),
@@ -229,7 +229,7 @@ SDL_Color MultiUnsubTest::getColor() const {
     return ctr == 0 ? PINK : BLUE;
 }
 
-void MultiUnsubTest::init(GameStruct &gs) {
+void MultiUnsubTest::init() {
     for (auto updateSub : mUpdateSubs) {
         updateSub = ServiceHandler::Get<UpdateService>()->Get<UpdateObservable>()->subscribe(
             std::bind(&MultiUnsubTest::onUpdate, this, std::placeholders::_1));

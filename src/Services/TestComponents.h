@@ -5,7 +5,6 @@
 #include "CoreServices/EventService.h"
 #include "CoreServices/RenderService.h"
 #include "CoreServices/UpdateService.h"
-#include "GameStruct.h"
 #include "MouseService/MouseService.h"
 #include "ServiceHandler.h"
 
@@ -30,7 +29,7 @@ class TestBase : public Component {
     virtual SDL_Color getColor() const;
 
    protected:
-    virtual void init(GameStruct &gs);
+    virtual void init();
 
     void onRender(SDL_Renderer *renderer);
 
@@ -44,7 +43,7 @@ class ClickRenderTest : public TestBase {
     SDL_Color getColor() const;
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void onClick(Event::MouseButton b, bool clicked);
 
@@ -60,7 +59,7 @@ class ChangeSubTest : public TestBase {
     SDL_Color getColor() const;
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void onClick(Event::MouseButton b, bool clicked);
 
@@ -76,7 +75,7 @@ class UnsubTest : public TestBase {
     SDL_Color getColor() const;
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void onClick(Event::MouseButton b, bool clicked);
 
@@ -92,7 +91,7 @@ class UpdateTest : public TestBase {
     SDL_Color getColor() const;
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void onClick(Event::MouseButton b, bool clicked);
 
@@ -109,7 +108,7 @@ class VisibilityTest : public TestBase {
     VisibilityTest(Rect r, int e);
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void onClick(Event::MouseButton b, bool clicked);
 
@@ -128,7 +127,7 @@ class InheritanceTestBase : public TestBase {
     SDL_Color getColor() const;
 
    protected:
-    virtual void init(GameStruct &gs);
+    virtual void init();
 
     void onClick(Event::MouseButton b, bool clicked, bool red);
 
@@ -145,7 +144,7 @@ class InheritanceTestDerived : public InheritanceTestBase {
     InheritanceTestDerived(Rect r, int e);
 
    private:
-    void init(GameStruct &gs);
+    void init();
 };
 
 class MultiUnsubTest : public TestBase {
@@ -155,7 +154,7 @@ class MultiUnsubTest : public TestBase {
     SDL_Color getColor() const;
 
    private:
-    void init(GameStruct &gs);
+    void init();
 
     void onUpdate(Time dt);
 

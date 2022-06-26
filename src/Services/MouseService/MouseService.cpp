@@ -4,7 +4,7 @@
 #include "../CoreServices/RenderService.h"
 
 // MouseObservable
-void MouseObservable::init(GameStruct &gs) {
+void MouseObservable::init() {
     eventSub = ServiceHandler::Get<EventService>()->Get<EventObservable>()->subscribe(
         std::bind(&MouseObservable::onEvent, this, std::placeholders::_1));
     eventSub->setUnsubscriber(unsub);
