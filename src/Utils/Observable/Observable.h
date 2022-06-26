@@ -87,7 +87,6 @@ class Observable<T, RetT(ArgTs...), Data> {
     ~Observable() = default;
 
     // Used when no subscriber data
-
     // Generates standard subscription
     template <int N = 0>
     typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>

@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include <algorithm>
+#include <list>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -46,7 +47,7 @@ class RenderOrderObservable : public RenderOrderObservableBase {
    private:
     void sort();
 
-    std::vector<UIComponentPtr> mToAdd;
+    std::list<UIComponentPtr> mToAdd;
     std::vector<UIComponentPtr> mRenderOrder;
     std::unordered_map<UIComponentPtr, int> mRefCounts;
 };
