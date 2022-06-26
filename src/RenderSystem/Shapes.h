@@ -10,8 +10,8 @@ Each struct contains data for rendering the item and functions to set the data.
 
 #include <cmath>
 
-#include "../Utils/Rect/Rect.h"
-#include "Colors.h"
+#include "../Utils/Colors.h"
+#include "../Utils/Rect.h"
 
 // Shape rendering struct
 struct ShapeData {

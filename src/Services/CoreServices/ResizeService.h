@@ -3,9 +3,9 @@
 
 #include <SDL.h>
 
-#include "../../EventSystem/Event.h"
-#include "../../Utils/Observable/Observable.h"
+#include "../../Utils/Event.h"
 #include "../Component.h"
+#include "../Observable.h"
 #include "../ServiceHandler.h"
 
 typedef Observable<SDL_Point, void(SDL_Point)> ResizeObservable;

@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../Utils/Observable/Observable.h"
 #include "Component.h"
+#include "Observable.h"
 
 template <class Base, class Derived = void, class... Ts>
 struct all_base_of : std::integral_constant<

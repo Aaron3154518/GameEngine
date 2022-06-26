@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "../Utils/Observable/Observable.h"
+#include "Observable.h"
 
 // Forward declaration
 template <class T>

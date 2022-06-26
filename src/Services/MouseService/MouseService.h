@@ -7,11 +7,11 @@
 #include <map>
 #include <memory>
 
-#include "../../EventSystem/Event.h"
-#include "../../Utils/Observable/Observable.h"
+#include "../../Utils/Event.h"
 #include "../Component.h"
 #include "../CoreServices/EventService.h"
 #include "../CoreServices/RenderService.h"
+#include "../Observable.h"
 #include "../ServiceHandler.h"
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {

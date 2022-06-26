@@ -1,22 +1,13 @@
-#include "../EventSystem/Event.h"
-#include "../EventSystem/Time.h"
-#include "../Utils/Rect/Rect.h"
+#include "../Utils/Colors.h"
+#include "../Utils/Event.h"
+#include "../Utils/Rect.h"
+#include "../Utils/Time.h"
 #include "Component.h"
 #include "CoreServices/EventService.h"
 #include "CoreServices/RenderService.h"
 #include "CoreServices/UpdateService.h"
 #include "MouseService/MouseService.h"
 #include "ServiceHandler.h"
-
-constexpr SDL_Color WHITE{255, 255, 255, 255};
-constexpr SDL_Color BLACK{0, 0, 0, 255};
-constexpr SDL_Color GREEN{0, 255, 0, 255};
-constexpr SDL_Color RED{255, 0, 0, 255};
-constexpr SDL_Color BLUE{0, 0, 255, 255};
-constexpr SDL_Color YELLOW{255, 255, 0, 255};
-constexpr SDL_Color ORANGE{255, 191, 0, 255};
-constexpr SDL_Color PINK{255, 0, 255, 255};
-constexpr SDL_Color PURPLE{175, 0, 175, 255};
 
 class TestBase : public Component {
    public:

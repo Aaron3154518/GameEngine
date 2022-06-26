@@ -7,9 +7,9 @@
 #include <memory>
 #include <sstream>
 
-#include "../EventSystem/Event.h"
-#include "../EventSystem/Time.h"
-#include "../Utils/Rect/Rect.h"
+#include "../Utils/Event.h"
+#include "../Utils/Rect.h"
+#include "../Utils/Time.h"
 #include "ServiceHandler.h"
 #include "TestComponents.h"
 

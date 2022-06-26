@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../../Utils/Observable/Observable.h"
-#include "../../Utils/Rect/Rect.h"
+#include "../../Utils/Rect.h"
+#include "../Observable.h"
 #include "../Service.h"
 #include "../ServiceHandler.h"
 

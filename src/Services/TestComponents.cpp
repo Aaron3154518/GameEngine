@@ -226,7 +226,7 @@ MultiUnsubTest::MultiUnsubTest(Rect r, int e) : TestBase(r, e) {
 }
 
 SDL_Color MultiUnsubTest::getColor() const {
-    return ctr == 0 ? PINK : BLUE;
+    return ctr == 0 ? MAGENTA : BLUE;
 }
 
 void MultiUnsubTest::init() {

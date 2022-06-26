@@ -13,7 +13,7 @@ This file contains structs that hold data necessary for rendering text and textu
 #include <sstream>
 #include <vector>
 
-#include "../Utils/Rect/Rect.h"
+#include "../Utils/Rect.h"
 #include "Renderer.h"
 
 // Memory management for surfaces

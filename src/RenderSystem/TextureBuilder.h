@@ -9,8 +9,8 @@ It contains various drawing functions for shapes in Shapes.h as well as other vi
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include "../Utils/Rect/Rect.h"
-#include "Colors.h"
+#include "../Utils/Colors.h"
+#include "../Utils/Rect.h"
 #include "RenderTypes.h"
 #include "Shapes.h"
 

@@ -21,14 +21,18 @@ EXIST = $(filter $(foreach file,$(call SOURCES,$1),$(wildcard $(file))),$(call S
 DEPS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$1) $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$(call EXIST,$1))
 OBJS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$1) $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(call EXIST,$1))
 
-all: RenderTest EventTest ServiceTest
-	$(BIN)/RenderTest
-	$(BIN)/EventTest
-	$(BIN)/ServiceTest
+all: test run-test
 
 .PHONY: clean
 clean:
 	@find $(OBJ) -type f \( -name "*.o" -o -name "*.d" \) -delete
+
+test: RenderTest EventTest ServiceTest
+
+run-test:
+	@$(BIN)/RenderTest
+	@$(BIN)/EventTest
+	@$(BIN)/ServiceTest
 
 RenderTest: $(call OBJS,src/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
@@ -46,7 +50,5 @@ $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 
-nothing:
-
-test: test.cpp
+testing: testing.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
