@@ -5,10 +5,6 @@ TestBase::TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {
     Game::registerComponent(this);
 }
 
-TestBase::~TestBase() {
-    unsub.unsubscribe();
-}
-
 const Rect &TestBase::getRect() const {
     return mPos->rect;
 }

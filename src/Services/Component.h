@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "../Utils/Observable/Observable.h"
+
 // Forward declaration
 struct GameStruct;
 
@@ -14,6 +16,8 @@ class Component {
 
    protected:
     virtual void init(GameStruct &gs);
+
+    Unsubscriber unsub;
 };
 
 #endif

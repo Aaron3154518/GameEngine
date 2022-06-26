@@ -2,6 +2,8 @@
 
 #include "Game.h"
 
-Component::~Component() {}
+Component::~Component() {
+    unsub.unsubscribe();
+}
 
 void Component::init(GameStruct &gs) {}

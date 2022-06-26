@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include <algorithm>
-#include <vector>
+#include <set>
 
 #include "Component.h"
 #include "GameStruct.h"
@@ -21,7 +21,8 @@ class Game {
 
     static bool &initialized();
 
-    static std::vector<Component *> &toInit();
+    // No duplicate inits
+    static std::set<Component *> &toInit();
 };
 
 #endif

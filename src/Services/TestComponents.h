@@ -22,7 +22,6 @@ constexpr SDL_Color PURPLE{175, 0, 175, 255};
 class TestBase : public Component {
    public:
     TestBase(Rect r, int e);
-    virtual ~TestBase();
 
     const Rect &getRect() const;
 
@@ -36,7 +35,6 @@ class TestBase : public Component {
     void onRender(SDL_Renderer *renderer);
 
     std::shared_ptr<UIComponent> mPos;
-    Unsubscriber unsub;
 };
 
 class ClickRenderTest : public TestBase {

@@ -10,8 +10,8 @@ bool &Game::initialized() {
     return INITIALIZED;
 }
 
-std::vector<Component *> &Game::toInit() {
-    static std::vector<Component *> TO_INIT;
+std::set<Component *> &Game::toInit() {
+    static std::set<Component *> TO_INIT;
     return TO_INIT;
 }
 
@@ -19,7 +19,7 @@ void Game::registerComponent(Component *comp) {
     if (initialized()) {
         comp->init(gameStruct());
     } else {
-        toInit().push_back(comp);
+        toInit().insert(comp);
     }
 }
 

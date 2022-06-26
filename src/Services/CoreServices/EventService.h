@@ -5,12 +5,14 @@
 #include "../../Utils/Observable/Observable.h"
 #include "../ServiceHandler.h"
 
+typedef Observable<const Event &, void(const Event &)> EventObservable;
+
 class EventService : public Service {
    public:
     EventService() = default;
     ~EventService() = default;
 
-    Observable<const Event &, void(const Event &)> event$;
+    EventObservable event$;
 };
 
 REGISTER_SERVICE(EventService);

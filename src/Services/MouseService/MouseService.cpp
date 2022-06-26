@@ -4,6 +4,19 @@
 #include "../CoreServices/RenderService.h"
 
 // MouseObservable
+MouseObservable::MouseObservable() {
+    Game::registerComponent(this);
+}
+
+void MouseObservable::init(GameStruct &gs) {
+    eventSub = ServiceHandler::Get<EventService>()->event$.subscribe(
+        std::bind(&MouseObservable::onEvent, this, std::placeholders::_1));
+    eventSub->setUnsubscriber(unsub);
+    renderSub = ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
+        std::bind(&MouseObservable::onRenderOrder, this, std::placeholders::_1));
+    renderSub->setUnsubscriber(unsub);
+}
+
 MouseObservable::SubscriptionPtr MouseObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent>::subscribe(func, data);
@@ -32,7 +45,13 @@ void MouseObservable::serve(Event::MouseButton mouse) {
     }
 }
 
-void MouseObservable::sort(const std::vector<UIComponentPtr> &order) {
+void MouseObservable::onEvent(Event e) {
+    if (e[Event::LEFT].clicked()) {
+        next(e[Event::LEFT]);
+    }
+}
+
+void MouseObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
     std::unordered_map<SubscriptionPtr, int> idxs;
 
     // Map out the order position of each subscription
@@ -44,22 +63,4 @@ void MouseObservable::sort(const std::vector<UIComponentPtr> &order) {
     mSubscriptions.sort([&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
         return idxs.at(a) > idxs.at(b);
     });
-}
-
-// MouseService
-MouseService::MouseService() {
-    Game::registerComponent(this);
-}
-
-void MouseService::init(GameStruct &gs) {
-    ServiceHandler::Get<EventService>()->event$.subscribe(
-        [this](const Event &e) {
-            if (e[Event::LEFT].clicked()) {
-                mouse$.next(e[Event::LEFT]);
-            }
-        });
-    ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
-        [this](const std::vector<UIComponentPtr> &order) {
-            mouse$.sort(order);
-        });
 }

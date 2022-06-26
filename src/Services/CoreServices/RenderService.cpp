@@ -3,23 +3,49 @@
 #include "UpdateService.h"
 
 // RenderOrderObservable
+void RenderOrderObservable::next() {
+    // Add pending
+    for (auto &comp : mToAdd) {
+        int &count = mRefCounts[comp];
+        if (count == 0) {
+            mRenderOrder.push_back(comp);
+        }
+        count++;
+    }
+    mToAdd.clear();
+    // Sort
+    sort();
+    // Serve
+    RenderOrderObservableBase::next(mRenderOrder);
+}
+
 void RenderOrderObservable::sort() {
     std::stable_sort(mRenderOrder.begin(), mRenderOrder.end(),
                      [](const UIComponentPtr &a, const UIComponentPtr &b) {
                          return a->elevation < b->elevation;
                      });
-    next(mRenderOrder);
 }
 
 void RenderOrderObservable::addComponent(UIComponentPtr comp) {
     int &count = mRefCounts[comp];
     if (count == 0) {
-        mRenderOrder.push_back(comp);
+        // If it's new, wait to add until next render cycle
+        mToAdd.push_back(comp);
+    } else {
+        // If it's not new, immediately increment references
+        count++;
     }
-    count++;
 }
 
 void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
+    // Check pending first
+    auto compIt = std::find(mToAdd.begin(), mToAdd.end(), comp);
+    if (compIt != mToAdd.end()) {
+        mToAdd.erase(compIt);
+        return;
+    }
+
+    // Else update references
     auto refIt = mRefCounts.find(comp);
     auto it = std::find(mRenderOrder.begin(), mRenderOrder.end(), comp);
     if (refIt == mRefCounts.end()) {
@@ -38,6 +64,22 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
 }
 
 // RenderObservable
+RenderObservable::RenderObservable() {
+    Game::registerComponent(this);
+}
+
+void RenderObservable::init(GameStruct &gs) {
+    // RenderService
+    renderOrderSub = ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
+        std::bind(&RenderObservable::onRenderOrder, this, std::placeholders::_1));
+    renderOrderSub->setUnsubscriber(unsub);
+}
+
+void RenderObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
+    sort(order);
+    // next(renderer);
+}
+
 RenderObservable::SubscriptionPtr RenderObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>::subscribe(func, data);
@@ -73,21 +115,6 @@ void RenderObservable::sort(const std::vector<UIComponentPtr> &order) {
 }
 
 // RenderService
-RenderService::RenderService() {
-    Game::registerComponent(this);
-}
-
-void RenderService::init(GameStruct &gs) {
-    ServiceHandler::Get<UpdateService>()->update$.subscribe(
-        [this](Time dt) {
-            renderOrder$.sort();
-        });
-    ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
-        [this](const std::vector<UIComponentPtr> &order) {
-            render$.sort(order);
-        });
-}
-
 void RenderService::addComponent(UIComponentPtr comp) {
     renderOrder$.addComponent(comp);
 }

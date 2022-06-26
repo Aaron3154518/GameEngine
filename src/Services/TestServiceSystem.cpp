@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
         // Rendering
         SDL_RenderClear(renderer);
 
+        ServiceHandler::Get<RenderService>()->renderOrder$.next();
         ServiceHandler::Get<RenderService>()->render$.next(renderer);
 
         SDL_RenderPresent(renderer);

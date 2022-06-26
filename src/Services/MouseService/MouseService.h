@@ -10,33 +10,38 @@
 #include "../../EventSystem/Event.h"
 #include "../../Utils/Observable/Observable.h"
 #include "../Component.h"
+#include "../CoreServices/EventService.h"
 #include "../CoreServices/RenderService.h"
 #include "../Game.h"
 #include "../GameStruct.h"
 #include "../ServiceHandler.h"
 
-class MouseObservable : public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
+class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
     friend class MouseService;
 
    public:
+    MouseObservable();
+
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
+    void init(GameStruct &gs);
+
     void serve(Event::MouseButton mouse);
 
     bool unsubscribe(SubscriptionPtr sub);
 
-    void sort(const std::vector<UIComponentPtr> &order);
+    void onEvent(Event e);
+
+    void onRenderOrder(const std::vector<UIComponentPtr> &order);
+
+    EventObservable::SubscriptionPtr eventSub;
+    RenderOrderObservable::SubscriptionPtr renderSub;
 };
 
-class MouseService : public Service, public Component {
+class MouseService : public Service {
    public:
-    MouseService();
-
     MouseObservable mouse$;
-
-   private:
-    void init(GameStruct &gs);
 };
 
 REGISTER_SERVICE(MouseService);

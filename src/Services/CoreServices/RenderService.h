@@ -31,35 +31,51 @@ struct UIComponentCompare {
     }
 };
 
-class RenderOrderObservable : public Observable<const std::vector<UIComponentPtr> &, void(const std::vector<UIComponentPtr> &)> {
-    friend class RenderService;
+// Use a typedef for less code duplication
+typedef Observable<const std::vector<UIComponentPtr> &, void(const std::vector<UIComponentPtr> &)>
+    RenderOrderObservableBase;
 
-   private:
-    void sort();
+class RenderOrderObservable : public RenderOrderObservableBase {
+   public:
+    // Expose custom next
+    void next();
+
     void addComponent(UIComponentPtr comp);
     void removeComponent(UIComponentPtr comp);
 
+   private:
+    void sort();
+
+    std::vector<UIComponentPtr> mToAdd;
     std::vector<UIComponentPtr> mRenderOrder;
     std::unordered_map<UIComponentPtr, int> mRefCounts;
 };
 
-class RenderObservable : public Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> {
+class RenderObservable : public Component, public Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> {
     friend class RenderService;
 
    public:
+    RenderObservable();
+
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
+    void init(GameStruct &gs);
+
     void serve(SDL_Renderer *renderer);
 
     bool unsubscribe(SubscriptionPtr sub);
 
     void sort(const std::vector<UIComponentPtr> &order);
+
+    void onRenderOrder(const std::vector<UIComponentPtr> &order);
+
+    RenderOrderObservable::SubscriptionPtr renderOrderSub;
 };
 
-class RenderService : public Service, public Component {
+class RenderService : public Service {
    public:
-    RenderService();
+    RenderService() = default;
     ~RenderService() = default;
 
     RenderOrderObservable renderOrder$;
@@ -67,9 +83,6 @@ class RenderService : public Service, public Component {
 
     void addComponent(UIComponentPtr comp);
     void removeComponent(UIComponentPtr comp);
-
-   private:
-    void init(GameStruct &gs);
 };
 
 REGISTER_SERVICE(RenderService);
