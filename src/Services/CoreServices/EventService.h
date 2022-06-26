@@ -7,14 +7,6 @@
 
 typedef Observable<const Event &, void(const Event &)> EventObservable;
 
-class EventService : public Service {
-   public:
-    EventService() = default;
-    ~EventService() = default;
-
-    EventObservable event$;
-};
-
-REGISTER_SERVICE(EventService);
+class EventService : public Service<EventObservable> {};
 
 #endif

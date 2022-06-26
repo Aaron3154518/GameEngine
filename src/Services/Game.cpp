@@ -17,7 +17,7 @@ std::set<Component *> &Game::toInit() {
 
 void Game::registerComponent(Component *comp) {
     if (initialized()) {
-        comp->init(gameStruct());
+        // comp->init(gameStruct());
     } else {
         toInit().insert(comp);
     }
@@ -37,7 +37,7 @@ void Game::init() {
     initialized() = true;
 
     for (Component *comp : toInit()) {
-        comp->init(gs);
+        // comp->init(gs);
     }
     toInit().clear();
 }

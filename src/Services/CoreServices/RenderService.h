@@ -11,8 +11,8 @@
 
 #include "../../Utils/Observable/Observable.h"
 #include "../../Utils/Rect/Rect.h"
-#include "../Component.h"
 #include "../Game.h"
+#include "../Service.h"
 #include "../ServiceHandler.h"
 
 struct UIComponent {
@@ -56,8 +56,6 @@ class RenderObservable : public Component, public Observable<SDL_Renderer *, voi
     friend class RenderService;
 
    public:
-    RenderObservable();
-
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
@@ -74,18 +72,10 @@ class RenderObservable : public Component, public Observable<SDL_Renderer *, voi
     RenderOrderObservable::SubscriptionPtr renderOrderSub;
 };
 
-class RenderService : public Service {
+class RenderService : public Service<RenderObservable, RenderOrderObservable> {
    public:
-    RenderService() = default;
-    ~RenderService() = default;
-
-    RenderOrderObservable renderOrder$;
-    RenderObservable render$;
-
     void addComponent(UIComponentPtr comp);
     void removeComponent(UIComponentPtr comp);
 };
-
-REGISTER_SERVICE(RenderService);
 
 #endif

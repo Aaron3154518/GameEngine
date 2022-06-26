@@ -48,19 +48,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Test before init
-    ClickRenderTest t1(Rect(25, 25, 200, 450), 1);
-    ChangeSubTest t2(Rect(50, 50, 400, 50), 3);
-    VisibilityTest t5(Rect(230, 280, 40, 40), 10);
-    InheritanceTestBase t8(Rect(230, 330, 40, 40), 5);
+    std::unique_ptr<ClickRenderTest> t1 = ComponentFactory<ClickRenderTest>::New(Rect(25, 25, 200, 450), 1);
+    std::unique_ptr<ChangeSubTest> t2 = ComponentFactory<ChangeSubTest>::New(Rect(50, 50, 400, 50), 3);
+    std::unique_ptr<VisibilityTest> t3 = ComponentFactory<VisibilityTest>::New(Rect(230, 280, 40, 40), 10);
+    std::unique_ptr<InheritanceTestBase> t4 = ComponentFactory<InheritanceTestBase>::New(Rect(230, 330, 40, 40), 5);
 
     Game::init();
 
     // Test after init
-    ClickRenderTest t3(Rect(275, 25, 200, 450), 3);
-    UnsubTest t4(Rect(50, 400, 400, 50), 2);
-    UpdateTest t6(Rect(230, 180, 40, 40), 10);
-    InheritanceTestDerived t7(Rect(230, 130, 40, 40), 5);
-    MultiUnsubTest t9(Rect(230, 230, 40, 40), 9);
+    std::unique_ptr<ClickRenderTest> t5 = ComponentFactory<ClickRenderTest>::New(Rect(275, 25, 200, 450), 3);
+    std::unique_ptr<UnsubTest> t6 = ComponentFactory<UnsubTest>::New(Rect(50, 400, 400, 50), 2);
+    std::unique_ptr<UpdateTest> t7 = ComponentFactory<UpdateTest>::New(Rect(230, 180, 40, 40), 10);
+    std::unique_ptr<InheritanceTestDerived> t8 = ComponentFactory<InheritanceTestDerived>::New(Rect(230, 130, 40, 40), 5);
+    std::unique_ptr<MultiUnsubTest> t9 = ComponentFactory<MultiUnsubTest>::New(Rect(230, 230, 40, 40), 9);
 
     Event e;
 
@@ -76,14 +76,14 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        ServiceHandler::Get<UpdateService>()->update$.next(dt);
-        ServiceHandler::Get<EventService>()->event$.next(e);
+        ServiceHandler::Get<UpdateService>()->Get<UpdateObservable>()->next(dt);
+        ServiceHandler::Get<EventService>()->Get<EventObservable>()->next(e);
 
         // Rendering
         SDL_RenderClear(renderer);
 
-        ServiceHandler::Get<RenderService>()->renderOrder$.next();
-        ServiceHandler::Get<RenderService>()->render$.next(renderer);
+        ServiceHandler::Get<RenderService>()->Get<RenderOrderObservable>()->next();
+        ServiceHandler::Get<RenderService>()->Get<RenderObservable>()->next(renderer);
 
         SDL_RenderPresent(renderer);
 

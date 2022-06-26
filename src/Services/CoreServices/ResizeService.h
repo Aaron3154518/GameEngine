@@ -10,17 +10,8 @@
 #include "../GameStruct.h"
 #include "../ServiceHandler.h"
 
-class ResizeService : public Service, public Component {
-   public:
-    ResizeService();
-    ~ResizeService() = default;
+typedef Observable<SDL_Point, void(SDL_Point)> ResizeObservable;
 
-    Observable<SDL_Point, void(SDL_Point)> resize$;
-
-   private:
-    void init(GameStruct &gs);
-};
-
-REGISTER_SERVICE(ResizeService);
+class ResizeService : public Service<ResizeObservable> {};
 
 #endif

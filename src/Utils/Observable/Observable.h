@@ -68,15 +68,17 @@ struct is_simple : std::false_type {};
 template <class T>
 struct is_simple<T, T> : std::true_type {};
 
+class ObservableBase {};
+
 // Full template, not usable
 template <class T, class RetT, class Data = void, class... ArgTs>
-class Observable {
+class Observable : public ObservableBase {
     static_assert(!std::is_same<T, T>::value, "Must use specialized observable");
 };
 
 // Partially specialized template, use this
 template <class T, class RetT, class Data, class... ArgTs>
-class Observable<T, RetT(ArgTs...), Data> {
+class Observable<T, RetT(ArgTs...), Data> : public ObservableBase {
    public:
     typedef Subscription<std::shared_ptr<Data>, RetT, ArgTs...> SubscriptionT;
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;

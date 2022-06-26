@@ -7,14 +7,6 @@
 
 typedef Observable<Time, void(Time)> UpdateObservable;
 
-class UpdateService : public Service {
-   public:
-    UpdateService() = default;
-    ~UpdateService() = default;
-
-    UpdateObservable update$;
-};
-
-REGISTER_SERVICE(UpdateService);
+class UpdateService : public Service<UpdateObservable> {};
 
 #endif

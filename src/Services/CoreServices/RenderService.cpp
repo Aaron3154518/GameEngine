@@ -64,13 +64,9 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
 }
 
 // RenderObservable
-RenderObservable::RenderObservable() {
-    Game::registerComponent(this);
-}
-
 void RenderObservable::init(GameStruct &gs) {
     // RenderService
-    renderOrderSub = ServiceHandler::Get<RenderService>()->renderOrder$.subscribe(
+    renderOrderSub = ServiceHandler::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
         std::bind(&RenderObservable::onRenderOrder, this, std::placeholders::_1));
     renderOrderSub->setUnsubscriber(unsub);
 }
@@ -116,9 +112,9 @@ void RenderObservable::sort(const std::vector<UIComponentPtr> &order) {
 
 // RenderService
 void RenderService::addComponent(UIComponentPtr comp) {
-    renderOrder$.addComponent(comp);
+    Get<RenderOrderObservable>()->addComponent(comp);
 }
 
 void RenderService::removeComponent(UIComponentPtr comp) {
-    renderOrder$.removeComponent(comp);
+    Get<RenderOrderObservable>()->removeComponent(comp);
 }

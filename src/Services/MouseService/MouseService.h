@@ -20,8 +20,6 @@ class MouseObservable : public Component, public Observable<Event::MouseButton, 
     friend class MouseService;
 
    public:
-    MouseObservable();
-
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
    private:
@@ -39,11 +37,6 @@ class MouseObservable : public Component, public Observable<Event::MouseButton, 
     RenderOrderObservable::SubscriptionPtr renderSub;
 };
 
-class MouseService : public Service {
-   public:
-    MouseObservable mouse$;
-};
-
-REGISTER_SERVICE(MouseService);
+class MouseService : public Service<MouseObservable> {};
 
 #endif
