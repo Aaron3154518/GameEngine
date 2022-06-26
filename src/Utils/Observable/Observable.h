@@ -108,6 +108,7 @@ class Observable<T, RetT(ArgTs...), Data> {
             sub = subscribe(func, data);
         } else {
             sub->changeSubscription(func);
+            sub->data = data;
         }
         return sub;
     }
