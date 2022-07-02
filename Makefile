@@ -28,12 +28,13 @@ all: test run-test
 clean:
 	@find $(OBJ) -type f \( -name "*.o" -o -name "*.d" \) -delete
 
-test: RenderTest EventTest ServiceTest
+test: RenderTest EventTest ServiceTest GameTest
 
 run-test:
 	@$(BIN)/RenderTest
 	@$(BIN)/EventTest
 	@$(BIN)/ServiceTest
+	@$(BIN)/GameTest
 
 RenderTest: $(call OBJS,src/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
@@ -46,6 +47,10 @@ EventTest: $(call OBJS,src/EventSystem/TestEventSystem.cpp)
 ServiceTest: $(call OBJS,src/ServiceSystem/TestServiceSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS,src/ServiceSystem/TestServiceSystem.cpp)
+
+GameTest: $(call OBJS,src/TestGameSystem.cpp)
+	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+-include $(call DEPS,src/TestGameSystem.cpp)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(@D)
