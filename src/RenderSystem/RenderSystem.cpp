@@ -1,5 +1,7 @@
 #include "RenderSystem.h"
 
+namespace RenderSystem {
+
 void initRenderSystem(int w, int h, std::string name) {
     static WindowPtr WINDOW = WindowPtr(NULL, SDL_DestroyWindow);
     if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
@@ -62,3 +64,5 @@ void enforceFPS(int fps) {
     }
     time = SDL_GetTicks();
 }
+
+}  // namespace RenderSystem

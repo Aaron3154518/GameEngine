@@ -15,6 +15,8 @@ This files contains the entry point to this module
 #include "Renderer.h"
 #include "TextureBuilder.h"
 
+namespace RenderSystem {
+
 class InitException : public std::exception {
     virtual const char *what() const throw() {
         return "Error attempting to initialize SDL systems";
@@ -29,5 +31,7 @@ void clearScreen(SDL_Color bkgrnd = BLACK);
 void presentScreen();
 
 void enforceFPS(int fps);
+
+}  // namespace RenderSystem
 
 #endif

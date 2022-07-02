@@ -3,7 +3,7 @@
 #include "RenderSystem.h"
 
 int main(int argc, char *argv[]) {
-    initRenderSystem(500, 500, "Render System Test");
+    RenderSystem::initRenderSystem(500, 500, "Render System Test");
 
     AssetManager am;
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Rendering
-        clearScreen(LGRAY);
+        RenderSystem::clearScreen(LGRAY);
 
         pb.set(pbVal, 1000);
         screen.draw(pb);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
         screen.draw(image);
         screen.draw(pp);
 
-        presentScreen();
+        RenderSystem::presentScreen();
 
         // Updating
         Uint32 dt = SDL_GetTicks() - time;
@@ -112,10 +112,10 @@ int main(int argc, char *argv[]) {
         }
 
         // FPS
-        enforceFPS(60);
+        RenderSystem::enforceFPS(60);
     }
 
-    teardownRenderSystem();
+    RenderSystem::teardownRenderSystem();
 
     return 0;
 }
