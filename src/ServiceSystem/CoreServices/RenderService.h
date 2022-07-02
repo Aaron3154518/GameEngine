@@ -26,9 +26,7 @@ struct UIComponent {
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
 
 struct UIComponentCompare {
-    bool operator()(const UIComponentPtr &a, const UIComponentPtr &b) const {
-        return a->elevation <= b->elevation;
-    }
+    bool operator()(const UIComponentPtr &a, const UIComponentPtr &b) const;
 };
 
 // Use a typedef for less code duplication

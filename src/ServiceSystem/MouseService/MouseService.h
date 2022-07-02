@@ -4,7 +4,6 @@
 #include <SDL.h>
 
 #include <algorithm>
-#include <map>
 #include <memory>
 
 #include "../../Utils/Event.h"
@@ -12,6 +11,7 @@
 #include "../CoreServices/EventService.h"
 #include "../CoreServices/RenderService.h"
 #include "../Observable.h"
+#include "../Service.h"
 #include "../ServiceSystem.h"
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
