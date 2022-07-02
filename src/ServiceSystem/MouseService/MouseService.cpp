@@ -5,10 +5,10 @@
 
 // MouseObservable
 void MouseObservable::init() {
-    eventSub = ServiceHandler::Get<EventService>()->Get<EventObservable>()->subscribe(
+    eventSub = ServiceSystem::Get<EventService>()->Get<EventObservable>()->subscribe(
         std::bind(&MouseObservable::onEvent, this, std::placeholders::_1));
     eventSub->setUnsubscriber(unsub);
-    renderSub = ServiceHandler::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
+    renderSub = ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
         std::bind(&MouseObservable::onRenderOrder, this, std::placeholders::_1));
     renderSub->setUnsubscriber(unsub);
 }
@@ -16,12 +16,12 @@ void MouseObservable::init() {
 MouseObservable::SubscriptionPtr MouseObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent>::subscribe(func, data);
-    ServiceHandler::Get<RenderService>()->addComponent(data);
+    ServiceSystem::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
 bool MouseObservable::unsubscribe(SubscriptionPtr sub) {
-    ServiceHandler::Get<RenderService>()->removeComponent(sub->data);
+    ServiceSystem::Get<RenderService>()->removeComponent(sub->data);
     return true;
 }
 

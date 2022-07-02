@@ -7,7 +7,7 @@
 #include "CoreServices/RenderService.h"
 #include "CoreServices/UpdateService.h"
 #include "MouseService/MouseService.h"
-#include "ServiceHandler.h"
+#include "ServiceSystem.h"
 
 class TestBase : public Component {
    public:

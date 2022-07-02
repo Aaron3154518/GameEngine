@@ -7,7 +7,7 @@ ResizeService::ResizeService() {
 }
 
 void ResizeService::init() {
-    ServiceHandler::Get<EventService>()->event$.subscribe(
+    ServiceSystem::Get<EventService>()->event$.subscribe(
         [this](const Event &e) {
             if (e.resized()) {
                 resize$.next(e.newDim());

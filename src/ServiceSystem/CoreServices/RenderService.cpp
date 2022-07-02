@@ -66,7 +66,7 @@ void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
 // RenderObservable
 void RenderObservable::init() {
     // RenderService
-    renderOrderSub = ServiceHandler::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
+    renderOrderSub = ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
         std::bind(&RenderObservable::onRenderOrder, this, std::placeholders::_1));
     renderOrderSub->setUnsubscriber(unsub);
 }
@@ -79,7 +79,7 @@ void RenderObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
 RenderObservable::SubscriptionPtr RenderObservable::subscribe(SubscriptionT::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal =
         Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>::subscribe(func, data);
-    ServiceHandler::Get<RenderService>()->addComponent(data);
+    ServiceSystem::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
@@ -92,7 +92,7 @@ void RenderObservable::serve(SDL_Renderer *renderer) {
 }
 
 bool RenderObservable::unsubscribe(SubscriptionPtr sub) {
-    ServiceHandler::Get<RenderService>()->removeComponent(sub->data);
+    ServiceSystem::Get<RenderService>()->removeComponent(sub->data);
     return true;
 }
 

@@ -6,7 +6,7 @@
 #include "../../Utils/Event.h"
 #include "../Component.h"
 #include "../Observable.h"
-#include "../ServiceHandler.h"
+#include "../ServiceSystem.h"
 
 typedef Observable<SDL_Point, void(SDL_Point)> ResizeObservable;
 

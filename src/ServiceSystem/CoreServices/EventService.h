@@ -3,7 +3,7 @@
 
 #include "../../Utils/Event.h"
 #include "..//Observable.h"
-#include "../ServiceHandler.h"
+#include "../ServiceSystem.h"
 
 typedef Observable<const Event &, void(const Event &)> EventObservable;
 

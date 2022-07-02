@@ -10,7 +10,7 @@
 #include "../Utils/Event.h"
 #include "../Utils/Rect.h"
 #include "../Utils/Time.h"
-#include "ServiceHandler.h"
+#include "ServiceSystem.h"
 #include "TestComponents.h"
 
 // TODO: Move init and game loop to dedicated classes
@@ -71,14 +71,14 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        ServiceHandler::Get<UpdateService>()->Get<UpdateObservable>()->next(dt);
-        ServiceHandler::Get<EventService>()->Get<EventObservable>()->next(e);
+        ServiceSystem::Get<UpdateService>()->Get<UpdateObservable>()->next(dt);
+        ServiceSystem::Get<EventService>()->Get<EventObservable>()->next(e);
 
         // Rendering
         SDL_RenderClear(renderer);
 
-        ServiceHandler::Get<RenderService>()->Get<RenderOrderObservable>()->next();
-        ServiceHandler::Get<RenderService>()->Get<RenderObservable>()->next(renderer);
+        ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->next();
+        ServiceSystem::Get<RenderService>()->Get<RenderObservable>()->next(renderer);
 
         SDL_RenderPresent(renderer);
 

@@ -12,7 +12,7 @@
 #include "../../Utils/Rect.h"
 #include "../Observable.h"
 #include "../Service.h"
-#include "../ServiceHandler.h"
+#include "../ServiceSystem.h"
 
 struct UIComponent {
     UIComponent() = default;

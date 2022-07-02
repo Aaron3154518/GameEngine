@@ -17,7 +17,7 @@ template <class Base>
 struct all_base_of<Base, void> : std::true_type {};
 
 class ServiceBase {
-    friend class ServiceHandler;
+    friend class ServiceSystem;
 
    public:
     virtual ~ServiceBase() = default;
