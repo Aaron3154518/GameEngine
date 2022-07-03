@@ -23,8 +23,18 @@ class InitException : public std::exception {
     }
 };
 
+struct Options {
+    // Dimensions
+    int width = 0;
+    int height = 0;
+    bool maximize = false;
+
+    // Window title
+    std::string title = "My Game";
+};
+
 typedef std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> WindowPtr;
-void initRenderSystem(int w, int h, std::string name = "Game");
+void initRenderSystem(Options options);
 void teardownRenderSystem();
 
 void clearScreen(SDL_Color bkgrnd = BLACK);

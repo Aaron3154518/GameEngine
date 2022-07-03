@@ -1,6 +1,8 @@
 #ifndef GAME_SYSTEM_H
 #define GAME_SYSTEM_H
 
+#include <SDL.h>
+
 #include "EventSystem/EventSystem.h"
 #include "RenderSystem/RenderSystem.h"
 #include "ServiceSystem/CoreServices/EventService.h"
@@ -10,7 +12,7 @@
 #include "Utils/Event.h"
 
 namespace GameSystem {
-void Init();
+void Init(RenderSystem::Options options);
 
 void Run();
 

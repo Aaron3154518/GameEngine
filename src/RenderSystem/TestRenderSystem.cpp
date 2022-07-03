@@ -3,7 +3,11 @@
 #include "RenderSystem/RenderSystem.h"
 
 int main(int argc, char *argv[]) {
-    RenderSystem::initRenderSystem(500, 500, "Render System Test");
+    RenderSystem::Options options;
+    options.title = "Render System Test";
+    options.width = options.height = 500;
+
+    RenderSystem::initRenderSystem(options);
 
     AssetManager am;
 

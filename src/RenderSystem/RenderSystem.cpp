@@ -2,7 +2,7 @@
 
 namespace RenderSystem {
 
-void initRenderSystem(int w, int h, std::string name) {
+void initRenderSystem(Options options) {
     static WindowPtr WINDOW = WindowPtr(NULL, SDL_DestroyWindow);
     if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
         int flags = SDL_WINDOW_RESIZABLE;
@@ -12,9 +12,13 @@ void initRenderSystem(int w, int h, std::string name) {
             // Use opengl
             SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
-            WINDOW.reset(SDL_CreateWindow(name.c_str(),
+            WINDOW.reset(SDL_CreateWindow(options.title.c_str(),
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          w, h, flags));
+                                          options.width, options.height, flags));
+
+            if (options.maximize) {
+                SDL_MaximizeWindow(WINDOW.get());
+            }
 
             Renderer::init(WINDOW.get());
         } else {

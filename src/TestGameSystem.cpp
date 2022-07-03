@@ -3,7 +3,11 @@
 #include "GameSystem.h"
 
 int main(int argc, char* argv[]) {
-    GameSystem::Init();
+    RenderSystem::Options options;
+    options.title = "Game System Test";
+    options.maximize = true;
+
+    GameSystem::Init(options);
 
     GameSystem::Run();
 

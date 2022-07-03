@@ -2,8 +2,8 @@
 
 namespace GameSystem {
 
-void Init() {
-    RenderSystem::initRenderSystem(500, 500, "Game System Test");
+void Init(RenderSystem::Options options) {
+    RenderSystem::initRenderSystem(options);
 }
 
 void Run() {
