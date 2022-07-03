@@ -1,14 +1,13 @@
 #include "ResizeService.h"
 
-ResizeService::ResizeService() {
-    Game::registerComponent(this);
+// ResizeObservable
+void ResizeObservable::init() {
+    mEventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
+        std::bind(&ResizeObservable::onEvent, this, std::placeholders::_1));
 }
 
-void ResizeService::init() {
-    ServiceSystem::Get<EventService>()->event$.subscribe(
-        [this](const Event &e) {
-            if (e.resized()) {
-                resize$.next(e.newDim());
-            }
-        });
+void ResizeObservable::onEvent(const Event& e) {
+    if (e.resized()) {
+        next(e.newDim());
+    }
 }
