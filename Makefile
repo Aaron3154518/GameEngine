@@ -1,10 +1,13 @@
 CXX := g++
 CXXFLAGS :=  
+AR := ar
+ARFLAGS := -rv
 
 INC := include
 BIN := bin
 SRC := src
 OBJ := obj
+LIB := lib
 
 SDL_INC := i686-w64-mingw32/include/SDL2
 SDL_LIB := i686-w64-mingw32/lib
@@ -12,6 +15,7 @@ SDL_LIB := i686-w64-mingw32/lib
 INCLUDE_PATHS := -I$(SRC) -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL_INC) -I$(INC)/SDL2_ttf-2.0.15/$(SDL_INC)
 LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL_LIB) -L$(INC)/SDL2_ttf-2.0.15/$(SDL_LIB)
 LINKER_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+GAME_LIBRARY := -L$(LIB) -lGameEngine
 
 DEP_FLAGS := -MM $(INCLUDE_PATHS)
 
@@ -38,25 +42,32 @@ run-test:
 	@$(BIN)/ServiceTest
 	@$(BIN)/GameTest
 
-RenderTest: $(call OBJS,src/RenderSystem/TestRenderSystem.cpp)
+RenderTest: $(call OBJS,$(SRC)/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS,src/RenderSystem/TestRenderSystem.cpp)
+-include $(call DEPS,$(SRC)/RenderSystem/TestRenderSystem.cpp)
 
-EventTest: $(call OBJS,src/EventSystem/TestEventSystem.cpp)
+EventTest: $(call OBJS,$(SRC)/EventSystem/TestEventSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS,src/EventSystem/TestEventSystem.cpp)
+-include $(call DEPS,$(SRC)/EventSystem/TestEventSystem.cpp)
 
-ServiceTest: $(call OBJS,src/ServiceSystem/TestServiceSystem.cpp)
+ServiceTest: $(call OBJS,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS,src/ServiceSystem/TestServiceSystem.cpp)
+-include $(call DEPS,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
 
-GameTest: $(call OBJS,src/TestGameSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS,src/TestGameSystem.cpp)
+GameTest: $(SRC)/TestGameSystem.cpp $(LIB)/libGameEngine.a
+	$(CXX) $(CXXFLAGS) $< -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+-include $(call DEPS,$(SRC)/TestGameSystem.cpp)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+
+.PHONY: GameLibrary
+GameLibrary: $(LIB)/libGameEngine.a
+
+$(LIB)/libGameEngine.a: $(call OBJS,$(SRC)/GameSystem.cpp)
+	@mkdir -p $(@D)
+	$(AR) $(ARFLAGS) $@ $^
 
 testing: testing.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)

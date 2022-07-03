@@ -1,6 +1,6 @@
 #define SDL_MAIN_HANDLED
 
-#include "GameSystem.h"
+#include <GameSystem.h>
 
 int main(int argc, char* argv[]) {
     RenderSystem::Options options;
