@@ -31,34 +31,10 @@ OBJS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(call EXIST,$1))
 DEPS_ALL = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.d,$1) $(call DEPS,$1)
 OBJS_ALL = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$1) $(call OBJS,$1)
 
-.PHONY: all clean
+.PHONY: all
 
-all: GameLibrary
-
-clean:
-	@find $(OBJ) -type f \( -name "*.o" -o -name "*.d" \) -delete
-
-test: RenderTest EventTest ServiceTest GameTest
-	@$(BIN)/RenderTest
-	@$(BIN)/EventTest
-	@$(BIN)/ServiceTest
-	@$(BIN)/GameTest
-
-RenderTest: $(call OBJS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
-
-EventTest: $(call OBJS_ALL,$(SRC)/EventSystem/TestEventSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS_ALL,$(SRC)/EventSystem/TestEventSystem.cpp)
-
-ServiceTest: $(call OBJS_ALL,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS_ALL,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
-
-GameTest: $(SRC)/TestGameSystem.cpp $(LIB)/libGameEngine.a
-	$(CXX) $(CXXFLAGS) $< -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
--include $(call DEPS_ALL,$(SRC)/TestGameSystem.cpp)
+all: Debug
+	@$(BIN)/Debug
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(@D)
@@ -71,3 +47,11 @@ $(LIB)/libGameEngine.a: $(call OBJS,$(SRC)/Includes.h)
 	@mkdir -p $(@D)
 	$(AR) $(ARFLAGS) $@ $^
 -include $(call DEPS,$(SRC)/Includes.h)
+
+testing: testing.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+
+DEBUG_TARGET := $(SRC)/Test/IdleWizard.cpp
+Debug: $(call OBJS_ALL,$(DEBUG_TARGET)) $(LIB)/libGameEngine.a
+	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+-include $(call DEPS_ALL,$(DEBUG_TARGET))
