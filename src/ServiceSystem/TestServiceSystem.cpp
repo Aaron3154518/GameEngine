@@ -71,14 +71,14 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        ServiceSystem::Get<UpdateService>()->Get<UpdateObservable>()->next(dt);
-        ServiceSystem::Get<EventService>()->Get<EventObservable>()->next(e);
+        ServiceSystem::Get<UpdateService, UpdateObservable>()->next(dt);
+        ServiceSystem::Get<EventService, EventObservable>()->next(e);
 
         // Rendering
         SDL_RenderClear(renderer);
 
-        ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->next();
-        ServiceSystem::Get<RenderService>()->Get<RenderObservable>()->next(renderer);
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()->next();
+        ServiceSystem::Get<RenderService, RenderObservable>()->next(renderer);
 
         SDL_RenderPresent(renderer);
 

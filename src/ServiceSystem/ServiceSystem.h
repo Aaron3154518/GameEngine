@@ -26,6 +26,11 @@ class ServiceSystem {
         }
     }
 
+    template <class ServiceT, class ObserverT>
+    static std::shared_ptr<ObserverT> Get() {
+        return Get<ServiceT>()->template Get<ObserverT>();
+    }
+
    private:
     ServiceSystem() = delete;
     ~ServiceSystem() = delete;
