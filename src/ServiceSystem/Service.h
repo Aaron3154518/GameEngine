@@ -4,6 +4,7 @@
 #include <ServiceSystem/Component.h>
 #include <ServiceSystem/Observable.h>
 
+#include <type_traits>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,6 +16,14 @@ struct all_base_of : std::integral_constant<
 
 template <class Base>
 struct all_base_of<Base, void> : std::true_type {};
+
+template <class T1, class T2 = void, class... Ts>
+struct contains : std::integral_constant<
+                      bool,
+                      std::is_same<T1, T2>::value || contains<T1, Ts...>::value> {};
+
+template <class T>
+struct contains<T, void> : std::false_type {};
 
 class ServiceBase {
     friend class ServiceSystem;
@@ -42,12 +51,14 @@ class Service : public ServiceBase {
     std::shared_ptr<T> Get() {
         static_assert(std::is_base_of<ObservableBase, T>::value,
                       "Service::Get(): template type is not a subclass of Observable");
+        static_assert(contains<T, Ts...>::value,
+                      "Service::Get(): Observable type does not exist in service");
         auto it = mObservables.find(std::type_index(typeid(T)));
         if (it != mObservables.end()) {
             return std::static_pointer_cast<T>(it->second);
         }
         throw std::runtime_error("Service::Get(): " + std::string(typeid(T).name()) +
-                                 " is not an observable");
+                                 " does not exist in the service");
     }
 
    private:
