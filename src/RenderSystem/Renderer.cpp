@@ -17,7 +17,10 @@ void Renderer::init(SDL_Window *window) {
     setRenderTarget(NULL);
     setBlendMode(SDL_BLENDMODE_BLEND);
 }
-SDL_Renderer *Renderer::get() {
+SDL_Renderer *Renderer::get(bool notNull) {
+    if (!mRenderer && notNull) {
+        throw NullRendererException();
+    }
     return mRenderer.get();
 }
 SDL_Point Renderer::getTargetSize() {

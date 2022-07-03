@@ -27,9 +27,15 @@ class Renderer {
     friend void RenderSystem::initRenderSystem(Options options);
 
    public:
+    class NullRendererException : public std::exception {
+        virtual const char *what() const throw() {
+            return "Error: SDL_Renderer was null while attempting get() with notNull = true. Did you forget to initialize?";
+        }
+    };
+
     Renderer() = delete;
 
-    static SDL_Renderer *get();
+    static SDL_Renderer *get(bool notNull = true);
 
    private:
     // Renderer
