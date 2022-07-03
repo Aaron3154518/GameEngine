@@ -1,6 +1,7 @@
 obj/
 lib/
 bin/*
+testing.*
+src/Test
 .vs/
 .vscode/
-testing.*

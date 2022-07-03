@@ -30,10 +30,13 @@ struct Options {
 
     // Window title
     std::string title = "My Game";
+
+    // Asset manager parameters
+    std::string defaultTexture = "";
 };
 
 typedef std::unique_ptr<SDL_Window, void (*)(SDL_Window *)> WindowPtr;
-void initRenderSystem(Options options);
+void initRenderSystem(const Options &options);
 void teardownRenderSystem();
 
 void clearScreen(SDL_Color bkgrnd = BLACK);

@@ -18,13 +18,13 @@ The Renderer class cannot be instantiated and provides static functions for obta
 // Forward declaration
 namespace RenderSystem {
 struct Options;
-void initRenderSystem(Options options);
+void initRenderSystem(const Options &options);
 }  // namespace RenderSystem
 
 // Renderer
 class Renderer {
     friend class TextureBuilder;
-    friend void RenderSystem::initRenderSystem(Options options);
+    friend void RenderSystem::initRenderSystem(const Options &options);
 
    public:
     class NullRendererException : public std::exception {

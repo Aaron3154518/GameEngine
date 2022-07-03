@@ -5,7 +5,8 @@
 int main(int argc, char *argv[]) {
     RenderSystem::Options options;
     options.title = "Render System Test";
-    options.width = options.height = 500;
+    options.width = options.height = 750;
+    options.defaultTexture = "res/default.png";
 
     RenderSystem::initRenderSystem(options);
 
@@ -111,6 +112,10 @@ int main(int argc, char *argv[]) {
             }
             pp.renderText();
             pp.fitToTexture();
+
+            image.texture = AssetManager::getTexture((int)pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
+            image.dest = Rect(125, 100, 250, 250);
+            image.fitToTexture();
         }
 
         // FPS

@@ -1,5 +1,6 @@
 #include "AssetManager.h"
 
+std::string AssetManager::mDefaultTexture = "";
 std::map<std::string, SharedTexture> AssetManager::mTextures;
 std::map<FontData, SharedFont> AssetManager::mFonts;
 
@@ -23,8 +24,8 @@ SharedTexture AssetManager::getTexture(std::string file) {
         struct stat buffer;
         if (stat(file.c_str(), &buffer) != 0) {
             std::cerr << "Could not find image file: " << file << std::endl;
-            if (file != "src/default.png") {
-                return getTexture("src/default.png");
+            if (file != mDefaultTexture) {
+                return getTexture(mDefaultTexture);
             } else {
                 return makeSharedTexture();
             }
@@ -69,6 +70,13 @@ SharedFont AssetManager::getFont(const FontData &data) {
         mFonts[data] = font;
         return font;
     }
+}
+
+const std::string &AssetManager::getDefaultTexture() {
+    return mDefaultTexture;
+}
+void AssetManager::setDefaultTexture(const std::string &str) {
+    mDefaultTexture = str;
 }
 
 bool AssetManager::getTextureSize(SDL_Texture *tex, int *w, int *h) {

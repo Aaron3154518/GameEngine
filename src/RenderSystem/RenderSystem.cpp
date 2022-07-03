@@ -2,7 +2,8 @@
 
 namespace RenderSystem {
 
-void initRenderSystem(Options options) {
+// Don't forget to update me in Renderer.h as well
+void initRenderSystem(const Options &options) {
     static WindowPtr WINDOW = WindowPtr(NULL, SDL_DestroyWindow);
     if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
         int flags = SDL_WINDOW_RESIZABLE;
@@ -15,10 +16,6 @@ void initRenderSystem(Options options) {
             WINDOW.reset(SDL_CreateWindow(options.title.c_str(),
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           options.width, options.height, flags));
-
-            if (options.maximize) {
-                SDL_MaximizeWindow(WINDOW.get());
-            }
 
             Renderer::init(WINDOW.get());
         } else {
@@ -34,6 +31,13 @@ void initRenderSystem(Options options) {
             throw InitException();
         }
     }
+
+    // Load options
+    if (options.maximize) {
+        SDL_MaximizeWindow(WINDOW.get());
+    }
+
+    AssetManager::setDefaultTexture(options.defaultTexture);
 }
 
 void teardownRenderSystem() {

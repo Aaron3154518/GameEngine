@@ -31,12 +31,16 @@ class AssetManager {
     static SharedTexture getTexture(std::string file);
     static SharedFont getFont(const FontData &data);
 
+    static const std::string &getDefaultTexture();
+    static void setDefaultTexture(const std::string &str);
+
     static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
     static void getFontSize(std::string fileName, int size, int *w, int *h);
     static void getTextSize(std::string fileName, int size,
                             std::string sampleText, int *w, int *h);
 
    private:
+    static std::string mDefaultTexture;
     static std::map<std::string, SharedTexture> mTextures;
     static std::map<FontData, SharedFont> mFonts;
 };
