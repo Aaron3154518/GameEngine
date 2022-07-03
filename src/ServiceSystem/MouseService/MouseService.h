@@ -12,12 +12,16 @@
 
 #include <algorithm>
 #include <memory>
+#include <set>
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
     friend class MouseService;
 
    public:
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
+
+    void* requestLock();
+    void releaseLock(void*& lock);
 
    private:
     void init();
@@ -28,8 +32,9 @@ class MouseObservable : public Component, public Observable<Event::MouseButton, 
 
     void onEvent(Event e);
 
-    void onRenderOrder(const std::vector<UIComponentPtr> &order);
+    void onRenderOrder(const std::vector<UIComponentPtr>& order);
 
+    std::set<std::unique_ptr<bool>> mLocks;
     EventObservable::SubscriptionPtr eventSub;
     RenderOrderObservable::SubscriptionPtr renderSub;
 };

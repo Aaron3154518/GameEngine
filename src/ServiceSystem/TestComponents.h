@@ -9,6 +9,8 @@
 #include <Utils/Rect.h>
 #include <Utils/Time.h>
 
+#include <random>
+
 class TestBase : public Component {
    public:
     TestBase(Rect r, int e);
@@ -25,6 +27,7 @@ class TestBase : public Component {
     void onRender(SDL_Renderer *renderer);
 
     std::shared_ptr<UIComponent> mPos;
+    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class ClickRenderTest : public TestBase {
@@ -40,7 +43,6 @@ class ClickRenderTest : public TestBase {
 
     bool color = false;
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class ChangeSubTest : public TestBase {
@@ -56,7 +58,6 @@ class ChangeSubTest : public TestBase {
 
     bool color = false;
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class UnsubTest : public TestBase {
@@ -72,7 +73,6 @@ class UnsubTest : public TestBase {
 
     bool color = false;
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class UpdateTest : public TestBase {
@@ -91,7 +91,6 @@ class UpdateTest : public TestBase {
     int delayMs = 0;
     UpdateObservable::SubscriptionPtr mUpdateSub;
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class VisibilityTest : public TestBase {
@@ -108,7 +107,6 @@ class VisibilityTest : public TestBase {
     int delayMs = 0;
     UpdateObservable::SubscriptionPtr mUpdateSub;
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class InheritanceTestBase : public TestBase {
@@ -127,7 +125,6 @@ class InheritanceTestBase : public TestBase {
     static const Uint8 COLOR_INC;
 
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
 };
 
 class InheritanceTestDerived : public InheritanceTestBase {
@@ -157,7 +154,24 @@ class MultiUnsubTest : public TestBase {
     Unsubscriber updateUnsub;
     std::vector<UpdateObservable::SubscriptionPtr> mUpdateSubs;
     MouseObservable::SubscriptionPtr mMouseSub;
-    RenderObservable::SubscriptionPtr mRenderSub;
+};
+
+class MouseLockTest : public TestBase {
+   public:
+    MouseLockTest(Rect r, int e);
+
+    SDL_Color getColor() const;
+
+   private:
+    void init();
+
+    void onUpdate(Time dt);
+
+    void onClick(Event::MouseButton b, bool clicked);
+
+    void *mMouseLock = NULL;
+    UpdateObservable::SubscriptionPtr mUpdateSub;
+    MouseObservable::SubscriptionPtr mMouseSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

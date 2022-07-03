@@ -23,7 +23,8 @@ bool MouseObservable::unsubscribe(SubscriptionPtr sub) {
 }
 
 void MouseObservable::serve(Event::MouseButton mouse) {
-    bool foundTop = false;
+    // If a lock exists, nobody gets clicked
+    bool foundTop = mLocks.size() != 0;
     for (SubscriptionPtr sub : mSubscriptions) {
         if (!sub->data->visible) {
             continue;
@@ -56,4 +57,18 @@ void MouseObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
     mSubscriptions.sort([&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
         return idxs.at(a) > idxs.at(b);
     });
+}
+
+void *MouseObservable::requestLock() {
+    return mLocks.insert(std::make_unique<bool>()).first->get();
+}
+
+void MouseObservable::releaseLock(void *&lock) {
+    auto it = std::find_if(mLocks.begin(), mLocks.end(), [lock](const std::unique_ptr<bool> &ptr) -> bool {
+        return ptr.get() == lock;
+    });
+    if (it != mLocks.end()) {
+        mLocks.erase(it);
+    }
+    lock = NULL;
 }
