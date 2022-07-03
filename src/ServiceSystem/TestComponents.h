@@ -2,6 +2,7 @@
 #include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
+#include <ServiceSystem/MouseService/DragService.h>
 #include <ServiceSystem/MouseService/MouseService.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Colors.h>
@@ -14,10 +15,6 @@
 class TestBase : public Component {
    public:
     TestBase(Rect r, int e);
-
-    const Rect &getRect() const;
-
-    int getElevation() const;
 
     virtual SDL_Color getColor() const;
 
@@ -172,6 +169,24 @@ class MouseLockTest : public TestBase {
     void *mMouseLock = NULL;
     UpdateObservable::SubscriptionPtr mUpdateSub;
     MouseObservable::SubscriptionPtr mMouseSub;
+};
+
+class DragTest : public TestBase {
+   public:
+    DragTest(Rect r, int e, int d);
+
+    SDL_Color getColor() const;
+
+   private:
+    void init();
+
+    void onDragStart();
+    void onDrag(int x, int y, double dx, double dy);
+    void onDragEnd();
+
+    SDL_Color dragColor = WHITE;
+    DragComponentPtr mPos;
+    DragObservable::SubscriptionPtr mDragSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

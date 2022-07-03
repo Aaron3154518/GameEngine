@@ -157,6 +157,9 @@ double Event::mouseDx() const {
 double Event::mouseDy() const {
     return mMouseDy;
 }
+bool Event::mouseMoved() const {
+    return mMouseDx != 0 || mMouseDy != 0;
+}
 int Event::scroll() const {
     return mScroll;
 }

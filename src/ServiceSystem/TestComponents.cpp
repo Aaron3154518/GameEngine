@@ -3,14 +3,6 @@
 // TestBase
 TestBase::TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {}
 
-const Rect &TestBase::getRect() const {
-    return mPos->rect;
-}
-
-int TestBase::getElevation() const {
-    return mPos->elevation;
-}
-
 SDL_Color TestBase::getColor() const {
     return BLACK;
 }
@@ -24,9 +16,9 @@ void TestBase::init() {
 void TestBase::onRender(SDL_Renderer *renderer) {
     SDL_Color c = getColor();
     SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
-    SDL_RenderFillRect(renderer, &mPos->rect);
+    SDL_RenderFillRect(renderer, &mRenderSub->data->rect);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &mPos->rect);
+    SDL_RenderDrawRect(renderer, &mRenderSub->data->rect);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
 
@@ -287,6 +279,43 @@ void MouseLockTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
         mMouseLock = ServiceSystem::Get<MouseService, MouseObservable>()->requestLock();
     }
+}
+
+// DragTest
+DragTest::DragTest(Rect r, int e, int d) : TestBase(r, e), mPos(std::make_shared<DragComponent>(r, e, d)) {
+    mPos->onDragStart = std::bind(&DragTest::onDragStart, this);
+    mPos->onDrag = std::bind(&DragTest::onDrag, this,
+                             std::placeholders::_1, std::placeholders::_2,
+                             std::placeholders::_3, std::placeholders::_4);
+    mPos->onDragEnd = std::bind(&DragTest::onDragEnd, this);
+}
+
+SDL_Color DragTest::getColor() const {
+    return mPos->dragging ? dragColor : YELLOW;
+}
+
+void DragTest::init() {
+    TestBase::init();
+    mRenderSub->data = mPos;
+    mDragSub = ServiceSystem::Get<DragService, DragObservable>()->subscribe(
+        []() {}, mPos);
+    mDragSub->setUnsubscriber(unsub);
+}
+
+void DragTest::onDragStart() {
+    dragColor = SDL_Color{(Uint8)(rand() % 256), (Uint8)(rand() % 256), (Uint8)(rand() % 256), 255};
+}
+
+void DragTest::onDrag(int x, int y, double dx, double dy) {
+    if (mPos->dragDelay >= 0) {
+        mPos->rect.setCenter(x, y);
+    } else {
+        mPos->rect.x += dx;
+        mPos->rect.y += dy;
+    }
+}
+
+void DragTest::onDragEnd() {
 }
 
 // Generate random test component

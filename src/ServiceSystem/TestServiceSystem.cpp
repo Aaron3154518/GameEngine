@@ -56,6 +56,9 @@ int main(int argc, char *argv[]) {
     auto t8 = ComponentFactory<InheritanceTestDerived>::New(Rect(230, 130, 40, 40), 5);
     auto t9 = ComponentFactory<MultiUnsubTest>::New(Rect(230, 230, 40, 40), 9);
     auto t10 = ComponentFactory<MouseLockTest>::New(Rect(100, 225, 50, 50), 10);
+    auto t11 = ComponentFactory<DragTest>::New(Rect(405, 180, 40, 40), 11, -1);
+    auto t12 = ComponentFactory<DragTest>::New(Rect(405, 230, 40, 40), 11, 0);
+    auto t13 = ComponentFactory<DragTest>::New(Rect(405, 280, 40, 40), 11, 1000);
 
     Event e;
 

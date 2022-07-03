@@ -1,36 +1,32 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#include <SDL.h>
+
 #include <array>
 #include <cmath>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 
-#include <SDL.h>
-
-class Event
-{
-public:
+class Event {
+   public:
     Event() = default;
     ~Event() = default;
 
-    enum Mouse : uint8_t
-    {
+    enum Mouse : uint8_t {
         LEFT = 0,
         RIGHT,
         MIDDLE
     };
-    enum Button : uint8_t
-    {
+    enum Button : uint8_t {
         PRESSED = 0x01,
         RELEASED = 0x02,
         HELD = 0x04,
-        CLICKED = 0x08 // For mouse buttons
+        CLICKED = 0x08  // For mouse buttons
     };
 
-    struct MouseButton
-    {
+    struct MouseButton {
         uint8_t status = 0;
         SDL_Point clickPos{0, 0};
         uint32_t duration;
@@ -40,8 +36,7 @@ public:
         bool held() const;
         bool clicked() const;
     };
-    struct KeyButton
-    {
+    struct KeyButton {
         uint8_t status = 0;
         uint32_t duration;
 
@@ -65,6 +60,7 @@ public:
     SDL_Point mouse() const;
     double mouseDx() const;
     double mouseDy() const;
+    bool mouseMoved() const;
     int scroll() const;
 
     std::string textInput() const;
@@ -81,7 +77,7 @@ public:
     static bool bitsSet(uint8_t val, uint8_t check);
     static double distance(SDL_Point p1, SDL_Point p2);
 
-private:
+   private:
     static constexpr int MAX_CLICK_DIFF = 10;
 
     uint32_t mDt;
