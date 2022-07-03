@@ -11,9 +11,9 @@ This files contains the entry point to this module
 #include <exception>
 #include <memory>
 
-#include "AssetManager.h"
-#include "Renderer.h"
-#include "TextureBuilder.h"
+#include "RenderSystem/AssetManager.h"
+#include "RenderSystem/Renderer.h"
+#include "RenderSystem/TextureBuilder.h"
 
 namespace RenderSystem {
 

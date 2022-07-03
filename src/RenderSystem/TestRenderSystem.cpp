@@ -1,6 +1,6 @@
 #define SDL_MAIN_HANDLED
 
-#include "RenderSystem.h"
+#include "RenderSystem/RenderSystem.h"
 
 int main(int argc, char *argv[]) {
     RenderSystem::initRenderSystem(500, 500, "Render System Test");

@@ -9,10 +9,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../../Utils/Rect.h"
-#include "../Observable.h"
-#include "../Service.h"
-#include "../ServiceSystem.h"
+#include "ServiceSystem/Observable.h"
+#include "ServiceSystem/Service.h"
+#include "ServiceSystem/ServiceSystem.h"
+#include "Utils/Rect.h"
 
 struct UIComponent {
     UIComponent() = default;

@@ -1,7 +1,5 @@
 #include "RenderService.h"
 
-#include "UpdateService.h"
-
 // UIComponentCompare
 bool UIComponentCompare::operator()(const UIComponentPtr &a, const UIComponentPtr &b) const {
     return a->elevation <= b->elevation;

@@ -1,7 +1,5 @@
 #include "ResizeService.h"
 
-#include "EventService.h"
-
 ResizeService::ResizeService() {
     Game::registerComponent(this);
 }

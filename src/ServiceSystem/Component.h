@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "Observable.h"
+#include "ServiceSystem/Observable.h"
 
 // Forward declaration
 template <class T>

@@ -7,11 +7,11 @@
 #include <memory>
 #include <sstream>
 
-#include "../Utils/Event.h"
-#include "../Utils/Rect.h"
-#include "../Utils/Time.h"
-#include "ServiceSystem.h"
-#include "TestComponents.h"
+#include "ServiceSystem/ServiceSystem.h"
+#include "ServiceSystem/TestComponents.h"
+#include "Utils/Event.h"
+#include "Utils/Rect.h"
+#include "Utils/Time.h"
 
 // TODO: Move init and game loop to dedicated classes
 int main(int argc, char *argv[]) {
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
             // Use opengl
             SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
-            window = SDL_CreateWindow("Event System Test",
+            window = SDL_CreateWindow("Service System Test",
                                       SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                       w, h, flags);
 

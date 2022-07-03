@@ -3,7 +3,7 @@
 namespace GameSystem {
 
 void Init() {
-    RenderSystem::initRenderSystem(500, 500, "Render System Test");
+    RenderSystem::initRenderSystem(500, 500, "Game System Test");
 }
 
 void Run() {

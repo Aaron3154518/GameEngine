@@ -6,13 +6,13 @@
 #include <algorithm>
 #include <memory>
 
-#include "../../Utils/Event.h"
-#include "../Component.h"
-#include "../CoreServices/EventService.h"
-#include "../CoreServices/RenderService.h"
-#include "../Observable.h"
-#include "../Service.h"
-#include "../ServiceSystem.h"
+#include "ServiceSystem/Component.h"
+#include "ServiceSystem/CoreServices/EventService.h"
+#include "ServiceSystem/CoreServices/RenderService.h"
+#include "ServiceSystem/Observable.h"
+#include "ServiceSystem/Service.h"
+#include "ServiceSystem/ServiceSystem.h"
+#include "Utils/Event.h"
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
     friend class MouseService;

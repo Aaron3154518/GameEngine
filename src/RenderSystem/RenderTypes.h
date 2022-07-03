@@ -13,8 +13,8 @@ This file contains structs that hold data necessary for rendering text and textu
 #include <sstream>
 #include <vector>
 
-#include "../Utils/Rect.h"
-#include "Renderer.h"
+#include "RenderSystem/Renderer.h"
+#include "Utils/Rect.h"
 
 // Memory management for surfaces
 typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> Surface;

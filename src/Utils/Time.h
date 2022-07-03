@@ -1,7 +1,7 @@
 #ifndef TIME_H
 #define TIME_H
 
-#include <SDL.h>
+#include <cstdint>
 
 class Time {
    public:

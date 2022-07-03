@@ -1,9 +1,9 @@
 #ifndef EVENT_SERVICE_H
 #define EVENT_SERVICE_H
 
-#include "../../Utils/Event.h"
-#include "..//Observable.h"
-#include "../Service.h"
+#include "ServiceSystem/Observable.h"
+#include "ServiceSystem/Service.h"
+#include "Utils/Event.h"
 
 typedef Observable<const Event &, void(const Event &)> EventObservable;
 

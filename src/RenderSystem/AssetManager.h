@@ -12,8 +12,8 @@ This files contains the AssetManager class which manages all fonts and loaded im
 #include <map>
 #include <string>
 
-#include "RenderTypes.h"
-#include "Renderer.h"
+#include "RenderSystem/RenderTypes.h"
+#include "RenderSystem/Renderer.h"
 
 // Data for creating a font
 struct FontData {

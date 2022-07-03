@@ -9,12 +9,14 @@ OBJ := obj
 SDL_INC := i686-w64-mingw32/include/SDL2
 SDL_LIB := i686-w64-mingw32/lib
 
-INCLUDE_PATHS := -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL_INC) -I$(INC)/SDL2_ttf-2.0.15/$(SDL_INC)
+INCLUDE_PATHS := -I$(SRC) -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL_INC) -I$(INC)/SDL2_ttf-2.0.15/$(SDL_INC)
 LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL_LIB) -L$(INC)/SDL2_ttf-2.0.15/$(SDL_LIB)
 LINKER_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 
+DEP_FLAGS := -MM $(INCLUDE_PATHS)
+
 # Get all header file dependencies relative to ./ and convert to .cpp
-SOURCES = $(shell realpath --relative-to ./ $(patsubst %.h,%.cpp,$(filter $(dir $1)%.h, $(shell $(CXX) -MM $1))))
+SOURCES = $(shell realpath --relative-to ./ $(patsubst %.h,%.cpp,$(filter $(SRC)/%.h, $(shell $(CXX) $(DEP_FLAGS) $1))))
 # Filter out missing .cpp files
 EXIST = $(filter $(foreach file,$(call SOURCES,$1),$(wildcard $(file))),$(call SOURCES,$1))
 # Compute .d and .h dependencies

@@ -9,10 +9,10 @@ It contains various drawing functions for shapes in Shapes.h as well as other vi
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include "../Utils/Colors.h"
-#include "../Utils/Rect.h"
-#include "RenderTypes.h"
-#include "Shapes.h"
+#include "RenderSystem/RenderTypes.h"
+#include "RenderSystem/Shapes.h"
+#include "Utils/Colors.h"
+#include "Utils/Rect.h"
 
 class TextureBuilder {
    public:

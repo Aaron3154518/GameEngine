@@ -9,8 +9,8 @@
 #include <typeinfo>
 #include <unordered_map>
 
-#include "Component.h"
-#include "Service.h"
+#include "ServiceSystem/Component.h"
+#include "ServiceSystem/Service.h"
 
 class ServiceSystem {
    public:
