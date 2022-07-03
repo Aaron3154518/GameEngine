@@ -1,5 +1,6 @@
 CXX := g++
 CXXFLAGS :=  
+
 AR := ar
 ARFLAGS := -rv
 
@@ -17,10 +18,10 @@ LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL
 LINKER_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 GAME_LIBRARY := -L$(LIB) -lGameEngine
 
-DEP_FLAGS := -MM $(INCLUDE_PATHS)
+DEPFLAGS := -MM $(INCLUDE_PATHS)
 
 # Get all header file dependencies relative to ./ and convert to .cpp
-SOURCES = $(shell realpath --relative-to ./ $(patsubst %.h,%.cpp,$(filter $(SRC)/%.h, $(shell $(CXX) $(DEP_FLAGS) $1))))
+SOURCES = $(shell realpath --relative-to ./ $(patsubst %.h,%.cpp,$(filter $(SRC)/%.h, $(shell $(CXX) $(DEPFLAGS) $1))))
 # Filter out missing .cpp files
 EXIST = $(filter $(foreach file,$(call SOURCES,$1),$(wildcard $(file))),$(call SOURCES,$1))
 # Compute .d and .h dependencies
@@ -29,14 +30,12 @@ OBJS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$1) $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o
 
 .PHONY: all clean
 
-all: test run-test
+all: GameLibrary
 
 clean:
 	@find $(OBJ) -type f \( -name "*.o" -o -name "*.d" \) -delete
 
 test: RenderTest EventTest ServiceTest GameTest
-
-run-test:
 	@$(BIN)/RenderTest
 	@$(BIN)/EventTest
 	@$(BIN)/ServiceTest
