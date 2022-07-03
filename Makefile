@@ -74,3 +74,8 @@ $(LIB)/libGameEngine.a: $(call OBJS,$(SRC)/Includes.h)
 
 testing: testing.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+
+DEBUG_TARGET := $(SRC)/Test/IdleWizard.cpp
+Debug: $(call OBJS_ALL,$(DEBUG_TARGET)) $(LIB)/libGameEngine.a
+	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+-include $(call DEPS_ALL,$(DEBUG_TARGET))
