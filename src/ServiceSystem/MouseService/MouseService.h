@@ -15,8 +15,6 @@
 #include <set>
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
-    friend class MouseService;
-
    public:
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 

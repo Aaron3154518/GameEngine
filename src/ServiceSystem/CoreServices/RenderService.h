@@ -49,8 +49,6 @@ class RenderOrderObservable : public RenderOrderObservableBase {
 };
 
 class RenderObservable : public Component, public Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> {
-    friend class RenderService;
-
    public:
     SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
 
