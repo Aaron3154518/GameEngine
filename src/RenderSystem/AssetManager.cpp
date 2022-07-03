@@ -1,10 +1,17 @@
 #include "AssetManager.h"
 
+std::map<std::string, SharedTexture> AssetManager::mTextures;
+std::map<FontData, SharedFont> AssetManager::mFonts;
+
 // FontData
 bool FontData::operator<(const FontData &rhs) const {
-    return w < rhs.w || (w == rhs.w && (h < rhs.h || (h == rhs.h &&
-                                                      (sample.compare(rhs.sample) < 0 || (sample.compare(rhs.sample) == 0 &&
-                                                                                          file.compare(rhs.file) < 0)))));
+    return w < rhs.w ||
+           (w == rhs.w &&
+            (h < rhs.h ||
+             (h == rhs.h &&
+              (sample.compare(rhs.sample) < 0 ||
+               (sample.compare(rhs.sample) == 0 &&
+                file.compare(rhs.file) < 0)))));
 }
 
 // AssetManager

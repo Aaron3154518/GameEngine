@@ -1,13 +1,13 @@
-#include "ServiceSystem/Component.h"
-#include "ServiceSystem/CoreServices/EventService.h"
-#include "ServiceSystem/CoreServices/RenderService.h"
-#include "ServiceSystem/CoreServices/UpdateService.h"
-#include "ServiceSystem/MouseService/MouseService.h"
-#include "ServiceSystem/ServiceSystem.h"
-#include "Utils/Colors.h"
-#include "Utils/Event.h"
-#include "Utils/Rect.h"
-#include "Utils/Time.h"
+#include <ServiceSystem/Component.h>
+#include <ServiceSystem/CoreServices/EventService.h>
+#include <ServiceSystem/CoreServices/RenderService.h>
+#include <ServiceSystem/CoreServices/UpdateService.h>
+#include <ServiceSystem/MouseService/MouseService.h>
+#include <ServiceSystem/ServiceSystem.h>
+#include <Utils/Colors.h>
+#include <Utils/Event.h>
+#include <Utils/Rect.h>
+#include <Utils/Time.h>
 
 class TestBase : public Component {
    public:

@@ -6,13 +6,12 @@ It contains various drawing functions for shapes in Shapes.h as well as other vi
 #ifndef TEXTURE_BUILDER_H
 #define TEXTURE_BUILDER_H
 
+#include <RenderSystem/RenderTypes.h>
+#include <RenderSystem/Shapes.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
-
-#include "RenderSystem/RenderTypes.h"
-#include "RenderSystem/Shapes.h"
-#include "Utils/Colors.h"
-#include "Utils/Rect.h"
+#include <Utils/Colors.h>
+#include <Utils/Rect.h>
 
 class TextureBuilder {
    public:

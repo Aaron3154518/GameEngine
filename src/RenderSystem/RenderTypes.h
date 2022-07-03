@@ -6,15 +6,14 @@ This file contains structs that hold data necessary for rendering text and textu
 #ifndef RENDER_TYPES_H
 #define RENDER_TYPES_H
 
+#include <RenderSystem/Renderer.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <Utils/Rect.h>
 
 #include <memory>
 #include <sstream>
 #include <vector>
-
-#include "RenderSystem/Renderer.h"
-#include "Utils/Rect.h"
 
 // Memory management for surfaces
 typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> Surface;

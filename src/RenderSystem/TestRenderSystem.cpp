@@ -1,6 +1,6 @@
 #define SDL_MAIN_HANDLED
 
-#include "RenderSystem/RenderSystem.h"
+#include <RenderSystem/RenderSystem.h>
 
 int main(int argc, char *argv[]) {
     RenderSystem::Options options;
@@ -9,18 +9,16 @@ int main(int argc, char *argv[]) {
 
     RenderSystem::initRenderSystem(options);
 
-    AssetManager am;
-
     TextureBuilder screen;
 
     RenderData image;
-    image.texture = am.getTexture("res/wizards/Catalyst.png");
+    image.texture = AssetManager::getTexture("res/wizards/Catalyst.png");
     image.dest = Rect(125, 100, 250, 250);
     image.fitToTexture();
 
     TextRenderData pp;
     pp.dest = image.dest;
-    pp.tData.font = am.getFont(FontData{-1, 25, "|"});
+    pp.tData.font = AssetManager::getFont(FontData{-1, 25, "|"});
     pp.tData.text =
         "According to all known laws of aviation, there is no way a bee should be able to fly.\n"
         "Its wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway"
@@ -38,7 +36,7 @@ int main(int argc, char *argv[]) {
     int timerVal = 1;
     TextRenderData timer;
     timer.dest = Rect(250, 450, 0, 50);
-    timer.tData.font = am.getFont(FontData{-1, 25, "|"});
+    timer.tData.font = AssetManager::getFont(FontData{-1, 25, "|"});
     timer.tData.color = BLUE;
     timer.tData.text = std::to_string(timerVal);
     timer.renderText();

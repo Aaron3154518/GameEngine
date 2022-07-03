@@ -1,6 +1,9 @@
 #ifndef SERVICE_SYSTEM_H
 #define SERVICE_SYSTEM_H
 
+#include <ServiceSystem/Component.h>
+#include <ServiceSystem/Service.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -8,9 +11,6 @@
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
-
-#include "ServiceSystem/Component.h"
-#include "ServiceSystem/Service.h"
 
 class ServiceSystem {
    public:

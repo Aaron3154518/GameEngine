@@ -1,12 +1,12 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
+#include <ServiceSystem/Component.h>
+#include <ServiceSystem/Observable.h>
+
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
-
-#include "ServiceSystem/Component.h"
-#include "ServiceSystem/Observable.h"
 
 template <class Base, class Derived = void, class... Ts>
 struct all_base_of : std::integral_constant<

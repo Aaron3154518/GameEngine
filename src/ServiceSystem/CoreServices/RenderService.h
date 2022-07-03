@@ -2,17 +2,16 @@
 #define RENDER_SERVICE_H
 
 #include <SDL.h>
+#include <ServiceSystem/Observable.h>
+#include <ServiceSystem/Service.h>
+#include <ServiceSystem/ServiceSystem.h>
+#include <Utils/Rect.h>
 
 #include <algorithm>
 #include <list>
 #include <set>
 #include <unordered_map>
 #include <vector>
-
-#include "ServiceSystem/Observable.h"
-#include "ServiceSystem/Service.h"
-#include "ServiceSystem/ServiceSystem.h"
-#include "Utils/Rect.h"
 
 struct UIComponent {
     UIComponent() = default;

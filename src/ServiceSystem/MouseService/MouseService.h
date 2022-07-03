@@ -2,17 +2,16 @@
 #define MOUSE_SERVICE_H
 
 #include <SDL.h>
+#include <ServiceSystem/Component.h>
+#include <ServiceSystem/CoreServices/EventService.h>
+#include <ServiceSystem/CoreServices/RenderService.h>
+#include <ServiceSystem/Observable.h>
+#include <ServiceSystem/Service.h>
+#include <ServiceSystem/ServiceSystem.h>
+#include <Utils/Event.h>
 
 #include <algorithm>
 #include <memory>
-
-#include "ServiceSystem/Component.h"
-#include "ServiceSystem/CoreServices/EventService.h"
-#include "ServiceSystem/CoreServices/RenderService.h"
-#include "ServiceSystem/Observable.h"
-#include "ServiceSystem/Service.h"
-#include "ServiceSystem/ServiceSystem.h"
-#include "Utils/Event.h"
 
 class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
     friend class MouseService;

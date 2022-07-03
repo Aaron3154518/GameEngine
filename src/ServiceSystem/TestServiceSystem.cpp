@@ -1,17 +1,16 @@
 #define SDL_MAIN_HANDLED
 
 #include <SDL_ttf.h>
+#include <ServiceSystem/ServiceSystem.h>
+#include <ServiceSystem/TestComponents.h>
+#include <Utils/Event.h>
+#include <Utils/Rect.h>
+#include <Utils/Time.h>
 
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <sstream>
-
-#include "ServiceSystem/ServiceSystem.h"
-#include "ServiceSystem/TestComponents.h"
-#include "Utils/Event.h"
-#include "Utils/Rect.h"
-#include "Utils/Time.h"
 
 // TODO: Move init and game loop to dedicated classes
 int main(int argc, char *argv[]) {

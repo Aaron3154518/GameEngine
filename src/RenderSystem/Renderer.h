@@ -8,13 +8,12 @@ The Renderer class cannot be instantiated and provides static functions for obta
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <Utils/Colors.h>
+#include <Utils/Rect.h>
 
 #include <memory>
 #include <stack>
 #include <vector>
-
-#include "Utils/Colors.h"
-#include "Utils/Rect.h"
 
 // Forward declaration
 namespace RenderSystem {

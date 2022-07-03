@@ -5,15 +5,14 @@ This files contains the AssetManager class which manages all fonts and loaded im
 #ifndef ASSET_MANAGER_H
 #define ASSET_MANAGER_H
 
+#include <RenderSystem/RenderTypes.h>
+#include <RenderSystem/Renderer.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <sys/stat.h>
 
 #include <map>
 #include <string>
-
-#include "RenderSystem/RenderTypes.h"
-#include "RenderSystem/Renderer.h"
 
 // Data for creating a font
 struct FontData {
@@ -26,11 +25,11 @@ struct FontData {
 
 class AssetManager {
    public:
-    AssetManager() = default;
-    ~AssetManager() = default;
+    AssetManager() = delete;
+    ~AssetManager() = delete;
 
-    SharedTexture getTexture(std::string file);
-    SharedFont getFont(const FontData &data);
+    static SharedTexture getTexture(std::string file);
+    static SharedFont getFont(const FontData &data);
 
     static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
     static void getFontSize(std::string fileName, int size, int *w, int *h);
@@ -38,8 +37,8 @@ class AssetManager {
                             std::string sampleText, int *w, int *h);
 
    private:
-    std::map<std::string, SharedTexture> mTextures;
-    std::map<FontData, SharedFont> mFonts;
+    static std::map<std::string, SharedTexture> mTextures;
+    static std::map<FontData, SharedFont> mFonts;
 };
 
 #endif

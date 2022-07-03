@@ -1,11 +1,10 @@
 #define SDL_MAIN_HANDLED
 
+#include <EventSystem/EventSystem.h>
 #include <SDL_ttf.h>
 
 #include <iostream>
 #include <sstream>
-
-#include "EventSystem.h"
 
 constexpr SDL_Color WHITE{255, 255, 255, 255};
 constexpr SDL_Color BLACK{0, 0, 0, 255};

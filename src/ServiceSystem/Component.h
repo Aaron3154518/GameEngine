@@ -1,9 +1,9 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <iostream>
+#include <ServiceSystem/Observable.h>
 
-#include "ServiceSystem/Observable.h"
+#include <iostream>
 
 // Forward declaration
 template <class T>

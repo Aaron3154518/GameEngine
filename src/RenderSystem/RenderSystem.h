@@ -5,15 +5,14 @@ This files contains the entry point to this module
 #ifndef RENDER_SYSTEM_H
 #define RENDER_SYSTEM_H
 
+#include <RenderSystem/AssetManager.h>
+#include <RenderSystem/Renderer.h>
+#include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 
 #include <exception>
 #include <memory>
-
-#include "RenderSystem/AssetManager.h"
-#include "RenderSystem/Renderer.h"
-#include "RenderSystem/TextureBuilder.h"
 
 namespace RenderSystem {
 
