@@ -8,7 +8,7 @@ bool eq(double v1, double v2, double err) {
 // Constructors
 Rect::Rect() : Rect(0, 0, 0, 0) {}
 Rect::Rect(const SDL_Rect& other) {
-    set<>(other);
+    set(other);
 }
 
 bool Rect::empty() const {

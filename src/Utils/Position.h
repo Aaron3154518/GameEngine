@@ -22,8 +22,8 @@ class Rect {
     Rect();
     template <Align X = Align::TOP_LEFT, Align Y = X>
     Rect(double v1x, double v1y, double v2x, double v2y) {
-        set<X>(v1x, v2x);
-        set<Y>(v1y, v2y);
+        setX<X>(v1x, v2x);
+        setY<Y>(v1y, v2y);
     }
     Rect(const SDL_Rect& other);
     ~Rect() = default;
@@ -51,25 +51,25 @@ class Rect {
 
     template <Align A = Align::TOP_LEFT>
     double getX() const {
-        return
-#if A == Align::BOT_RIGHT
-            x2();
-#elif A == Align::CENTER
-            cX();
-#else
-            x;
-#endif
+        switch (A) {
+            case Align::BOT_RIGHT:
+                return x2();
+            case Align::CENTER:
+                return cX();
+            default:
+                return x;
+        }
     }
     template <Align A = Align::TOP_LEFT>
     double getY() const {
-        return
-#if A == Align::BOT_RIGHT
-            y2();
-#elif A == Align::CENTER
-            cY();
-#else
-            y;
-#endif
+        switch (A) {
+            case Align::BOT_RIGHT:
+                return y2();
+            case Align::CENTER:
+                return cY();
+            default:
+                return y;
+        }
     }
 
     int X() const;
@@ -83,25 +83,25 @@ class Rect {
 
     template <Align A = Align::TOP_LEFT>
     int GetX() const {
-        return
-#if A == Align::BOT_RIGHT
-            X2();
-#elif A == Align::CENTER
-            CX();
-#else
-            X();
-#endif
+        switch (A) {
+            case Align::BOT_RIGHT:
+                return X2();
+            case Align::CENTER:
+                return CX();
+            default:
+                return X();
+        }
     }
     template <Align A = Align::TOP_LEFT>
     int GetY() const {
-        return
-#if A == Align::BOT_RIGHT
-            Y2();
-#elif A == Align::CENTER
-            CY();
-#else
-            Y();
-#endif
+        switch (A) {
+            case Align::BOT_RIGHT:
+                return Y2();
+            case Align::CENTER:
+                return CY();
+            default:
+                return Y();
+        }
     }
 
     static Rect getMinRect(SDL_Texture* tex, double maxW, double maxH);
@@ -111,21 +111,23 @@ class Rect {
     // Set positions and dimensions
     template <Align X = Align::TOP_LEFT, Align Y = X>
     void set(const Rect& r) {
-        setX<X>(r.getX<X>(),
-#if X == Align::CORNERS
-                r.x2()
-#else
-                r.w
-#endif
-        );
+        switch (X) {
+            case Align::CORNERS:
+                setX<X>(r.getX<X>(), r.x2());
+                break;
+            default:
+                setX<X>(r.getX<X>(), r.w);
+                break;
+        }
 
-        setY<Y>(r.getY<Y>(),
-#if Y == Align::CORNERS
-                r.y2()
-#else
-                r.h
-#endif
-        );
+        switch (Y) {
+            case Align::CORNERS:
+                setY<Y>(r.getY<Y>(), r.y2());
+                break;
+            default:
+                setY<Y>(r.getY<Y>(), r.h);
+                break;
+        }
     }
     template <Align X = Align::TOP_LEFT, Align Y = X>
     void set(double v1x, double v1y, double v2x, double v2y) {

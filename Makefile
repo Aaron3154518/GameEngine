@@ -44,6 +44,10 @@ test: RenderTest EventTest ServiceTest GameTest
 	@$(BIN)/ServiceTest
 	@$(BIN)/GameTest
 
+ArgTest: $(call OBJS_ALL,$(T))
+	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+-include $(call DEPS_ALL,$(T))
+
 RenderTest: $(call OBJS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
