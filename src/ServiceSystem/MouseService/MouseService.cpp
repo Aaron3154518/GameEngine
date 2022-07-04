@@ -2,7 +2,7 @@
 
 // MouseObservable
 void MouseObservable::init() {
-    eventSub = ServiceSystem::Get<EventService>()->Get<EventObservable>()->subscribe(
+    eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
         std::bind(&MouseObservable::onEvent, this, std::placeholders::_1));
     eventSub->setUnsubscriber(unsub);
 }

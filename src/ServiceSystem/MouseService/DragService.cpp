@@ -7,10 +7,10 @@ DragComponent::DragComponent(Rect r, int e, int d) : UIComponent(r, e), dragDela
 void DragObservable::init() {
     updateSub = ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
         std::bind(&DragObservable::onUpdate, this, std::placeholders::_1));
-    eventSub = ServiceSystem::Get<EventService>()->Get<EventObservable>()->subscribe(
+    eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
         std::bind(&DragObservable::onEvent, this, std::placeholders::_1));
     eventSub->setUnsubscriber(unsub);
-    renderSub = ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
+    renderSub = ServiceSystem::Get<RenderService, RenderOrderObservable>()->subscribe(
         std::bind(&DragObservable::onRenderOrder, this, std::placeholders::_1));
     renderSub->setUnsubscriber(unsub);
 }

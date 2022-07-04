@@ -18,17 +18,17 @@ void Run() {
         }
 
         // Send update
-        ServiceSystem::Get<UpdateService>()->Get<UpdateObservable>()->next(e.dt());
+        ServiceSystem::Get<UpdateService, UpdateObservable>()->next(e.dt());
         // Send event
-        ServiceSystem::Get<EventService>()->Get<EventObservable>()->next(e);
+        ServiceSystem::Get<EventService, EventObservable>()->next(e);
 
         // Clear screen
         RenderSystem::clearScreen(LGRAY);
 
         // Send render order
-        ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->next();
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()->next();
         // Send renderer
-        ServiceSystem::Get<RenderService>()->Get<RenderObservable>()->next(Renderer::get());
+        ServiceSystem::Get<RenderService, RenderObservable>()->next(Renderer::get());
 
         // Display screen
         RenderSystem::presentScreen();

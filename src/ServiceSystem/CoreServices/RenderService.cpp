@@ -89,7 +89,7 @@ const std::vector<UIComponentPtr> &RenderOrderObservable::getOrder() const {
 // RenderObservable
 void RenderObservable::init() {
     // RenderService
-    renderOrderSub = ServiceSystem::Get<RenderService>()->Get<RenderOrderObservable>()->subscribe(
+    renderOrderSub = ServiceSystem::Get<RenderService, RenderOrderObservable>()->subscribe(
         std::bind(&RenderObservable::onRenderOrder, this, std::placeholders::_1));
     renderOrderSub->setUnsubscriber(unsub);
 }
