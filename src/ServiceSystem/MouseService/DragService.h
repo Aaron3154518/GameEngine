@@ -29,10 +29,13 @@ struct DragComponent : public UIComponent {
 
 typedef std::shared_ptr<DragComponent> DragComponentPtr;
 
+typedef Observable<const Event&, void(), DragComponent> DragObservableBase;
+
 class DragObservable : public Component,
-                       public Observable<const Event&, void(), DragComponent> {
+                       public DragObservableBase {
    public:
-    SubscriptionPtr subscribe(SubscriptionT::Function func, DragComponentPtr data);
+    SubscriptionPtr subscribe(Subscription::Function func, DragComponentPtr data);
+    void updateSubscriptionData(SubscriptionPtr sub, DragComponentPtr data);
 
    private:
     void init();

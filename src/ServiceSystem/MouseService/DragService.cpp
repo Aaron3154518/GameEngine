@@ -15,15 +15,20 @@ void DragObservable::init() {
     renderSub->setUnsubscriber(unsub);
 }
 
-DragObservable::SubscriptionPtr DragObservable::subscribe(SubscriptionT::Function func, DragComponentPtr data) {
-    SubscriptionPtr retVal =
-        Observable<const Event &, void(), DragComponent>::subscribe(func, data);
+DragObservable::SubscriptionPtr DragObservable::subscribe(Subscription::Function func, DragComponentPtr data) {
+    SubscriptionPtr retVal = DragObservableBase::subscribe(func, data);
     ServiceSystem::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
+void DragObservable::updateSubscriptionData(SubscriptionPtr sub, DragComponentPtr data) {
+    ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
+    DragObservableBase::updateSubscriptionData(sub, data);
+    ServiceSystem::Get<RenderService>()->addComponent(data);
+}
+
 bool DragObservable::unsubscribe(SubscriptionPtr sub) {
-    ServiceSystem::Get<RenderService>()->removeComponent(sub->data);
+    ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
     return true;
 }
 
@@ -32,28 +37,33 @@ void DragObservable::serve(const Event &e) {
     SDL_Point mousePos = e.mouse();
 
     if (current) {
-        if (!current->data->dragging || !current->data->visible || left.released()) {
-            current->data->onDragEnd();
-            current->data->dragging = false;
+        auto data = current->getData();
+        if (!data->dragging || !data->visible || left.released()) {
+            data->onDragEnd();
+            data->dragging = false;
             current.reset();
             // Release the lock on next update
         } else {
-            current->data->onDrag(mousePos.x, mousePos.y, e.mouseDx(), e.mouseDy());
+            data->onDrag(mousePos.x, mousePos.y, e.mouseDx(), e.mouseDy());
         }
     } else if (left.held()) {
+        auto underMouse = ServiceSystem::Get<RenderService, RenderOrderObservable>()->getUnderMouse();
+
         for (SubscriptionPtr sub : mSubscriptions) {
-            if (!sub->data->visible) {
+            auto data = sub->getData();
+
+            if (!data->visible) {
                 continue;
             }
 
-            if (SDL_PointInRect(&mousePos, &sub->data->rect)) {
-                int dragDelay = sub->data->dragDelay;
+            if (data == underMouse) {
+                int dragDelay = data->dragDelay;
                 if ((dragDelay < 0 && e.mouseMoved()) || (dragDelay >= 0 && left.duration >= dragDelay)) {
                     current = sub;
                     mouseLock = ServiceSystem::Get<MouseService, MouseObservable>()->requestLock();
-                    current->data->dragging = true;
-                    current->data->onDragStart();
-                    current->data->onDrag(mousePos.x, mousePos.y, e.mouseDx(), e.mouseDy());
+                    data->dragging = true;
+                    data->onDragStart();
+                    data->onDrag(mousePos.x, mousePos.y, e.mouseDx(), e.mouseDy());
                 }
                 break;
             }
@@ -76,7 +86,7 @@ void DragObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
 
     // Map out the order position of each subscription
     for (auto sub : mSubscriptions) {
-        idxs[sub] = std::find(order.begin(), order.end(), sub->data) - order.begin();
+        idxs[sub] = std::find(order.begin(), order.end(), sub->getData()) - order.begin();
     }
 
     // Sort the subcription by ascending order position

@@ -14,9 +14,12 @@
 #include <memory>
 #include <set>
 
-class MouseObservable : public Component, public Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> {
+typedef Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> MouseObservableBase;
+
+class MouseObservable : public Component, public MouseObservableBase {
    public:
-    SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
+    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
+    void updateSubscriptionData(SubscriptionPtr sub, UIComponentPtr data);
 
     void* requestLock();
     void releaseLock(void*& lock);
@@ -34,7 +37,6 @@ class MouseObservable : public Component, public Observable<Event::MouseButton, 
 
     std::set<std::unique_ptr<bool>> mLocks;
     EventObservable::SubscriptionPtr eventSub;
-    RenderOrderObservable::SubscriptionPtr renderSub;
 };
 
 class MouseService : public Service<MouseObservable> {};

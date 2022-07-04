@@ -18,50 +18,6 @@ struct Unsubscriber {
     std::shared_ptr<bool> mSubscribed = std::make_shared<bool>(true);
 };
 
-template <class Data, class RetT, class... ArgTs>
-class Subscription {
-   public:
-    typedef std::function<RetT(ArgTs...)> Function;
-
-    Subscription(Function func)
-        : subscription(func) {}
-    ~Subscription() = default;
-
-    void setUnsubscriber(Unsubscriber unsub) {
-        unsubscriber = unsub;
-    }
-
-    Unsubscriber getUnsubscriber() const {
-        return unsubscriber;
-    }
-
-    // Unsubscribes only this subscription
-    void unsubscribe() {
-        unsubscriber = Unsubscriber();
-        unsubscriber.unsubscribe();
-    }
-
-    void changeSubscription(Function func) {
-        subscription = func;
-    }
-
-    operator bool() const {
-        return unsubscriber;
-    }
-
-    RetT operator()(ArgTs... args) const {
-        return subscription(args...);
-    }
-
-    // Only include data if not void
-    std::enable_if_t<!std::is_same<Data, void>::value, Data> data;
-
-   private:
-    Function subscription;
-
-    Unsubscriber unsubscriber;
-};
-
 template <class T, class... Args>
 struct is_simple : std::false_type {};
 
@@ -71,17 +27,67 @@ struct is_simple<T, T> : std::true_type {};
 class ObservableBase {};
 
 // Full template, not usable
-template <class T, class RetT, class Data = void, class... ArgTs>
+template <class T, class RetT, class DaDataTta = void, class... ArgTs>
 class Observable : public ObservableBase {
     static_assert(!std::is_same<T, T>::value, "Must use specialized observable");
 };
 
 // Partially specialized template, use this
-template <class T, class RetT, class Data, class... ArgTs>
-class Observable<T, RetT(ArgTs...), Data> : public ObservableBase {
+template <class T, class RetT, class DataT, class... ArgTs>
+class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
+   private:
+    template <class Data, class Enable = void>
+    class SubscriptionBase {};
+
+    template <class Data>
+    class SubscriptionBase<Data, std::enable_if_t<!std::is_same<Data, void>::value>> {
+       public:
+        const std::shared_ptr<Data> &getData() const {
+            return data;
+        }
+
+       protected:
+        std::shared_ptr<Data> data;
+    };
+
    public:
-    typedef Subscription<std::shared_ptr<Data>, RetT, ArgTs...> SubscriptionT;
-    typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
+    class Subscription : public SubscriptionBase<DataT> {
+        friend class Observable<T, RetT(ArgTs...), DataT>;
+
+       public:
+        typedef std::function<RetT(ArgTs...)> Function;
+
+        Subscription(Function func) : subscription(func) {}
+        ~Subscription() = default;
+
+        void setUnsubscriber(Unsubscriber unsub) {
+            unsubscriber = unsub;
+        }
+
+        Unsubscriber getUnsubscriber() const {
+            return unsubscriber;
+        }
+
+        // Unsubscribes only this subscription
+        void unsubscribe() {
+            unsubscriber = Unsubscriber();
+            unsubscriber.unsubscribe();
+        }
+
+        operator bool() const {
+            return unsubscriber;
+        }
+
+        RetT operator()(ArgTs... args) const {
+            return subscription(args...);
+        }
+
+       private:
+        Function subscription;
+
+        Unsubscriber unsubscriber;
+    };
+    typedef std::shared_ptr<Subscription> SubscriptionPtr;
     typedef std::list<SubscriptionPtr> SubscriptionList;
     typedef typename SubscriptionList::iterator SubscriptionIterator;
 
@@ -91,47 +97,31 @@ class Observable<T, RetT(ArgTs...), Data> : public ObservableBase {
     // Used when no subscriber data
     // Generates standard subscription
     template <int N = 0>
-    typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>
-    subscribe(typename SubscriptionT::Function func) {
-        SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
+    typename std::enable_if_t<std::is_same<DataT, void>::value && N == N, SubscriptionPtr>
+    subscribe(typename Subscription::Function func) {
+        SubscriptionPtr sub = std::make_shared<Subscription>(func);
         mSubscriptions.push_back(sub);
-        return sub;
-    }
-
-    // Takes existing subscription, creates new if null else updates existing
-    template <int N = 0>
-    typename std::enable_if_t<std::is_same<Data, void>::value && N == N, SubscriptionPtr>
-    updateSubscription(SubscriptionPtr &sub, typename SubscriptionT::Function func) {
-        auto it = std::find(mSubscriptions.begin(), mSubscriptions.end(), sub);
-        if (it == mSubscriptions.end()) {
-            sub = subscribe(func);
-        } else {
-            sub->changeSubscription(func);
-        }
         return sub;
     }
 
     // Used when subscriber has data
     template <int N = 0>
-    typename std::enable_if_t<!std::is_same<Data, void>::value && N == N, SubscriptionPtr>
-    subscribe(typename SubscriptionT::Function func, std::shared_ptr<Data> data) {
-        SubscriptionPtr sub = std::make_shared<SubscriptionT>(func);
+    typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N, SubscriptionPtr>
+    subscribe(typename Subscription::Function func, std::shared_ptr<DataT> data) {
+        SubscriptionPtr sub = std::make_shared<Subscription>(func);
         sub->data = data;
         mSubscriptions.push_back(sub);
         return sub;
     }
 
+    void updateSubscription(SubscriptionPtr &sub, typename Subscription::Function func) {
+        sub->subscription = func;
+    }
+
     template <int N = 0>
-    typename std::enable_if_t<!std::is_same<Data, void>::value && N == N, SubscriptionPtr>
-    updateSubscription(SubscriptionPtr &sub, typename SubscriptionT::Function func, std::shared_ptr<Data> data) {
-        auto it = std::find(mSubscriptions.begin(), mSubscriptions.end(), sub);
-        if (it == mSubscriptions.end()) {
-            sub = subscribe(func, data);
-        } else {
-            sub->changeSubscription(func);
-            sub->data = data;
-        }
-        return sub;
+    typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N>
+    updateSubscriptionData(SubscriptionPtr &sub, std::shared_ptr<DataT> data) {
+        sub->data = data;
     }
 
     virtual void next(T val) {

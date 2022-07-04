@@ -16,9 +16,9 @@ void TestBase::init() {
 void TestBase::onRender(SDL_Renderer *renderer) {
     SDL_Color c = getColor();
     SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
-    SDL_RenderFillRect(renderer, &mRenderSub->data->rect);
+    SDL_RenderFillRect(renderer, &mRenderSub->getData()->rect);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &mRenderSub->data->rect);
+    SDL_RenderDrawRect(renderer, &mRenderSub->getData()->rect);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
 
@@ -60,9 +60,11 @@ void ChangeSubTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
         color = !color;
         if (color) {
-            mRenderSub->changeSubscription([](SDL_Renderer *) {});
+            ServiceSystem::Get<RenderService, RenderObservable>()->updateSubscription(
+                mRenderSub, [](SDL_Renderer *) {});
         } else {
-            mRenderSub->changeSubscription(std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1));
+            ServiceSystem::Get<RenderService, RenderObservable>()->updateSubscription(
+                mRenderSub, std::bind(&ChangeSubTest::onRender, this, std::placeholders::_1));
         }
     }
 }
@@ -169,8 +171,7 @@ SDL_Color InheritanceTestBase::getColor() const {
 
 void InheritanceTestBase::init() {
     TestBase::init();
-    ServiceSystem::Get<MouseService, MouseObservable>()->updateSubscription(
-        mMouseSub,
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&InheritanceTestBase::onClick, this, std::placeholders::_1, std::placeholders::_2, true),
         mPos);
     mMouseSub->setUnsubscriber(unsub);
@@ -198,8 +199,8 @@ InheritanceTestDerived::InheritanceTestDerived(Rect r, int e) : InheritanceTestB
 
 void InheritanceTestDerived::init() {
     InheritanceTestBase::init();
-    ServiceSystem::Get<MouseService, MouseObservable>()->updateSubscription(
-        mMouseSub,
+    mMouseSub->unsubscribe();
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&InheritanceTestDerived::onClick, this, std::placeholders::_1, std::placeholders::_2, false),
         mPos);
 }
@@ -224,7 +225,8 @@ void MultiUnsubTest::init() {
         std::bind(&MultiUnsubTest::onClick, this, std::placeholders::_1, std::placeholders::_2),
         mPos);
     mMouseSub->setUnsubscriber(unsub);
-    mRenderSub->changeSubscription(std::bind(&MultiUnsubTest::onRender, this, std::placeholders::_1));
+    ServiceSystem::Get<RenderService, RenderObservable>()->updateSubscription(
+        mRenderSub, std::bind(&MultiUnsubTest::onRender, this, std::placeholders::_1));
 }
 
 void MultiUnsubTest::onUpdate(Time dt) {
@@ -296,7 +298,7 @@ SDL_Color DragTest::getColor() const {
 
 void DragTest::init() {
     TestBase::init();
-    mRenderSub->data = mPos;
+    ServiceSystem::Get<RenderService, RenderObservable>()->updateSubscriptionData(mRenderSub, mPos);
     mDragSub = ServiceSystem::Get<DragService, DragObservable>()->subscribe(
         []() {}, mPos);
     mDragSub->setUnsubscriber(unsub);

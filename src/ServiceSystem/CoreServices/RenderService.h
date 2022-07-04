@@ -5,6 +5,7 @@
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
 #include <ServiceSystem/ServiceSystem.h>
+#include <Utils/Event.h>
 #include <Utils/Rect.h>
 
 #include <algorithm>
@@ -37,20 +38,29 @@ class RenderOrderObservable : public RenderOrderObservableBase {
     // Expose custom next
     void next();
 
+    void computeUnderMouse(const Event &e);
+    UIComponentPtr getUnderMouse() const;
+
     void addComponent(UIComponentPtr comp);
     void removeComponent(UIComponentPtr comp);
+
+    const std::vector<UIComponentPtr> &getOrder() const;
 
    private:
     void sort();
 
+    UIComponentPtr mUnderMouse;
     std::list<UIComponentPtr> mToAdd;
     std::vector<UIComponentPtr> mRenderOrder;
     std::unordered_map<UIComponentPtr, int> mRefCounts;
 };
 
-class RenderObservable : public Component, public Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> {
+typedef Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> RenderObservableBase;
+
+class RenderObservable : public Component, public RenderObservableBase {
    public:
-    SubscriptionPtr subscribe(SubscriptionT::Function func, UIComponentPtr data);
+    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
+    void updateSubscriptionData(SubscriptionPtr sub, UIComponentPtr data);
 
    private:
     void init();
