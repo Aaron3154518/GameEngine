@@ -15,8 +15,8 @@ void DragObservable::init() {
     renderSub->setUnsubscriber(unsub);
 }
 
-DragObservable::SubscriptionPtr DragObservable::subscribe(Subscription::Function func, DragComponentPtr data) {
-    SubscriptionPtr retVal = DragObservableBase::subscribe(func, data);
+DragObservable::SubscriptionPtr DragObservable::subscribe(DragComponentPtr data) {
+    SubscriptionPtr retVal = DragObservableBase::subscribe([]() {}, data);
     ServiceSystem::Get<RenderService>()->addComponent(data);
     return retVal;
 }

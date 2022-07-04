@@ -34,7 +34,7 @@ typedef Observable<const Event&, void(), DragComponent> DragObservableBase;
 class DragObservable : public Component,
                        public DragObservableBase {
    public:
-    SubscriptionPtr subscribe(Subscription::Function func, DragComponentPtr data);
+    SubscriptionPtr subscribe(DragComponentPtr data);
     void updateSubscriptionData(SubscriptionPtr sub, DragComponentPtr data);
 
    private:

@@ -299,8 +299,7 @@ SDL_Color DragTest::getColor() const {
 void DragTest::init() {
     TestBase::init();
     ServiceSystem::Get<RenderService, RenderObservable>()->updateSubscriptionData(mRenderSub, mPos);
-    mDragSub = ServiceSystem::Get<DragService, DragObservable>()->subscribe(
-        []() {}, mPos);
+    mDragSub = ServiceSystem::Get<DragService, DragObservable>()->subscribe(mPos);
     mDragSub->setUnsubscriber(unsub);
 }
 
