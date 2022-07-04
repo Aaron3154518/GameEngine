@@ -67,6 +67,43 @@ int Rect::CY() const {
     return (int)(cY() + ERR);
 }
 
+Rect Rect::getMinRect(SDL_Texture* tex, double maxW, double maxH) {
+    int imgW, imgH;
+    if (SDL_QueryTexture(tex, NULL, NULL, &imgW, &imgH) != 0) {
+        SDL_Log("SDL_QueryTexture failed: %s", SDL_GetError());
+        return Rect(0, 0, maxW, maxH);
+    }
+    Rect r = getMinRect(imgW, imgH, maxW, maxH);
+#ifdef DEBUG
+    std::cerr << "Got " << r << " from image with size " << imgW << " x " << imgH << std::endl;
+#endif
+    return r;
+}
+Rect Rect::getMinRect(double w, double h, double maxW, double maxH) {
+    // Save signs and make w/h positive
+    int wSign = 1, hSign = 1;
+    if (w < 0) {
+        w *= -1;
+        wSign = -1;
+    }
+    if (h < 0) {
+        h *= -1;
+        hSign = -1;
+    }
+
+    // maxW/maxH <= 0 or w/h <= 0 means ignore that dimensions
+    bool noW = maxW <= 0 || w <= 0, noH = maxH <= 0 || h <= 0;
+    double factor = 1.;
+    if (!noW && !noH) {
+        factor = std::fmin((double)maxW / w, (double)maxH / h);
+    } else if (noW && !noH) {
+        factor = (double)maxH / h;
+    } else if (!noW && noH) {
+        factor = (double)maxW / w;
+    }
+    return Rect(0, 0, wSign * w * factor, hSign * h * factor);
+}
+
 // Setters
 // Position and dimensions
 template <>

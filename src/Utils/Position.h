@@ -81,6 +81,32 @@ class Rect {
     int CX() const;
     int CY() const;
 
+    template <Align A = Align::TOP_LEFT>
+    int GetX() const {
+        return
+#if A == Align::BOT_RIGHT
+            X2();
+#elif A == Align::CENTER
+            CX();
+#else
+            X();
+#endif
+    }
+    template <Align A = Align::TOP_LEFT>
+    int GetY() const {
+        return
+#if A == Align::BOT_RIGHT
+            Y2();
+#elif A == Align::CENTER
+            CY();
+#else
+            Y();
+#endif
+    }
+
+    static Rect getMinRect(SDL_Texture* tex, double maxW, double maxH);
+    static Rect getMinRect(double w, double h, double maxW, double maxH);
+
     // Setters
     // Set positions and dimensions
     template <Align X = Align::TOP_LEFT, Align Y = X>
