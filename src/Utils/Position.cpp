@@ -7,6 +7,10 @@ bool eq(double v1, double v2, double err) {
 // Rect
 // Constructors
 Rect::Rect() : Rect(0, 0, 0, 0) {}
+Rect::Rect(double x, double y, double w, double h) {
+    setX<>(x, w);
+    setY<>(y, h);
+}
 Rect::Rect(const SDL_Rect& other) {
     set(other);
 }
@@ -104,87 +108,21 @@ Rect Rect::getMinRect(double w, double h, double maxW, double maxH) {
     return Rect(0, 0, wSign * w * factor, hSign * h * factor);
 }
 
-// Setters
-// Position and dimensions
-template <>
-void Rect::setX<Rect::Align::TOP_LEFT>(double _x, double _w) {
-    x = _x;
-    w = _w;
+std::string Rect::toString() const {
+    std::stringstream ss;
+    ss << "(" << x << ", " << y << ") -> ("
+       << x2() << ", " << y2() << "), ("
+       << w << "x" << h << "), ("
+       << cX() << ", " << cY() << ")";
+    return ss.str();
 }
-template <>
-void Rect::setY<Rect::Align::TOP_LEFT>(double _y, double _h) {
-    y = _y;
-    h = _h;
-}
-
-template <>
-void Rect::setX<Rect::Align::BOT_RIGHT>(double _x2, double _w) {
-    x = _x2 - _w;
-    w = _w;
-}
-template <>
-void Rect::setY<Rect::Align::BOT_RIGHT>(double _y2, double _h) {
-    y = _y2 - _h;
-    h = _h;
-}
-
-template <>
-void Rect::setX<Rect::Align::CENTER>(double _cx, double _w) {
-    x = _cx - _w / 2.0;
-    w = _w;
-}
-template <>
-void Rect::setY<Rect::Align::CENTER>(double _cy, double _h) {
-    y = _cy - _h / 2.0;
-    h = _h;
-}
-
-template <>
-void Rect::setX<Rect::Align::CORNERS>(double _x1, double _x2) {
-    x = _x1;
-    w = _x2 - _x1;
-}
-template <>
-void Rect::setY<Rect::Align::CORNERS>(double _y1, double _y2) {
-    y = _y1;
-    h = _y2 - _y1;
-}
-
-// Position only
-template <>
-void Rect::setPosX<Rect::Align::TOP_LEFT>(double _x) {
-    x = _x;
-}
-template <>
-void Rect::setPosY<Rect::Align::TOP_LEFT>(double _y) {
-    y = _y;
-}
-
-template <>
-void Rect::setPosX<Rect::Align::BOT_RIGHT>(double _x2) {
-    x = _x2 - w;
-}
-template <>
-void Rect::setPosY<Rect::Align::BOT_RIGHT>(double _y2) {
-    y = _y2 - h;
-}
-
-template <>
-void Rect::setPosX<Rect::Align::CENTER>(double _cx) {
-    x = _cx - w / 2.0;
-}
-template <>
-void Rect::setPosY<Rect::Align::CENTER>(double _cy) {
-    y = _cy - h / 2.0;
-}
-
-template <>
-void Rect::setPosX<Rect::Align::CORNERS>(double _x) {
-    x = _x;
-}
-template <>
-void Rect::setPosY<Rect::Align::CORNERS>(double _y) {
-    y = _y;
+std::string Rect::ToString() const {
+    std::stringstream ss;
+    ss << "(" << X() << ", " << Y() << ") -> ("
+       << X2() << ", " << Y2() << "), ("
+       << W() << "x" << H() << "), ("
+       << CX() << ", " << CY() << ")";
+    return ss.str();
 }
 
 // Operators

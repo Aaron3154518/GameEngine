@@ -4,6 +4,8 @@
 #include <SDL.h>
 
 #include <cmath>
+#include <sstream>
+#include <string>
 
 bool eq(double v1, double v2, double err);
 
@@ -20,11 +22,7 @@ class Rect {
     double ERR = 1e-5;
 
     Rect();
-    template <Align X = Align::TOP_LEFT, Align Y = X>
-    Rect(double v1x, double v1y, double v2x, double v2y) {
-        setX<X>(v1x, v2x);
-        setY<Y>(v1y, v2y);
-    }
+    Rect(double x, double y, double w, double h);
     Rect(const SDL_Rect& other);
     ~Rect() = default;
 
@@ -107,6 +105,9 @@ class Rect {
     static Rect getMinRect(SDL_Texture* tex, double maxW, double maxH);
     static Rect getMinRect(double w, double h, double maxW, double maxH);
 
+    std::string toString() const;
+    std::string ToString() const;
+
     // Setters
     // Set positions and dimensions
     template <Align X = Align::TOP_LEFT, Align Y = X>
@@ -136,9 +137,47 @@ class Rect {
     }
 
     template <Align A = Align::TOP_LEFT>
-    void setX(double v1, double v2);
+    void setX(double v1, double v2) {
+        switch (A) {
+            case Align::BOT_RIGHT:
+                x = v1 - v2;
+                w = v2;
+                break;
+            case Align::CENTER:
+                x = v1 - v2 / 2.0;
+                w = v2;
+                break;
+            case Align::CORNERS:
+                x = v1;
+                w = v2 - v1;
+                break;
+            default:
+                x = v1;
+                w = v2;
+                break;
+        }
+    }
     template <Align A = Align::TOP_LEFT>
-    void setY(double v1, double v2);
+    void setY(double v1, double v2) {
+        switch (A) {
+            case Align::BOT_RIGHT:
+                y = v1 - v2;
+                h = v2;
+                break;
+            case Align::CENTER:
+                y = v1 - v2 / 2.0;
+                h = v2;
+                break;
+            case Align::CORNERS:
+                y = v1;
+                h = v2 - v1;
+                break;
+            default:
+                y = v1;
+                h = v2;
+                break;
+        }
+    }
 
     // Set only position
     template <Align X = Align::TOP_LEFT, Align Y = X>
@@ -153,9 +192,45 @@ class Rect {
     }
 
     template <Align A = Align::TOP_LEFT>
-    void setPosX(double val);
+    void setPosX(double val) {}
     template <Align A = Align::TOP_LEFT>
-    void setPosY(double val);
+    void setPosY(double val) {}
+
+    template <Align A>
+    void setPosX<Align::TOP_LEFT>(double _x) {
+        x = _x;
+    }
+    template <Align A>
+    void setPosY<Align::TOP_LEFT>(double _y) {
+        y = _y;
+    }
+
+    template <Align A>
+    void setPosX<Align::BOT_RIGHT>(double _x2) {
+        x = _x2 - w;
+    }
+    template <Align A>
+    void setPosY<Align::BOT_RIGHT>(double _y2) {
+        y = _y2 - h;
+    }
+
+    template <Align A>
+    void setPosX<Align::CENTER>(double _cx) {
+        x = _cx - w / 2.0;
+    }
+    template <Align A>
+    void setPosY<Align::CENTER>(double _cy) {
+        y = _cy - h / 2.0;
+    }
+
+    template <Align A>
+    void setPosX<Align::CORNERS>(double _x) {
+        x = _x;
+    }
+    template <Align A>
+    void setPosY<Align::CORNERS>(double _y) {
+        y = _y;
+    }
 
     // Operators
     operator bool() const;
