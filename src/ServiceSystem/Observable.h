@@ -109,7 +109,7 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N, SubscriptionPtr>
     subscribe(typename Subscription::Function func, std::shared_ptr<DataT> data) {
         SubscriptionPtr sub = std::make_shared<Subscription>(func);
-        sub->data = data;
+        updateSubscriptionData(sub, data);
         mSubscriptions.push_back(sub);
         return sub;
     }
