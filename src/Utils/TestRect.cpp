@@ -4,7 +4,8 @@
 
 #include <iostream>
 
-void constructor_test() {
+void constructor_test()
+{
     std::cerr << "Testing Constructor" << std::endl;
     Rect r(0, 0, 500, 500);
     std::cerr << r.toString() << std::endl;
@@ -17,8 +18,11 @@ void constructor_test() {
     std::cerr << r.ToString() << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     std::cerr << "Hello World" << std::endl;
+
+    constructor_test();
 
     return 0;
 }

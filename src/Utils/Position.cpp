@@ -92,19 +92,21 @@ double Rect::getY<Rect::Align::CORNERS>() const
 
 int Rect::X() const
 {
-    return (int)(x + ERR);
+    return (int)(x + copysign(ERR, x));
 }
 int Rect::Y() const
 {
-    return (int)(y + ERR);
+    return (int)(y + copysign(ERR, y));
 }
 int Rect::X2() const
 {
-    return (int)(x2() + ERR);
+    double _x2 = x2();
+    return (int)(_x2 + copysign(ERR, _x2));
 }
 int Rect::Y2() const
 {
-    return (int)(y2() + ERR);
+    double _y2 = y2();
+    return (int)(_y2 + copysign(ERR, _y2));
 }
 int Rect::W() const
 {
@@ -116,11 +118,13 @@ int Rect::H() const
 }
 int Rect::CX() const
 {
-    return (int)(cX() + ERR);
+    double _cX = cX();
+    return (int)(_cX + copysign(ERR, _cX));
 }
 int Rect::CY() const
 {
-    return (int)(cY() + ERR);
+    double _cY = cY();
+    return (int)(_cY + copysign(ERR, _cY));
 }
 
 template <>
