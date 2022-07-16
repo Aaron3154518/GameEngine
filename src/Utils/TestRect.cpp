@@ -52,6 +52,39 @@ void normalize_test()
               << r.ToString() << std::endl;
 }
 
+void modify_test()
+{
+    std::cerr << "Testing Modification" << std::endl;
+
+    Rect r(0, 0, 500, 500);
+    std::cerr << r.toString() << "\n"
+              << r.ToString() << std::endl;
+
+    std::cerr << std::endl;
+
+    r.move(50, -50);
+    std::cerr << r.toString() << "\n"
+              << r.ToString() << std::endl;
+
+    std::cerr << std::endl;
+
+    r.move(50, -50, 100);
+    std::cerr << r.toString() << "\n"
+              << r.ToString() << std::endl;
+
+    std::cerr << std::endl;
+
+    r.resize<Rect::Align::CENTER, Rect::Align::BOT_RIGHT>(300, 200);
+    std::cerr << r.toString() << "\n"
+              << r.ToString() << std::endl;
+
+    std::cerr << std::endl;
+
+    r.resize<Rect::Align::TOP_LEFT, Rect::Align::CENTER>(2.5);
+    std::cerr << r.toString() << "\n"
+              << r.ToString() << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     std::cerr << "Hello World" << std::endl;
@@ -60,6 +93,9 @@ int main(int argc, char *argv[])
     std::cerr << "\n"
               << std::endl;
     normalize_test();
+    std::cerr << "\n"
+              << std::endl;
+    modify_test();
 
     return 0;
 }

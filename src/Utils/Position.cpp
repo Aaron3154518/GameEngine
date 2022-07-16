@@ -27,6 +27,16 @@ void Rect::normalize()
         h = -h;
     }
 }
+void Rect::move(double dX, double dY)
+{
+    setPos<Align::TOP_LEFT>(x + dX, y + dY);
+}
+void Rect::move(double mag, double dX, double dY)
+{
+    double dMag = sqrt(dX * dX + dY * dY);
+    double factor = dMag == 0 ? 0 : mag / dMag;
+    setPos<Align::TOP_LEFT>(x + dX * factor, y + dY * factor);
+}
 
 // Getters
 double Rect::x2() const

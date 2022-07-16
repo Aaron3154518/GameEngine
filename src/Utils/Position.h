@@ -31,6 +31,8 @@ public:
     bool empty() const;
     bool invalid() const;
     void normalize();
+    void move(double dX, double dY);
+    void move(double mag, double dX, double dY);
     template <Align X = Align::TOP_LEFT, Align Y = X>
     void resize(double nW, double nH)
     {
