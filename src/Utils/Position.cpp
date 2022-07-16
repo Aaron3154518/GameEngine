@@ -245,12 +245,14 @@ void Rect::setX<Rect::Align::TOP_LEFT>(double v1, double v2)
 {
     x = v1;
     w = v2;
+    normalize();
 }
 template <>
 void Rect::setY<Rect::Align::TOP_LEFT>(double v1, double v2)
 {
     y = v1;
     h = v2;
+    normalize();
 }
 
 template <>
@@ -258,12 +260,14 @@ void Rect::setX<Rect::Align::BOT_RIGHT>(double v1, double v2)
 {
     x = v1 - v2;
     w = v2;
+    normalize();
 }
 template <>
 void Rect::setY<Rect::Align::BOT_RIGHT>(double v1, double v2)
 {
     y = v1 - v2;
     h = v2;
+    normalize();
 }
 
 template <>
@@ -271,12 +275,14 @@ void Rect::setX<Rect::Align::CENTER>(double v1, double v2)
 {
     x = v1 - v2 / 2.0;
     w = v2;
+    normalize();
 }
 template <>
 void Rect::setY<Rect::Align::CENTER>(double v1, double v2)
 {
     y = v1 - v2 / 2.0;
     h = v2;
+    normalize();
 }
 
 template <>
@@ -284,12 +290,14 @@ void Rect::setX<Rect::Align::CORNERS>(double v1, double v2)
 {
     x = v1;
     w = v2 - v1;
+    normalize();
 }
 template <>
 void Rect::setY<Rect::Align::CORNERS>(double v1, double v2)
 {
     y = v1;
     h = v2 - v1;
+    normalize();
 }
 
 // Rect position
@@ -297,44 +305,52 @@ template <>
 void Rect::setPosX<Rect::Align::TOP_LEFT>(double _x)
 {
     x = _x;
+    normalize();
 }
 template <>
 void Rect::setPosY<Rect::Align::TOP_LEFT>(double _y)
 {
     y = _y;
+    normalize();
 }
 
 template <>
 void Rect::setPosX<Rect::Align::BOT_RIGHT>(double _x2)
 {
     x = _x2 - w;
+    normalize();
 }
 template <>
 void Rect::setPosY<Rect::Align::BOT_RIGHT>(double _y2)
 {
     y = _y2 - h;
+    normalize();
 }
 
 template <>
 void Rect::setPosX<Rect::Align::CENTER>(double _cx)
 {
     x = _cx - w / 2.0;
+    normalize();
 }
 template <>
 void Rect::setPosY<Rect::Align::CENTER>(double _cy)
 {
     y = _cy - h / 2.0;
+    normalize();
 }
 
 template <>
 void Rect::setPosX<Rect::Align::CORNERS>(double _x)
 {
     x = _x;
+    normalize();
 }
 template <>
 void Rect::setPosY<Rect::Align::CORNERS>(double _y)
 {
     y = _y;
+    normalize();
 }
 
 // Operators
