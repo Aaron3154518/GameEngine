@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     int w = cd.r2 * sqrt(2) * .9;
     Rect rdR(0, 0, w, w);
     rdR.setPos(halfW, halfW, Rect::Align::CENTER);
-    shapesTex.draw(rd.set(rdR));
+    shapesTex.draw(rd.set(rdR, 3));
 
     Uint32 time = SDL_GetTicks();
 

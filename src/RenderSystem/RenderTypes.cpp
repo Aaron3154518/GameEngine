@@ -198,7 +198,8 @@ Texture TextData::renderTextWrapped() {
             if (lineSurf) {
                 Rect lineRect = Rect(0, 0, lineSurf->w, lineSurf->h);
                 lineRect.setPos(lineR, align, Rect::Align::CENTER);
-                SDL_BlitSurface(lineSurf.get(), NULL, surf.get(), lineRect);
+                SDL_Rect lineRectSDL = lineRect.toSDLRect();
+                SDL_BlitSurface(lineSurf.get(), NULL, surf.get(), &lineRectSDL);
             } else {
 #ifdef RENDER_DEBUG
                 std::cerr << "line '" << line << "' produced a null surface"

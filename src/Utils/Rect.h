@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include <cmath>
+#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -65,6 +66,8 @@ class Rect : private SDL_Rect {
     std::string toString() const;
     std::string ToString() const;
 
+    SDL_Rect toSDLRect() const;
+
     // Setters
     // Set positions and dimensionsd
     void set(const Rect &r, Align aX = Align::TOP_LEFT);
@@ -89,7 +92,7 @@ class Rect : private SDL_Rect {
 
     // Operators
     operator bool() const;
-    operator SDL_Rect *() const;
+    operator const SDL_Rect *() const;
     friend std::ostream &operator<<(std::ostream &os, const Rect &rhs);
 };
 

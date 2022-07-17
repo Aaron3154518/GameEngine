@@ -11,6 +11,7 @@ Each struct contains data for rendering the item and functions to set the data.
 #include <Utils/Rect.h>
 
 #include <cmath>
+#include <iostream>
 
 // Shape rendering struct
 struct ShapeData {

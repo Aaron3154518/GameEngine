@@ -64,9 +64,10 @@ void TextureBuilder::draw(const RenderData &data) {
     }
     // Get the boundary rect
     Rect boundary = data.boundary;
+    SDL_Rect result;
     if (boundary.empty()) {
         boundary = renderBounds;
-    } else if (SDL_IntersectRect(boundary, renderBounds, boundary) ==
+    } else if (SDL_IntersectRect(boundary, renderBounds, &result) ==
                SDL_FALSE) {
 #ifdef RENDER_DEBUG
         std::cerr << "draw(): Boundary rect " << boundary
@@ -134,7 +135,9 @@ Rect TextureBuilder::getShapeBounds(const ShapeData &data) {
         return bounds;
     }
     // Interesect screen and shape boundary
-    SDL_IntersectRect(data.boundary, bounds, bounds);
+    SDL_Rect result;
+    SDL_IntersectRect(data.boundary, bounds, &result);
+    bounds = result;
     return bounds;
 }
 void TextureBuilder::endDrawShape() {
@@ -146,19 +149,22 @@ void TextureBuilder::draw(const RectData &data) {
     startDrawShape(data);
     Rect bounds = getShapeBounds(data);
     if (!bounds.empty()) {
+        SDL_Rect intersect;
         // Fill entire render target
         if (data.r2.empty()) {
             SDL_RenderFillRect(Renderer::get(), bounds);
             // Intersect r2 and bounds
-        } else if (SDL_IntersectRect(data.r2, bounds, bounds) == SDL_TRUE) {
-            // Start at r1
-            Rect r = data.r1;
+        } else if (SDL_IntersectRect(data.r2, bounds, &intersect) == SDL_TRUE) {
+            bounds = intersect;
             // Fill r2 if r is empty or not within bounds
             // Intersect r with bounds
-            if (r.empty() || SDL_IntersectRect(bounds, r, r) == SDL_FALSE) {
+            if (data.r1.empty() ||
+                SDL_IntersectRect(bounds, data.r1, &intersect) == SDL_FALSE) {
                 SDL_RenderFillRect(Renderer::get(), bounds);
                 // Fill bounds except for r
             } else {
+                // Start at r1
+                Rect r = data.r1;
                 // bounds is inclusive so draw once more when r = bounds
                 float oldW, oldH;
                 do {
@@ -169,13 +175,13 @@ void TextureBuilder::draw(const RectData &data) {
                         r.setWidth(r.w() + 1, Rect::Align::BOT_RIGHT);
                     }
                     if (r.Y() > bounds.Y()) {
-                        r.setHeight(r.w() + 1, Rect::Align::BOT_RIGHT);
+                        r.setHeight(r.h() + 1, Rect::Align::BOT_RIGHT);
                     }
                     if (r.X2() < bounds.X2()) {
                         r.setWidth(r.w() + 1, Rect::Align::TOP_LEFT);
                     }
                     if (r.Y2() < bounds.Y2()) {
-                        r.setHeight(r.w() + 1, Rect::Align::TOP_LEFT);
+                        r.setHeight(r.h() + 1, Rect::Align::TOP_LEFT);
                     }
                     SDL_RenderDrawRect(Renderer::get(), r);
                 } while (oldW != r.w() || oldH != r.h());

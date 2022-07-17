@@ -5,7 +5,7 @@ bool eq(float v1, float v2, float err) { return std::abs(v1 - v2) <= err; }
 // Constructors
 Rect::Rect() : Rect(0, 0, 0, 0) {}
 Rect::Rect(float _x, float _y, float _w, float _h) { set(_x, _y, _w, _h); }
-Rect::Rect(const SDL_Rect &other) { set(other); }
+Rect::Rect(const SDL_Rect &other) { set(other.x, other.y, other.w, other.h); }
 
 // Rect
 bool Rect::empty() const { return eq(_w, 0., ERR) && eq(_h, 0., ERR); }
@@ -173,6 +173,8 @@ std::string Rect::ToString() const {
     return ss.str();
 }
 
+SDL_Rect Rect::toSDLRect() const { return {X(), Y(), W(), H()}; }
+
 // Setters
 // Entire rect
 void Rect::set(const Rect &r, Align aX) { set(r, aX, aX); }
@@ -279,7 +281,7 @@ void Rect::setHeight(float vH, Align a) {
 
 // Operators
 Rect::operator bool() const { return !empty() && !invalid(); }
-Rect::operator SDL_Rect *() const { return (SDL_Rect *)this; }
+Rect::operator const SDL_Rect *() const { return (SDL_Rect *)this; }
 
 std::ostream &operator<<(std::ostream &os, const Rect &rhs) {
     os << rhs.toString();
