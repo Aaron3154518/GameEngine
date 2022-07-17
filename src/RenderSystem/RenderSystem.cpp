@@ -13,9 +13,9 @@ void initRenderSystem(const Options &options) {
             // Use opengl
             SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
-            WINDOW.reset(SDL_CreateWindow(options.title.c_str(),
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          options.width, options.height, flags));
+            WINDOW.reset(SDL_CreateWindow(
+                options.title.c_str(), SDL_WINDOWPOS_CENTERED,
+                SDL_WINDOWPOS_CENTERED, options.width, options.height, flags));
 
             Renderer::init(WINDOW.get());
         } else {
@@ -54,14 +54,13 @@ void teardownRenderSystem() {
 void clearScreen(SDL_Color bkgrnd) {
     SDL_Color tmp;
     SDL_GetRenderDrawColor(Renderer::get(), &tmp.r, &tmp.g, &tmp.b, &tmp.a);
-    SDL_SetRenderDrawColor(Renderer::get(), bkgrnd.r, bkgrnd.g, bkgrnd.b, bkgrnd.a);
+    SDL_SetRenderDrawColor(Renderer::get(), bkgrnd.r, bkgrnd.g, bkgrnd.b,
+                           bkgrnd.a);
     SDL_RenderClear(Renderer::get());
     SDL_SetRenderDrawColor(Renderer::get(), tmp.r, tmp.g, tmp.b, tmp.a);
 }
 
-void presentScreen() {
-    SDL_RenderPresent(Renderer::get());
-}
+void presentScreen() { SDL_RenderPresent(Renderer::get()); }
 
 void enforceFPS(int fps) {
     static Uint32 time = 0;
@@ -71,6 +70,12 @@ void enforceFPS(int fps) {
         SDL_Delay(delay - dt);
     }
     time = SDL_GetTicks();
+}
+
+SDL_Point getWindowSize() {
+    SDL_Point p;
+    SDL_GetRendererOutputSize(Renderer::get(), &p.x, &p.y);
+    return p;
 }
 
 }  // namespace RenderSystem

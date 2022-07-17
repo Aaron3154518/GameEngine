@@ -96,8 +96,12 @@ int main(int argc, char *argv[]) {
         while (pbVal > 1000.) {
             pbVal -= 1000.;
 
+            SDL_Point dim = RenderSystem::getWindowSize();
+
             timerVal *= 2;
-            timer.tData.text = std::to_string(timerVal);
+            timer.tData.text = std::to_string(dim.x) + "x" +
+                               std::to_string(dim.y) + " - " +
+                               std::to_string(timerVal);
             timer.renderText();
             timer.fitToTexture(0, timer.dest.h());
 
