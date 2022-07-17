@@ -1,6 +1,6 @@
 #include "TextureBuilder.h"
 
-#define RENDER_DEBUG
+//#define RENDER_DEBUG
 
 // TextureBuilder
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
