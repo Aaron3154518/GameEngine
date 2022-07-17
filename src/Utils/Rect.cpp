@@ -38,6 +38,10 @@ void Rect::resize(float factor, Align aX) {
 void Rect::resize(float factor, Align aX, Align aY) {
     setDim(_w * factor, _h * factor, aX, aY);
 }
+void Rect::fitWithin(const Rect &boundary) {
+    setPosX(std::max(std::min(_x, boundary.x2() - _w), 0.f));
+    setPosY(std::max(std::min(_y, boundary.y2() - _h), 0.f));
+}
 
 // Getters
 float Rect::x() const { return _x; }
@@ -48,6 +52,8 @@ float Rect::w() const { return _w; }
 float Rect::h() const { return _h; }
 float Rect::cX() const { return _x + _w / 2.0; }
 float Rect::cY() const { return _y + _h / 2.0; }
+float Rect::halfW() const { return _w / 2.0; }
+float Rect::halfH() const { return _h / 2.0; }
 
 float Rect::getX(Align a) const {
     switch (a) {

@@ -30,6 +30,7 @@ class Rect : private SDL_Rect {
     void move(float mag, float dX, float dY);
     void resize(float factor, Align aX = Align::TOP_LEFT);
     void resize(float factor, Align aX, Align aY);
+    void fitWithin(const Rect &boundary);
 
     // Getters
     float x() const;
@@ -40,6 +41,8 @@ class Rect : private SDL_Rect {
     float h() const;
     float cX() const;
     float cY() const;
+    float halfW() const;
+    float halfH() const;
 
     float getX(Align a = Align::TOP_LEFT) const;
     float getY(Align a = Align::TOP_LEFT) const;
