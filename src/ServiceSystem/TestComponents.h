@@ -181,7 +181,7 @@ class DragTest : public TestBase {
     void init();
 
     void onDragStart();
-    void onDrag(int x, int y, double dx, double dy);
+    void onDrag(int x, int y, float dx, float dy);
     void onDragEnd();
 
     SDL_Color dragColor = WHITE;

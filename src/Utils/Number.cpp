@@ -1,16 +1,18 @@
 #include "Number.h"
 
-constexpr auto MAX_Es = 5;                          // Max number of e's to display for tetration
-constexpr auto TOLERANCE = 1e-10;                   // Error tolerance when comparing doubles
-constexpr double CONVERT_UP = 1e10;                 // Value at which to increase the layer
-constexpr double CONVERT_DOWN = log10(CONVERT_UP);  // Value at which to decrease the layer
-constexpr double CONVERT_NEG = 1 / CONVERT_UP;      // Value at which to make the layer negative
-const Number MAX_DOUBLE = Number(std::numeric_limits<double>::max());
-const Number MIN_DOUBLE = Number(std::numeric_limits<double>::min());
+constexpr auto MAX_Es = 5;         // Max number of e's to display for tetration
+constexpr auto TOLERANCE = 1e-10;  // Error tolerance when comparing floats
+constexpr float CONVERT_UP = 1e10;  // Value at which to increase the layer
+constexpr float CONVERT_DOWN =
+    log10(CONVERT_UP);  // Value at which to decrease the layer
+constexpr float CONVERT_NEG =
+    1 / CONVERT_UP;  // Value at which to make the layer negative
+const Number MAX_float = Number(std::numeric_limits<float>::max());
+const Number MIN_float = Number(std::numeric_limits<float>::min());
 
 /*struct Pows {
 public:
-    static double getPow(int exp) {
+    static float getPow(int exp) {
         pows[MAX_EXP] = 1.;
         int idx = exp + MAX_EXP;
         if (idx < 0 || idx > pows.size()) { return 0.; }
@@ -27,23 +29,23 @@ else {
 return pows[idx];
     }
 Gprivate:
-    static std::array<double, MAX_EXP * 2 + 1> pows;
+    static std::array<float, MAX_EXP * 2 + 1> pows;
     static size_t lb, ub;
 };
-std::array<double, MAX_EXP * 2 + 1> Pows::pows;
+std::array<float, MAX_EXP * 2 + 1> Pows::pows;
 size_t Pows::lb = MAX_EXP - 1, Pows::ub = MAX_EXP + 1;*/
 
-Number::Number(int layer, double exp, int sign) : mLayer(layer), mExp(exp), mSign((sign > 0) - (sign < 0)) {
+Number::Number(int layer, float exp, int sign)
+    : mLayer(layer), mExp(exp), mSign((sign > 0) - (sign < 0)) {
     balance();
 }
-Number::Number(double val) : Number(0, std::abs(val),
-                                    (val > 0.) - (val < 0.)) {}
-Number::Number(double val, int exp) : Number(1,
-                                             val == 0 ? 0 : log10(std::abs(val)) + exp,
-                                             (val > 0) - (val < 0)) {}
+Number::Number(float val) : Number(0, std::abs(val), (val > 0.) - (val < 0.)) {}
+Number::Number(float val, int exp)
+    : Number(1, val == 0 ? 0 : log10(std::abs(val)) + exp,
+             (val > 0) - (val < 0)) {}
 Number::Number(std::string str) {
     Number n(0, 1, 1);
-    double num1 = 0., num2 = 0.;
+    float num1 = 0., num2 = 0.;
     int exp1 = -1, exp2 = -1;
     for (auto it = str.crbegin(); it != str.crend(); ++it) {
         if (*it == 'e' || *it == 'E') {
@@ -67,17 +69,17 @@ Number::Number(std::string str) {
     copy(Number(num1, exp1) ^ n);
 }
 
-double Number::toDouble() const {
-    if (absValCopy() >= MAX_DOUBLE) {
-        return mSign * std::numeric_limits<double>::max();
+float Number::tofloat() const {
+    if (absValCopy() >= MAX_float) {
+        return mSign * std::numeric_limits<float>::max();
     }
-    if (absValCopy() <= MIN_DOUBLE) {
-        return mSign * std::numeric_limits<double>::min();
+    if (absValCopy() <= MIN_float) {
+        return mSign * std::numeric_limits<float>::min();
     }
     if (mLayer == 0) {
         return mSign * mExp;
     }
-    double val = mExp;
+    float val = mExp;
     for (int i = 1; i < abs(mLayer); ++i) {
         val = pow(10, val);
     }
@@ -87,9 +89,7 @@ double Number::toDouble() const {
     return mSign * pow(10, -val);
 }
 
-Number Number::copy() const {
-    return Number(mLayer, mExp, mSign);
-}
+Number Number::copy() const { return Number(mLayer, mExp, mSign); }
 void Number::copy(const Number &n) {
     mLayer = n.mLayer;
     mExp = n.mExp;
@@ -176,8 +176,8 @@ Number &Number::add(const Number &num) {
             copy(num);
         }
     } else {
-        double x = mLayer == 0 ? log10(mExp) : mLayer * mExp;
-        double y = num.mLayer == 0 ? log10(num.mExp) : num.mLayer * num.mExp;
+        float x = mLayer == 0 ? log10(mExp) : mLayer * mExp;
+        float y = num.mLayer == 0 ? log10(num.mExp) : num.mLayer * num.mExp;
         // 10^x + 10^y = 10^(log(10^(y-x) + 1) + x)
         // -10^x + -10^y = -(10^x + 10^y)
         if (mSign * num.mSign == 1) {
@@ -186,13 +186,13 @@ Number &Number::add(const Number &num) {
         // 10^x + -10^y = 10^(log(1 - 10^(y-x)) + x)
         // -10^x + 10^y = -(10^x + -10^y)
         else {
-            // Note that y<x must be true so if y>x, swap x and y and negate answer
-            // and if y=x, the answer is zero
+            // Note that y<x must be true so if y>x, swap x and y and negate
+            // answer and if y=x, the answer is zero
             if (y == x) {
                 mSign = 0;
             } else {
                 if (y > x) {
-                    double tmp = x;
+                    float tmp = x;
                     x = y;
                     y = tmp;
                     mSign *= -1;
@@ -356,7 +356,8 @@ Number &Number::ceilNum() {
 
 // Comparison Operators
 bool Number::equal(const Number &num) const {
-    return mLayer == num.mLayer && std::abs(mExp - num.mExp) < TOLERANCE && mSign == num.mSign;
+    return mLayer == num.mLayer && std::abs(mExp - num.mExp) < TOLERANCE &&
+           mSign == num.mSign;
 }
 bool Number::less(const Number &num) const {
     if (equal(num)) {
@@ -373,10 +374,11 @@ bool Number::less(const Number &num) const {
 }
 
 void Number::printAll() const {
-    std::cout << "Layer = " << mLayer << ", Exponent = " << mExp << ", Sign = " << mSign << std::endl;
+    std::cout << "Layer = " << mLayer << ", Exponent = " << mExp
+              << ", Sign = " << mSign << std::endl;
 }
 
-double round(double val, double precision) {
+float round(float val, float precision) {
     return floor(val / precision + 0.5) * precision;
 }
 
@@ -389,7 +391,7 @@ std::ostream &operator<<(std::ostream &os, const Number &rhs) {
     }
     if (std::abs(rhs.mLayer) == 1) {
         int exp = (int)rhs.mExp;
-        double m = floor(pow(10, rhs.mExp - exp) * 100.) / 100.;
+        float m = floor(pow(10, rhs.mExp - exp) * 100.) / 100.;
         os << m << "e" << exp;
     } else {
         if (std::abs(rhs.mLayer) < MAX_Es) {
@@ -402,7 +404,7 @@ std::ostream &operator<<(std::ostream &os, const Number &rhs) {
         if (rhs.mExp == 0. || 0.01 <= rhs.mExp && rhs.mExp < 1000) {
             os << round(rhs.mExp, 0.01);
         } else {
-            double val = log10(rhs.mExp);
+            float val = log10(rhs.mExp);
             os << round(pow(10, val - (int)val), 0.01) << "e" << (int)val;
         }
     }

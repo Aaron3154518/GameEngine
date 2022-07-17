@@ -1,5 +1,6 @@
 /*
-This files contains the AssetManager class which manages all fonts and loaded images.
+This files contains the AssetManager class which manages all fonts and loaded
+images.
 */
 
 #ifndef ASSET_MANAGER_H
@@ -8,9 +9,11 @@ This files contains the AssetManager class which manages all fonts and loaded im
 #include <RenderSystem/RenderTypes.h>
 #include <RenderSystem/Renderer.h>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <sys/stat.h>
 
+#include <iostream>
 #include <map>
 #include <string>
 

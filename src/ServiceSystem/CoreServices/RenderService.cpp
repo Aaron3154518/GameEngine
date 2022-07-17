@@ -1,7 +1,8 @@
 #include "RenderService.h"
 
 // UIComponentCompare
-bool UIComponentCompare::operator()(const UIComponentPtr &a, const UIComponentPtr &b) const {
+bool UIComponentCompare::operator()(const UIComponentPtr &a,
+                                    const UIComponentPtr &b) const {
     return a->elevation <= b->elevation;
 }
 
@@ -11,7 +12,7 @@ void RenderOrderObservable::computeUnderMouse(const Event &e) {
 
     SDL_Point mouse = e.mouse();
     for (auto it = mRenderOrder.rbegin(); it != mRenderOrder.rend(); ++it) {
-        if ((*it)->visible && SDL_PointInRect(&mouse, &(*it)->rect)) {
+        if ((*it)->visible && SDL_PointInRect(&mouse, (*it)->rect)) {
             mUnderMouse = *it;
             break;
         }
@@ -89,8 +90,10 @@ const std::vector<UIComponentPtr> &RenderOrderObservable::getOrder() const {
 // RenderObservable
 void RenderObservable::init() {
     // RenderService
-    renderOrderSub = ServiceSystem::Get<RenderService, RenderOrderObservable>()->subscribe(
-        std::bind(&RenderObservable::onRenderOrder, this, std::placeholders::_1));
+    renderOrderSub =
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()->subscribe(
+            std::bind(&RenderObservable::onRenderOrder, this,
+                      std::placeholders::_1));
     renderOrderSub->setUnsubscriber(unsub);
 }
 
@@ -98,13 +101,15 @@ void RenderObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
     sort(order);
 }
 
-RenderObservable::SubscriptionPtr RenderObservable::subscribe(Subscription::Function func, UIComponentPtr data) {
+RenderObservable::SubscriptionPtr RenderObservable::subscribe(
+    Subscription::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal = RenderObservableBase::subscribe(func, data);
     ServiceSystem::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
-void RenderObservable::updateSubscriptionData(SubscriptionPtr sub, UIComponentPtr data) {
+void RenderObservable::updateSubscriptionData(SubscriptionPtr sub,
+                                              UIComponentPtr data) {
     ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
     RenderObservableBase::updateSubscriptionData(sub, data);
     ServiceSystem::Get<RenderService>()->addComponent(data);
@@ -128,13 +133,15 @@ void RenderObservable::sort(const std::vector<UIComponentPtr> &order) {
 
     // Map out the order position of each subscription
     for (auto sub : mSubscriptions) {
-        idxs[sub] = std::find(order.begin(), order.end(), sub->getData()) - order.begin();
+        idxs[sub] = std::find(order.begin(), order.end(), sub->getData()) -
+                    order.begin();
     }
 
     // Sort the subcription by ascending order position
-    mSubscriptions.sort([&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
-        return idxs.at(a) <= idxs.at(b);
-    });
+    mSubscriptions.sort(
+        [&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
+            return idxs.at(a) <= idxs.at(b);
+        });
 }
 
 // RenderService

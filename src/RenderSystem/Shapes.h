@@ -42,11 +42,11 @@ struct CircleData : public ShapeData {
 struct ProgressBar : public ShapeData {
     ProgressBar &set(const Rect &r);
     ProgressBar &set(SDL_Color foreground, SDL_Color background);
-    ProgressBar &set(double amnt, double cap, bool log = false);
-    ProgressBar &set(double percent);
+    ProgressBar &set(float amnt, float cap, bool log = false);
+    ProgressBar &set(float percent);
 
     Rect rect;
-    double perc = 0.;
+    float perc = 0.;
     SDL_Color bkgrnd = GRAY;
 };
 

@@ -14,11 +14,7 @@ class Event {
     Event() = default;
     ~Event() = default;
 
-    enum Mouse : uint8_t {
-        LEFT = 0,
-        RIGHT,
-        MIDDLE
-    };
+    enum Mouse : uint8_t { LEFT = 0, RIGHT, MIDDLE };
     enum Button : uint8_t {
         PRESSED = 0x01,
         RELEASED = 0x02,
@@ -58,8 +54,8 @@ class Event {
     int newH() const;
 
     SDL_Point mouse() const;
-    double mouseDx() const;
-    double mouseDy() const;
+    float mouseDx() const;
+    float mouseDy() const;
     bool mouseMoved() const;
     int scroll() const;
 
@@ -75,7 +71,7 @@ class Event {
 
     // Don't belong in Event
     static bool bitsSet(uint8_t val, uint8_t check);
-    static double distance(SDL_Point p1, SDL_Point p2);
+    static float distance(SDL_Point p1, SDL_Point p2);
 
    private:
     static constexpr int MAX_CLICK_DIFF = 10;
@@ -87,7 +83,7 @@ class Event {
     int mNewW = 0, mNewH = 0;
 
     SDL_Point mMouse;
-    double mMouseDx = 0., mMouseDy = 0.;
+    float mMouseDx = 0., mMouseDy = 0.;
     // < 0 = down, > 0 = up
     int mScroll = 0;
 

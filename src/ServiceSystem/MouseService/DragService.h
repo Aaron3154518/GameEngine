@@ -24,15 +24,14 @@ struct DragComponent : public UIComponent {
     bool dragging = false;
 
     std::function<void()> onDragStart, onDragEnd;
-    std::function<void(int, int, double, double)> onDrag;
+    std::function<void(int, int, float, float)> onDrag;
 };
 
 typedef std::shared_ptr<DragComponent> DragComponentPtr;
 
 typedef Observable<const Event&, void(), DragComponent> DragObservableBase;
 
-class DragObservable : public Component,
-                       public DragObservableBase {
+class DragObservable : public Component, public DragObservableBase {
    public:
     SubscriptionPtr subscribe(DragComponentPtr data);
     void updateSubscriptionData(SubscriptionPtr sub, DragComponentPtr data);

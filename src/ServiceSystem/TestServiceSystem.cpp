@@ -26,9 +26,9 @@ int main(int argc, char *argv[]) {
             // Use opengl
             SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
-            window = SDL_CreateWindow("Service System Test",
-                                      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                      w, h, flags);
+            window =
+                SDL_CreateWindow("Service System Test", SDL_WINDOWPOS_CENTERED,
+                                 SDL_WINDOWPOS_CENTERED, w, h, flags);
 
             renderer = SDL_CreateRenderer(window, -1, 0);
         } else {
@@ -49,16 +49,20 @@ int main(int argc, char *argv[]) {
     auto t1 = ComponentFactory<ClickRenderTest>::New(Rect(25, 25, 200, 450), 1);
     auto t2 = ComponentFactory<ChangeSubTest>::New(Rect(50, 50, 400, 50), 3);
     auto t3 = ComponentFactory<VisibilityTest>::New(Rect(230, 280, 40, 40), 10);
-    auto t4 = ComponentFactory<InheritanceTestBase>::New(Rect(230, 330, 40, 40), 5);
-    auto t5 = ComponentFactory<ClickRenderTest>::New(Rect(275, 25, 200, 450), 3);
+    auto t4 =
+        ComponentFactory<InheritanceTestBase>::New(Rect(230, 330, 40, 40), 5);
+    auto t5 =
+        ComponentFactory<ClickRenderTest>::New(Rect(275, 25, 200, 450), 3);
     auto t6 = ComponentFactory<UnsubTest>::New(Rect(50, 400, 400, 50), 2);
     auto t7 = ComponentFactory<UpdateTest>::New(Rect(230, 180, 40, 40), 10);
-    auto t8 = ComponentFactory<InheritanceTestDerived>::New(Rect(230, 130, 40, 40), 5);
+    auto t8 = ComponentFactory<InheritanceTestDerived>::New(
+        Rect(230, 130, 40, 40), 5);
     auto t9 = ComponentFactory<MultiUnsubTest>::New(Rect(230, 230, 40, 40), 9);
     auto t10 = ComponentFactory<MouseLockTest>::New(Rect(100, 225, 50, 50), 10);
     auto t11 = ComponentFactory<DragTest>::New(Rect(405, 180, 40, 40), 11, -1);
     auto t12 = ComponentFactory<DragTest>::New(Rect(405, 230, 40, 40), 11, 0);
-    auto t13 = ComponentFactory<DragTest>::New(Rect(405, 280, 40, 40), 11, 1000);
+    auto t13 =
+        ComponentFactory<DragTest>::New(Rect(405, 280, 40, 40), 11, 1000);
 
     Event e;
 

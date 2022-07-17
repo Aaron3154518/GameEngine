@@ -8,11 +8,9 @@ std::map<FontData, SharedFont> AssetManager::mFonts;
 bool FontData::operator<(const FontData &rhs) const {
     return w < rhs.w ||
            (w == rhs.w &&
-            (h < rhs.h ||
-             (h == rhs.h &&
-              (sample.compare(rhs.sample) < 0 ||
-               (sample.compare(rhs.sample) == 0 &&
-                file.compare(rhs.file) < 0)))));
+            (h < rhs.h || (h == rhs.h && (sample.compare(rhs.sample) < 0 ||
+                                          (sample.compare(rhs.sample) == 0 &&
+                                           file.compare(rhs.file) < 0)))));
 }
 
 // AssetManager
@@ -30,7 +28,8 @@ SharedTexture AssetManager::getTexture(std::string file) {
                 return makeSharedTexture();
             }
         }
-        SharedTexture tex = makeSharedTexture(IMG_LoadTexture(Renderer::get(), file.c_str()));
+        SharedTexture tex =
+            makeSharedTexture(IMG_LoadTexture(Renderer::get(), file.c_str()));
         mTextures[file] = tex;
         return tex;
     }
@@ -48,12 +47,14 @@ SharedFont AssetManager::getFont(const FontData &data) {
             int w, h;
             getTextSize(data.file, minSize, data.sample, &w, &h);
             // While too small
-            while ((data.w <= 0 || w <= data.w) && (data.h <= 0 || h <= data.h)) {
+            while ((data.w <= 0 || w <= data.w) &&
+                   (data.h <= 0 || h <= data.h)) {
                 minSize = maxSize;
                 maxSize *= 2;
                 getTextSize(data.file, maxSize, data.sample, &w, &h);
             }
-            // Terminate when maxSize (too big) is right after minSize (too small)
+            // Terminate when maxSize (too big) is right after minSize (too
+            // small)
             while (maxSize - minSize > 1) {
                 int size = (maxSize + minSize) / 2;
                 getTextSize(data.file, size, data.sample, &w, &h);
@@ -66,15 +67,14 @@ SharedFont AssetManager::getFont(const FontData &data) {
                 }
             }
         }
-        SharedFont font = makeSharedFont(TTF_OpenFont(data.file.c_str(), minSize));
+        SharedFont font =
+            makeSharedFont(TTF_OpenFont(data.file.c_str(), minSize));
         mFonts[data] = font;
         return font;
     }
 }
 
-const std::string &AssetManager::getDefaultTexture() {
-    return mDefaultTexture;
-}
+const std::string &AssetManager::getDefaultTexture() { return mDefaultTexture; }
 void AssetManager::setDefaultTexture(const std::string &str) {
     mDefaultTexture = str;
 }

@@ -27,9 +27,9 @@ int main(int argc, char *argv[]) {
             // Use opengl
             SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
-            window = SDL_CreateWindow("Event System Test",
-                                      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                      w, h, flags);
+            window =
+                SDL_CreateWindow("Event System Test", SDL_WINDOWPOS_CENTERED,
+                                 SDL_WINDOWPOS_CENTERED, w, h, flags);
 
             renderer = SDL_CreateRenderer(window, -1, 0);
         } else {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     TTF_Font *font = TTF_OpenFont("res/fonts/times.ttf", mouseW);
 
-    double sFrac = 0., dFrac = 0.;
+    float sFrac = 0., dFrac = 0.;
 
     Event e;
 
@@ -83,13 +83,13 @@ int main(int argc, char *argv[]) {
         }
 
         if (sFrac > 0.) {
-            sFrac = fmax(0., sFrac - (double)e.dt() / 1000);
+            sFrac = fmax(0., sFrac - (float)e.dt() / 1000);
         } else if (sFrac < 0.) {
-            sFrac = fmin(0., sFrac + (double)e.dt() / 1000);
+            sFrac = fmin(0., sFrac + (float)e.dt() / 1000);
         }
 
         if (dFrac > 0.) {
-            dFrac = fmax(0., dFrac - (double)e.dt() / 1000);
+            dFrac = fmax(0., dFrac - (float)e.dt() / 1000);
         }
 
         std::stringstream pr, re, he;
@@ -136,24 +136,26 @@ int main(int argc, char *argv[]) {
         // Scroll
         r = SDL_Rect{0, mouseW, w / 2, mouseW};
         if (e.scroll() != 0) {
-            sFrac = (double)e.scroll() / 2.;
+            sFrac = (float)e.scroll() / 2.;
         }
         if (sFrac >= 0.) {
-            double val = sqrt(fmin(1, sFrac));
-            SDL_SetRenderDrawColor(renderer, 255 * val, 0, 255 * (1 - val), 255);
+            float val = sqrt(fmin(1, sFrac));
+            SDL_SetRenderDrawColor(renderer, 255 * val, 0, 255 * (1 - val),
+                                   255);
         } else {
-            double val = sqrt(fmin(1, -sFrac));
-            SDL_SetRenderDrawColor(renderer, 0, 255 * val, 255 * (1 - val), 255);
+            float val = sqrt(fmin(1, -sFrac));
+            SDL_SetRenderDrawColor(renderer, 0, 255 * val, 255 * (1 - val),
+                                   255);
         }
         SDL_RenderFillRect(renderer, &r);
 
         // Drag
         r.x += w / 2;
-        double d = sqrt(e.mouseDx() * e.mouseDx() + e.mouseDy() * e.mouseDy());
+        float d = sqrt(e.mouseDx() * e.mouseDx() + e.mouseDy() * e.mouseDy());
         if (d != 0.) {
             dFrac = d / 250.;
         }
-        double val = sqrt(fmin(1, dFrac));
+        float val = sqrt(fmin(1, dFrac));
         SDL_SetRenderDrawColor(renderer, 255, 255 * (1 - val), 255 * val, 255);
         SDL_RenderFillRect(renderer, &r);
 

@@ -1,93 +1,95 @@
-#ifndef RECT_H
-#define RECT_H
+#ifndef POSITION_H
+#define POSITION_H
 
 #include <SDL.h>
-#include <SDL_image.h>
 
 #include <cmath>
-#include <iostream>
+#include <sstream>
+#include <string>
 
-// namespace utils {
-class Rect : public SDL_Rect {
+bool eq(float v1, float v2, float err);
+
+class Rect : private SDL_Rect {
+   private:
+    float _x, _y, _w, _h;
+
    public:
-    enum Align : uint8_t {
-        TOP_LEFT = 0,
-        CENTER,
-        BOT_RIGHT
-    };
+    enum Align : uint8_t { TOP_LEFT = 0, CENTER, BOT_RIGHT, CORNERS };
+
+    float ERR = 1e-5;
 
     Rect();
-    Rect(int x, int y, int w, int h);
+    Rect(float x, float y, float w, float h);
     Rect(const SDL_Rect &other);
-    ~Rect();
+    ~Rect() = default;
 
-    Rect &operator=(const SDL_Rect &rhs);
-    bool operator==(const Rect &rhs);
-    bool operator!=(const Rect &rhs) { return !(*this == rhs); }
-
-    int x2() const { return x + w; }
-    int y2() const { return y + h; }
-    double cX() const { return x + (double)w / 2; }
-    double cY() const { return y + (double)h / 2; }
-    SDL_Point topLeft() const { return SDL_Point{x, y}; }
-    SDL_Point topRight() const { return SDL_Point{x + w, y}; }
-    SDL_Point bottomLeft() const { return SDL_Point{x, y + h}; }
-    SDL_Point bottomRight() const { return SDL_Point{x + w, y + h}; }
-    SDL_Point center() const { return SDL_Point{x + w / 2, y + h / 2}; }
-    SDL_Point dim() const { return SDL_Point{w, h}; }
-    bool empty() const { return w == 0 || h == 0; }
-    bool invalid() const { return w < 0 || h < 0; }
-
-    void shift(int dX, int dY);
-    void setPos(const Rect &r, Align mode);
-    void setPos(const Rect &r, Align xMode, Align yMode);
-    void setX2(double nX2) { x = (int)(nX2 - w); }
-    void setY2(double nY2) { y = (int)(nY2 - h); }
-    void setCX(double nCX) { x = (int)(nCX - w / 2); }
-    void setCY(double nCY) { y = (int)(nCY - h / 2); }
-    void setCenter(double nCX, double nCY);
-    void setCenter(const SDL_Point &pos);
-    void setTopLeft(const SDL_Point &pos);
-    void setBottomRight(const SDL_Point &pos);
-    void resize(SDL_Point nDim, bool center);
-    void resize(int nW, int nH, bool center);
-    void resizeFactor(double factor, bool center);
+    bool empty() const;
+    bool invalid() const;
     void normalize();
+    void move(float dX, float dY);
+    void move(float mag, float dX, float dY);
+    void resize(float factor, Align aX = Align::TOP_LEFT);
+    void resize(float factor, Align aX, Align aY);
 
-    static Rect getMinRect(SDL_Texture *tex, int maxW, int maxH);
-    static Rect getMinRect(int w, int h, int maxW, int maxH);
+    // Getters
+    float x() const;
+    float y() const;
+    float x2() const;
+    float y2() const;
+    float w() const;
+    float h() const;
+    float cX() const;
+    float cY() const;
 
-    operator bool() { return !empty() && !invalid(); }
+    float getX(Align a = Align::TOP_LEFT) const;
+    float getY(Align a = Align::TOP_LEFT) const;
+
+    int X() const;
+    int Y() const;
+    int X2() const;
+    int Y2() const;
+    int W() const;
+    int H() const;
+    int CX() const;
+    int CY() const;
+
+    float GetX(Align a = Align::TOP_LEFT) const;
+    float GetY(Align a = Align::TOP_LEFT) const;
+
+    static Rect getMinRect(SDL_Texture *tex, float maxW, float maxH);
+    static Rect getMinRect(float w, float h, float maxW, float maxH);
+
+    std::string toString() const;
+    std::string ToString() const;
+
+    // Setters
+    // Set positions and dimensionsd
+    void set(const Rect &r, Align aX = Align::TOP_LEFT);
+    void set(const Rect &r, Align aX, Align aY);
+    void set(float v1x, float v1y, float v2x, float v2y,
+             Align aX = Align::TOP_LEFT);
+    void set(float v1x, float v1y, float v2x, float v2y, Align aX, Align aY);
+
+    void setPos(const Rect &r, Align aX = Align::TOP_LEFT);
+    void setPos(const Rect &r, Align aX, Align aY);
+    void setPos(float vx, float vy, Align aX = Align::TOP_LEFT);
+    void setPos(float vx, float vy, Align aX, Align aY);
+
+    void setDim(float nW, float nH, Align aX = Align::TOP_LEFT);
+    void setDim(float nW, float nH, Align aX, Align aY);
+
+    void setPosX(float val, Align a = Align::TOP_LEFT);
+    void setPosY(float val, Align a = Align::TOP_LEFT);
+
+    void setWidth(float vW, Align a = Align::TOP_LEFT);
+    void setHeight(float vH, Align a = Align::TOP_LEFT);
+
+    // Operators
+    operator bool() const;
+    operator SDL_Rect *() const;
     friend std::ostream &operator<<(std::ostream &os, const Rect &rhs);
-    friend Rect &operator+=(Rect &lhs, const SDL_Point &rhs);
-    friend Rect operator+(Rect lhs, const SDL_Point &rhs);
-    friend Rect &operator-=(Rect &lhs, const SDL_Point &rhs);
-    friend Rect operator-(Rect lhs, const SDL_Point &rhs);
 };
-//}
 
-// TODO: Move these!
-// For comparing SDL_Points
-bool operator==(const SDL_Point &lhs, const SDL_Point &rhs);
-bool operator!=(const SDL_Point &lhs, const SDL_Point &rhs);
-// Point with point
-SDL_Point &operator+=(SDL_Point &lhs, const SDL_Point &rhs);
-SDL_Point operator+(SDL_Point lhs, const SDL_Point &rhs);
-SDL_Point &operator-=(SDL_Point &lhs, const SDL_Point &rhs);
-SDL_Point operator-(SDL_Point lhs, const SDL_Point &rhs);
-SDL_Point &operator*=(SDL_Point &lhs, const SDL_Point &rhs);
-SDL_Point operator*(SDL_Point lhs, const SDL_Point &rhs);
-SDL_Point &operator/=(SDL_Point &lhs, const SDL_Point &rhs);
-SDL_Point operator/(SDL_Point lhs, const SDL_Point &rhs);
-// Point with double
-SDL_Point &operator+=(SDL_Point &lhs, const double &rhs);
-SDL_Point operator+(SDL_Point lhs, const double &rhs);
-SDL_Point &operator-=(SDL_Point &lhs, const double &rhs);
-SDL_Point operator-(SDL_Point lhs, const double &rhs);
-SDL_Point &operator*=(SDL_Point &lhs, const double &rhs);
-SDL_Point operator*(SDL_Point lhs, const double &rhs);
-SDL_Point &operator/=(SDL_Point &lhs, const double &rhs);
-SDL_Point operator/(SDL_Point lhs, const double &rhs);
-std::ostream &operator<<(std::ostream &os, const SDL_Point &rhs);
+std::ostream &operator<<(std::ostream &os, const SDL_Rect &rhs);
 
-#endif /* Rect */
+#endif

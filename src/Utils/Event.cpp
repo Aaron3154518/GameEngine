@@ -96,7 +96,10 @@ void Event::update(SDL_Event &e) {
         } break;
         case SDL_MOUSEBUTTONUP: {
             MouseButton &b = mMouseButtons[toMouse(e.button.button)];
-            b.status = (distance(b.clickPos, mMouse) < MAX_CLICK_DIFF ? Button::CLICKED : 0) | Button::RELEASED;
+            b.status =
+                (distance(b.clickPos, mMouse) < MAX_CLICK_DIFF ? Button::CLICKED
+                                                               : 0) |
+                Button::RELEASED;
             b.duration = 0;
         } break;
         case SDL_MOUSEMOTION: {
@@ -128,45 +131,21 @@ void Event::update(SDL_Event &e) {
     }
 }
 
-uint32_t Event::dt() const {
-    return mDt;
-}
+uint32_t Event::dt() const { return mDt; }
 
-bool Event::quit() const {
-    return mQuit;
-}
-bool Event::resized() const {
-    return mResized;
-}
-SDL_Point Event::newDim() const {
-    return SDL_Point{mNewW, mNewH};
-}
-int Event::newW() const {
-    return mNewW;
-}
-int Event::newH() const {
-    return mNewH;
-}
+bool Event::quit() const { return mQuit; }
+bool Event::resized() const { return mResized; }
+SDL_Point Event::newDim() const { return SDL_Point{mNewW, mNewH}; }
+int Event::newW() const { return mNewW; }
+int Event::newH() const { return mNewH; }
 
-SDL_Point Event::mouse() const {
-    return mMouse;
-}
-double Event::mouseDx() const {
-    return mMouseDx;
-}
-double Event::mouseDy() const {
-    return mMouseDy;
-}
-bool Event::mouseMoved() const {
-    return mMouseDx != 0 || mMouseDy != 0;
-}
-int Event::scroll() const {
-    return mScroll;
-}
+SDL_Point Event::mouse() const { return mMouse; }
+float Event::mouseDx() const { return mMouseDx; }
+float Event::mouseDy() const { return mMouseDy; }
+bool Event::mouseMoved() const { return mMouseDx != 0 || mMouseDy != 0; }
+int Event::scroll() const { return mScroll; }
 
-std::string Event::textInput() const {
-    return mInputText;
-}
+std::string Event::textInput() const { return mInputText; }
 
 const Event::MouseButton &Event::operator[](Uint8 sdlButton) const {
     return (*this)[toMouse(sdlButton)];
@@ -198,7 +177,7 @@ const Event::KeyButton &Event::unusedKey() {
 bool Event::bitsSet(uint8_t val, uint8_t check) {
     return (val & check) == check;
 }
-double Event::distance(SDL_Point p1, SDL_Point p2) {
+float Event::distance(SDL_Point p1, SDL_Point p2) {
     return sqrt((p1.x - p2.x) ^ 2 + (p1.y - p2.y) ^ 2);
 }
 

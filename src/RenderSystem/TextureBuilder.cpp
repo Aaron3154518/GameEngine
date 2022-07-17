@@ -26,14 +26,13 @@ TextureBuilder::TextureBuilder(SharedTexture src) {
 }
 
 // Get texture
-SharedTexture TextureBuilder::getTexture() {
-    return mTex;
-}
+SharedTexture TextureBuilder::getTexture() { return mTex; }
 
 // Start new texture
 void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
     mTex = makeSharedTexture(SDL_CreateTexture(Renderer::get(),
-                                               SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, w, h));
+                                               SDL_PIXELFORMAT_RGBA8888,
+                                               SDL_TEXTUREACCESS_TARGET, w, h));
     SDL_SetTextureBlendMode(mTex.get(), SDL_BLENDMODE_BLEND);
     RectData r;
     r.color = bkgrnd;
@@ -45,8 +44,10 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
 void TextureBuilder::draw(const RenderData &data) {
     Renderer::setRenderTarget(mTex.get());
 
-    Rect renderBounds;
-    Renderer::getTargetSize(&renderBounds.w, &renderBounds.h);
+    int w, h;
+    Renderer::getTargetSize(&w, &h);
+    Rect renderBounds(0, 0, w, h);
+
     // Make sure we are actually drawing something
     if (data.dest.empty()) {
 #ifdef RENDER_DEBUG
@@ -65,7 +66,8 @@ void TextureBuilder::draw(const RenderData &data) {
     Rect boundary = data.boundary;
     if (boundary.empty()) {
         boundary = renderBounds;
-    } else if (SDL_IntersectRect(&boundary, &renderBounds, &boundary) == SDL_FALSE) {
+    } else if (SDL_IntersectRect(boundary, renderBounds, boundary) ==
+               SDL_FALSE) {
 #ifdef RENDER_DEBUG
         std::cerr << "draw(): Boundary rect " << boundary
                   << " was outside the screen: " << renderBounds << std::endl;
@@ -75,35 +77,35 @@ void TextureBuilder::draw(const RenderData &data) {
 
     Rect destRect = data.dest;
     // Get fraction of item to draw
-    double leftFrac = fmax(boundary.x - destRect.x, 0) / destRect.w;
-    double topFrac = fmax(boundary.y - destRect.y, 0) / destRect.h;
-    double rightFrac = fmax(destRect.x2() - boundary.x2(), 0) / destRect.w;
-    double botFrac = fmax(destRect.y2() - boundary.y2(), 0) / destRect.h;
+    float leftFrac = fmax(boundary.x() - destRect.x(), 0) / destRect.w();
+    float topFrac = fmax(boundary.y() - destRect.y(), 0) / destRect.h();
+    float rightFrac = fmax(destRect.x2() - boundary.x2(), 0) / destRect.w();
+    float botFrac = fmax(destRect.y2() - boundary.y2(), 0) / destRect.h();
     // Make sure the rect is actually in the boundary
     if (leftFrac + rightFrac >= 1 || topFrac + botFrac >= 1) {
 #ifdef RENDER_DEBUG
-        std::cerr << "draw(): Rect " << destRect << " was out side the boundary " << boundary << std::endl;
+        std::cerr << "draw(): Rect " << destRect
+                  << " was out side the boundary " << boundary << std::endl;
 #endif
         return;
     }
 
-    destRect = Rect(destRect.x + destRect.w * leftFrac,
-                    destRect.y + destRect.h * topFrac,
-                    destRect.w * (1. - leftFrac - rightFrac),
-                    destRect.h * (1. - topFrac - botFrac));
-    int w, h;
+    destRect = Rect(destRect.x() + destRect.w() * leftFrac,
+                    destRect.y() + destRect.h() * topFrac,
+                    destRect.w() * (1. - leftFrac - rightFrac),
+                    destRect.h() * (1. - topFrac - botFrac));
     if (!getTextureSize(data.texture.get(), &w, &h)) {
 #ifdef RENDER_DEBUG
-        std::cerr << "draw(): Unable to query texture size: "
-                  << SDL_GetError() << std::endl;
+        std::cerr << "draw(): Unable to query texture size: " << SDL_GetError()
+                  << std::endl;
 #endif
         return;
     }
     Rect areaRect = data.area.empty() ? Rect(0, 0, w, h) : data.area;
-    Rect texRect = Rect(areaRect.x + areaRect.w * leftFrac,
-                        areaRect.y + areaRect.h * topFrac,
-                        areaRect.w * (1. - leftFrac - rightFrac),
-                        areaRect.h * (1. - topFrac - botFrac));
+    Rect texRect = Rect(areaRect.x() + areaRect.w() * leftFrac,
+                        areaRect.y() + areaRect.h() * topFrac,
+                        areaRect.w() * (1. - leftFrac - rightFrac),
+                        areaRect.h() * (1. - topFrac - botFrac));
     // Make sure at least one pixel will be drawn
     if (texRect.empty()) {
 #ifdef RENDER_DEBUG
@@ -113,7 +115,7 @@ void TextureBuilder::draw(const RenderData &data) {
         return;
     }
 
-    SDL_RenderCopy(Renderer::get(), data.texture.get(), &texRect, &destRect);
+    SDL_RenderCopy(Renderer::get(), data.texture.get(), texRect, destRect);
 
     Renderer::resetRenderTarget();
 }
@@ -126,12 +128,13 @@ void TextureBuilder::startDrawShape(const ShapeData &data) {
 Rect TextureBuilder::getShapeBounds(const ShapeData &data) {
     // Start with bounds as the target dimensions
     Rect bounds;
-    bounds.resize(Renderer::getTargetSize(), false);
+    SDL_Point size = Renderer::getTargetSize();
+    bounds.setDim(size.x, size.y);
     if (data.boundary.empty()) {
         return bounds;
     }
     // Interesect screen and shape boundary
-    SDL_IntersectRect(&data.boundary, &bounds, &bounds);
+    SDL_IntersectRect(data.boundary, bounds, bounds);
     return bounds;
 }
 void TextureBuilder::endDrawShape() {
@@ -145,36 +148,37 @@ void TextureBuilder::draw(const RectData &data) {
     if (!bounds.empty()) {
         // Fill entire render target
         if (data.r2.empty()) {
-            SDL_RenderFillRect(Renderer::get(), &bounds);
+            SDL_RenderFillRect(Renderer::get(), bounds);
             // Intersect r2 and bounds
-        } else if (SDL_IntersectRect(&data.r2, &bounds, &bounds) == SDL_TRUE) {
+        } else if (SDL_IntersectRect(data.r2, bounds, bounds) == SDL_TRUE) {
             // Start at r1
             Rect r = data.r1;
             // Fill r2 if r is empty or not within bounds
             // Intersect r with bounds
-            if (r.empty() || SDL_IntersectRect(&bounds, &r, &r) == SDL_FALSE) {
-                SDL_RenderFillRect(Renderer::get(), &bounds);
+            if (r.empty() || SDL_IntersectRect(bounds, r, r) == SDL_FALSE) {
+                SDL_RenderFillRect(Renderer::get(), bounds);
                 // Fill bounds except for r
             } else {
                 // bounds is inclusive so draw once more when r = bounds
+                float oldW, oldH;
                 do {
+                    oldW = r.w();
+                    oldH = r.h();
                     // Expand rect
-                    if (r.x > bounds.x) {
-                        r.x--;
-                        r.w++;
+                    if (r.X() > bounds.X()) {
+                        r.setWidth(r.w() + 1, Rect::Align::BOT_RIGHT);
                     }
-                    if (r.y > bounds.y) {
-                        r.y--;
-                        r.h++;
+                    if (r.Y() > bounds.Y()) {
+                        r.setHeight(r.w() + 1, Rect::Align::BOT_RIGHT);
                     }
-                    if (r.x2() < bounds.x2()) {
-                        r.w++;
+                    if (r.X2() < bounds.X2()) {
+                        r.setWidth(r.w() + 1, Rect::Align::TOP_LEFT);
                     }
-                    if (r.y2() < bounds.y2()) {
-                        r.h++;
+                    if (r.Y2() < bounds.Y2()) {
+                        r.setHeight(r.w() + 1, Rect::Align::TOP_LEFT);
                     }
-                    SDL_RenderDrawRect(Renderer::get(), &r);
-                } while (r != bounds);
+                    SDL_RenderDrawRect(Renderer::get(), r);
+                } while (oldW != r.w() || oldH != r.h());
             }
         }
     }
@@ -187,19 +191,21 @@ void TextureBuilder::draw(const CircleData &data) {
         // Circle
         int dx = -1;
         while (++dx < data.r2) {
-            int dy1 = dx >= data.r1 ? 0 : (int)(std::sqrt(data.r1 * data.r1 - dx * dx) + .5);
+            int dy1 = dx >= data.r1
+                          ? 0
+                          : (int)(std::sqrt(data.r1 * data.r1 - dx * dx) + .5);
             int dy2 = (int)(std::sqrt(data.r2 * data.r2 - dx * dx) + .5);
             // Iterate through dx, -dx
             do {
                 int x = data.c.x + dx;
                 // Make sure x is in bounds
-                if (x >= bounds.x && x <= bounds.x2()) {
+                if (x >= bounds.X() && x <= bounds.X2()) {
                     // Iterate through [dy1, dy2], [-dy2, -dy1]
                     do {
-                        int y1 = std::max(data.c.y + dy1, bounds.y);
-                        int y2 = std::min(data.c.y + dy2, bounds.y2());
+                        int y1 = std::max(data.c.y + dy1, bounds.Y());
+                        int y2 = std::min(data.c.y + dy2, bounds.Y2());
                         // Make sure at least one y is in bounds
-                        if (y1 <= bounds.y2() && y2 >= bounds.y) {
+                        if (y1 <= bounds.Y2() && y2 >= bounds.Y()) {
                             SDL_RenderDrawLine(Renderer::get(), x, y1, x, y2);
                         }
                         int tmp = -dy1;
@@ -220,7 +226,8 @@ void TextureBuilder::draw(const ProgressBar &data) {
         r.copy(data);
         r.color = data.bkgrnd;
         draw(r.set(data.rect));
-        Rect progR(data.rect.x, data.rect.y, data.rect.w * data.perc, data.rect.h);
+        Rect progR = data.rect;
+        progR.setWidth(progR.w() * data.perc);
         if (!progR.empty()) {
             r.color = data.color;
             draw(r.set(progR));

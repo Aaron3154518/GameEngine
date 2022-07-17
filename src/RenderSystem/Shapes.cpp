@@ -23,14 +23,14 @@ RectData &RectData::set(Rect r, int thickness, bool center) {
     r1 = r2 = r;
     if (center) {
         thickness = std::abs(thickness);
-        r1.resize(r1.w - thickness, r1.h - thickness, true);
-        r2.resize(r2.w + thickness, r2.h + thickness, true);
+        r1.setDim(r1.w() - thickness, r1.h() - thickness, Rect::Align::CENTER);
+        r2.setDim(r2.w() + thickness, r2.h() + thickness, Rect::Align::CENTER);
     } else {
         int dw = 2 * thickness;
         if (dw > 0) {
-            r2.resize(r2.w + dw, r2.h + dw, true);
+            r2.setDim(r2.w() + dw, r2.h() + dw, Rect::Align::CENTER);
         } else {
-            r1.resize(r1.w + dw, r1.h + dw, true);
+            r1.setDim(r1.w() + dw, r1.h() + dw, Rect::Align::CENTER);
         }
     }
     if (r1.invalid()) {
@@ -68,7 +68,7 @@ ProgressBar &ProgressBar::set(SDL_Color foreground, SDL_Color background) {
     bkgrnd = background;
     return *this;
 }
-ProgressBar &ProgressBar::set(double amnt, double cap, bool log) {
+ProgressBar &ProgressBar::set(float amnt, float cap, bool log) {
     if (amnt < 0) {
         amnt = 0.;
     }
@@ -89,7 +89,7 @@ ProgressBar &ProgressBar::set(double amnt, double cap, bool log) {
     }
     return set(cap == 0 ? 1. : amnt / cap);
 }
-ProgressBar &ProgressBar::set(double percent) {
+ProgressBar &ProgressBar::set(float percent) {
     perc = fmax(0., fmin(1., percent));
     return *this;
 }

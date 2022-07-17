@@ -1,6 +1,7 @@
 /*
-This file contains typedefs for smart pointer implementations of various SDL pointer classes.
-This file contains structs that hold data necessary for rendering text and textures.
+This file contains typedefs for smart pointer implementations of various SDL
+pointer classes. This file contains structs that hold data necessary for
+rendering text and textures.
 */
 
 #ifndef RENDER_TYPES_H
@@ -11,6 +12,7 @@ This file contains structs that hold data necessary for rendering text and textu
 #include <SDL_ttf.h>
 #include <Utils/Rect.h>
 
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -34,8 +36,8 @@ Font makeFont(TTF_Font *font = NULL);
 SharedFont makeSharedFont(TTF_Font *font = NULL);
 
 // Helper function to split text for wrapping
-std::vector<std::string> splitText(const std::string &text,
-                                   SharedFont font, int maxW);
+std::vector<std::string> splitText(const std::string &text, SharedFont font,
+                                   int maxW);
 
 // To render text
 struct TextData {
@@ -62,7 +64,8 @@ struct RenderData {
     Rect dest, area, boundary;
 
     void fitToTexture(Rect::Align align = Rect::Align::CENTER);
-    void fitToTexture(int maxW, int maxH, Rect::Align align = Rect::Align::CENTER);
+    void fitToTexture(int maxW, int maxH,
+                      Rect::Align align = Rect::Align::CENTER);
 };
 
 // To draw a texture from text

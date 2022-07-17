@@ -1,6 +1,7 @@
 /*
 This files contains a wrapper for the SDL_Renderer needed in all rendering.
-The Renderer class cannot be instantiated and provides static functions for obtaining the renderer and creating textures.
+The Renderer class cannot be instantiated and provides static functions for
+obtaining the renderer and creating textures.
 */
 
 #ifndef RENDERER_H
@@ -11,6 +12,7 @@ The Renderer class cannot be instantiated and provides static functions for obta
 #include <Utils/Colors.h>
 #include <Utils/Rect.h>
 
+#include <iostream>
 #include <memory>
 #include <stack>
 #include <vector>
@@ -29,7 +31,8 @@ class Renderer {
    public:
     class NullRendererException : public std::exception {
         virtual const char *what() const throw() {
-            return "Error: SDL_Renderer was null while attempting get() with notNull = true. Did you forget to initialize?";
+            return "Error: SDL_Renderer was null while attempting get() with "
+                   "notNull = true. Did you forget to initialize?";
         }
     };
 
