@@ -39,8 +39,8 @@ void Rect::resize(float factor, Align aX, Align aY) {
     setDim(_w * factor, _h * factor, aX, aY);
 }
 void Rect::fitWithin(const Rect &boundary) {
-    setPosX(std::max(std::min(_x, boundary.x2() - _w), 0.f));
-    setPosY(std::max(std::min(_y, boundary.y2() - _h), 0.f));
+    setPosX(std::max(std::min(_x, boundary.x2() - _w), boundary.x()));
+    setPosY(std::max(std::min(_y, boundary.y2() - _h), boundary.y()));
 }
 
 // Getters

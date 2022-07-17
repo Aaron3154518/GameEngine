@@ -7,7 +7,7 @@
 void print(const Rect &r) {
     std::cerr << r << "\n"
               << r.ToString() << "\n"
-              << *(SDL_Rect *)r << std::endl;
+              << r.toSDLRect() << std::endl;
 }
 
 void set_test() {
@@ -73,6 +73,11 @@ void modify_test() {
     std::cerr << std::endl;
 
     r.resize(2.5, Rect::Align::TOP_LEFT, Rect::Align::CENTER);
+    print(r);
+
+    std::cerr << std::endl;
+
+    r.fitWithin(Rect(150, 150, 1000, 1000));
     print(r);
 }
 
