@@ -44,9 +44,19 @@ test: RenderTest EventTest ServiceTest GameTest
 	@$(BIN)/ServiceTest
 	@$(BIN)/GameTest
 
-ArgTest: $(call OBJS_ALL,$(T))
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+
+ifeq ($(O),)
+O := $(basename $(notdir $(T)))
+endif
+
+ifeq ($(T),)
+compile:
+	@echo "Please specify a compile target using 'T=path-to-file'"
+else
+compile: $(call OBJS_ALL,$(T))
+	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$(O).exe $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS_ALL,$(T))
+endif
 
 RenderTest: $(call OBJS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
