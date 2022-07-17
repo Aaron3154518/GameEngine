@@ -27,9 +27,10 @@ struct is_simple<T, T> : std::true_type {};
 class ObservableBase {};
 
 // Full template, not usable
-template <class T, class RetT, class DaDataTta = void, class... ArgTs>
+template <class T, class RetT, class DataT = void, class... ArgTs>
 class Observable : public ObservableBase {
-    static_assert(!std::is_same<T, T>::value, "Must use specialized observable");
+    static_assert(!std::is_same<T, T>::value,
+                  "Must use specialized observable");
 };
 
 // Partially specialized template, use this
@@ -40,11 +41,10 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     class SubscriptionBase {};
 
     template <class Data>
-    class SubscriptionBase<Data, std::enable_if_t<!std::is_same<Data, void>::value>> {
+    class SubscriptionBase<Data,
+                           std::enable_if_t<!std::is_same<Data, void>::value>> {
        public:
-        const std::shared_ptr<Data> &getData() const {
-            return data;
-        }
+        const std::shared_ptr<Data> &getData() const { return data; }
 
        protected:
         std::shared_ptr<Data> data;
@@ -60,13 +60,9 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
         Subscription(Function func) : subscription(func) {}
         ~Subscription() = default;
 
-        void setUnsubscriber(Unsubscriber unsub) {
-            unsubscriber = unsub;
-        }
+        void setUnsubscriber(Unsubscriber unsub) { unsubscriber = unsub; }
 
-        Unsubscriber getUnsubscriber() const {
-            return unsubscriber;
-        }
+        Unsubscriber getUnsubscriber() const { return unsubscriber; }
 
         // Unsubscribes only this subscription
         void unsubscribe() {
@@ -74,13 +70,9 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
             unsubscriber.unsubscribe();
         }
 
-        operator bool() const {
-            return unsubscriber;
-        }
+        operator bool() const { return unsubscriber; }
 
-        RetT operator()(ArgTs... args) const {
-            return subscription(args...);
-        }
+        RetT operator()(ArgTs... args) const { return subscription(args...); }
 
        private:
         Function subscription;
@@ -97,7 +89,8 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     // Used when no subscriber data
     // Generates standard subscription
     template <int N = 0>
-    typename std::enable_if_t<std::is_same<DataT, void>::value && N == N, SubscriptionPtr>
+    typename std::enable_if_t<std::is_same<DataT, void>::value && N == N,
+                              SubscriptionPtr>
     subscribe(typename Subscription::Function func) {
         SubscriptionPtr sub = std::make_shared<Subscription>(func);
         mSubscriptions.push_back(sub);
@@ -106,15 +99,18 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
 
     // Used when subscriber has data
     template <int N = 0>
-    typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N, SubscriptionPtr>
-    subscribe(typename Subscription::Function func, std::shared_ptr<DataT> data) {
+    typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N,
+                              SubscriptionPtr>
+    subscribe(typename Subscription::Function func,
+              std::shared_ptr<DataT> data) {
         SubscriptionPtr sub = std::make_shared<Subscription>(func);
         sub->data = data;
         mSubscriptions.push_back(sub);
         return sub;
     }
 
-    void updateSubscription(SubscriptionPtr &sub, typename Subscription::Function func) {
+    void updateSubscription(SubscriptionPtr &sub,
+                            typename Subscription::Function func) {
         sub->subscription = func;
     }
 
@@ -130,16 +126,13 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     }
 
    protected:
-    virtual void serve(T val) {
-        defaultServe(val);
-    }
+    virtual void serve(T val) { defaultServe(val); }
 
-    virtual bool unsubscribe(SubscriptionPtr sub) {
-        return true;
-    }
+    virtual bool unsubscribe(SubscriptionPtr sub) { return true; }
 
     void removeUnsubscribed() {
-        for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); ++it) {
+        for (auto it = mSubscriptions.begin(); it != mSubscriptions.end();
+             ++it) {
             if (!**it && unsubscribe(*it)) {
                 it = mSubscriptions.erase(it);
                 if (it == mSubscriptions.end()) {
