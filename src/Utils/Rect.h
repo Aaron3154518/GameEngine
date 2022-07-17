@@ -25,7 +25,9 @@ class Rect : private SDL_Rect {
     ~Rect() = default;
 
     bool empty() const;
+    bool Empty() const;
     bool invalid() const;
+    bool Invalid() const;
     void normalize();
     void move(float dX, float dY);
     void move(float mag, float dX, float dY);

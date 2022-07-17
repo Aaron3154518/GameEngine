@@ -9,7 +9,9 @@ Rect::Rect(const SDL_Rect &other) { set(other.x, other.y, other.w, other.h); }
 
 // Rect
 bool Rect::empty() const { return eq(_w, 0., ERR) || eq(_h, 0., ERR); }
+bool Rect::Empty() const { return W() == 0 || H() == 0; }
 bool Rect::invalid() const { return _w < 0 || _h < 0; }
+bool Rect::Invalid() const { return W() < 0 || H() < 0; }
 void Rect::normalize() {
     if (_w < 0) {
         _x += _w;
