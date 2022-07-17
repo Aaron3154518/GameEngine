@@ -8,7 +8,7 @@ Rect::Rect(float _x, float _y, float _w, float _h) { set(_x, _y, _w, _h); }
 Rect::Rect(const SDL_Rect &other) { set(other.x, other.y, other.w, other.h); }
 
 // Rect
-bool Rect::empty() const { return eq(_w, 0., ERR) && eq(_h, 0., ERR); }
+bool Rect::empty() const { return eq(_w, 0., ERR) || eq(_h, 0., ERR); }
 bool Rect::invalid() const { return _w < 0 || _h < 0; }
 void Rect::normalize() {
     if (_w < 0) {
