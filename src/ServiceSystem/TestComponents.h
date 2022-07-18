@@ -4,6 +4,7 @@
 #include <ServiceSystem/CoreServices/UpdateService.h>
 #include <ServiceSystem/EventServices/DragService.h>
 #include <ServiceSystem/EventServices/MouseService.h>
+#include <ServiceSystem/EventServices/ResizeService.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <ServiceSystem/UpdateServices/TimerService.h>
 #include <Utils/Colors.h>
@@ -204,6 +205,20 @@ class TimerTest : public TestBase {
     bool color = false;
 
     TimerObservable::SubscriptionPtr mTimerSub;
+};
+
+class ResizeTest : public TestBase {
+   public:
+    ResizeTest();
+
+    SDL_Color getColor() const;
+
+   private:
+    void init();
+
+    void onResize(ResizeData data);
+
+    ResizeObservable::SubscriptionPtr mResizeSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

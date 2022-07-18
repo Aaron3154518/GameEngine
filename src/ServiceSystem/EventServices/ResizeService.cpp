@@ -8,6 +8,6 @@ void ResizeObservable::init() {
 
 void ResizeObservable::onEvent(const Event& e) {
     if (e.resized()) {
-        next(e.newDim());
+        next({e.oldW(), e.oldH(), e.newW(), e.newH()});
     }
 }

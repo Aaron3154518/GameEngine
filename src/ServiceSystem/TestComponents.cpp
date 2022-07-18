@@ -352,6 +352,23 @@ bool TimerTest::onTimer() {
     return rand() % 25 != 0;
 }
 
+// ResizeTest
+ResizeTest::ResizeTest() : TestBase(Rect(), 0) {}
+
+SDL_Color ResizeTest::getColor() const { return LGRAY; }
+
+void ResizeTest::init() {
+    TestBase::init();
+    mResizeSub =
+        ServiceSystem::Get<ResizeService, ResizeObservable>()->subscribe(
+            std::bind(&ResizeTest::onResize, this, std::placeholders::_1));
+    mResizeSub->setUnsubscriber(unsub);
+}
+
+void ResizeTest::onResize(ResizeData data) {
+    mPos->rect = Rect(0, 0, data.newW, data.newH);
+}
+
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;

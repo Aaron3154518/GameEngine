@@ -7,7 +7,12 @@
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
 
-class ResizeObservable : public Component, public Observable<SDL_Point, void(SDL_Point)> {
+struct ResizeData {
+    int oldW, oldH, newW, newH;
+};
+
+class ResizeObservable : public Component,
+                         public Observable<ResizeData, void(ResizeData)> {
    private:
     void init();
 
