@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <memory>
 #include <type_traits>
@@ -44,7 +45,7 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     class SubscriptionBase<Data,
                            std::enable_if_t<!std::is_same<Data, void>::value>> {
        public:
-        const std::shared_ptr<Data> &getData() const { return data; }
+        const std::shared_ptr<Data>& getData() const { return data; }
 
        protected:
         std::shared_ptr<Data> data;
@@ -72,16 +73,79 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
 
         operator bool() const { return unsubscriber; }
 
+       private:
         RetT operator()(ArgTs... args) const { return subscription(args...); }
 
-       private:
         Function subscription;
 
         Unsubscriber unsubscriber;
     };
     typedef std::shared_ptr<Subscription> SubscriptionPtr;
     typedef std::list<SubscriptionPtr> SubscriptionList;
-    typedef typename SubscriptionList::iterator SubscriptionIterator;
+    /*
+        class SubscriptionList {
+           public:
+            SubscriptionList() = default;
+            ~SubscriptionList() = default;
+
+            struct Iterator {
+                using iterator_category = std::forward_iterator_tag;
+                using difference_type = std::ptrdiff_t;
+                using value_type = Subscription;
+                using pointer = std::list<SubscriptionPtr>::iterator;
+                using reference = SubscriptionPtr;
+
+                Iterator(pointer end, std::function(pointer(pointer)) erase)
+                    : mPtr(end), mEnd(end), mErase(erase) {}
+                Iterator(pointer ptr, pointer end,
+                         std::function(pointer(pointer)) erase)
+                    : mPtr(ptr), mEnd(end), mErase(erase) {
+                    while (mPtr != mEnd && !**mPtr) {
+                        mPtr = mErase(mPtr);
+                    }
+                }
+
+                reference operator*() const { return *mPtr; }
+                pointer operator->() { return mPtr; }
+                Iterator& operator++() {
+                    mPtr++;
+                    while (mPtr != mEnd && !**mPtr) {
+                        mPtr = mErase(mPtr);
+                    }
+                    return *this;
+                }
+                Iterator operator++(int) {
+                    Iterator tmp = *this;
+                    ++(*this);
+                    return tmp;
+                }
+                friend bool operator==(const Iterator& a, const Iterator& b) {
+                    return a.mPtr == b.mPtr;
+                };
+                friend bool operator!=(const Iterator& a, const Iterator& b) {
+                    return a.mPtr != b.mPtr;
+                };
+
+               private:
+                pointer mPtr, mEnd;
+                std::function(iterator(iterator)) mErase;
+            };
+
+            Iterator begin() {
+                return Iterator(mSubscriptions.begin(), mSubscriptions.end(),
+                                [this](std::list<SubscriptionPtr>::iterator it)
+       { return mSubscriptions.erase(it);
+                                });
+            }
+            Iterator end() {
+                return Iterator(mSubscriptions.end(),
+                                [this](std::list<SubscriptionPtr>::iterator it)
+       { return mSubscriptions.erase(it);
+                                });
+            }
+
+            std::list<SubscriptionPtr> mSubscriptions;
+        };*/
 
     Observable() = default;
     ~Observable() = default;
@@ -89,8 +153,8 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     // Used when no subscriber data
     // Generates standard subscription
     template <int N = 0>
-    typename std::enable_if_t<std::is_same<DataT, void>::value && N == N,
-                              SubscriptionPtr>
+    std::enable_if_t<std::is_same<DataT, void>::value && N == N,
+                     SubscriptionPtr>
     subscribe(typename Subscription::Function func) {
         SubscriptionPtr sub = std::make_shared<Subscription>(func);
         mSubscriptions.push_back(sub);
@@ -99,8 +163,8 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
 
     // Used when subscriber has data
     template <int N = 0>
-    typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N,
-                              SubscriptionPtr>
+    std::enable_if_t<!std::is_same<DataT, void>::value && N == N,
+                     SubscriptionPtr>
     subscribe(typename Subscription::Function func,
               std::shared_ptr<DataT> data) {
         SubscriptionPtr sub = std::make_shared<Subscription>(func);
@@ -109,67 +173,107 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
         return sub;
     }
 
-    void updateSubscription(SubscriptionPtr &sub,
+    void updateSubscription(SubscriptionPtr& sub,
                             typename Subscription::Function func) {
         sub->subscription = func;
     }
 
     template <int N = 0>
-    typename std::enable_if_t<!std::is_same<DataT, void>::value && N == N>
-    updateSubscriptionData(SubscriptionPtr &sub, std::shared_ptr<DataT> data) {
+    std::enable_if_t<!std::is_same<DataT, void>::value && N == N>
+    updateSubscriptionData(SubscriptionPtr& sub, std::shared_ptr<DataT> data) {
         sub->data = data;
     }
 
     virtual void next(T val) {
-        removeUnsubscribed();
+        prune();
         serve(val);
     }
 
    protected:
-    virtual void serve(T val) { defaultServe(val); }
+    virtual void onUnsubscribe(SubscriptionPtr sub) {}
 
-    virtual bool unsubscribe(SubscriptionPtr sub) { return true; }
-
-    void removeUnsubscribed() {
-        for (auto it = mSubscriptions.begin(); it != mSubscriptions.end();
-             ++it) {
-            if (!**it && unsubscribe(*it)) {
+    virtual void prune() {
+        for (auto it = mSubscriptions.begin(), end = mSubscriptions.end();
+             it != end; ++it) {
+            if (!**it) {
+                onUnsubscribe(*it);
                 it = mSubscriptions.erase(it);
-                if (it == mSubscriptions.end()) {
+                if (it == end) {
                     break;
                 }
             }
         }
     }
 
-    SubscriptionIterator &nextSubscription(SubscriptionIterator &current) {
-        if (current == mSubscriptions.end()) {
-            return current;
-        }
+    virtual void serve(T val) { defaultServe(val); }
 
-        ++current;
-        if (current != mSubscriptions.end() && !**current) {
-            current = mSubscriptions.erase(current);
+    // No return value
+    template <int N = 0>
+    std::enable_if_t<std::is_same<RetT, void>::value && N == N, bool> call(
+        typename SubscriptionList::iterator it, ArgTs... args) {
+        return call(*it, args...);
+    }
+    template <int N = 0>
+    std::enable_if_t<std::is_same<RetT, void>::value && N == N, bool> call(
+        SubscriptionPtr sub, ArgTs... args) {
+        if (*sub) {
+            (*sub)(args...);
+            return true;
         }
-        return current;
+        return false;
     }
 
+    // Yes return value
+    template <int N = 0>
+    std::enable_if_t<!std::is_same<RetT, void>::value && N == N, bool> call(
+        typename SubscriptionList::iterator it, RetT* retVal, ArgTs... args) {
+        return call(*it, retVal, args...);
+    }
+    template <int N = 0>
+    std::enable_if_t<!std::is_same<RetT, void>::value && N == N, bool> call(
+        SubscriptionPtr sub, RetT* retVal, ArgTs... args) {
+        if (*sub) {
+            *retVal = (*sub)(args...);
+            return true;
+        }
+        return false;
+    }
+
+    /*
+        SubscriptionIterator& begin() {
+            auto it = mSubscriptions.begin();
+            while (it != end() && !**it) {
+                it = mSubscriptions.erase(it);
+            }
+            return it;
+        }
+        SubscriptionIterator& end() { return mSubscriptions.end(); }
+        SubscriptionIterator& next(SubscriptionIterator& curr) {
+            if (curr != end()) {
+                ++curr;
+            }
+            while (curr != end() && !**curr) {
+                curr = mSubscriptions.erase(curr);
+            }
+            return curr;
+        }
+    */
     SubscriptionList mSubscriptions;
 
    private:
     // Case 1: ArgTs = T => defaultServe() will send subscribers data.
     template <int N = 0>
-    typename std::enable_if_t<is_simple<T, ArgTs...>::value && N == N>
-    defaultServe(T val) {
+    std::enable_if_t<is_simple<T, ArgTs...>::value && N == N> defaultServe(
+        T val) {
         for (auto sub : mSubscriptions) {
-            (*sub)(val);
+            call(sub, val);
         }
     }
 
     // Case 2: ArgTs != T => serve functionality is left to the inheritor
     template <int N = 0>
-    typename std::enable_if_t<!is_simple<T, ArgTs...>::value && N == N>
-    defaultServe(T val) {}
+    std::enable_if_t<!is_simple<T, ArgTs...>::value && N == N> defaultServe(
+        T val) {}
 };
 
 #endif

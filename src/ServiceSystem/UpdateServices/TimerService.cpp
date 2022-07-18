@@ -14,14 +14,15 @@ void TimerObservable::init() {
 }
 
 void TimerObservable::onUpdate(Time dt) {
-    TimerObservableBase::removeUnsubscribed();
+    TimerObservableBase::prune();
 
     for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); it++) {
         std::shared_ptr<Timer> data = (*it)->getData();
         data->timer += dt;
         while (data->timer >= data->length) {
             data->timer -= data->length;
-            if (!(**it)()) {
+            bool renew;
+            if (!call(it, &renew) || !renew) {
                 it = mSubscriptions.erase(it);
                 if (it == mSubscriptions.end()) {
                     return;

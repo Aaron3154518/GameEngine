@@ -118,7 +118,7 @@ void RenderObservable::updateSubscriptionData(SubscriptionPtr sub,
 void RenderObservable::serve(SDL_Renderer *renderer) {
     for (auto sub : mSubscriptions) {
         if (sub->getData()->visible) {
-            (*sub)(renderer);
+            call(sub, renderer);
         }
     }
 }

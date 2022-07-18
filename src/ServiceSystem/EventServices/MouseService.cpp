@@ -7,13 +7,15 @@ void MouseObservable::init() {
     eventSub->setUnsubscriber(unsub);
 }
 
-MouseObservable::SubscriptionPtr MouseObservable::subscribe(Subscription::Function func, UIComponentPtr data) {
+MouseObservable::SubscriptionPtr MouseObservable::subscribe(
+    Subscription::Function func, UIComponentPtr data) {
     SubscriptionPtr retVal = MouseObservableBase::subscribe(func, data);
     ServiceSystem::Get<RenderService>()->addComponent(data);
     return retVal;
 }
 
-void MouseObservable::updateSubscriptionData(SubscriptionPtr sub, UIComponentPtr data) {
+void MouseObservable::updateSubscriptionData(SubscriptionPtr sub,
+                                             UIComponentPtr data) {
     ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
     MouseObservableBase::updateSubscriptionData(sub, data);
     ServiceSystem::Get<RenderService>()->addComponent(data);
@@ -28,14 +30,15 @@ void MouseObservable::serve(Event::MouseButton mouse) {
     // If a lock exists, nobody gets clicked
     bool locked = mLocks.size() > 0;
 
-    auto underMouse = ServiceSystem::Get<RenderService, RenderOrderObservable>()->getUnderMouse();
+    auto underMouse = ServiceSystem::Get<RenderService, RenderOrderObservable>()
+                          ->getUnderMouse();
 
     for (SubscriptionPtr sub : mSubscriptions) {
         if (!sub->getData()->visible) {
             continue;
         }
 
-        (*sub)(mouse, !locked && sub->getData() == underMouse);
+        call(sub, mouse, !locked && sub->getData() == underMouse);
     }
 }
 
@@ -50,9 +53,10 @@ void *MouseObservable::requestLock() {
 }
 
 void MouseObservable::releaseLock(void *&lock) {
-    auto it = std::find_if(mLocks.begin(), mLocks.end(), [lock](const std::unique_ptr<bool> &ptr) -> bool {
-        return ptr.get() == lock;
-    });
+    auto it = std::find_if(mLocks.begin(), mLocks.end(),
+                           [lock](const std::unique_ptr<bool> &ptr) -> bool {
+                               return ptr.get() == lock;
+                           });
     if (it != mLocks.end()) {
         mLocks.erase(it);
     }

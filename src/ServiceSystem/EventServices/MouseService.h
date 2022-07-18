@@ -14,7 +14,9 @@
 #include <memory>
 #include <set>
 
-typedef Observable<Event::MouseButton, void(Event::MouseButton, bool), UIComponent> MouseObservableBase;
+typedef Observable<Event::MouseButton, void(Event::MouseButton, bool),
+                   UIComponent>
+    MouseObservableBase;
 
 class MouseObservable : public Component, public MouseObservableBase {
    public:

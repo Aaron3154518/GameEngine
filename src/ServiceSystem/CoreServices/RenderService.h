@@ -30,7 +30,8 @@ struct UIComponentCompare {
 };
 
 // Use a typedef for less code duplication
-typedef Observable<const std::vector<UIComponentPtr> &, void(const std::vector<UIComponentPtr> &)>
+typedef Observable<const std::vector<UIComponentPtr> &,
+                   void(const std::vector<UIComponentPtr> &)>
     RenderOrderObservableBase;
 
 class RenderOrderObservable : public RenderOrderObservableBase {
@@ -55,7 +56,8 @@ class RenderOrderObservable : public RenderOrderObservableBase {
     std::unordered_map<UIComponentPtr, int> mRefCounts;
 };
 
-typedef Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent> RenderObservableBase;
+typedef Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>
+    RenderObservableBase;
 
 class RenderObservable : public Component, public RenderObservableBase {
    public:
