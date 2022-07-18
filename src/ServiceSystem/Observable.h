@@ -7,6 +7,7 @@
 #include <iterator>
 #include <list>
 #include <memory>
+#include <tuple>
 #include <type_traits>
 
 struct Unsubscriber {
@@ -25,6 +26,41 @@ struct is_simple : std::false_type {};
 template <class T>
 struct is_simple<T, T> : std::true_type {};
 
+template <std::size_t i, class RetT, class... ArgTs>
+struct TestFunc;
+
+template <std::size_t i, class RetT, class... ArgTs>
+struct TestFunc<i, RetT(ArgTs...)> {
+    std::function<RetT(ArgTs...)> func;
+};
+
+template <std::size_t i, class...>
+struct TestImpl;
+
+template <std::size_t i>
+struct TestImpl<i> {};
+
+template <std::size_t i, class RetT, class... ArgTs, class... Tail>
+struct TestImpl<i, RetT(ArgTs...), Tail...>
+    : public TestFunc<i, RetT(ArgTs...)>, public TestImpl<i + 1, Tail...> {};
+
+template <class... Ts>
+using Test = TestImpl<0, Ts...>;
+
+template <std::size_t i, class RetT, class... ArgTs, class... Tail>
+RetT call(TestImpl<i, RetT(ArgTs...), Tail...>& t, ArgTs... args) {
+    return t.TestFunc<i, RetT(ArgTs...)>::func(args...);
+}
+/*
+using MTest = Test<void(int), std::string(bool), bool(bool)>;
+
+void foo_() {
+    Test<void(int), std::string(bool), bool(bool)> t;
+    call<0>(t, 1);
+    std::string s = call<1>(t, true);
+    bool b = call<2>(t, false);
+}
+*/
 class ObservableBase {};
 
 // Full template, not usable
@@ -35,7 +71,7 @@ class Observable : public ObservableBase {
 };
 
 // Partially specialized template, use this
-template <class T, class RetT, class DataT, class... ArgTs>
+template <class T, class RetT, class... ArgTs, class DataT>
 class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
    private:
     template <class Data, class Enable = void>
