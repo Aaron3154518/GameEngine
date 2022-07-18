@@ -2,8 +2,8 @@
 #include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
-#include <ServiceSystem/MouseService/DragService.h>
-#include <ServiceSystem/MouseService/MouseService.h>
+#include <ServiceSystem/EventServices/DragService.h>
+#include <ServiceSystem/EventServices/MouseService.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Colors.h>
 #include <Utils/Event.h>
