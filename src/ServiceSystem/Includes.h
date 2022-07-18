@@ -11,5 +11,6 @@
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
 #include <ServiceSystem/ServiceSystem.h>
+#include <ServiceSystem/UpdateServices/TimerService.h>
 
 #endif
