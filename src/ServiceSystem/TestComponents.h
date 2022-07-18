@@ -5,6 +5,7 @@
 #include <ServiceSystem/EventServices/DragService.h>
 #include <ServiceSystem/EventServices/MouseService.h>
 #include <ServiceSystem/ServiceSystem.h>
+#include <ServiceSystem/UpdateServices/TimerService.h>
 #include <Utils/Colors.h>
 #include <Utils/Event.h>
 #include <Utils/Rect.h>
@@ -187,6 +188,22 @@ class DragTest : public TestBase {
     SDL_Color dragColor = WHITE;
     DragComponentPtr mPos;
     DragObservable::SubscriptionPtr mDragSub;
+};
+
+class TimerTest : public TestBase {
+   public:
+    TimerTest(Rect r, int e);
+
+    SDL_Color getColor() const;
+
+   private:
+    void init();
+
+    bool onTimer();
+
+    bool color = false;
+
+    TimerObservable::SubscriptionPtr mTimerSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

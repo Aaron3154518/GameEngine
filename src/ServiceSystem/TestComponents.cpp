@@ -334,6 +334,24 @@ void DragTest::onDrag(int x, int y, float dx, float dy) {
 
 void DragTest::onDragEnd() {}
 
+// TimerTest
+TimerTest::TimerTest(Rect r, int e) : TestBase(r, e) {}
+
+SDL_Color TimerTest::getColor() const { return color ? PURPLE : ORANGE; }
+
+void TimerTest::init() {
+    TestBase::init();
+    mTimerSub = ServiceSystem::Get<TimerService, TimerObservable>()->subscribe(
+        std::bind(&TimerTest::onTimer, this), 200);
+    mTimerSub->setUnsubscriber(unsub);
+}
+
+bool TimerTest::onTimer() {
+    color = !color;
+    mTimerSub->getData()->length = rand() % 500;
+    return rand() % 25 != 0;
+}
+
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;
