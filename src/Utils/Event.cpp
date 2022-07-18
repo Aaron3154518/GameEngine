@@ -66,28 +66,36 @@ void Event::update() {
     // Handle events
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
-        switch (e.type) {
-            case SDL_QUIT:
-#ifdef DEBUG_EVENT
-                std::cerr << "Quit" << std::endl;
-#endif
-                mQuit = true;
-                break;
-            case SDL_WINDOWEVENT:
-                if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    mResized = true;
-                    mNewW = e.window.data1;
-                    mNewH = e.window.data2;
-                }
-                break;
-            default:
-                update(e);
-                break;
-        }
+        update(e);
     }
 }
 void Event::update(SDL_Event &e) {
     switch (e.type) {
+        case SDL_QUIT: {
+#ifdef DEBUG_EVENT
+            std::cerr << "Quit" << std::endl;
+#endif
+            mQuit = true;
+            break;
+        }
+        case SDL_WINDOWEVENT: {
+            switch (e.window.event) {
+                case SDL_WINDOWEVENT_SHOWN:
+                    SDL_GetWindowSize(SDL_GetWindowFromID(e.window.windowID),
+                                      &mOldW, &mOldH);
+                    mNewW = mOldW;
+                    mNewH = mOldH;
+                    break;
+                case SDL_WINDOWEVENT_RESIZED:
+                    mResized = true;
+                    mOldW = mNewW;
+                    mOldH = mNewH;
+                    mNewW = e.window.data1;
+                    mNewH = e.window.data2;
+                    break;
+            }
+            break;
+        }
         case SDL_MOUSEBUTTONDOWN: {
             MouseButton &b = mMouseButtons[toMouse(e.button.button)];
             b.status = Button::PRESSED | Button::HELD;
@@ -135,6 +143,9 @@ uint32_t Event::dt() const { return mDt; }
 
 bool Event::quit() const { return mQuit; }
 bool Event::resized() const { return mResized; }
+SDL_Point Event::oldDim() const { return SDL_Point{mOldW, mOldH}; }
+int Event::oldW() const { return mOldW; }
+int Event::oldH() const { return mOldH; }
 SDL_Point Event::newDim() const { return SDL_Point{mNewW, mNewH}; }
 int Event::newW() const { return mNewW; }
 int Event::newH() const { return mNewH; }

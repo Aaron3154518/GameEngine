@@ -179,6 +179,17 @@ int main(int argc, char *argv[]) {
         SDL_FreeSurface(surf);
         SDL_DestroyTexture(tex);
 
+        // Window Size
+        std::stringstream sizeSS;
+        sizeSS << e.oldW() << "x" << e.oldH() << ", " << e.newW() << "x"
+               << e.newH();
+        r = SDL_Rect{0, r.y + r.h, w, mouseW};
+        surf = TTF_RenderText_Solid(font, sizeSS.str().c_str(), BLACK);
+        tex = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_RenderCopy(renderer, tex, NULL, &r);
+        SDL_FreeSurface(surf);
+        SDL_DestroyTexture(tex);
+
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
         SDL_RenderPresent(renderer);

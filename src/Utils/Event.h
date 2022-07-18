@@ -49,6 +49,9 @@ class Event {
 
     bool quit() const;
     bool resized() const;
+    SDL_Point oldDim() const;
+    int oldW() const;
+    int oldH() const;
     SDL_Point newDim() const;
     int newW() const;
     int newH() const;
@@ -80,6 +83,7 @@ class Event {
 
     bool mQuit = false;
     bool mResized = false;
+    int mOldW = 0, mOldH = 0;
     int mNewW = 0, mNewH = 0;
 
     SDL_Point mMouse;
