@@ -82,70 +82,6 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
     };
     typedef std::shared_ptr<Subscription> SubscriptionPtr;
     typedef std::list<SubscriptionPtr> SubscriptionList;
-    /*
-        class SubscriptionList {
-           public:
-            SubscriptionList() = default;
-            ~SubscriptionList() = default;
-
-            struct Iterator {
-                using iterator_category = std::forward_iterator_tag;
-                using difference_type = std::ptrdiff_t;
-                using value_type = Subscription;
-                using pointer = std::list<SubscriptionPtr>::iterator;
-                using reference = SubscriptionPtr;
-
-                Iterator(pointer end, std::function(pointer(pointer)) erase)
-                    : mPtr(end), mEnd(end), mErase(erase) {}
-                Iterator(pointer ptr, pointer end,
-                         std::function(pointer(pointer)) erase)
-                    : mPtr(ptr), mEnd(end), mErase(erase) {
-                    while (mPtr != mEnd && !**mPtr) {
-                        mPtr = mErase(mPtr);
-                    }
-                }
-
-                reference operator*() const { return *mPtr; }
-                pointer operator->() { return mPtr; }
-                Iterator& operator++() {
-                    mPtr++;
-                    while (mPtr != mEnd && !**mPtr) {
-                        mPtr = mErase(mPtr);
-                    }
-                    return *this;
-                }
-                Iterator operator++(int) {
-                    Iterator tmp = *this;
-                    ++(*this);
-                    return tmp;
-                }
-                friend bool operator==(const Iterator& a, const Iterator& b) {
-                    return a.mPtr == b.mPtr;
-                };
-                friend bool operator!=(const Iterator& a, const Iterator& b) {
-                    return a.mPtr != b.mPtr;
-                };
-
-               private:
-                pointer mPtr, mEnd;
-                std::function(iterator(iterator)) mErase;
-            };
-
-            Iterator begin() {
-                return Iterator(mSubscriptions.begin(), mSubscriptions.end(),
-                                [this](std::list<SubscriptionPtr>::iterator it)
-       { return mSubscriptions.erase(it);
-                                });
-            }
-            Iterator end() {
-                return Iterator(mSubscriptions.end(),
-                                [this](std::list<SubscriptionPtr>::iterator it)
-       { return mSubscriptions.erase(it);
-                                });
-            }
-
-            std::list<SubscriptionPtr> mSubscriptions;
-        };*/
 
     Observable() = default;
     ~Observable() = default;
@@ -239,25 +175,6 @@ class Observable<T, RetT(ArgTs...), DataT> : public ObservableBase {
         return false;
     }
 
-    /*
-        SubscriptionIterator& begin() {
-            auto it = mSubscriptions.begin();
-            while (it != end() && !**it) {
-                it = mSubscriptions.erase(it);
-            }
-            return it;
-        }
-        SubscriptionIterator& end() { return mSubscriptions.end(); }
-        SubscriptionIterator& next(SubscriptionIterator& curr) {
-            if (curr != end()) {
-                ++curr;
-            }
-            while (curr != end() && !**curr) {
-                curr = mSubscriptions.erase(curr);
-            }
-            return curr;
-        }
-    */
     SubscriptionList mSubscriptions;
 
    private:
