@@ -31,6 +31,8 @@ class Rect : private SDL_Rect {
     void normalize();
     void move(float dX, float dY);
     void move(float mag, float dX, float dY);
+    void moveFactor(float factorX, float factorY, Align aX = Align::TOP_LEFT);
+    void moveFactor(float factorX, float factorY, Align aX, Align aY);
     void resize(float factor, Align aX = Align::TOP_LEFT);
     void resize(float factor, Align aX, Align aY);
     void fitWithin(const Rect &boundary);

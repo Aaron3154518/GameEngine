@@ -67,6 +67,11 @@ void modify_test() {
 
     std::cerr << std::endl;
 
+    r.moveFactor(.5, .2, Rect::Align::CENTER, Rect::Align::TOP_LEFT);
+    print(r);
+
+    std::cerr << std::endl;
+
     r.setDim(300, 200, Rect::Align::CENTER, Rect::Align::BOT_RIGHT);
     print(r);
 

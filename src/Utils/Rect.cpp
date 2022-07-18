@@ -34,6 +34,13 @@ void Rect::move(float mag, float dX, float dY) {
     float factor = dMag == 0 ? 0 : mag / dMag;
     setPos(_x + dX * factor, _y + dY * factor, Align::TOP_LEFT);
 }
+void Rect::moveFactor(float factorX, float factorY, Align aX) {
+    moveFactor(factorX, factorY, aX, aX);
+}
+void Rect::moveFactor(float factorX, float factorY, Align aX, Align aY) {
+    setPosX(getX(aX) * factorX, aX);
+    setPosY(getY(aY) * factorY, aY);
+}
 void Rect::resize(float factor, Align aX) {
     setDim(_w * factor, _h * factor, aX, aX);
 }
