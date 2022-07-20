@@ -6,7 +6,7 @@ class MyModel : public Model<TypeWrapper<>, TypeWrapper<int, bool>,
    public:
     MyModel() {}
 
-    void next() { std::cerr << "Custom Next" << std::endl; }
+    // void next() { std::cerr << "Custom Next" << std::endl; }
 
     void next(int i, bool b) {
         std::cerr << "Spicy Next: " << i << " " << b << std::endl;
@@ -19,9 +19,6 @@ int main(int argc, char* argv[]) {
 
     next<0>(m);
     next<1>(m, 2452, true);
-
-    m.next();
-    m.next(2452, true);
 
     set<0>(m, std::make_shared<int>(69));
     std::cerr << get<0>(m).get() << " " << *get<0>(m) << std::endl;

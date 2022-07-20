@@ -33,7 +33,9 @@ struct Args {
     friend void next(Args<_i, _ArgTs...>&, _ArgTs...);
 
    private:
-    void next(ArgTs... args) { std::cerr << "Next: " << i << std::endl; }
+    virtual void next(ArgTs... args) {
+        std::cerr << "Next: " << i << std::endl;
+    }
 };
 
 template <std::size_t i, class DataT>
