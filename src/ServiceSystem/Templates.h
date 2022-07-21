@@ -191,9 +191,14 @@ const std::shared_ptr<DataT>& get(SubscriptionImpl<i, DataT, Tail...>& t) {
     return t.mData;
 }
 
-template <std::size_t i, class DataT>
-void set(SubscriptionImpl<i, DataT>& t, const DataT& data) {
+template <std::size_t i, class DataT, class... Tail>
+void set(SubscriptionImpl<i, DataT, Tail...>& t, const DataT& data) {
     t.mData = data;
+}
+
+template <std::size_t i, class... ArgTs, class... Tail>
+void next(SubscriptionImpl<i, ArgTs..., Tail...>& t, ArgTs... args) {
+    t.next(args...);
 }
 
 // Observable
@@ -210,6 +215,8 @@ class Observable<> {
 template <class... ArgTs, class... Tail>
 class Observable<void(ArgTs...), Tail...> : public Observable<Tail...> {
    public:
+    using Observable<Tail...>::next;
+
     void next(ArgTs... args) { std::cerr << "Base Next()" << std::endl; }
 };
 
@@ -228,6 +235,8 @@ class Observable<Subscription<ArgTs...>> {
         mSubscriptions.push_back(std::make_shared<SubscriptionT>(args...));
         return mSubscriptions.back();
     }
+
+    void next() = delete;
 
    protected:
     std::vector<SubscriptionPtr> mSubscriptions;

@@ -36,7 +36,21 @@ void testModel() {
 // MyObservable
 class MyObservable
     : public Observable<void(), void(int, bool),
-                        Subscription<void(), int(bool), void(bool)>> {};
+                        Subscription<void(), int(bool), void(bool)>> {
+   public:
+    void next() {
+        for (auto sub : mSubscriptions) {
+            call<0>(*sub);
+        }
+    }
+
+    void next(int i, bool b) {
+        for (auto sub : mSubscriptions) {
+            call<1>(*sub, i > 0);
+            call<2>(*sub, i > 0 && b);
+        }
+    }
+};
 
 void testObservable() {
     MyObservable m;
@@ -47,11 +61,11 @@ void testObservable() {
             std::cerr << "bool(" << b << ")" << std::endl;
             return 200;
         },
-        [](bool b) { std::cerr << "void(" << b << "}" << std::endl; });
+        [](bool b) { std::cerr << "void(" << b << ")" << std::endl; });
 
-    call<0>(*mSub);
-    std::cerr << call<1>(*mSub, true) << std::endl;
-    call<1>(*mSub, false);
+    m.next();
+    m.next(200, false);
+    m.next(-1, true);
 }
 
 // Main
