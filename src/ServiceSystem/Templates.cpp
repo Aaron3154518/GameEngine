@@ -13,8 +13,7 @@ class MyModel : public Model<TypeWrapper<>, TypeWrapper<int, bool>,
     }
 };
 
-// Main
-int main(int argc, char* argv[]) {
+void testModel() {
     MyModel m;
 
     next<0>(m);
@@ -33,3 +32,27 @@ int main(int argc, char* argv[]) {
     call<1>(m);
     call<2>(m);
 }
+
+// MyObservable
+class MyObservable
+    : public Observable<void(), void(int, bool),
+                        Subscription<void(), int(bool), void(bool)>> {};
+
+void testObservable() {
+    MyObservable m;
+
+    MyObservable::SubscriptionPtr mSub = m.subscribe(
+        []() { std::cerr << "void()" << std::endl; },
+        [](bool b) {
+            std::cerr << "bool(" << b << ")" << std::endl;
+            return 200;
+        },
+        [](bool b) { std::cerr << "void(" << b << "}" << std::endl; });
+
+    call<0>(*mSub);
+    std::cerr << call<1>(*mSub, true) << std::endl;
+    call<1>(*mSub, false);
+}
+
+// Main
+int main(int argc, char* argv[]) { testObservable(); }
