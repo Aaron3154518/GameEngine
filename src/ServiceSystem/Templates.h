@@ -179,7 +179,7 @@ class SubscriptionImpl<i, DataT, Tail...>
 };
 
 template <class... Ts>
-using Subscription = SubscriptionImpl<0, Ts...>;
+class Subscription {};
 
 template <std::size_t i, class RetT, class... ArgTs, class... Tail>
 RetT call(SubscriptionImpl<i, RetT(ArgTs...), Tail...>& t, ArgTs... args) {
@@ -205,29 +205,22 @@ void next(SubscriptionImpl<i, ArgTs..., Tail...>& t, ArgTs... args) {
 template <class...>
 class Observable;
 
-template <>
-class Observable<> {
-   public:
-    Observable() = default;
-    virtual ~Observable() = default;
-};
-
 template <class... ArgTs, class... Tail>
 class Observable<void(ArgTs...), Tail...> : public Observable<Tail...> {
    public:
     using Observable<Tail...>::next;
 
-    void next(ArgTs... args) { std::cerr << "Base Next()" << std::endl; }
+    virtual void next(ArgTs... args) {}
 };
 
 template <class... ArgTs>
 class Observable<Subscription<ArgTs...>> {
    public:
-    class SubscriptionT : public Subscription<ArgTs...> {
+    class SubscriptionT : public SubscriptionImpl<0, ArgTs...> {
         friend class Observable<Subscription<ArgTs...>>;
 
        public:
-        SubscriptionT(ArgTs... args) : Subscription<ArgTs...>(args...) {}
+        SubscriptionT(ArgTs... args) : SubscriptionImpl<0, ArgTs...>(args...) {}
     };
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
 
@@ -240,6 +233,20 @@ class Observable<Subscription<ArgTs...>> {
 
    protected:
     std::vector<SubscriptionPtr> mSubscriptions;
+};
+
+template <class ArgT>
+class ForwardObservable
+    : public Observable<void(ArgT), Subscription<void(ArgT)>> {
+   public:
+    void next(ArgT t) {
+        for (auto sub : mSubscriptions) {
+            call<0>(*sub, t);
+        }
+    }
+
+   protected:
+    using Observable<Subscription<void(ArgT)>>::mSubscriptions;
 };
 
 #endif
