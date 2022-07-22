@@ -292,8 +292,50 @@ class ForwardObservableImpl<i, Subscription<SubTs...>, void(ArgTs...), Tail...>
 template <class... Ts>
 using ForwardObservable = ForwardObservableImpl<0, Subscription<>, Ts...>;
 
+template <size_t, class>
+class T {};
+
+class B {
+   public:
+    B(int i) { std::cerr << "B" << i << std::endl; }
+};
+
+class C {
+   public:
+    C(int i) { std::cerr << "C" << i << std::endl; }
+};
+
+class D {
+   public:
+    D(int i) { std::cerr << "D" << i << std::endl; }
+};
+
+template <class...>
+class AImpl2;
+
+template <size_t... is, class... Ts>
+class AImpl2<T<is, Ts>...> : public Ts... {
+   public:
+    AImpl2() : Ts(is)... { std::cerr << "A" << std::endl; }
+};
+
+template <size_t, class...>
+class AImpl;
+
+template <size_t i, class U, class... Ts, class... Tail>
+class AImpl<i, TypeWrapper<Ts...>, U, Tail...>
+    : public AImpl<i + 1, TypeWrapper<Ts..., T<i, U>>, Tail...> {};
+
+template <size_t i, class... Ts>
+class AImpl<i, TypeWrapper<Ts...>> : public AImpl2<Ts...> {};
+
+template <class... Ts>
+using A = AImpl<0, TypeWrapper<>, Ts...>;
+
 // TODO:
+// Variadic Inheritance
 // Data
+// ForwardObservable Data
 // Unsubscribe
 
 #endif

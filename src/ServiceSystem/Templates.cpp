@@ -95,4 +95,8 @@ void testObservable() {
 }
 
 // Main
-int main(int argc, char* argv[]) { testObservable(); }
+int main(int argc, char* argv[]) {
+    testObservable();
+
+    A<B, C, D> a;
+}
