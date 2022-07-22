@@ -256,7 +256,7 @@ class ForwardObservableImpl<i, Subscription<SubTs...>, void(ArgTs...), Tail...>
     using ForwardObservableImpl<i + 1, Subscription<SubTs..., void(ArgTs...)>,
                                 Tail...>::next;
 
-    void next(ArgTs... t) {
+    virtual void next(ArgTs... t) {
         for (auto sub : mSubscriptions) {
             call<i>(*sub, t...);
         }

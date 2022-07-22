@@ -52,7 +52,16 @@ class MyObservable
     }
 };
 
-class SimpleObservable : public ForwardObservable<int, void(int, int)> {};
+class SimpleObservable : public ForwardObservable<int, void(int, int)> {
+   public:
+    using ForwardObservable<int, void(int, int)>::next;
+
+    void next(int i) {
+        for (auto sub : mSubscriptions) {
+            call<1>(*sub, i * 2, i * i);
+        }
+    }
+};
 
 void testObservable() {
     MyObservable m;
