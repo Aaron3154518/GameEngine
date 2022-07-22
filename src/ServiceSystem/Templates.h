@@ -232,31 +232,43 @@ class Observable<Subscription<ArgTs...>> {
 };
 
 // ForwardObservable
-template <class... Tail>
-class ForwardObservable : public ForwardObservable<Subscription<>, Tail...> {};
+template <size_t i, class... Tail>
+class ForwardObservableImpl
+    : public ForwardObservableImpl<i, Subscription<>, Tail...> {};
 
-template <class... SubTs>
-class ForwardObservable<Subscription<SubTs...>>
+template <size_t i, class... SubTs>
+class ForwardObservableImpl<i, Subscription<SubTs...>>
     : public Observable<SubTs..., Subscription<SubTs...>> {
    protected:
     using Observable<SubTs..., Subscription<SubTs...>>::mSubscriptions;
 };
 
-template <class... ArgTs, class... SubTs, class... Tail>
-class ForwardObservable<Subscription<SubTs...>, void(ArgTs...), Tail...>
-    : public ForwardObservable<Subscription<SubTs..., void(ArgTs...)>,
-                               Tail...> {
+template <size_t i, class ArgT, class... SubTs, class... Tail>
+class ForwardObservableImpl<i, Subscription<SubTs...>, ArgT, Tail...>
+    : public ForwardObservableImpl<i, Subscription<SubTs...>, void(ArgT),
+                                   Tail...> {};
+
+template <size_t i, class... ArgTs, class... SubTs, class... Tail>
+class ForwardObservableImpl<i, Subscription<SubTs...>, void(ArgTs...), Tail...>
+    : public ForwardObservableImpl<
+          i + 1, Subscription<SubTs..., void(ArgTs...)>, Tail...> {
    public:
-    void next(ArgTs&&... t) {
+    using ForwardObservableImpl<i + 1, Subscription<SubTs..., void(ArgTs...)>,
+                                Tail...>::next;
+
+    void next(ArgTs... t) {
         for (auto sub : mSubscriptions) {
-            call<0>(*sub, std::forward<ArgTs>(t)...);
+            call<i>(*sub, t...);
         }
     }
 
    protected:
-    using ForwardObservable<Subscription<SubTs..., void(ArgTs...)>,
-                            Tail...>::mSubscriptions;
+    using ForwardObservableImpl<i + 1, Subscription<SubTs..., void(ArgTs...)>,
+                                Tail...>::mSubscriptions;
 };
+
+template <class... Ts>
+using ForwardObservable = ForwardObservableImpl<0, Ts...>;
 
 // TODO:
 // Data
