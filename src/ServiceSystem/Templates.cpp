@@ -52,7 +52,7 @@ class MyObservable
     }
 };
 
-class SimpleObservable : public ForwardObservable<int> {};
+class SimpleObservable : public ForwardObservable<void(int, int)> {};
 
 void testObservable() {
     MyObservable m;
@@ -70,11 +70,12 @@ void testObservable() {
     m.next(-1, true);
 
     SimpleObservable s;
-    SimpleObservable::SubscriptionPtr mSub2 = s.subscribe(
-        [](int i) { std::cerr << "Too simple " << i << std::endl; });
+    SimpleObservable::SubscriptionPtr mSub2 = s.subscribe([](int i, int j) {
+        std::cerr << "Too simple " << i << " " << j << std::endl;
+    });
 
-    s.next(6);
-    s.next(-9);
+    s.next(6, 9);
+    s.next(-42, 0);
 }
 
 // Main

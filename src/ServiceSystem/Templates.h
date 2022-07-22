@@ -242,18 +242,19 @@ class ForwardObservable<Subscription<SubTs...>>
     using Observable<SubTs..., Subscription<SubTs...>>::mSubscriptions;
 };
 
-template <class ArgT, class... SubTs, class... Tail>
-class ForwardObservable<Subscription<SubTs...>, ArgT, Tail...>
-    : public ForwardObservable<Subscription<SubTs..., void(ArgT)>, Tail...> {
+template <class... ArgTs, class... SubTs, class... Tail>
+class ForwardObservable<Subscription<SubTs...>, void(ArgTs...), Tail...>
+    : public ForwardObservable<Subscription<SubTs..., void(ArgTs...)>,
+                               Tail...> {
    public:
-    void next(ArgT t) {
+    void next(ArgTs&&... t) {
         for (auto sub : mSubscriptions) {
-            call<0>(*sub, t);
+            call<0>(*sub, std::forward<ArgTs>(t)...);
         }
     }
 
    protected:
-    using ForwardObservable<Subscription<SubTs..., void(ArgT)>,
+    using ForwardObservable<Subscription<SubTs..., void(ArgTs...)>,
                             Tail...>::mSubscriptions;
 };
 
