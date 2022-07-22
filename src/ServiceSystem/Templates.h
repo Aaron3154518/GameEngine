@@ -126,10 +126,6 @@ void set(Data<i, DataT>& t, std::shared_ptr<DataT> data) {
     t.mData = data;
 }
 
-// TODO:
-// Add constructor to take all required functions and data
-// Fix std::function to take argument
-
 // Subscription
 template <size_t i, class...>
 class SubscriptionImpl;
@@ -235,9 +231,20 @@ class Observable<Subscription<ArgTs...>> {
     std::vector<SubscriptionPtr> mSubscriptions;
 };
 
-template <class ArgT>
-class ForwardObservable
-    : public Observable<void(ArgT), Subscription<void(ArgT)>> {
+// ForwardObservable
+template <class... Tail>
+class ForwardObservable : public ForwardObservable<Subscription<>, Tail...> {};
+
+template <class... SubTs>
+class ForwardObservable<Subscription<SubTs...>>
+    : public Observable<SubTs..., Subscription<SubTs...>> {
+   protected:
+    using Observable<SubTs..., Subscription<SubTs...>>::mSubscriptions;
+};
+
+template <class ArgT, class... SubTs, class... Tail>
+class ForwardObservable<Subscription<SubTs...>, ArgT, Tail...>
+    : public ForwardObservable<Subscription<SubTs..., void(ArgT)>, Tail...> {
    public:
     void next(ArgT t) {
         for (auto sub : mSubscriptions) {
@@ -246,7 +253,12 @@ class ForwardObservable
     }
 
    protected:
-    using Observable<Subscription<void(ArgT)>>::mSubscriptions;
+    using ForwardObservable<Subscription<SubTs..., void(ArgT)>,
+                            Tail...>::mSubscriptions;
 };
+
+// TODO:
+// Data
+// Unsubscribe
 
 #endif
