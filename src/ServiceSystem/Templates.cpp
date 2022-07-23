@@ -34,9 +34,7 @@ void testModel() {
 }
 
 // MyObservable
-class MyObservable
-    : public Observable<void(), void(int, bool),
-                        Subscription<void(), int(bool), void(bool)>> {
+class MyObservable : public Observable<void(), int(bool), void(bool)> {
    public:
     void next() {
         for (auto sub : mSubscriptions) {
@@ -52,9 +50,9 @@ class MyObservable
     }
 };
 
-class SimpleObservable : public ForwardObservable<int, void(int, int)> {
+class SimpleObservable : public ForwardObservable<void(int), void(int, int)> {
    public:
-    using ForwardObservable<int, void(int, int)>::next;
+    using ForwardObservable<void(int), void(int, int)>::next;
 
     void next(int i) {
         for (auto sub : mSubscriptions) {
@@ -62,8 +60,6 @@ class SimpleObservable : public ForwardObservable<int, void(int, int)> {
         }
     }
 };
-
-void foo(std::function<void(int)> f, int i) { f(i); }
 
 void testObservable() {
     MyObservable m;
@@ -99,4 +95,6 @@ int main(int argc, char* argv[]) {
     testObservable();
 
     A<B, C, D> a;
+
+    foo();
 }
