@@ -50,9 +50,10 @@ class MyObservable : public Observable<void(), int(bool), void(bool)> {
     }
 };
 
-class SimpleObservable : public ForwardObservable<void(int), void(int, int)> {
+typedef ForwardObservable<void(int), void(int, int)> SimpleObservableBase;
+class SimpleObservable : public SimpleObservableBase {
    public:
-    using ForwardObservable<void(int), void(int, int)>::next;
+    using SimpleObservableBase::next;
 
     void next(int i) {
         for (auto sub : mSubscriptions) {
@@ -90,6 +91,16 @@ void testObservable() {
     s.next(-42);
 }
 
+template <class>
+struct Print;
+
+template <size_t... Is>
+struct Print<Range<Is...>> {
+    static void print() { (void)(int[]){(std::cerr << Is << " ", 0)...}; }
+};
+
+typedef RangeGen<0, 1024 * 1024> test;
+
 // Main
 int main(int argc, char* argv[]) {
     testObservable();
@@ -97,4 +108,6 @@ int main(int argc, char* argv[]) {
     A<B, C, D> a;
 
     foo();
+
+    Print<RangeGen<204, 867>>::print();
 }

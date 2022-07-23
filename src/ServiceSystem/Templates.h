@@ -130,7 +130,39 @@ void set(Data<i, DataT>& t, std::shared_ptr<DataT> data) {
 template <size_t...>
 struct Range {};
 
-template <typename Range, size_t, size_t>
+template <bool, size_t, class>
+struct Merge;
+
+template <size_t Off, size_t Start, size_t... Tail>
+struct Merge<false, Off, Range<Start, Tail...>> {
+    typedef Range<Start, Tail..., (Off + Tail)...> range;
+};
+
+template <size_t Off, size_t... Idxs>
+struct Merge<true, Off, Range<Idxs...>> {
+    typedef Range<Idxs..., (Off + Idxs)...> range;
+};
+
+template <size_t Start, size_t End>
+struct RangeGenImpl {
+    static_assert(Start < End, "Invalid start");
+
+    typedef typename Merge<
+        (End - Start + 1) % 2 == 0, (End - Start + 1) / 2,
+        typename RangeGenImpl<Start, Start + (End - Start) / 2>::range>::range
+        range;
+};
+
+template <size_t End>
+struct RangeGenImpl<End, End> {
+    typedef Range<End> range;
+};
+
+template <size_t Start, size_t End>
+using RangeGen = typename RangeGenImpl<Start, End - 1>::range;
+
+/*
+template <class, size_t, size_t>
 struct RangeImpl;
 
 template <size_t Start, size_t End, size_t... Prev>
@@ -148,6 +180,7 @@ struct RangeImpl<Range<Prev...>, End, End> {
 
 template <size_t Start, size_t End>
 using RangeGen = RangeImpl<Range<>, Start, End>;
+*/
 
 // Subscription
 // Subscription Functions
@@ -208,8 +241,10 @@ void set(SubscriptionDataImpl<i, DataT>& t, DataT&& data) {
 template <class... Ts>
 struct Subscription {};
 
-template <size_t FCtr, typename FRange, typename Subscription, size_t DCtr,
-          typename DRange, typename TypeWrapper, class...>
+// For storing different observables
+struct ObservableBase {};
+
+template <size_t, class, class, size_t, class, class, class...>
 struct ObservableImpl;
 
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
@@ -234,7 +269,8 @@ struct ObservableImpl<FCtr, Range<FIdxs...>, Subscription<FuncTs...>, DCtr,
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
           size_t... DIdxs, class... DataTs>
 struct ObservableImpl<FCtr, Range<FIdxs...>, Subscription<FuncTs...>, DCtr,
-                      Range<DIdxs...>, TypeWrapper<DataTs...>> {
+                      Range<DIdxs...>, TypeWrapper<DataTs...>>
+    : public ObservableBase {
    public:
     struct SubscriptionT : public SubscriptionFuncImpl<FIdxs, FuncTs>...,
                            SubscriptionDataImpl<DIdxs, DataTs>... {
@@ -264,8 +300,7 @@ using Observable = ObservableImpl<0, Range<>, Subscription<>, 0, Range<>,
 // ForwardObservable
 template <class... SubTs>
 using ForwardObservableBase =
-    ObservableImpl<sizeof...(SubTs),
-                   typename RangeGen<0, sizeof...(SubTs)>::range,
+    ObservableImpl<sizeof...(SubTs), RangeGen<0, sizeof...(SubTs)>,
                    Subscription<SubTs...>, 0, Range<>, TypeWrapper<>>;
 
 template <size_t, class...>
