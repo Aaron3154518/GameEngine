@@ -12,7 +12,7 @@ class MyObservable
     }
 
     void next(int i, bool b) {
-        for (auto it = begin(), itEnd = end(); it != itEnd; ++it) {
+        for (auto it = crbegin(), itEnd = crend(); it != itEnd; ++it) {
             call<1>(**it, i > 0);
             call<2>(**it, i > 0 && b);
         }
@@ -38,15 +38,24 @@ void testObservable() {
 
     std::string str = "Hello World";
 
-    MyObservable::SubscriptionPtr mSub = m.subscribe(
-        []() { std::cerr << "void()" << std::endl; },
+    MyObservable::SubscriptionPtr sub1 = m.subscribe(
+        []() { std::cerr << "1 void()" << std::endl; },
         [](bool b) {
-            std::cerr << "bool(" << b << ")" << std::endl;
+            std::cerr << "1 bool(" << b << ")" << std::endl;
             return 200;
         },
-        [](bool b) { std::cerr << "void(" << b << ")" << std::endl; }, str);
+        [](bool b) { std::cerr << "1 void(" << b << ")" << std::endl; }, str);
+    MyObservable::SubscriptionPtr sub2 = m.subscribe(
+        []() { std::cerr << "2 void()" << std::endl; },
+        [](bool b) {
+            std::cerr << "2 bool(" << b << ")" << std::endl;
+            return 200;
+        },
+        [](bool b) { std::cerr << "2 void(" << b << ")" << std::endl; },
+        str + " Other");
 
     m.next();
+    std::cerr << "Order should now be 2, 1" << std::endl;
     m.next(200, false);
     m.next(-1, true);
 }

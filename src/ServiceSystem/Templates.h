@@ -103,23 +103,11 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
 
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
     typedef std::weak_ptr<SubscriptionT> SubscriptionWPtr;
-    typedef std::list<SubscriptionWPtr> SubscriptionList;
-    typedef typename SubscriptionList::iterator SubscriptionIter;
 
-    SubscriptionPtr subscribe(ArgTs... args, Unsubscriber unsub = {}) {
-        SubscriptionPtr sub = std::make_shared<SubscriptionT>(args...);
-        sub->setUnsubscriber(unsub);
-        mSubscriptions.push_back(sub);
-        return sub;
-    };
-
-   protected:
-    SubscriptionList mSubscriptions;
-
+    template <class ItT>
     struct Iterator {
        public:
-        Iterator(const SubscriptionIter& it, const SubscriptionIter& end)
-            : mIt(it), mEnd(end) {
+        Iterator(const ItT& it, const ItT& end) : mIt(it), mEnd(end) {
             while (mIt != mEnd && !*this) {
                 std::cerr << "Sup" << std::endl;
                 ++mIt;
@@ -146,11 +134,21 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
         }
 
        private:
-        SubscriptionIter mIt, mEnd;
+        ItT mIt, mEnd;
     };
 
-    Iterator begin() {
-        // Prune unsubscribed
+    SubscriptionPtr subscribe(ArgTs... args, Unsubscriber unsub = {}) {
+        SubscriptionPtr sub = std::make_shared<SubscriptionT>(args...);
+        sub->setUnsubscriber(unsub);
+        mSubscriptions.push_back(sub);
+        return sub;
+    };
+
+   protected:
+    std::list<SubscriptionWPtr> mSubscriptions;
+
+    // Prune unsubscribed
+    void prune() {
         for (auto it = mSubscriptions.begin(), end = mSubscriptions.end();
              it != end; ++it) {
             while (it != end && (!it->lock() || !*it->lock())) {
@@ -160,11 +158,35 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
                 break;
             }
         }
-
-        return Iterator(mSubscriptions.begin(), mSubscriptions.end());
     }
-    Iterator end() {
-        return Iterator(mSubscriptions.end(), mSubscriptions.end());
+
+    auto begin() {
+        return _begin(mSubscriptions.begin(), mSubscriptions.end());
+    }
+    auto rbegin() {
+        return _begin(mSubscriptions.rbegin(), mSubscriptions.rend());
+    }
+    auto cbegin() {
+        return _begin(mSubscriptions.cbegin(), mSubscriptions.cend());
+    }
+    auto crbegin() {
+        return _begin(mSubscriptions.crbegin(), mSubscriptions.crend());
+    }
+    auto end() { return _end(mSubscriptions.end()); }
+    auto rend() { return _end(mSubscriptions.rend()); }
+    auto cend() { return _end(mSubscriptions.cend()); }
+    auto crend() { return _end(mSubscriptions.crend()); }
+
+   private:
+    template <class ItT>
+    Iterator<ItT> _begin(const ItT& begin, const ItT& end) {
+        prune();
+        return Iterator<ItT>(begin, end);
+    }
+
+    template <class ItT>
+    Iterator<ItT> _end(const ItT& end) {
+        return Iterator<ItT>(end, end);
     }
 };
 
