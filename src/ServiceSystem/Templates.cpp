@@ -1,10 +1,12 @@
 #include "Templates.h"
 
 // MyObservable
-class MyObservable : public Observable<void(), int(bool), void(bool)> {
+class MyObservable
+    : public Observable<void(), int(bool), std::string, void(bool)> {
    public:
     void next() {
         for (auto sub : mSubscriptions) {
+            std::cerr << get<0>(*sub) << std::endl;
             call<0>(*sub);
         }
     }
@@ -24,6 +26,7 @@ class SimpleObservable : public SimpleObservableBase {
 
     void next(int i) {
         for (auto sub : mSubscriptions) {
+            call<0>(*sub, 100 + i);
             call<1>(*sub, i * 2, i * i);
         }
     }
@@ -32,13 +35,15 @@ class SimpleObservable : public SimpleObservableBase {
 void testObservable() {
     MyObservable m;
 
+    std::string str = "Hello World";
+
     MyObservable::SubscriptionPtr mSub = m.subscribe(
         []() { std::cerr << "void()" << std::endl; },
         [](bool b) {
             std::cerr << "bool(" << b << ")" << std::endl;
             return 200;
         },
-        [](bool b) { std::cerr << "void(" << b << ")" << std::endl; });
+        [](bool b) { std::cerr << "void(" << b << ")" << std::endl; }, str);
 
     m.next();
     m.next(200, false);

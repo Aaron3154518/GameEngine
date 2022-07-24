@@ -69,19 +69,16 @@ RetT call(SubscriptionFuncImpl<i, std::function<RetT(ArgTs...)>>& t,
 }
 
 // Subscription Data
-template <size_t, class...>
-struct SubscriptionDataImpl;
-
 template <size_t i, class DataT>
-struct SubscriptionDataImpl<i, DataT> {
+struct SubscriptionDataImpl {
     template <std::size_t _i, class _DataT>
-    friend const _DataT& get(SubscriptionDataImpl<_i, _DataT>&);
+    friend _DataT& get(SubscriptionDataImpl<_i, _DataT>&);
 
     template <std::size_t _i, class _DataT>
-    friend void set(SubscriptionDataImpl<_i, _DataT>&, _DataT&&);
+    friend void set(SubscriptionDataImpl<_i, _DataT>&, const _DataT&);
 
    public:
-    SubscriptionDataImpl(DataT&& data) : mData(std::forward<DataT>(data)) {}
+    SubscriptionDataImpl(const DataT& data) : mData(data) {}
 
    protected:
     DataT mData;
@@ -93,7 +90,7 @@ DataT& get(SubscriptionDataImpl<i, DataT>& t) {
 }
 
 template <std::size_t i, class DataT>
-void set(SubscriptionDataImpl<i, DataT>& t, DataT&& data) {
+void set(SubscriptionDataImpl<i, DataT>& t, const DataT& data) {
     t.mData = std::forward<DataT>(data);
 }
 
@@ -101,14 +98,40 @@ void set(SubscriptionDataImpl<i, DataT>& t, DataT&& data) {
 template <class... Ts>
 struct TypeWrapper {};
 
-// For storing different observables
+// For storing different observables in a container
 struct ObservableBase {};
 
+// This struct is used to combine all arguments into one parameter pack
+// Apparently g++ doesn't like multiple variadic inheritance
+template <class, class>
+struct ObservableImplBase;
+
+template <class... ArgTs, class... InherTs>
+struct ObservableImplBase<TypeWrapper<ArgTs...>, TypeWrapper<InherTs...>>
+    : public ObservableBase {
+   public:
+    struct SubscriptionT : public InherTs... {
+       public:
+        SubscriptionT(ArgTs... args) : InherTs(args)... {}
+    };
+
+    typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
+
+    SubscriptionPtr subscribe(ArgTs... args) {
+        mSubscriptions.push_back(std::make_shared<SubscriptionT>(args...));
+        return mSubscriptions.back();
+    };
+
+   protected:
+    std::list<SubscriptionPtr> mSubscriptions;
+};
+
+// This struct is used to separate and enumerate data and function classes
 template <size_t, class, class, size_t, class, class, class...>
 struct ObservableImpl;
 
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
-          class... DataTs, size_t... DIdxs, class DataT, class... Tail>
+          size_t... DIdxs, class... DataTs, class DataT, class... Tail>
 struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
                       Range<DIdxs...>, TypeWrapper<DataTs...>, DataT, Tail...>
     : public ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>,
@@ -116,7 +139,7 @@ struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
                             TypeWrapper<DataTs..., DataT>, Tail...> {};
 
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
-          class... DataTs, size_t... DIdxs, class RetT, class... ArgTs,
+          size_t... DIdxs, class... DataTs, class RetT, class... ArgTs,
           class... Tail>
 struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
                       Range<DIdxs...>, TypeWrapper<DataTs...>, RetT(ArgTs...),
@@ -130,32 +153,15 @@ template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
           size_t... DIdxs, class... DataTs>
 struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
                       Range<DIdxs...>, TypeWrapper<DataTs...>>
-    : public ObservableBase {
-   public:
-    struct SubscriptionT : public SubscriptionFuncImpl<FIdxs, FuncTs>...,
-                           SubscriptionDataImpl<DIdxs, DataTs>... {
-       public:
-        SubscriptionT(FuncTs... funcs, DataTs&&... data)
-            : SubscriptionFuncImpl<FIdxs, FuncTs>(funcs)...,
-              SubscriptionDataImpl<DIdxs, DataTs>(
-                  std::forward<DataTs>(data))... {}
-    };
+    : public ObservableImplBase<
+          TypeWrapper<FuncTs..., const DataTs&...>,
+          TypeWrapper<SubscriptionFuncImpl<FIdxs, FuncTs>...,
+                      SubscriptionDataImpl<DIdxs, DataTs>...>> {};
 
-    typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
-
-    SubscriptionPtr subscribe(FuncTs... funcs, DataTs&&... data) {
-        mSubscriptions.push_back(std::make_shared<SubscriptionT>(
-            funcs..., std::forward<DataTs>(data)...));
-        return mSubscriptions.back();
-    };
-
-   protected:
-    std::list<SubscriptionPtr> mSubscriptions;
-};
-
+// For convenience
 template <class... Ts>
-using Observable = ObservableImpl<0, Range<>, TypeWrapper<>, 0, Range<>,
-                                  TypeWrapper<>, Ts...>;
+using Observable =
+    ObservableImpl<0, Range<>, TypeWrapper<>, 0, Range<>, TypeWrapper<>, Ts...>;
 
 // ForwardObservable
 template <class... SubTs>
