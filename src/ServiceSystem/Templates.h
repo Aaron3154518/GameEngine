@@ -164,17 +164,16 @@ using Observable =
     ObservableImpl<0, Range<>, TypeWrapper<>, 0, Range<>, TypeWrapper<>, Ts...>;
 
 // ForwardObservable
-template <class... SubTs>
-using ForwardObservableBase =
-    ObservableImpl<sizeof...(SubTs), RangeGen<0, sizeof...(SubTs)>,
-                   TypeWrapper<SubTs...>, 0, Range<>, TypeWrapper<>>;
-
-template <size_t, class...>
+template <size_t, class, class, class...>
 struct ForwardObservableImpl;
 
-template <size_t i, class... SubTs, class... ArgTs>
-struct ForwardObservableImpl<i, TypeWrapper<SubTs...>, void(ArgTs...)>
-    : public ForwardObservableBase<SubTs..., std::function<void(ArgTs...)>> {
+template <size_t i, class... FuncTs, class... SubTs, class... ArgTs>
+struct ForwardObservableImpl<i, TypeWrapper<FuncTs...>, TypeWrapper<SubTs...>,
+                             void(ArgTs...)>
+    : public ObservableImplBase<
+          TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
+          TypeWrapper<SubTs...,
+                      SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>> {
    public:
     virtual void next(ArgTs... t) {
         for (auto sub : mSubscriptions) {
@@ -183,17 +182,27 @@ struct ForwardObservableImpl<i, TypeWrapper<SubTs...>, void(ArgTs...)>
     }
 
    protected:
-    using ForwardObservableBase<SubTs...,
-                                std::function<void(ArgTs...)>>::mSubscriptions;
+    using ObservableImplBase<
+        TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
+        TypeWrapper<SubTs...,
+                    SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>>::
+        mSubscriptions;
 };
 
-template <size_t i, class... SubTs, class... ArgTs, class... Tail>
-struct ForwardObservableImpl<i, TypeWrapper<SubTs...>, void(ArgTs...), Tail...>
+template <size_t i, class... FuncTs, class... SubTs, class... ArgTs,
+          class... Tail>
+struct ForwardObservableImpl<i, TypeWrapper<FuncTs...>, TypeWrapper<SubTs...>,
+                             void(ArgTs...), Tail...>
     : public ForwardObservableImpl<
-          i + 1, TypeWrapper<SubTs..., std::function<void(ArgTs...)>>,
+          i + 1, TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
+          TypeWrapper<SubTs...,
+                      SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>,
           Tail...> {
     typedef ForwardObservableImpl<
-        i + 1, TypeWrapper<SubTs..., std::function<void(ArgTs...)>>, Tail...>
+        i + 1, TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
+        TypeWrapper<SubTs...,
+                    SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>,
+        Tail...>
         Base;
 
    public:
@@ -210,11 +219,10 @@ struct ForwardObservableImpl<i, TypeWrapper<SubTs...>, void(ArgTs...), Tail...>
 };
 
 template <class... Ts>
-using ForwardObservable = ForwardObservableImpl<0, TypeWrapper<>, Ts...>;
+using ForwardObservable =
+    ForwardObservableImpl<0, TypeWrapper<>, TypeWrapper<>, Ts...>;
 
 // TODO:
-// Variadic Inheritance
-// Data
 // Unsubscribe
 
 #endif
