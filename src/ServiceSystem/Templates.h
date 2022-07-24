@@ -255,7 +255,4 @@ struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
 template <class... Ts>
 using ForwardObservable = ForwardObservableImpl<0, Wrapper<>, Wrapper<>, Ts...>;
 
-// TODO:
-// Unsubscribe
-
 #endif
