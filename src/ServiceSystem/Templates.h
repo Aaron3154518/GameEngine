@@ -17,6 +17,16 @@ template <class T>
 using Func = std::function<T>;
 
 // Subscription
+struct Unsubscriber {
+   public:
+    void unsubscribe();
+
+    operator bool() const;
+
+   private:
+    std::shared_ptr<bool> mSubscribed = std::make_shared<bool>(true);
+};
+
 // Subscription Functions
 template <size_t, class...>
 struct SubFuncImpl;
@@ -82,17 +92,80 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
     struct SubscriptionT : public InherTs... {
        public:
         SubscriptionT(ArgTs... args) : InherTs(args)... {}
+
+        operator bool() { return mUnsub; }
+
+        void setUnsubscriber(Unsubscriber unsub) { mUnsub = unsub; }
+
+       private:
+        Unsubscriber mUnsub;
     };
 
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
+    typedef std::weak_ptr<SubscriptionT> SubscriptionWPtr;
+    typedef std::list<SubscriptionWPtr> SubscriptionList;
+    typedef typename SubscriptionList::iterator SubscriptionIter;
 
-    SubscriptionPtr subscribe(ArgTs... args) {
-        mSubscriptions.push_back(std::make_shared<SubscriptionT>(args...));
-        return mSubscriptions.back();
+    SubscriptionPtr subscribe(ArgTs... args, Unsubscriber unsub = {}) {
+        SubscriptionPtr sub = std::make_shared<SubscriptionT>(args...);
+        sub->setUnsubscriber(unsub);
+        mSubscriptions.push_back(sub);
+        return sub;
     };
 
    protected:
-    std::list<SubscriptionPtr> mSubscriptions;
+    SubscriptionList mSubscriptions;
+
+    struct Iterator {
+       public:
+        Iterator(const SubscriptionIter& it, const SubscriptionIter& end)
+            : mIt(it), mEnd(end) {
+            while (mIt != mEnd && !*this) {
+                std::cerr << "Sup" << std::endl;
+                ++mIt;
+            }
+        }
+
+        // Prefix ++
+        Iterator& operator++() {
+            ++mIt;
+            while (mIt != mEnd && !*this) {
+                ++mIt;
+            }
+            return *this;
+        }
+
+        bool operator==(const Iterator& it) { return mIt == it.mIt; }
+        bool operator!=(const Iterator& it) { return mIt != it.mIt; }
+
+        SubscriptionPtr operator*() { return mIt->lock(); }
+
+        operator bool() const {
+            SubscriptionPtr ptr = mIt->lock();
+            return mIt != mEnd && ptr && *ptr;
+        }
+
+       private:
+        SubscriptionIter mIt, mEnd;
+    };
+
+    Iterator begin() {
+        // Prune unsubscribed
+        for (auto it = mSubscriptions.begin(), end = mSubscriptions.end();
+             it != end; ++it) {
+            while (it != end && (!it->lock() || !*it->lock())) {
+                it = mSubscriptions.erase(it);
+            }
+            if (it == end) {
+                break;
+            }
+        }
+
+        return Iterator(mSubscriptions.begin(), mSubscriptions.end());
+    }
+    Iterator end() {
+        return Iterator(mSubscriptions.end(), mSubscriptions.end());
+    }
 };
 
 // This struct is used to separate and enumerate data and function classes
@@ -142,7 +215,7 @@ struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
           Wrapper<SubTs..., SubFuncImpl<i, Func<void(ArgTs...)>>>> {
    public:
     virtual void next(ArgTs... t) {
-        for (auto sub : mSubscriptions) {
+        for (auto sub : *this) {
             call<i>(*sub, t...);
         }
     }
@@ -170,7 +243,7 @@ struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
     using Base::next;
 
     virtual void next(ArgTs... t) {
-        for (auto sub : mSubscriptions) {
+        for (auto sub : *this) {
             call<i>(*sub, t...);
         }
     }

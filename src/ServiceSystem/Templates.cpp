@@ -1,20 +1,25 @@
 #include "Templates.h"
 
+// Unsubscriber
+void Unsubscriber::unsubscribe() { *mSubscribed = false; }
+
+Unsubscriber::operator bool() const { return *mSubscribed; }
+
 // MyObservable
 class MyObservable
     : public Observable<void(), int(bool), std::string, void(bool)> {
    public:
     void next() {
-        for (auto sub : mSubscriptions) {
+        for (auto sub : *this) {
             std::cerr << get<0>(*sub) << std::endl;
             call<0>(*sub);
         }
     }
 
     void next(int i, bool b) {
-        for (auto sub : mSubscriptions) {
-            call<1>(*sub, i > 0);
-            call<2>(*sub, i > 0 && b);
+        for (auto it = begin(), itEnd = end(); it != itEnd; ++it) {
+            call<1>(**it, i > 0);
+            call<2>(**it, i > 0 && b);
         }
     }
 };
@@ -25,7 +30,7 @@ class SimpleObservable : public SimpleObservableBase {
     using SimpleObservableBase::next;
 
     void next(int i) {
-        for (auto sub : mSubscriptions) {
+        for (auto sub : *this) {
             call<0>(*sub, 100 + i);
             call<1>(*sub, i * 2, i * i);
         }
@@ -52,14 +57,21 @@ void testObservable() {
     int c = 10;
 
     SimpleObservable s;
-    SimpleObservable::SubscriptionPtr mSub2 = s.subscribe(
-        [c](int i) { std::cerr << "To Simple " << c << " " << i << std::endl; },
-        [&c](int i, int j) {
-            std::cerr << "Too simple " << c << " " << i << " " << j
-                      << std::endl;
-        });
+    {
+        SimpleObservable::SubscriptionPtr mSub2 = s.subscribe(
+            [c](int i) {
+                std::cerr << "To Simple " << c << " " << i << std::endl;
+            },
+            [&c](int i, int j) {
+                std::cerr << "Too simple " << c << " " << i << " " << j
+                          << std::endl;
+            });
 
-    s.next(6, 9);
+        s.next(6, 9);
+    }
+
+    std::cerr << "Reset" << std::endl;
+
     s.next(-42);
 }
 
