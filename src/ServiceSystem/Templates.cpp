@@ -63,19 +63,5 @@ void testObservable() {
     s.next(-42);
 }
 
-template <class>
-struct Print;
-
-template <size_t... Is>
-struct Print<Range<Is...>> {
-    static void print() { (void)(int[]){(std::cerr << Is << " ", 0)...}; }
-};
-
-typedef RangeGen<0, 1024 * 1024> test;
-
 // Main
-int main(int argc, char* argv[]) {
-    testObservable();
-
-    Print<RangeGen<0, 70>>::print();
-}
+int main(int argc, char* argv[]) { testObservable(); }

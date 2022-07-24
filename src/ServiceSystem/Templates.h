@@ -1,103 +1,72 @@
 #ifndef TEMPLATES_H
 #define TEMPLATES_H
 
+#include <Utils/Range.h>
+
 #include <cstddef>
 #include <functional>
 #include <iostream>
 #include <list>
 #include <memory>
 
-// Range
-template <size_t...>
-struct Range {};
+// Helper structs/typedefs
+template <class... Ts>
+struct Wrapper {};
 
-template <bool, size_t, class>
-struct Merge;
-
-template <size_t Off, size_t Start, size_t... Tail>
-struct Merge<false, Off, Range<Start, Tail...>> {
-    typedef Range<Start, Tail..., (Off + Tail)...> range;
-};
-
-template <size_t Off, size_t... Idxs>
-struct Merge<true, Off, Range<Idxs...>> {
-    typedef Range<Idxs..., (Off + Idxs)...> range;
-};
-
-template <size_t Start, size_t End>
-struct RangeGenImpl {
-    static_assert(Start < End, "Invalid start");
-
-    typedef typename Merge<
-        (End - Start + 1) % 2 == 0, (End - Start + 1) / 2,
-        typename RangeGenImpl<Start, Start + (End - Start) / 2>::range>::range
-        range;
-};
-
-template <size_t End>
-struct RangeGenImpl<End, End> {
-    typedef Range<End> range;
-};
-
-template <size_t Start, size_t End>
-using RangeGen = typename RangeGenImpl<Start, End - 1>::range;
+template <class T>
+using Func = std::function<T>;
 
 // Subscription
 // Subscription Functions
 template <size_t, class...>
-struct SubscriptionFuncImpl;
+struct SubFuncImpl;
 
 template <size_t i, class RetT, class... ArgTs>
-struct SubscriptionFuncImpl<i, std::function<RetT(ArgTs...)>> {
+struct SubFuncImpl<i, Func<RetT(ArgTs...)>> {
     template <std::size_t _i, class _RetT, class... _ArgTs>
-    friend _RetT call(
-        SubscriptionFuncImpl<_i, std::function<_RetT(_ArgTs...)>>&, _ArgTs...);
+    friend _RetT call(SubFuncImpl<_i, Func<_RetT(_ArgTs...)>>&, _ArgTs...);
 
    public:
-    typedef std::function<RetT(ArgTs...)> Function;
+    typedef Func<RetT(ArgTs...)> Function;
 
-    SubscriptionFuncImpl(Function func) : mFunc(func) {}
+    SubFuncImpl(Function func) : mFunc(func) {}
 
    protected:
     Function mFunc;
 };
 
 template <std::size_t i, class RetT, class... ArgTs>
-RetT call(SubscriptionFuncImpl<i, std::function<RetT(ArgTs...)>>& t,
-          ArgTs... args) {
+RetT call(SubFuncImpl<i, Func<RetT(ArgTs...)>>& t, ArgTs... args) {
     return t.mFunc(args...);
 }
 
 // Subscription Data
 template <size_t i, class DataT>
-struct SubscriptionDataImpl {
+struct SubDataImpl {
     template <std::size_t _i, class _DataT>
-    friend _DataT& get(SubscriptionDataImpl<_i, _DataT>&);
+    friend _DataT& get(SubDataImpl<_i, _DataT>&);
 
     template <std::size_t _i, class _DataT>
-    friend void set(SubscriptionDataImpl<_i, _DataT>&, const _DataT&);
+    friend void set(SubDataImpl<_i, _DataT>&, const _DataT&);
 
    public:
-    SubscriptionDataImpl(const DataT& data) : mData(data) {}
+    SubDataImpl(const DataT& data) : mData(data) {}
 
    protected:
     DataT mData;
 };
 
 template <std::size_t i, class DataT>
-DataT& get(SubscriptionDataImpl<i, DataT>& t) {
+DataT& get(SubDataImpl<i, DataT>& t) {
     return t.mData;
 }
 
 template <std::size_t i, class DataT>
-void set(SubscriptionDataImpl<i, DataT>& t, const DataT& data) {
+void set(SubDataImpl<i, DataT>& t, const DataT& data) {
     t.mData = std::forward<DataT>(data);
 }
 
 // Observable
-template <class... Ts>
-struct TypeWrapper {};
-
 // For storing different observables in a container
 struct ObservableBase {};
 
@@ -107,7 +76,7 @@ template <class, class>
 struct ObservableImplBase;
 
 template <class... ArgTs, class... InherTs>
-struct ObservableImplBase<TypeWrapper<ArgTs...>, TypeWrapper<InherTs...>>
+struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
     : public ObservableBase {
    public:
     struct SubscriptionT : public InherTs... {
@@ -132,48 +101,45 @@ struct ObservableImpl;
 
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
           size_t... DIdxs, class... DataTs, class DataT, class... Tail>
-struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
-                      Range<DIdxs...>, TypeWrapper<DataTs...>, DataT, Tail...>
-    : public ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>,
-                            DCtr + 1, Range<DIdxs..., DCtr>,
-                            TypeWrapper<DataTs..., DataT>, Tail...> {};
+struct ObservableImpl<FCtr, Range<FIdxs...>, Wrapper<FuncTs...>, DCtr,
+                      Range<DIdxs...>, Wrapper<DataTs...>, DataT, Tail...>
+    : public ObservableImpl<FCtr, Range<FIdxs...>, Wrapper<FuncTs...>, DCtr + 1,
+                            Range<DIdxs..., DCtr>, Wrapper<DataTs..., DataT>,
+                            Tail...> {};
 
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
           size_t... DIdxs, class... DataTs, class RetT, class... ArgTs,
           class... Tail>
-struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
-                      Range<DIdxs...>, TypeWrapper<DataTs...>, RetT(ArgTs...),
+struct ObservableImpl<FCtr, Range<FIdxs...>, Wrapper<FuncTs...>, DCtr,
+                      Range<DIdxs...>, Wrapper<DataTs...>, RetT(ArgTs...),
                       Tail...>
-    : public ObservableImpl<
-          FCtr + 1, Range<FIdxs..., FCtr>,
-          TypeWrapper<FuncTs..., std::function<RetT(ArgTs...)>>, DCtr,
-          Range<DIdxs...>, TypeWrapper<DataTs...>, Tail...> {};
+    : public ObservableImpl<FCtr + 1, Range<FIdxs..., FCtr>,
+                            Wrapper<FuncTs..., Func<RetT(ArgTs...)>>, DCtr,
+                            Range<DIdxs...>, Wrapper<DataTs...>, Tail...> {};
 
 template <size_t FCtr, size_t... FIdxs, class... FuncTs, size_t DCtr,
           size_t... DIdxs, class... DataTs>
-struct ObservableImpl<FCtr, Range<FIdxs...>, TypeWrapper<FuncTs...>, DCtr,
-                      Range<DIdxs...>, TypeWrapper<DataTs...>>
-    : public ObservableImplBase<
-          TypeWrapper<FuncTs..., const DataTs&...>,
-          TypeWrapper<SubscriptionFuncImpl<FIdxs, FuncTs>...,
-                      SubscriptionDataImpl<DIdxs, DataTs>...>> {};
+struct ObservableImpl<FCtr, Range<FIdxs...>, Wrapper<FuncTs...>, DCtr,
+                      Range<DIdxs...>, Wrapper<DataTs...>>
+    : public ObservableImplBase<Wrapper<FuncTs..., const DataTs&...>,
+                                Wrapper<SubFuncImpl<FIdxs, FuncTs>...,
+                                        SubDataImpl<DIdxs, DataTs>...>> {};
 
 // For convenience
 template <class... Ts>
 using Observable =
-    ObservableImpl<0, Range<>, TypeWrapper<>, 0, Range<>, TypeWrapper<>, Ts...>;
+    ObservableImpl<0, Range<>, Wrapper<>, 0, Range<>, Wrapper<>, Ts...>;
 
 // ForwardObservable
 template <size_t, class, class, class...>
 struct ForwardObservableImpl;
 
 template <size_t i, class... FuncTs, class... SubTs, class... ArgTs>
-struct ForwardObservableImpl<i, TypeWrapper<FuncTs...>, TypeWrapper<SubTs...>,
+struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
                              void(ArgTs...)>
     : public ObservableImplBase<
-          TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
-          TypeWrapper<SubTs...,
-                      SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>> {
+          Wrapper<FuncTs..., Func<void(ArgTs...)>>,
+          Wrapper<SubTs..., SubFuncImpl<i, Func<void(ArgTs...)>>>> {
    public:
     virtual void next(ArgTs... t) {
         for (auto sub : mSubscriptions) {
@@ -183,26 +149,21 @@ struct ForwardObservableImpl<i, TypeWrapper<FuncTs...>, TypeWrapper<SubTs...>,
 
    protected:
     using ObservableImplBase<
-        TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
-        TypeWrapper<SubTs...,
-                    SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>>::
-        mSubscriptions;
+        Wrapper<FuncTs..., Func<void(ArgTs...)>>,
+        Wrapper<SubTs...,
+                SubFuncImpl<i, Func<void(ArgTs...)>>>>::mSubscriptions;
 };
 
 template <size_t i, class... FuncTs, class... SubTs, class... ArgTs,
           class... Tail>
-struct ForwardObservableImpl<i, TypeWrapper<FuncTs...>, TypeWrapper<SubTs...>,
+struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
                              void(ArgTs...), Tail...>
     : public ForwardObservableImpl<
-          i + 1, TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
-          TypeWrapper<SubTs...,
-                      SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>,
-          Tail...> {
+          i + 1, Wrapper<FuncTs..., Func<void(ArgTs...)>>,
+          Wrapper<SubTs..., SubFuncImpl<i, Func<void(ArgTs...)>>>, Tail...> {
     typedef ForwardObservableImpl<
-        i + 1, TypeWrapper<FuncTs..., std::function<void(ArgTs...)>>,
-        TypeWrapper<SubTs...,
-                    SubscriptionFuncImpl<i, std::function<void(ArgTs...)>>>,
-        Tail...>
+        i + 1, Wrapper<FuncTs..., Func<void(ArgTs...)>>,
+        Wrapper<SubTs..., SubFuncImpl<i, Func<void(ArgTs...)>>>, Tail...>
         Base;
 
    public:
@@ -219,8 +180,7 @@ struct ForwardObservableImpl<i, TypeWrapper<FuncTs...>, TypeWrapper<SubTs...>,
 };
 
 template <class... Ts>
-using ForwardObservable =
-    ForwardObservableImpl<0, TypeWrapper<>, TypeWrapper<>, Ts...>;
+using ForwardObservable = ForwardObservableImpl<0, Wrapper<>, Wrapper<>, Ts...>;
 
 // TODO:
 // Unsubscribe
