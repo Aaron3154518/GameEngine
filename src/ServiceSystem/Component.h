@@ -1,8 +1,6 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <ServiceSystem/Observable.h>
-
 #include <iostream>
 
 // Forward declaration
@@ -21,8 +19,6 @@ class Component {
 
    protected:
     virtual void init();
-
-    Unsubscriber unsub;
 };
 
 template <class T>

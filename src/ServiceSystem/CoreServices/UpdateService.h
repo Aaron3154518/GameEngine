@@ -5,7 +5,7 @@
 #include <ServiceSystem/Service.h>
 #include <Utils/Time.h>
 
-typedef Observable<Time, void(Time)> UpdateObservable;
+typedef ForwardObservable<void(Time)> UpdateObservable;
 
 class UpdateService : public Service<UpdateObservable> {};
 

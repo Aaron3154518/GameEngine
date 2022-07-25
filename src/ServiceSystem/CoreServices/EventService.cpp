@@ -3,5 +3,7 @@
 void EventObservable::next(const Event &e) {
     ServiceSystem::Get<RenderService, RenderOrderObservable>()
         ->computeUnderMouse(e);
-    EventObservableBase::next(e);
+    for (auto sub : *this) {
+        call<0>(*sub, e);
+    }
 }

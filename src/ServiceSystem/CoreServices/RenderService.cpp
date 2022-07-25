@@ -36,7 +36,9 @@ void RenderOrderObservable::next() {
     // Sort
     sort();
     // Serve
-    RenderOrderObservableBase::next(mRenderOrder);
+    for (auto sub : *this) {
+        call<0>(*sub, mRenderOrder);
+    }
 }
 
 void RenderOrderObservable::sort() {
@@ -46,28 +48,28 @@ void RenderOrderObservable::sort() {
                      });
 }
 
-void RenderOrderObservable::addComponent(UIComponentPtr comp) {
-    int &count = mRefCounts[comp];
+void RenderOrderObservable::addComponent(UIComponentSubWPtr sub) {
+    int &count = mRefCounts[sub];
     if (count == 0) {
         // If it's new, wait to add until next render cycle
-        mToAdd.push_back(comp);
+        mToAdd.push_back(sub);
     } else {
         // If it's not new, immediately increment references
         count++;
     }
 }
 
-void RenderOrderObservable::removeComponent(UIComponentPtr comp) {
+void RenderOrderObservable::removeComponent(UIComponentSubWPtr sub) {
     // Check pending first
-    auto compIt = std::find(mToAdd.begin(), mToAdd.end(), comp);
+    auto compIt = std::find(mToAdd.begin(), mToAdd.end(), sub);
     if (compIt != mToAdd.end()) {
         mToAdd.erase(compIt);
         return;
     }
 
     // Else update references
-    auto refIt = mRefCounts.find(comp);
-    auto it = std::find(mRenderOrder.begin(), mRenderOrder.end(), comp);
+    auto refIt = mRefCounts.find(sub);
+    auto it = std::find(mRenderOrder.begin(), mRenderOrder.end(), sub);
     if (refIt == mRefCounts.end()) {
         if (it != mRenderOrder.end()) {
             mRenderOrder.erase(it);
@@ -102,17 +104,10 @@ void RenderObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
 }
 
 RenderObservable::SubscriptionPtr RenderObservable::subscribe(
-    Subscription::Function func, UIComponentPtr data) {
-    SubscriptionPtr retVal = RenderObservableBase::subscribe(func, data);
-    ServiceSystem::Get<RenderService>()->addComponent(data);
-    return retVal;
-}
-
-void RenderObservable::updateSubscriptionData(SubscriptionPtr sub,
-                                              UIComponentPtr data) {
-    ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
-    RenderObservableBase::updateSubscriptionData(sub, data);
-    ServiceSystem::Get<RenderService>()->addComponent(data);
+    std::function<void(SDL_Renderer *)> func, UIComponentPtr data) {
+    SubscriptionPtr sub = RenderObservableBase::subscribe(func, data);
+    ServiceSystem::Get<RenderService>()->subscribe(sub);
+    return sub;
 }
 
 void RenderObservable::serve(SDL_Renderer *renderer) {

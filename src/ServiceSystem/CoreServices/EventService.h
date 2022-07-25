@@ -7,9 +7,7 @@
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
 
-typedef Observable<const Event &, void(const Event &)> EventObservableBase;
-
-class EventObservable : public EventObservableBase {
+class EventObservable : public Observable<void(const Event &)> {
    public:
     void next(const Event &e);
 };

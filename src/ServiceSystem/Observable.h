@@ -17,21 +17,29 @@ template <class T>
 using Func = std::function<T>;
 
 // Subscription Functions
-template <size_t, class...>
-struct SubFuncImpl;
+// Use SubFuncBase to match all subscriptions with the given function signature
+template <class>
+struct SubFuncBase;
 
-template <size_t i, class RetT, class... ArgTs>
-struct SubFuncImpl<i, Func<RetT(ArgTs...)>> {
-    template <std::size_t _i, class _RetT, class... _ArgTs>
-    friend _RetT call(SubFuncImpl<_i, Func<_RetT(_ArgTs...)>>&, _ArgTs...);
-
+template <class RetT, class... ArgTs>
+struct SubFuncBase<Func<RetT(ArgTs...)>> {
    public:
     typedef Func<RetT(ArgTs...)> Function;
 
-    SubFuncImpl(Function func) : mFunc(func) {}
+    SubFuncBase(Function func) : mFunc(func) {}
 
    protected:
     Function mFunc;
+};
+
+template <size_t, class>
+struct SubFuncImpl;
+
+template <size_t i, class RetT, class... ArgTs>
+struct SubFuncImpl<i, Func<RetT(ArgTs...)>>
+    : public SubFuncBase<Func<RetT(ArgTs...)>> {
+    template <std::size_t _i, class _RetT, class... _ArgTs>
+    friend _RetT call(SubFuncImpl<_i, Func<_RetT(_ArgTs...)>>&, _ArgTs...);
 };
 
 template <std::size_t i, class RetT, class... ArgTs>
@@ -40,22 +48,26 @@ RetT call(SubFuncImpl<i, Func<RetT(ArgTs...)>>& t, ArgTs... args) {
 }
 
 // Subscription Data
-template <size_t i, class DataT>
-struct SubDataImpl {
-    template <std::size_t _i, class _DataT>
-    friend _DataT& get(SubDataImpl<_i, _DataT>&);
-
-    template <std::size_t _i, class _DataT>
-    friend void set(SubDataImpl<_i, _DataT>&, const _DataT&);
-
+// Use SubDataBase to match all subscriptions with the given data type
+template <class DataT>
+struct SubDataBase {
    public:
-    SubDataImpl(const DataT& data) : mData(data) {}
+    SubDataBase(const DataT& data) : mData(data) {}
 
    protected:
     DataT mData;
 };
 
-template <std::size_t i, class DataT>
+template <size_t i, class DataT>
+struct SubDataImpl : public SubDataBase<DataT> {
+    template <std::size_t _i, class _DataT>
+    friend _DataT& get(SubDataImpl<_i, _DataT>&);
+
+    template <std::size_t _i, class _DataT>
+    friend void set(SubDataImpl<_i, _DataT>&, const _DataT&);
+};
+
+template <std::size_t i = 0, class DataT>
 DataT& get(SubDataImpl<i, DataT>& t) {
     return t.mData;
 }
@@ -122,6 +134,10 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
         return sub;
     };
 
+    void subscribe(const SubscriptionPtr& sub) {
+        mSubscriptions.push_back(sub);
+    };
+
    protected:
     std::list<SubscriptionWPtr> mSubscriptions;
 
@@ -144,16 +160,16 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<InherTs...>>
     auto rbegin() {
         return _begin(mSubscriptions.rbegin(), mSubscriptions.rend());
     }
-    auto cbegin() {
+    auto begin() const {
         return _begin(mSubscriptions.cbegin(), mSubscriptions.cend());
     }
-    auto crbegin() {
+    auto rbegin() const {
         return _begin(mSubscriptions.crbegin(), mSubscriptions.crend());
     }
     auto end() { return _end(mSubscriptions.end()); }
     auto rend() { return _end(mSubscriptions.rend()); }
-    auto cend() { return _end(mSubscriptions.cend()); }
-    auto crend() { return _end(mSubscriptions.crend()); }
+    auto end() const { return _end(mSubscriptions.cend()); }
+    auto rend() const { return _end(mSubscriptions.crend()); }
 
    private:
     template <class ItT>

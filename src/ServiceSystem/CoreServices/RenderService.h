@@ -25,25 +25,22 @@ struct UIComponent {
 
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
 
+typedef std::weak_ptr<SubDataBase<UIComponentPtr>> UIComponentSubWPtr;
+
 struct UIComponentCompare {
     bool operator()(const UIComponentPtr &a, const UIComponentPtr &b) const;
 };
 
-// Use a typedef for less code duplication
-typedef Observable<const std::vector<UIComponentPtr> &,
-                   void(const std::vector<UIComponentPtr> &)>
-    RenderOrderObservableBase;
-
-class RenderOrderObservable : public RenderOrderObservableBase {
+class RenderOrderObservable
+    : public Observable<void(const std::vector<UIComponentPtr> &)> {
    public:
-    // Expose custom next
     void next();
 
     void computeUnderMouse(const Event &e);
     UIComponentPtr getUnderMouse() const;
 
-    void addComponent(UIComponentPtr comp);
-    void removeComponent(UIComponentPtr comp);
+    void addComponent(UIComponentSubWPtr sub);
+    void removeComponent(UIComponentSubWPtr sub);
 
     const std::vector<UIComponentPtr> &getOrder() const;
 
@@ -51,18 +48,17 @@ class RenderOrderObservable : public RenderOrderObservableBase {
     void sort();
 
     UIComponentPtr mUnderMouse;
-    std::list<UIComponentPtr> mToAdd;
-    std::vector<UIComponentPtr> mRenderOrder;
-    std::unordered_map<UIComponentPtr, int> mRefCounts;
+    std::list<UIComponentSubWPtr> mToAdd;
+    std::vector<UIComponentSubWPtr> mRenderOrder;
+    std::unordered_map<UIComponentSubWPtr, int> mRefCounts;
 };
 
-typedef Observable<SDL_Renderer *, void(SDL_Renderer *), UIComponent>
-    RenderObservableBase;
+typedef Observable<void(SDL_Renderer *), UIComponentPtr> RenderObservableBase;
 
 class RenderObservable : public Component, public RenderObservableBase {
    public:
-    SubscriptionPtr subscribe(Subscription::Function func, UIComponentPtr data);
-    void updateSubscriptionData(SubscriptionPtr sub, UIComponentPtr data);
+    SubscriptionPtr subscribe(std::function<void(SDL_Renderer *)> func,
+                              UIComponentPtr data);
 
    private:
     void init();
