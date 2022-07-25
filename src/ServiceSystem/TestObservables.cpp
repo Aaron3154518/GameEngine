@@ -1,4 +1,4 @@
-#include "Templates.h"
+#include <ServiceSystem/Observable.h>
 
 // MyObservable
 class MyObservable
@@ -89,23 +89,15 @@ class UObservable : public Observable<void(), std::string> {
 void testUnsubscribe() {
     UObservable u;
 
-    Unsubscriber unsub;
+    const int N = 4;
+    int ctrs[N] = {3, 2, 1, 0};
 
-    const int N = 5;
-    int ctrs[N] = {4, 3, 2, 1, 0};
-
-    UObservable::SubscriptionPtr sub0 = u.subscribe(
-        [&ctrs]() {
-            std::cerr << "Should print 4 times" << std::endl;
-            ctrs[0]--;
-        },
-        "Control");
     UObservable::SubscriptionPtr sub1 = u.subscribe(
         [&ctrs]() {
             std::cerr << "Should print 3 times" << std::endl;
             ctrs[1]--;
         },
-        "Unsubscribe Test", unsub);
+        "Control");
     UObservable::SubscriptionPtr sub2 = u.subscribe(
         [&ctrs]() {
             std::cerr << "Should print 2 times" << std::endl;
@@ -131,10 +123,6 @@ void testUnsubscribe() {
     u.next();
 
     sub2.reset();
-
-    u.next();
-
-    unsub.unsubscribe();
 
     u.next();
 
