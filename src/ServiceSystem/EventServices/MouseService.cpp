@@ -4,41 +4,28 @@
 void MouseObservable::init() {
     eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
         std::bind(&MouseObservable::onEvent, this, std::placeholders::_1));
-    eventSub->setUnsubscriber(unsub);
 }
 
-MouseObservable::SubscriptionPtr MouseObservable::subscribe(
-    Subscription::Function func, UIComponentPtr data) {
-    SubscriptionPtr retVal = MouseObservableBase::subscribe(func, data);
-    ServiceSystem::Get<RenderService>()->addComponent(data);
-    return retVal;
+void MouseObservable::onSubscribe(SubscriptionPtr sub) {
+    ServiceSystem::Get<RenderService, RenderOrderObservable>()->addComponent(
+        sub);
 }
 
-void MouseObservable::updateSubscriptionData(SubscriptionPtr sub,
-                                             UIComponentPtr data) {
-    ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
-    MouseObservableBase::updateSubscriptionData(sub, data);
-    ServiceSystem::Get<RenderService>()->addComponent(data);
-}
-
-bool MouseObservable::unsubscribe(SubscriptionPtr sub) {
-    ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
-    return true;
-}
-
-void MouseObservable::serve(Event::MouseButton mouse) {
+void MouseObservable::next(Event::MouseButton mouse) {
     // If a lock exists, nobody gets clicked
     bool locked = mLocks.size() > 0;
 
     auto underMouse = ServiceSystem::Get<RenderService, RenderOrderObservable>()
                           ->getUnderMouse();
 
-    for (SubscriptionPtr sub : mSubscriptions) {
-        if (!sub->getData()->visible) {
+    for (auto sub : *this) {
+        auto data = sub->get<DATA>();
+
+        if (!data->visible) {
             continue;
         }
 
-        call(sub, mouse, !locked && sub->getData() == underMouse);
+        sub->get<FUNC>()(mouse, !locked && data == underMouse);
     }
 }
 

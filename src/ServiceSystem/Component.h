@@ -2,6 +2,7 @@
 #define COMPONENT_H
 
 #include <iostream>
+#include <memory>
 
 // Forward declaration
 template <class T>

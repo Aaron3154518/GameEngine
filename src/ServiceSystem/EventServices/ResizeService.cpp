@@ -4,7 +4,6 @@
 void ResizeObservable::init() {
     mEventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
         std::bind(&ResizeObservable::onEvent, this, std::placeholders::_1));
-    mEventSub->setUnsubscriber(unsub);
 }
 
 void ResizeObservable::onEvent(const Event& e) {

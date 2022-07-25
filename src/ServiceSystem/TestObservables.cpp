@@ -27,24 +27,10 @@ class MyObservable
     }
 
     void next(int i, bool b) {
-        for (auto it = rbegin(), itEnd = rend(); it != itEnd; ++it) {
+        for (auto it = rbegin(), itEnd = rend(); it != itEnd; it++) {
             Test t(i > 0);
             (*it)->get<1>()(t);
             (*it)->get<3>()(i > 0 && b);
-        }
-    }
-};
-
-// SimpleObservable
-typedef ForwardObservable<void(int), void(int, int)> SimpleObservableBase;
-class SimpleObservable : public SimpleObservableBase {
-   public:
-    using SimpleObservableBase::next;
-
-    void next(int&& i) {
-        for (auto sub : *this) {
-            sub->get<0>()(100 + i);
-            sub->get<1>()(i * 2, i * i);
         }
     }
 };
@@ -75,6 +61,20 @@ void testObservable() {
     m.next(200, false);
     m.next(-1, true);
 }
+
+// SimpleObservable
+typedef ForwardObservable<void(int), void(int, int)> SimpleObservableBase;
+class SimpleObservable : public SimpleObservableBase {
+   public:
+    using SimpleObservableBase::next;
+
+    void next(int&& i) {
+        for (auto sub : *this) {
+            sub->get<0>()(100 + i);
+            sub->get<1>()(i * 2, i * i);
+        }
+    }
+};
 
 void testForward() {
     int c = 10;

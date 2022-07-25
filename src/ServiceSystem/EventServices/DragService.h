@@ -17,43 +17,37 @@
 #include <memory>
 #include <set>
 
-struct DragComponent : public UIComponent {
-    DragComponent(Rect r, int e, int d);
-
+struct DragComponent {
     int dragDelay = 0;
     bool dragging = false;
-
-    std::function<void()> onDragStart, onDragEnd;
-    std::function<void(int, int, float, float)> onDrag;
 };
 
 typedef std::shared_ptr<DragComponent> DragComponentPtr;
 
-typedef Observable<const Event&, void(), DragComponent> DragObservableBase;
+typedef Observable<void(), void(int, int, float, float), void(), UIComponentPtr,
+                   DragComponentPtr>
+    DragObservableBase;
 
 class DragObservable : public Component, public DragObservableBase {
    public:
-    SubscriptionPtr subscribe(DragComponentPtr data);
-    void updateSubscriptionData(SubscriptionPtr sub, DragComponentPtr data);
+    enum : size_t { DRAG_START = 0, DRAG, DRAG_END, UI_DATA, DRAG_DATA };
+
+    void onSubscribe(SubscriptionPtr sub);
+
+    void next(const Event& e);
 
    private:
     void init();
-
-    void serve(const Event& e);
-
-    bool unsubscribe(SubscriptionPtr sub);
 
     void onUpdate(Time dt);
 
     void onEvent(const Event& e);
 
-    void onRenderOrder(const std::vector<UIComponentPtr>& order);
-
     void* mouseLock;
     SubscriptionPtr current;
+
     UpdateObservable::SubscriptionPtr updateSub;
     EventObservable::SubscriptionPtr eventSub;
-    RenderOrderObservable::SubscriptionPtr renderSub;
 };
 
 class DragService : public Service<DragObservable> {};

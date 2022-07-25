@@ -13,13 +13,11 @@ struct Timer {
     int timer = 0;
 };
 
-typedef Observable<Time, bool(), Timer> TimerObservableBase;
+typedef Observable<bool(), Timer> TimerObservableBase;
 
 class TimerObservable : public TimerObservableBase, public Component {
    public:
-    TimerObservable() = default;
-
-    SubscriptionPtr subscribe(Subscription::Function func, int length);
+    enum : size_t { FUNC = 0, DATA };
 
    private:
     void init();

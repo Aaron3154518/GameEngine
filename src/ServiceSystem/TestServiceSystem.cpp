@@ -80,6 +80,9 @@ int main(int argc, char *argv[]) {
             break;
         }
 
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()
+            ->computeUnderMouse(e.mouse());
+
         ServiceSystem::Get<UpdateService, UpdateObservable>()->next(dt);
         ServiceSystem::Get<EventService, EventObservable>()->next(e);
 

@@ -1,7 +1,5 @@
 #include "Component.h"
 
-Component::~Component() {
-    unsub.unsubscribe();
-}
+Component::~Component() {}
 
 void Component::init() {}

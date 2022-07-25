@@ -150,7 +150,8 @@ class MultiUnsubTest : public TestBase {
     void onRender(SDL_Renderer *renderer);
 
     int ctr = 0;
-    Unsubscriber updateUnsub;
+    bool unsub = true;
+
     std::vector<UpdateObservable::SubscriptionPtr> mUpdateSubs;
     MouseObservable::SubscriptionPtr mMouseSub;
 };
@@ -187,7 +188,7 @@ class DragTest : public TestBase {
     void onDragEnd();
 
     SDL_Color dragColor = WHITE;
-    DragComponentPtr mPos;
+    DragComponentPtr mDrag;
     DragObservable::SubscriptionPtr mDragSub;
 };
 

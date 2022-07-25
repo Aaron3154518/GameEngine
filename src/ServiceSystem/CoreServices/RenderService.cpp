@@ -12,9 +12,9 @@ void RenderOrderObservable::computeUnderMouse(SDL_Point mouse) {
 
     for (auto it = mComponents.rbegin(); it != mComponents.rend(); ++it) {
         auto compPtr = it->lock();
-        if (compPtr && compPtr->mData->visible &&
-            SDL_PointInRect(&mouse, compPtr->mData->rect)) {
-            mUnderMouse = compPtr->mData;
+        if (compPtr && compPtr->mVal->visible &&
+            SDL_PointInRect(&mouse, compPtr->mVal->rect)) {
+            mUnderMouse = compPtr->mVal;
             break;
         }
     }
@@ -28,7 +28,7 @@ void RenderOrderObservable::next() {
     sort();
     // Serve
     for (auto sub : *this) {
-        call<0>(*sub, getOrder());
+        sub->get<0>()(mRenderOrder);
     }
 }
 
@@ -45,18 +45,17 @@ void RenderOrderObservable::sort() {
     }
 
     // Sort remaining components
-    std::stable_sort(
-        mComponents.begin(), mComponents.end(),
+    mComponents.sort(
         [](const UIComponentSubWPtr &a, const UIComponentSubWPtr &b) {
-            return a.lock()->mData->elevation < b.lock()->mData->elevation;
+            return a.lock()->mVal->elevation < b.lock()->mVal->elevation;
         });
 
     // Create render order
-    mUnderMouse = mComponents.front().lock()->mData;
+    mUnderMouse = mComponents.front().lock()->mVal;
     mRenderOrder.clear();
     int i = 0;
     for (auto comp : mComponents) {
-        int &order = mRenderOrder[comp.lock()->mData];
+        int &order = mRenderOrder[comp.lock()->mVal];
         if (order == 0) {
             order = i++;
         }
@@ -84,25 +83,28 @@ void RenderObservable::init() {
             std::bind(&RenderObservable::sort, this, std::placeholders::_1));
 }
 
+void RenderObservable::onSubscribe(SubscriptionPtr sub) {
+    std::cerr << "RenderService onSubscribe" << std::endl;
+    ServiceSystem::Get<RenderService, RenderOrderObservable>()->addComponent(
+        sub);
+}
+
 void RenderObservable::next(SDL_Renderer *renderer) {
     for (auto sub : *this) {
-        if (get<0>(*sub)->visible) {
-            call<0>(*sub, renderer);
+        if (sub->get<DATA>()->visible) {
+            sub->get<FUNC>()(renderer);
         }
     }
 }
 
 void RenderObservable::sort(
     const std::unordered_map<UIComponentPtr, int> &order) {
+    // Remove unsubscribed
+    prune();
     // Sort the subcription by ascending order position
     mSubscriptions.sort(
-        [&order](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
-            return order.at(get<0>(*a)) <= order.at(get<0>(*b));
+        [&order](const SubscriptionWPtr &a, const SubscriptionWPtr &b) -> bool {
+            return order.at(a.lock()->get<DATA>()) <=
+                   order.at(b.lock()->get<DATA>());
         });
-}
-
-void RenderObservable::onSubscribe(SubscriptionPtr sub) {
-    std::cerr << "RenderService onSubscribe" << std::endl;
-    ServiceSystem::Get<RenderService, RenderOrderObservable>()->addComponent(
-        sub);
 }

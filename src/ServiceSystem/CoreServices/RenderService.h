@@ -26,7 +26,7 @@ struct UIComponent {
 
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
 
-typedef std::weak_ptr<SubDataBase<UIComponentPtr>> UIComponentSubWPtr;
+typedef std::weak_ptr<SubscriptionType<UIComponentPtr>> UIComponentSubWPtr;
 
 struct UIComponentCompare {
     bool operator()(const UIComponentPtr &a, const UIComponentPtr &b) const;
@@ -56,8 +56,7 @@ typedef Observable<void(SDL_Renderer *), UIComponentPtr> RenderObservableBase;
 
 class RenderObservable : public Component, public RenderObservableBase {
    public:
-    SubscriptionPtr subscribe(std::function<void(SDL_Renderer *)> func,
-                              UIComponentPtr data);
+    enum : size_t { FUNC = 0, DATA };
 
     void next(SDL_Renderer *renderer);
 

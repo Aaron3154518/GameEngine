@@ -12,7 +12,7 @@ struct ResizeData {
 };
 
 class ResizeObservable : public Component,
-                         public Observable<ResizeData, void(ResizeData)> {
+                         public ForwardObservable<void(ResizeData)> {
    private:
     void init();
 

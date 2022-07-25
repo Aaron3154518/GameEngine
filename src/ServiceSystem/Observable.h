@@ -17,15 +17,15 @@ template <class T>
 using Func = std::function<T>;
 
 template <class T>
-struct SubImplBase {
-    SubImplBase(T t) : mT(t) {}
+struct SubscriptionType {
+    SubscriptionType(T t) : mVal(t) {}
 
-    T mT;
+    T mVal;
 };
 
 template <std::size_t i, class T>
-struct SubImpl : SubImplBase<T> {
-    using SubImplBase<T>::SubImplBase;
+struct SubImpl : SubscriptionType<T> {
+    using SubscriptionType<T>::SubscriptionType;
 };
 
 // Observable
@@ -57,7 +57,7 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         std::conditional_t<std::is_function<ArgType<I>>::value, ArgType<I>,
                            ArgType<I>&>
         get() {
-            return static_cast<BaseType<I>*>(this)->mT;
+            return static_cast<BaseType<I>*>(this)->mVal;
         }
     };
 
@@ -66,6 +66,8 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
 
     template <class ItT>
     struct Iterator {
+        friend class ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>;
+
        public:
         Iterator(const ItT& it, const ItT& end) : mIt(it), mEnd(end) {
             while (mIt != mEnd && !mIt->lock()) {
@@ -82,6 +84,12 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
             }
             return *this;
         }
+        // Postfix ++
+        Iterator operator++(int) {
+            Iterator old(mIt, mEnd);
+            ++*this;
+            return old;
+        }
 
         bool operator==(const Iterator& it) { return mIt == it.mIt; }
         bool operator!=(const Iterator& it) { return mIt != it.mIt; }
@@ -93,6 +101,13 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
        private:
         ItT mIt, mEnd;
     };
+    typedef std::list<SubscriptionWPtr> SubscriptionList;
+    typedef Iterator<typename SubscriptionList::iterator> iterator;
+    typedef Iterator<typename SubscriptionList::reverse_iterator>
+        reverse_iterator;
+    typedef Iterator<typename SubscriptionList::const_iterator> const_iterator;
+    typedef Iterator<typename SubscriptionList::const_reverse_iterator>
+        const_reverse_iterator;
 
     SubscriptionPtr subscribe(ArgTs... args) {
         SubscriptionPtr sub = std::make_shared<SubscriptionT>(args...);
@@ -106,7 +121,7 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
     };
 
    protected:
-    std::list<SubscriptionWPtr> mSubscriptions;
+    SubscriptionList mSubscriptions;
 
     virtual void onSubscribe(SubscriptionPtr sub) {}
 
@@ -121,6 +136,10 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
                 break;
             }
         }
+    }
+
+    iterator erase(const iterator& it) {
+        return iterator(mSubscriptions.erase(it.mIt), it.mEnd);
     }
 
     auto begin() {
@@ -189,9 +208,9 @@ struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
           Wrapper<FuncTs..., Func<void(ArgTs...)>>,
           Wrapper<SubTs..., SubImpl<i, Func<void(ArgTs...)>>>> {
    public:
-    virtual void next(ArgTs&&... t) {
+    virtual void next(ArgTs... t) {
         for (auto sub : *this) {
-            sub->template get<i>()(std::forward<ArgTs>(t)...);
+            sub->template get<i>()(t...);
         }
     }
 
@@ -216,9 +235,9 @@ struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
    public:
     using Base::next;
 
-    virtual void next(ArgTs&&... t) {
+    virtual void next(ArgTs... t) {
         for (auto sub : *this) {
-            sub->template get<i>()(std::forward<ArgTs>(t)...);
+            sub->template get<i>()(t...);
         }
     }
 

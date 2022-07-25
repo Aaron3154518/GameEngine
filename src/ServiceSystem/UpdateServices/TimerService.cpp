@@ -1,12 +1,6 @@
 #include "TimerService.h"
 
 // TimerObservable
-TimerObservable::SubscriptionPtr TimerObservable::subscribe(
-    Subscription::Function func, int length) {
-    return TimerObservableBase::subscribe(
-        func, std::make_shared<Timer>(Timer{length, 0}));
-}
-
 void TimerObservable::init() {
     mUpdateSub =
         ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
@@ -14,17 +8,14 @@ void TimerObservable::init() {
 }
 
 void TimerObservable::onUpdate(Time dt) {
-    TimerObservableBase::prune();
-
-    for (auto it = mSubscriptions.begin(); it != mSubscriptions.end(); it++) {
-        std::shared_ptr<Timer> data = (*it)->getData();
-        data->timer += dt;
-        while (data->timer >= data->length) {
-            data->timer -= data->length;
-            bool renew;
-            if (!call(it, &renew) || !renew) {
-                it = mSubscriptions.erase(it);
-                if (it == mSubscriptions.end()) {
+    for (auto it = begin(); it != end(); ++it) {
+        Timer& data = (*it)->get<DATA>();
+        data.timer += dt;
+        while (data.timer >= data.length) {
+            data.timer -= data.length;
+            if (!(*it)->get<FUNC>()()) {
+                it = erase(it);
+                if (it == end()) {
                     return;
                 }
                 break;
