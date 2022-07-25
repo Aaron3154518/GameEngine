@@ -7,85 +7,72 @@ bool UIComponentCompare::operator()(const UIComponentPtr &a,
 }
 
 // RenderOrderObservable
-void RenderOrderObservable::computeUnderMouse(const Event &e) {
+void RenderOrderObservable::computeUnderMouse(SDL_Point mouse) {
     mUnderMouse.reset();
 
-    SDL_Point mouse = e.mouse();
-    for (auto it = mRenderOrder.rbegin(); it != mRenderOrder.rend(); ++it) {
-        if ((*it)->visible && SDL_PointInRect(&mouse, (*it)->rect)) {
-            mUnderMouse = *it;
+    for (auto it = mComponents.rbegin(); it != mComponents.rend(); ++it) {
+        auto compPtr = it->lock();
+        if (compPtr && compPtr->mData->visible &&
+            SDL_PointInRect(&mouse, compPtr->mData->rect)) {
+            mUnderMouse = compPtr->mData;
             break;
         }
     }
+}
+
+void RenderOrderObservable::next() {
+    // Add pending
+    mComponents.insert(mComponents.end(), mToAdd.begin(), mToAdd.end());
+    mToAdd.clear();
+    // Sort
+    sort();
+    // Serve
+    for (auto sub : *this) {
+        call<0>(*sub, getOrder());
+    }
+}
+
+void RenderOrderObservable::sort() {
+    // Prune deleted components
+    for (auto it = mComponents.begin(), end = mComponents.end(); it != end;
+         ++it) {
+        while (it != end && !it->lock()) {
+            it = mComponents.erase(it);
+        }
+        if (it == end) {
+            break;
+        }
+    }
+
+    // Sort remaining components
+    std::stable_sort(
+        mComponents.begin(), mComponents.end(),
+        [](const UIComponentSubWPtr &a, const UIComponentSubWPtr &b) {
+            return a.lock()->mData->elevation < b.lock()->mData->elevation;
+        });
+
+    // Create render order
+    mUnderMouse = mComponents.front().lock()->mData;
+    mRenderOrder.clear();
+    int i = 0;
+    for (auto comp : mComponents) {
+        int &order = mRenderOrder[comp.lock()->mData];
+        if (order == 0) {
+            order = i++;
+        }
+    }
+}
+
+void RenderOrderObservable::addComponent(UIComponentSubWPtr sub) {
+    mToAdd.push_back(sub);
 }
 
 UIComponentPtr RenderOrderObservable::getUnderMouse() const {
     return mUnderMouse;
 }
 
-void RenderOrderObservable::next() {
-    // Add pending
-    for (auto &comp : mToAdd) {
-        int &count = mRefCounts[comp];
-        if (count == 0) {
-            mRenderOrder.push_back(comp);
-        }
-        count++;
-    }
-    mToAdd.clear();
-    // Sort
-    sort();
-    // Serve
-    for (auto sub : *this) {
-        call<0>(*sub, mRenderOrder);
-    }
-}
-
-void RenderOrderObservable::sort() {
-    std::stable_sort(mRenderOrder.begin(), mRenderOrder.end(),
-                     [](const UIComponentPtr &a, const UIComponentPtr &b) {
-                         return a->elevation < b->elevation;
-                     });
-}
-
-void RenderOrderObservable::addComponent(UIComponentSubWPtr sub) {
-    int &count = mRefCounts[sub];
-    if (count == 0) {
-        // If it's new, wait to add until next render cycle
-        mToAdd.push_back(sub);
-    } else {
-        // If it's not new, immediately increment references
-        count++;
-    }
-}
-
-void RenderOrderObservable::removeComponent(UIComponentSubWPtr sub) {
-    // Check pending first
-    auto compIt = std::find(mToAdd.begin(), mToAdd.end(), sub);
-    if (compIt != mToAdd.end()) {
-        mToAdd.erase(compIt);
-        return;
-    }
-
-    // Else update references
-    auto refIt = mRefCounts.find(sub);
-    auto it = std::find(mRenderOrder.begin(), mRenderOrder.end(), sub);
-    if (refIt == mRefCounts.end()) {
-        if (it != mRenderOrder.end()) {
-            mRenderOrder.erase(it);
-        }
-    } else if (it == mRenderOrder.end()) {
-        mRefCounts.erase(refIt);
-    } else {
-        refIt->second--;
-        if (refIt->second < 1) {
-            mRenderOrder.erase(it);
-            mRefCounts.erase(refIt);
-        }
-    }
-}
-
-const std::vector<UIComponentPtr> &RenderOrderObservable::getOrder() const {
+const std::unordered_map<UIComponentPtr, int> &RenderOrderObservable::getOrder()
+    const {
     return mRenderOrder;
 }
 
@@ -94,56 +81,28 @@ void RenderObservable::init() {
     // RenderService
     renderOrderSub =
         ServiceSystem::Get<RenderService, RenderOrderObservable>()->subscribe(
-            std::bind(&RenderObservable::onRenderOrder, this,
-                      std::placeholders::_1));
-    renderOrderSub->setUnsubscriber(unsub);
+            std::bind(&RenderObservable::sort, this, std::placeholders::_1));
 }
 
-void RenderObservable::onRenderOrder(const std::vector<UIComponentPtr> &order) {
-    sort(order);
-}
-
-RenderObservable::SubscriptionPtr RenderObservable::subscribe(
-    std::function<void(SDL_Renderer *)> func, UIComponentPtr data) {
-    SubscriptionPtr sub = RenderObservableBase::subscribe(func, data);
-    ServiceSystem::Get<RenderService>()->subscribe(sub);
-    return sub;
-}
-
-void RenderObservable::serve(SDL_Renderer *renderer) {
-    for (auto sub : mSubscriptions) {
-        if (sub->getData()->visible) {
-            call(sub, renderer);
+void RenderObservable::next(SDL_Renderer *renderer) {
+    for (auto sub : *this) {
+        if (get<0>(*sub)->visible) {
+            call<0>(*sub, renderer);
         }
     }
 }
 
-bool RenderObservable::unsubscribe(SubscriptionPtr sub) {
-    ServiceSystem::Get<RenderService>()->removeComponent(sub->getData());
-    return true;
-}
-
-void RenderObservable::sort(const std::vector<UIComponentPtr> &order) {
-    std::unordered_map<SubscriptionPtr, int> idxs;
-
-    // Map out the order position of each subscription
-    for (auto sub : mSubscriptions) {
-        idxs[sub] = std::find(order.begin(), order.end(), sub->getData()) -
-                    order.begin();
-    }
-
+void RenderObservable::sort(
+    const std::unordered_map<UIComponentPtr, int> &order) {
     // Sort the subcription by ascending order position
     mSubscriptions.sort(
-        [&idxs](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
-            return idxs.at(a) <= idxs.at(b);
+        [&order](const SubscriptionPtr &a, const SubscriptionPtr &b) -> bool {
+            return order.at(get<0>(*a)) <= order.at(get<0>(*b));
         });
 }
 
-// RenderService
-void RenderService::addComponent(UIComponentPtr comp) {
-    Get<RenderOrderObservable>()->addComponent(comp);
-}
-
-void RenderService::removeComponent(UIComponentPtr comp) {
-    Get<RenderOrderObservable>()->removeComponent(comp);
+void RenderObservable::onSubscribe(SubscriptionPtr sub) {
+    std::cerr << "RenderService onSubscribe" << std::endl;
+    ServiceSystem::Get<RenderService, RenderOrderObservable>()->addComponent(
+        sub);
 }

@@ -9,6 +9,14 @@ void Init(RenderSystem::Options options) {
 void Run() {
     Event e;
 
+    /** Game Loop:
+     * 1) Interperet events
+     * 2) Compute component under mouse
+     * 3) Trigger update
+     * 4) Handle events
+     * 5) Lock render order
+     * 6) Perform render
+     */
     while (true) {
         // Check events
         e.update();
@@ -17,18 +25,24 @@ void Run() {
             break;
         }
 
+        // Compute the current component under the mouse
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()
+            ->computeUnderMouse(e.mouse());
+
         // Send update
         ServiceSystem::Get<UpdateService, UpdateObservable>()->next(e.dt());
         // Send event
         ServiceSystem::Get<EventService, EventObservable>()->next(e);
 
+        // Send render order
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()->next();
+
         // Clear screen
         RenderSystem::clearScreen(LGRAY);
 
-        // Send render order
-        ServiceSystem::Get<RenderService, RenderOrderObservable>()->next();
         // Send renderer
-        ServiceSystem::Get<RenderService, RenderObservable>()->next(Renderer::get());
+        ServiceSystem::Get<RenderService, RenderObservable>()->next(
+            Renderer::get());
 
         // Display screen
         RenderSystem::presentScreen();
@@ -38,8 +52,6 @@ void Run() {
     }
 }
 
-void Clean() {
-    RenderSystem::teardownRenderSystem();
-}
+void Clean() { RenderSystem::teardownRenderSystem(); }
 
 }  // namespace GameSystem

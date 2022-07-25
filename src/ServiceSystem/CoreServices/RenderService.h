@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <list>
+#include <map>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -32,25 +33,23 @@ struct UIComponentCompare {
 };
 
 class RenderOrderObservable
-    : public Observable<void(const std::vector<UIComponentPtr> &)> {
+    : public Observable<void(const std::unordered_map<UIComponentPtr, int> &)> {
    public:
     void next();
 
-    void computeUnderMouse(const Event &e);
+    void computeUnderMouse(SDL_Point mouse);
     UIComponentPtr getUnderMouse() const;
 
     void addComponent(UIComponentSubWPtr sub);
-    void removeComponent(UIComponentSubWPtr sub);
 
-    const std::vector<UIComponentPtr> &getOrder() const;
+    const std::unordered_map<UIComponentPtr, int> &getOrder() const;
 
    private:
     void sort();
 
+    std::list<UIComponentSubWPtr> mToAdd, mComponents;
     UIComponentPtr mUnderMouse;
-    std::list<UIComponentSubWPtr> mToAdd;
-    std::vector<UIComponentSubWPtr> mRenderOrder;
-    std::unordered_map<UIComponentSubWPtr, int> mRefCounts;
+    std::unordered_map<UIComponentPtr, int> mRenderOrder;
 };
 
 typedef Observable<void(SDL_Renderer *), UIComponentPtr> RenderObservableBase;
@@ -60,24 +59,19 @@ class RenderObservable : public Component, public RenderObservableBase {
     SubscriptionPtr subscribe(std::function<void(SDL_Renderer *)> func,
                               UIComponentPtr data);
 
+    void next(SDL_Renderer *renderer);
+
    private:
     void init();
 
-    void serve(SDL_Renderer *renderer);
+    void sort(const std::unordered_map<UIComponentPtr, int> &order);
 
-    bool unsubscribe(SubscriptionPtr sub);
-
-    void sort(const std::vector<UIComponentPtr> &order);
-
-    void onRenderOrder(const std::vector<UIComponentPtr> &order);
+    void onSubscribe(SubscriptionPtr sub);
 
     RenderOrderObservable::SubscriptionPtr renderOrderSub;
 };
 
 class RenderService : public Service<RenderObservable, RenderOrderObservable> {
-   public:
-    void addComponent(UIComponentPtr comp);
-    void removeComponent(UIComponentPtr comp);
 };
 
 #endif

@@ -7,10 +7,7 @@
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
 
-class EventObservable : public Observable<void(const Event &)> {
-   public:
-    void next(const Event &e);
-};
+typedef ForwardObservable<void(const Event &)> EventObservable;
 
 class EventService : public Service<EventObservable> {};
 

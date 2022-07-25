@@ -1,20 +1,36 @@
 #include <ServiceSystem/Observable.h>
 
+struct Test {
+    Test(bool _b) : b(_b) {}
+    Test(const Test& rhs) {
+        std::cerr << "Copied" << std::endl;
+        b = rhs.b;
+    }
+    Test& operator=(const Test& rhs) {
+        b = rhs.b;
+        return *this;
+    }
+    ~Test() = default;
+
+    bool b;
+};
+
 // MyObservable
 class MyObservable
-    : public Observable<void(), int(bool), std::string, void(bool)> {
+    : public Observable<void(), int(const Test&), std::string, void(bool)> {
    public:
     void next() {
         for (auto sub : *this) {
-            std::cerr << get<0>(*sub) << std::endl;
-            call<0>(*sub);
+            std::cerr << sub->get<2>() << std::endl;
+            sub->get<0>()();
         }
     }
 
     void next(int i, bool b) {
-        for (auto it = crbegin(), itEnd = crend(); it != itEnd; ++it) {
-            call<1>(**it, i > 0);
-            call<2>(**it, i > 0 && b);
+        for (auto it = rbegin(), itEnd = rend(); it != itEnd; ++it) {
+            Test t(i > 0);
+            (*it)->get<1>()(t);
+            (*it)->get<3>()(i > 0 && b);
         }
     }
 };
@@ -25,10 +41,10 @@ class SimpleObservable : public SimpleObservableBase {
    public:
     using SimpleObservableBase::next;
 
-    void next(int i) {
+    void next(int&& i) {
         for (auto sub : *this) {
-            call<0>(*sub, 100 + i);
-            call<1>(*sub, i * 2, i * i);
+            sub->get<0>()(100 + i);
+            sub->get<1>()(i * 2, i * i);
         }
     }
 };
@@ -40,19 +56,19 @@ void testObservable() {
 
     MyObservable::SubscriptionPtr sub1 = m.subscribe(
         []() { std::cerr << "1 void()" << std::endl; },
-        [](bool b) {
-            std::cerr << "1 bool(" << b << ")" << std::endl;
+        [](const Test& t) {
+            std::cerr << "1 bool(" << t.b << ")" << std::endl;
             return 200;
         },
-        [](bool b) { std::cerr << "1 void(" << b << ")" << std::endl; }, str);
+        str, [](bool b) { std::cerr << "1 void(" << b << ")" << std::endl; });
     MyObservable::SubscriptionPtr sub2 = m.subscribe(
         []() { std::cerr << "2 void()" << std::endl; },
-        [](bool b) {
-            std::cerr << "2 bool(" << b << ")" << std::endl;
+        [](const Test& t) {
+            std::cerr << "2 bool(" << t.b << ")" << std::endl;
             return 200;
         },
-        [](bool b) { std::cerr << "2 void(" << b << ")" << std::endl; },
-        str + " Other");
+        str, [](bool b) { std::cerr << "2 void(" << b << ")" << std::endl; });
+    sub2->get<2>() += " Other";
 
     m.next();
     std::cerr << "Order should now be 2, 1" << std::endl;
@@ -80,8 +96,8 @@ class UObservable : public Observable<void(), std::string> {
    public:
     void next() {
         for (auto sub : *this) {
-            std::cerr << get<0>(*sub) << ": ";
-            call<0>(*sub);
+            std::cerr << sub->get<1>() << ": ";
+            sub->get<0>()();
         }
     }
 };
@@ -95,26 +111,26 @@ void testUnsubscribe() {
     UObservable::SubscriptionPtr sub1 = u.subscribe(
         [&ctrs]() {
             std::cerr << "Should print 3 times" << std::endl;
-            ctrs[1]--;
+            ctrs[0]--;
         },
         "Control");
     UObservable::SubscriptionPtr sub2 = u.subscribe(
         [&ctrs]() {
             std::cerr << "Should print 2 times" << std::endl;
-            ctrs[2]--;
+            ctrs[1]--;
         },
         "Reset Test");
     {
         UObservable::SubscriptionPtr sub3 = u.subscribe(
             [&ctrs]() {
                 std::cerr << "Should print 1 time" << std::endl;
-                ctrs[3]--;
+                ctrs[2]--;
             },
             "Out of Scope Test");
         u.subscribe(
             [&ctrs]() {
                 std::cerr << "Should print 0 times" << std::endl;
-                ctrs[4]--;
+                ctrs[3]--;
             },
             "No Save Test");
         u.next();
