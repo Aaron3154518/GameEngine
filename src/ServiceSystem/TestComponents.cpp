@@ -285,8 +285,7 @@ void MouseLockTest::onClick(Event::MouseButton b, bool clicked) {
 
 // DragTest
 DragTest::DragTest(Rect r, int e, int d)
-    : TestBase(r, e),
-      mDrag(std::make_shared<DragComponent>(DragComponent{d})) {}
+    : TestBase(r, e), mDrag(std::make_shared<DragComponent>(d)) {}
 
 void DragTest::init() {
     TestBase::init();

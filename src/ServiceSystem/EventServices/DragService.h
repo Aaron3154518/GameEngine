@@ -18,6 +18,9 @@
 #include <set>
 
 struct DragComponent {
+    DragComponent() = default;
+    DragComponent(int _dragDelay) : dragDelay(_dragDelay) {}
+
     int dragDelay = 0;
     bool dragging = false;
 };

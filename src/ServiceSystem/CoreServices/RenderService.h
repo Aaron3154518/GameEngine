@@ -19,7 +19,7 @@ struct UIComponent {
     UIComponent() = default;
     UIComponent(Rect r, int e) : rect(r), elevation(e) {}
 
-    Rect rect = Rect();
+    Rect rect;
     int elevation = 0;
     bool visible = true;
 };
