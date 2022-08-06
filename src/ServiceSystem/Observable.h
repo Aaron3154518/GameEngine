@@ -72,7 +72,6 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
        public:
         Iterator(const ItT& it, const ItT& end) : mIt(it), mEnd(end) {
             while (mIt != mEnd && !mIt->lock()) {
-                std::cerr << "Sup" << std::endl;
                 ++mIt;
             }
         }
