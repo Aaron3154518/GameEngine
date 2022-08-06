@@ -36,8 +36,8 @@ void DragObservable::next(const Event &e) {
                 ->getUnderMouse();
 
         for (auto sub : *this) {
-            auto uiData = current->get<UI_DATA>();
-            auto dragData = current->get<DRAG_DATA>();
+            auto uiData = sub->get<UI_DATA>();
+            auto dragData = sub->get<DRAG_DATA>();
 
             if (!uiData->visible) {
                 continue;

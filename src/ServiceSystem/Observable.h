@@ -4,6 +4,7 @@
 #include <Utils/Range.h>
 
 #include <cstddef>
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -94,7 +95,14 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         bool operator==(const Iterator& it) { return mIt == it.mIt; }
         bool operator!=(const Iterator& it) { return mIt != it.mIt; }
 
-        SubscriptionPtr operator*() { return mIt->lock(); }
+        SubscriptionPtr operator*() {
+            if (!mIt->lock()) {
+                throw std::runtime_error(
+                    "Attempted to dereference iterator to null subscription: " +
+                    std::string(typeid(this).name()));
+            }
+            return mIt->lock();
+        }
 
         operator bool() const { return mIt != mEnd && mIt->lock(); }
 

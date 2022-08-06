@@ -84,7 +84,6 @@ void RenderObservable::init() {
 }
 
 void RenderObservable::onSubscribe(SubscriptionPtr sub) {
-    std::cerr << "RenderService onSubscribe" << std::endl;
     ServiceSystem::Get<RenderService, RenderOrderObservable>()->addComponent(
         sub);
 }

@@ -210,7 +210,7 @@ SDL_Color MultiUnsubTest::getColor() const { return ctr == 0 ? MAGENTA : BLUE; }
 
 void MultiUnsubTest::init() {
     TestBase::init();
-    for (auto updateSub : mUpdateSubs) {
+    for (auto &updateSub : mUpdateSubs) {
         updateSub =
             ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
                 std::bind(&MultiUnsubTest::onUpdate, this,
@@ -231,11 +231,11 @@ void MultiUnsubTest::onUpdate(Time dt) { ctr++; }
 void MultiUnsubTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
         if (unsub) {
-            for (auto updateSub : mUpdateSubs) {
+            for (auto &updateSub : mUpdateSubs) {
                 updateSub.reset();
             }
         } else {
-            for (auto updateSub : mUpdateSubs) {
+            for (auto &updateSub : mUpdateSubs) {
                 updateSub =
                     ServiceSystem::Get<UpdateService, UpdateObservable>()
                         ->subscribe(std::bind(&MultiUnsubTest::onUpdate, this,
@@ -331,7 +331,7 @@ void TimerTest::init() {
 bool TimerTest::onTimer() {
     color = !color;
     mTimerSub->get<TimerObservable::DATA>().length = rand() % 500;
-    return rand() % 25 != 0;
+    return rand() % 50 != 0;
 }
 
 // ResizeTest
