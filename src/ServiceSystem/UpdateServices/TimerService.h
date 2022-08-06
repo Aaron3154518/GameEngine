@@ -9,6 +9,9 @@
 #include "Utils/Time.h"
 
 struct Timer {
+    Timer() = default;
+    Timer(int len) : length(len) {}
+
     int length = 0;
     int timer = 0;
 };

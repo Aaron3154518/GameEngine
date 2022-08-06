@@ -324,7 +324,7 @@ SDL_Color TimerTest::getColor() const { return color ? PURPLE : ORANGE; }
 void TimerTest::init() {
     TestBase::init();
     mTimerSub = ServiceSystem::Get<TimerService, TimerObservable>()->subscribe(
-        std::bind(&TimerTest::onTimer, this), {200});
+        std::bind(&TimerTest::onTimer, this), Timer(200));
 }
 
 bool TimerTest::onTimer() {
