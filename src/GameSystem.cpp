@@ -34,13 +34,11 @@ void Run() {
         // Send event
         ServiceSystem::Get<EventService, EventObservable>()->next(e);
 
-        // Send render order
-        ServiceSystem::Get<RenderService, RenderOrderObservable>()->next();
-
         // Clear screen
         RenderSystem::clearScreen(LGRAY);
 
         // Send renderer
+        ServiceSystem::Get<RenderService, RenderOrderObservable>()->next();
         ServiceSystem::Get<RenderService, RenderObservable>()->next(
             Renderer::get());
 

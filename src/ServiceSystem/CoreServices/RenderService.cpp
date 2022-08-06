@@ -51,7 +51,10 @@ void RenderOrderObservable::sort() {
         });
 
     // Create render order
-    mUnderMouse = mComponents.front().lock()->mVal;
+    mUnderMouse.reset();
+    if (mComponents.size() > 0) {
+        mUnderMouse = mComponents.front().lock()->mVal;
+    }
     mRenderOrder.clear();
     int i = 0;
     for (auto comp : mComponents) {
