@@ -349,6 +349,34 @@ void ResizeTest::onResize(ResizeData data) {
     mPos->rect = Rect(0, 0, data.newW, data.newH);
 }
 
+// HoverTest
+HoverTest::HoverTest(Rect r, int e) : TestBase(r, e) {}
+
+SDL_Color HoverTest::getColor() const { return mColor; }
+
+void HoverTest::init() {
+    TestBase::init();
+    mHoverSub = ServiceSystem::Get<HoverService, HoverObservable>()->subscribe(
+        std::bind(&HoverTest::onMouseEnter, this),
+        std::bind(&HoverTest::onHover, this, std::placeholders::_1),
+        std::bind(&HoverTest::onMouseLeave, this), mPos);
+}
+
+void HoverTest::onMouseEnter() { mColor = WHITE; }
+void HoverTest::onMouseLeave() { mColor = CYAN; }
+void HoverTest::onHover(SDL_Point mouse) {
+    double dx = mouse.x - mPos->rect.cX();
+    double dy = mouse.y - mPos->rect.cY();
+    double mag = sqrt(dx * dx + dy * dy);
+    double maxMag = sqrt(mPos->rect.w() * mPos->rect.w() +
+                         mPos->rect.h() * mPos->rect.h()) /
+                    2;
+    double amnt = 3 * powf((1 - mag / maxMag), 2);
+
+    mColor.r = fmax(0, mColor.r - amnt);
+    mColor.g = fmax(0, mColor.g - amnt);
+}
+
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;

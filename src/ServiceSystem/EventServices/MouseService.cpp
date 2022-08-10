@@ -13,7 +13,7 @@ void MouseObservable::onSubscribe(SubscriptionPtr sub) {
 
 void MouseObservable::next(Event::MouseButton mouse) {
     // If a lock exists, nobody gets clicked
-    bool locked = mLocks.size() > 0;
+    bool locked = isLocked();
 
     auto underMouse = ServiceSystem::Get<RenderService, RenderOrderObservable>()
                           ->getUnderMouse();
@@ -49,3 +49,5 @@ void MouseObservable::releaseLock(void *&lock) {
     }
     lock = NULL;
 }
+
+bool MouseObservable::isLocked() const { return mLocks.size() > 0; }

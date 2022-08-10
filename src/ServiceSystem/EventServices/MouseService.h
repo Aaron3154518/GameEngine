@@ -27,6 +27,7 @@ class MouseObservable : public Component, public MouseObservableBase {
 
     void* requestLock();
     void releaseLock(void*& lock);
+    bool isLocked() const;
 
    private:
     void init();

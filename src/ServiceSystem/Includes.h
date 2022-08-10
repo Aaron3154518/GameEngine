@@ -6,6 +6,7 @@
 #include <ServiceSystem/CoreService/RenderService.h>
 #include <ServiceSystem/CoreService/UpdateService.h>
 #include <ServiceSystem/EventServices/DragService.h>
+#include <ServiceSystem/EventServices/HoverService.h>
 #include <ServiceSystem/EventServices/MouseService.h>
 #include <ServiceSystem/EventServices/ResizeService.h>
 #include <ServiceSystem/Observable.h>

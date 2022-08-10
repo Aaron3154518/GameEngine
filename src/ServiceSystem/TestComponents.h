@@ -3,6 +3,7 @@
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
 #include <ServiceSystem/EventServices/DragService.h>
+#include <ServiceSystem/EventServices/HoverService.h>
 #include <ServiceSystem/EventServices/MouseService.h>
 #include <ServiceSystem/EventServices/ResizeService.h>
 #include <ServiceSystem/ServiceSystem.h>
@@ -220,6 +221,23 @@ class ResizeTest : public TestBase {
     void onResize(ResizeData data);
 
     ResizeObservable::SubscriptionPtr mResizeSub;
+};
+
+class HoverTest : public TestBase {
+   public:
+    HoverTest(Rect r, int e);
+
+    SDL_Color getColor() const;
+
+   private:
+    void init();
+
+    void onMouseEnter();
+    void onMouseLeave();
+    void onHover(SDL_Point mouse);
+
+    SDL_Color mColor = CYAN;
+    HoverObservable::SubscriptionPtr mHoverSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

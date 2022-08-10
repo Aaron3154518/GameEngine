@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
         ComponentFactory<DragTest>::New(Rect(405, 280, 40, 40), 11, 1000);
     auto t14 = ComponentFactory<TimerTest>::New(Rect(5, 5, 40, 40), 3);
     auto t15 = ComponentFactory<ResizeTest>::New();
+    auto t16 = ComponentFactory<HoverTest>::New(Rect(5, 455, 40, 40), 9);
 
     Event e;
 
