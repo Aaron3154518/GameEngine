@@ -70,6 +70,7 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         friend class ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>;
 
        public:
+        Iterator(const ItT& end) : Iterator(end, end) {}
         Iterator(const ItT& it, const ItT& end) : mIt(it), mEnd(end) {
             while (mIt != mEnd && !mIt->lock()) {
                 ++mIt;
@@ -149,33 +150,28 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         return iterator(mSubscriptions.erase(it.mIt), it.mEnd);
     }
 
-    auto begin() {
-        return _begin(mSubscriptions.begin(), mSubscriptions.end());
-    }
-    auto rbegin() {
-        return _begin(mSubscriptions.rbegin(), mSubscriptions.rend());
-    }
-    auto begin() const {
-        return _begin(mSubscriptions.cbegin(), mSubscriptions.cend());
-    }
-    auto rbegin() const {
-        return _begin(mSubscriptions.crbegin(), mSubscriptions.crend());
-    }
-    auto end() { return _end(mSubscriptions.end()); }
-    auto rend() { return _end(mSubscriptions.rend()); }
-    auto end() const { return _end(mSubscriptions.cend()); }
-    auto rend() const { return _end(mSubscriptions.crend()); }
-
-   private:
-    template <class ItT>
-    Iterator<ItT> _begin(const ItT& begin, const ItT& end) {
+    iterator begin() {
         prune();
-        return Iterator<ItT>(begin, end);
+        return iterator(mSubscriptions.begin(), mSubscriptions.end());
     }
-
-    template <class ItT>
-    Iterator<ItT> _end(const ItT& end) {
-        return Iterator<ItT>(end, end);
+    reverse_iterator rbegin() {
+        prune();
+        return reverse_iterator(mSubscriptions.rbegin(), mSubscriptions.rend());
+    }
+    const_iterator begin() const {
+        prune();
+        return const_iterator(mSubscriptions.cbegin(), mSubscriptions.cend());
+    }
+    const_reverse_iterator rbegin() const {
+        prune();
+        return const_reverse_iterator(mSubscriptions.crbegin(),
+                                      mSubscriptions.crend());
+    }
+    iterator end() { return iterator(mSubscriptions.end()); }
+    reverse_iterator rend() { return reverse_iterator(mSubscriptions.rend()); }
+    const_iterator end() const { return const_iterator(mSubscriptions.cend()); }
+    const_reverse_iterator rend() const {
+        return const_reverse_iterator(mSubscriptions.crend());
     }
 };
 
@@ -200,7 +196,7 @@ struct ObservableImpl<Ctr, Range<Idxs...>, Wrapper<Ts...>>
     : public ObservableImplBase<Wrapper<Ts...>, Wrapper<SubImpl<Idxs, Ts>...>> {
 };
 
-// For convenience
+// Expose the implementation
 template <class... Ts>
 using Observable = ObservableImpl<0, Range<>, Wrapper<>, Ts...>;
 
@@ -252,7 +248,100 @@ struct ForwardObservableImpl<i, Wrapper<FuncTs...>, Wrapper<SubTs...>,
     using Base::mSubscriptions;
 };
 
+// Expose the implementation
 template <class... Ts>
 using ForwardObservable = ForwardObservableImpl<0, Wrapper<>, Wrapper<>, Ts...>;
+
+// ReplyObservable
+template <class>
+struct ReplyObservable;
+
+template <class ResT, class... ReqTs>
+struct ReplyObservable<ResT(ReqTs...)> {
+   public:
+    class RequestObservable
+        : public ObservableImplBase<
+              Wrapper<std::function<ResT(ReqTs...)>>,
+              Wrapper<SubImpl<0, std::function<ResT(ReqTs...)>>>> {
+        friend class ReplyObservable<ResT(ReqTs...)>;
+    };
+
+    class ResponseObservable
+        : public ObservableImplBase<
+              Wrapper<std::function<void(ResT)>>,
+              Wrapper<SubImpl<0, std::function<void(ResT)>>>> {
+        friend class ReplyObservable<ResT(ReqTs...)>;
+    };
+
+    ReplyObservable() = default;
+    virtual ~ReplyObservable() = default;
+
+    virtual void next(ReqTs... args) {
+        for (auto reqSub : mRequestObservable) {
+            ResT message = reqSub->template get<0>()(args...);
+            for (auto resSub : mResponseObservable) {
+                resSub->template get<0>()(message);
+            }
+        }
+    }
+
+    typename RequestObservable::SubscriptionPtr subscribeToRequest(
+        std::function<ResT(ReqTs...)> func) {
+        return mRequestObservable.subscribe(func);
+    }
+
+    typename ResponseObservable::SubscriptionPtr subscribeToResponse(
+        std::function<void(ResT)> func) {
+        return mResponseObservable.subscribe(func);
+    }
+
+   protected:
+    RequestObservable mRequestObservable;
+    ResponseObservable mResponseObservable;
+};
+
+// Specialization for ResT = void
+template <class... ReqTs>
+struct ReplyObservable<void(ReqTs...)> {
+   public:
+    class RequestObservable
+        : public ObservableImplBase<
+              Wrapper<std::function<void(ReqTs...)>>,
+              Wrapper<SubImpl<0, std::function<void(ReqTs...)>>>> {
+        friend class ReplyObservable<void(ReqTs...)>;
+    };
+
+    class ResponseObservable : public ObservableImplBase<
+                                   Wrapper<std::function<void()>>,
+                                   Wrapper<SubImpl<0, std::function<void()>>>> {
+        friend class ReplyObservable<void(ReqTs...)>;
+    };
+
+    ReplyObservable() = default;
+    virtual ~ReplyObservable() = default;
+
+    virtual void next(ReqTs... args) {
+        for (auto reqSub : mRequestObservable) {
+            reqSub->template get<0>()(args...);
+            for (auto resSub : mResponseObservable) {
+                resSub->template get<0>()();
+            }
+        }
+    }
+
+    typename RequestObservable::SubscriptionPtr subscribeToRequest(
+        std::function<void(ReqTs...)> func) {
+        return mRequestObservable.subscribe(func);
+    }
+
+    typename ResponseObservable::SubscriptionPtr subscribeToResponse(
+        std::function<void()> func) {
+        return mResponseObservable.subscribe(func);
+    }
+
+   protected:
+    RequestObservable mRequestObservable;
+    ResponseObservable mResponseObservable;
+};
 
 #endif

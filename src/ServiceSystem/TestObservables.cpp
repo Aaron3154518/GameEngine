@@ -68,7 +68,7 @@ class SimpleObservable : public SimpleObservableBase {
    public:
     using SimpleObservableBase::next;
 
-    void next(int&& i) {
+    void next(int i) {
         for (auto sub : *this) {
             sub->get<0>()(100 + i);
             sub->get<1>()(i * 2, i * i);
@@ -155,6 +155,40 @@ void testUnsubscribe() {
     }
 }
 
+// ReplyObservable
+typedef ReplyObservable<int(int)> MReply;
+typedef ReplyObservable<void(int, int&)> MReplyVoid;
+
+void testReply() {
+    MReply reply;
+
+    MReply::RequestObservable::SubscriptionPtr mReqSub =
+        reply.subscribeToRequest([](int i) { return i * 2; });
+
+    MReply::ResponseObservable::SubscriptionPtr mResSub =
+        reply.subscribeToResponse([](int i) { std::cerr << i << std::endl; });
+
+    reply.next(10);
+
+    mResSub.reset();
+
+    reply.next(10);
+
+    int j = 0;
+    MReplyVoid replyVoid;
+
+    MReplyVoid::RequestObservable::SubscriptionPtr mReqVoidSub =
+        replyVoid.subscribeToRequest([](int i, int& j) {
+            std::cerr << "Request: " << i << ", " << --j << std::endl;
+        });
+
+    MReplyVoid::ResponseObservable::SubscriptionPtr mResVoidSub =
+        replyVoid.subscribeToResponse(
+            [&j]() { std::cerr << "Response: " << j << std::endl; });
+
+    replyVoid.next(1, j);
+}
+
 // Main
 int main(int argc, char* argv[]) {
     testObservable();
@@ -164,4 +198,7 @@ int main(int argc, char* argv[]) {
 
     std::cerr << std::endl;
     testUnsubscribe();
+
+    std::cerr << std::endl;
+    testReply();
 }
