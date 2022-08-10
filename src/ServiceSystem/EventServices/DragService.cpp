@@ -39,7 +39,7 @@ void DragObservable::next(const Event &e) {
             auto uiData = sub->get<UI_DATA>();
             auto dragData = sub->get<DRAG_DATA>();
 
-            if (!uiData->visible) {
+            if (!uiData->visible || !uiData->mouse) {
                 continue;
             }
 

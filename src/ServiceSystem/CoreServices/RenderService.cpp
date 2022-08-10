@@ -12,7 +12,7 @@ void RenderOrderObservable::computeUnderMouse(SDL_Point mouse) {
 
     for (auto it = mComponents.rbegin(); it != mComponents.rend(); ++it) {
         auto compPtr = it->lock();
-        if (compPtr && compPtr->mVal->visible &&
+        if (compPtr && compPtr->mVal->visible && compPtr->mVal->mouse &&
             SDL_PointInRect(&mouse, compPtr->mVal->rect)) {
             mUnderMouse = compPtr->mVal;
             break;

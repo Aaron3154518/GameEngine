@@ -21,7 +21,7 @@ void MouseObservable::next(Event::MouseButton mouse) {
     for (auto sub : *this) {
         auto data = sub->get<DATA>();
 
-        if (!data->visible) {
+        if (!data->visible || !data->mouse) {
             continue;
         }
 

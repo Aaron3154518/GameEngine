@@ -240,4 +240,11 @@ class HoverTest : public TestBase {
     HoverObservable::SubscriptionPtr mHoverSub;
 };
 
+class NoMouseTest : public TestBase {
+   public:
+    NoMouseTest(Rect r);
+
+    SDL_Color getColor() const;
+};
+
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
     auto t14 = ComponentFactory<TimerTest>::New(Rect(5, 5, 40, 40), 3);
     auto t15 = ComponentFactory<ResizeTest>::New();
     auto t16 = ComponentFactory<HoverTest>::New(Rect(5, 455, 40, 40), 9);
+    auto t17 = ComponentFactory<NoMouseTest>::New(Rect(300, 225, 50, 50));
 
     Event e;
 

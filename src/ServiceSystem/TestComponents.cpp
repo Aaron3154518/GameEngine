@@ -377,6 +377,11 @@ void HoverTest::onHover(SDL_Point mouse) {
     mColor.g = fmax(0, mColor.g - amnt);
 }
 
+// NoMouseTest
+NoMouseTest::NoMouseTest(Rect r) : TestBase(r, 100) { mPos->mouse = false; }
+
+SDL_Color NoMouseTest::getColor() const { return WHITE; }
+
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;

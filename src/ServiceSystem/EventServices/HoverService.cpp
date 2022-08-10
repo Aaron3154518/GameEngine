@@ -29,7 +29,7 @@ void HoverObservable::next(SDL_Point mouse) {
     for (auto sub : *this) {
         auto data = sub->get<DATA>();
 
-        if (!data->visible) {
+        if (!data->visible || !data->mouse) {
             continue;
         }
 

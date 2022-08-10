@@ -21,7 +21,7 @@ struct UIComponent {
 
     Rect rect;
     int elevation = 0;
-    bool visible = true;
+    bool visible = true, mouse = true;
 };
 
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
