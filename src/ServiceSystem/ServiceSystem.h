@@ -2,7 +2,6 @@
 #define SERVICE_SYSTEM_H
 
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/Service.h>
 
 #include <iostream>
 #include <memory>
@@ -11,6 +10,16 @@
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
+
+class ServiceBase {
+    friend class ServiceSystem;
+
+   public:
+    virtual ~ServiceBase() = default;
+
+   protected:
+    virtual void init();
+};
 
 class ServiceSystem {
    public:
@@ -29,7 +38,7 @@ class ServiceSystem {
 
     template <class ServiceT, class ObserverT>
     static std::shared_ptr<ObserverT> Get() {
-        return Get<ServiceT>()->template Get<ObserverT>();
+        return Get<ServiceT>()->template get<ObserverT>();
     }
 
    private:
