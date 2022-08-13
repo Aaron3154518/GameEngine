@@ -31,7 +31,9 @@ struct SubImpl : SubscriptionType<T> {
 
 // Observable
 // For storing different observables in a container
-struct ObservableBase {};
+struct ObservableBase {
+    virtual ~ObservableBase() = default;
+};
 
 // This struct is used to combine all arguments into one parameter pack
 // Apparently g++ doesn't like multiple variadic inheritance
