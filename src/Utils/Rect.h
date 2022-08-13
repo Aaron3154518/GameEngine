@@ -98,6 +98,9 @@ class Rect : private SDL_Rect {
     operator bool() const;
     operator const SDL_Rect *() const;
     friend std::ostream &operator<<(std::ostream &os, const Rect &rhs);
+
+    bool operator==(const Rect &rhs);
+    bool operator!=(const Rect &rhs);
 };
 
 std::ostream &operator<<(std::ostream &os, const SDL_Rect &rhs);
