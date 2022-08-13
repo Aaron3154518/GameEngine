@@ -6,7 +6,6 @@ TestBase::TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {}
 SDL_Color TestBase::getColor() const { return BLACK; }
 
 void TestBase::init() {
-    // Test ServiceSystem::Get
     mRenderSub =
         ServiceSystem::Get<RenderService, RenderObservable>()->subscribe(
             std::bind(&TestBase::onRender, this, std::placeholders::_1), mPos);
@@ -30,7 +29,7 @@ SDL_Color ClickRenderTest::getColor() const { return color ? GREEN : RED; }
 
 void ClickRenderTest::init() {
     TestBase::init();
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&ClickRenderTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
@@ -47,7 +46,7 @@ SDL_Color ChangeSubTest::getColor() const { return color ? ORANGE : PURPLE; }
 
 void ChangeSubTest::init() {
     TestBase::init();
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&ChangeSubTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
@@ -72,7 +71,7 @@ SDL_Color UnsubTest::getColor() const { return color ? YELLOW : BLUE; }
 
 void UnsubTest::init() {
     TestBase::init();
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&UnsubTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
@@ -84,9 +83,10 @@ void UnsubTest::onClick(Event::MouseButton b, bool clicked) {
         if (color) {
             mRenderSub.reset();
         } else {
-            mRenderSub = RenderService::Get<RenderObservable>()->subscribe(
-                std::bind(&UnsubTest::onRender, this, std::placeholders::_1),
-                mPos);
+            mRenderSub = ServiceSystem::Get<RenderService, RenderObservable>()
+                             ->subscribe(std::bind(&UnsubTest::onRender, this,
+                                                   std::placeholders::_1),
+                                         mPos);
         }
     }
 }
@@ -105,9 +105,10 @@ SDL_Color UpdateTest::getColor() const {
 
 void UpdateTest::init() {
     TestBase::init();
-    mUpdateSub = UpdateService::Get<UpdateObservable>()->subscribe(
-        std::bind(&UpdateTest::onUpdate, this, std::placeholders::_1));
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mUpdateSub =
+        ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
+            std::bind(&UpdateTest::onUpdate, this, std::placeholders::_1));
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&UpdateTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
@@ -130,9 +131,10 @@ VisibilityTest::VisibilityTest(Rect r, int e) : TestBase(r, e) {}
 
 void VisibilityTest::init() {
     TestBase::init();
-    mUpdateSub = UpdateService::Get<UpdateObservable>()->subscribe(
-        std::bind(&VisibilityTest::onUpdate, this, std::placeholders::_1));
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mUpdateSub =
+        ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
+            std::bind(&VisibilityTest::onUpdate, this, std::placeholders::_1));
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&VisibilityTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
@@ -163,7 +165,7 @@ SDL_Color InheritanceTestBase::getColor() const { return color; }
 
 void InheritanceTestBase::init() {
     TestBase::init();
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&InheritanceTestBase::onClick, this, std::placeholders::_1,
                   std::placeholders::_2, true),
         mPos);
@@ -193,7 +195,7 @@ InheritanceTestDerived::InheritanceTestDerived(Rect r, int e)
 
 void InheritanceTestDerived::init() {
     InheritanceTestBase::init();
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&InheritanceTestDerived::onClick, this, std::placeholders::_1,
                   std::placeholders::_2, false),
         mPos);
@@ -209,16 +211,19 @@ SDL_Color MultiUnsubTest::getColor() const { return ctr == 0 ? MAGENTA : BLUE; }
 void MultiUnsubTest::init() {
     TestBase::init();
     for (auto &updateSub : mUpdateSubs) {
-        updateSub = UpdateService::Get<UpdateObservable>()->subscribe(
-            std::bind(&MultiUnsubTest::onUpdate, this, std::placeholders::_1));
+        updateSub =
+            ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
+                std::bind(&MultiUnsubTest::onUpdate, this,
+                          std::placeholders::_1));
     }
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&MultiUnsubTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
-    mRenderSub = RenderService::Get<RenderObservable>()->subscribe(
-        std::bind(&MultiUnsubTest::onRender, this, std::placeholders::_1),
-        mPos);
+    mRenderSub =
+        ServiceSystem::Get<RenderService, RenderObservable>()->subscribe(
+            std::bind(&MultiUnsubTest::onRender, this, std::placeholders::_1),
+            mPos);
 }
 
 void MultiUnsubTest::onUpdate(Time dt) { ctr++; }
@@ -231,9 +236,10 @@ void MultiUnsubTest::onClick(Event::MouseButton b, bool clicked) {
             }
         } else {
             for (auto &updateSub : mUpdateSubs) {
-                updateSub = UpdateService::Get<UpdateObservable>()->subscribe(
-                    std::bind(&MultiUnsubTest::onUpdate, this,
-                              std::placeholders::_1));
+                updateSub =
+                    ServiceSystem::Get<UpdateService, UpdateObservable>()
+                        ->subscribe(std::bind(&MultiUnsubTest::onUpdate, this,
+                                              std::placeholders::_1));
             }
         }
         unsub = !unsub;
@@ -254,9 +260,10 @@ SDL_Color MouseLockTest::getColor() const {
 
 void MouseLockTest::init() {
     TestBase::init();
-    mUpdateSub = UpdateService::Get<UpdateObservable>()->subscribe(
-        std::bind(&MouseLockTest::onUpdate, this, std::placeholders::_1));
-    mMouseSub = MouseService::Get<MouseObservable>()->subscribe(
+    mUpdateSub =
+        ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
+            std::bind(&MouseLockTest::onUpdate, this, std::placeholders::_1));
+    mMouseSub = ServiceSystem::Get<MouseService, MouseObservable>()->subscribe(
         std::bind(&MouseLockTest::onClick, this, std::placeholders::_1,
                   std::placeholders::_2),
         mPos);
@@ -264,13 +271,15 @@ void MouseLockTest::init() {
 
 void MouseLockTest::onUpdate(Time dt) {
     if (mMouseLock && std::rand() % 150 == 0) {
-        MouseService::Get<MouseObservable>()->releaseLock(mMouseLock);
+        ServiceSystem::Get<MouseService, MouseObservable>()->releaseLock(
+            mMouseLock);
     }
 }
 
 void MouseLockTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
-        mMouseLock = MouseService::Get<MouseObservable>()->requestLock();
+        mMouseLock =
+            ServiceSystem::Get<MouseService, MouseObservable>()->requestLock();
     }
 }
 
@@ -280,7 +289,7 @@ DragTest::DragTest(Rect r, int e, int d)
 
 void DragTest::init() {
     TestBase::init();
-    mDragSub = DragService::Get<DragObservable>()->subscribe(
+    mDragSub = ServiceSystem::Get<DragService, DragObservable>()->subscribe(
         std::bind(&DragTest::onDragStart, this),
         std::bind(&DragTest::onDrag, this, std::placeholders::_1,
                   std::placeholders::_2, std::placeholders::_3,
@@ -314,7 +323,7 @@ SDL_Color TimerTest::getColor() const { return color ? PURPLE : ORANGE; }
 
 void TimerTest::init() {
     TestBase::init();
-    mTimerSub = TimerService::Get<TimerObservable>()->subscribe(
+    mTimerSub = ServiceSystem::Get<TimerService, TimerObservable>()->subscribe(
         std::bind(&TimerTest::onTimer, this), Timer(200));
 }
 
@@ -331,8 +340,9 @@ SDL_Color ResizeTest::getColor() const { return LGRAY; }
 
 void ResizeTest::init() {
     TestBase::init();
-    mResizeSub = ResizeService::Get<ResizeObservable>()->subscribe(
-        std::bind(&ResizeTest::onResize, this, std::placeholders::_1));
+    mResizeSub =
+        ServiceSystem::Get<ResizeService, ResizeObservable>()->subscribe(
+            std::bind(&ResizeTest::onResize, this, std::placeholders::_1));
 }
 
 void ResizeTest::onResize(ResizeData data) {
@@ -346,7 +356,7 @@ SDL_Color HoverTest::getColor() const { return mColor; }
 
 void HoverTest::init() {
     TestBase::init();
-    mHoverSub = HoverService::Get<HoverObservable>()->subscribe(
+    mHoverSub = ServiceSystem::Get<HoverService, HoverObservable>()->subscribe(
         std::bind(&HoverTest::onMouseEnter, this),
         std::bind(&HoverTest::onHover, this, std::placeholders::_1),
         std::bind(&HoverTest::onMouseLeave, this), mPos);

@@ -62,11 +62,6 @@ class Service : public ServiceBase {
             " should exist in service but doesn't");
     }
 
-    template <class T>
-    static std::shared_ptr<T> Get() {
-        return ServiceSystem::Get<Service<Ts...>, T>();
-    }
-
    private:
     void init() {
         for (auto comp : mComponents) {
