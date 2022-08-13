@@ -7,22 +7,15 @@ TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
     reset(w, h, bkgrnd);
 }
 TextureBuilder::TextureBuilder(SharedTexture src) {
-    int w, h;
-    if (getTextureSize(src.get(), &w, &h)) {
-        reset(w, h);
+    SDL_Point dim = getTextureSize();
+    reset(dim.x, dim.y);
 
-        Renderer::setRenderTarget(mTex.get());
-        RenderData data;
-        data.dest = Rect(0, 0, w, h);
-        data.texture = src;
-        draw(data);
-        Renderer::resetRenderTarget();
-    } else {
-#ifndef RENDER_DEBUG
-        std::cerr << "TextureBuilder(): "
-                  << "could not query source texture" << std::endl;
-#endif
-    }
+    Renderer::setRenderTarget(mTex.get());
+    RenderData data;
+    data.dest = Rect(0, 0, dim.x, dim.y);
+    data.texture = src;
+    draw(data);
+    Renderer::resetRenderTarget();
 }
 
 // Get texture
@@ -95,14 +88,10 @@ void TextureBuilder::draw(const RenderData &data) {
                     destRect.y() + destRect.h() * topFrac,
                     destRect.w() * (1. - leftFrac - rightFrac),
                     destRect.h() * (1. - topFrac - botFrac));
-    if (!getTextureSize(data.texture.get(), &w, &h)) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Unable to query texture size: " << SDL_GetError()
-                  << std::endl;
-#endif
-        return;
-    }
-    Rect areaRect = data.area.empty() ? Rect(0, 0, w, h) : data.area;
+
+    SDL_Point srcDim = getTextureSize(data.texture.get());
+    Rect areaRect =
+        data.area.empty() ? Rect(0, 0, srcDim.x, srcDim.y) : data.area;
     Rect texRect = Rect(areaRect.x() + areaRect.w() * leftFrac,
                         areaRect.y() + areaRect.h() * topFrac,
                         areaRect.w() * (1. - leftFrac - rightFrac),
@@ -244,20 +233,23 @@ void TextureBuilder::draw(const ProgressBar &data) {
 
 // Brighten texture
 void TextureBuilder::brighten(Uint8 strength) {
-    int w, h;
-    if (getTextureSize(mTex.get(), &w, &h)) {
-        RectData r;
-        r.color = SDL_Color{strength, strength, strength, 255};
-        r.blendMode = SDL_BLENDMODE_ADD;
-        draw(r.set());
-    } else {
-#ifndef RENDER_DEBUG
-        std::cerr << "brighten: "
-                  << "could not query source texture" << std::endl;
-#endif
-    }
+    RectData r;
+    r.color = SDL_Color{strength, strength, strength, 255};
+    r.blendMode = SDL_BLENDMODE_ADD;
+    draw(r.set());
 }
 
-bool TextureBuilder::getTextureSize(SDL_Texture *tex, int *w, int *h) {
-    return SDL_QueryTexture(tex, NULL, NULL, w, h) == 0;
+SDL_Point TextureBuilder::getTextureSize() {
+    return getTextureSize(mTex.get());
+}
+SDL_Point TextureBuilder::getTextureSize(SDL_Texture *tex) {
+    SDL_Point p;
+    if (SDL_QueryTexture(tex, NULL, NULL, &p.x, &p.y) != 0) {
+#ifndef RENDER_DEBUG
+        std::cerr << "getTextureSize(): "
+                  << "could not query source texture" << std::endl;
+#endif
+        p.x = p.y = 0;
+    }
+    return p;
 }

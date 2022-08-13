@@ -1,6 +1,7 @@
 /*
-This file contains the TextureBuilder class used to draw to a texture or the screen.
-It contains various drawing functions for shapes in Shapes.h as well as other visual modifications.
+This file contains the TextureBuilder class used to draw to a texture or the
+screen. It contains various drawing functions for shapes in Shapes.h as well as
+other visual modifications.
 */
 
 #ifndef TEXTURE_BUILDER_H
@@ -35,7 +36,8 @@ class TextureBuilder {
     // Brighten texture
     void brighten(Uint8 strength);
 
-    static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
+    SDL_Point getTextureSize();
+    static SDL_Point getTextureSize(SDL_Texture *tex);
 
    private:
     SharedTexture mTex = makeSharedTexture();
