@@ -319,18 +319,29 @@ void DragTest::onDragEnd() {}
 // TimerTest
 TimerTest::TimerTest(Rect r, int e) : TestBase(r, e) {}
 
-SDL_Color TimerTest::getColor() const { return color ? PURPLE : ORANGE; }
+SDL_Color TimerTest::getColor() const { return color; }
 
 void TimerTest::init() {
     TestBase::init();
     mTimerSub = ServiceSystem::Get<TimerService, TimerObservable>()->subscribe(
-        std::bind(&TimerTest::onTimer, this), Timer(200));
+        std::bind(&TimerTest::onTimer, this),
+        std::bind(&TimerTest::onTimerUpdate, this, std::placeholders::_1,
+                  std::placeholders::_2),
+        Timer(1000));
 }
 
 bool TimerTest::onTimer() {
-    color = !color;
-    mTimerSub->get<TimerObservable::DATA>().length = rand() % 500;
+    color = PURPLE;
+    mTimerSub->get<TimerObservable::DATA>().length = rand() % 500 + 500;
     return rand() % 50 != 0;
+}
+
+void TimerTest::onTimerUpdate(Time dt, Timer &t) {
+    if (t.timer < t.length / 3) {
+        color = RED;
+    } else if (t.timer < t.length * 2 / 3) {
+        color = ORANGE;
+    }
 }
 
 // ResizeTest

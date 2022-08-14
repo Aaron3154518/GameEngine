@@ -204,7 +204,9 @@ class TimerTest : public TestBase {
 
     bool onTimer();
 
-    bool color = false;
+    void onTimerUpdate(Time dt, Timer &t);
+
+    SDL_Color color = PURPLE;
 
     TimerObservable::SubscriptionPtr mTimerSub;
 };

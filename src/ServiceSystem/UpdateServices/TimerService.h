@@ -9,18 +9,30 @@
 #include "Utils/Time.h"
 
 struct Timer {
+    friend class TimerObservable;
+
     Timer() = default;
-    Timer(int len) : length(len) {}
+    Timer(int len);
+
+    bool isActive() const;
 
     int length = 0;
     int timer = 0;
+
+   private:
+    bool active = true;
 };
 
-typedef Observable<bool(), Timer> TimerObservableBase;
+typedef Observable<bool(), void(Time, Timer&), Timer> TimerObservableBase;
 
 class TimerObservable : public TimerObservableBase, public Component {
    public:
-    enum : size_t { FUNC = 0, DATA };
+    enum : size_t { ON_TRIGGER = 0, ON_UPDATE, DATA };
+
+    using TimerObservableBase::subscribe;
+    SubscriptionPtr subscribe(std::function<bool()> func, const Timer& timer);
+
+    void onSubscribe(SubscriptionPtr sub);
 
    private:
     void init();
