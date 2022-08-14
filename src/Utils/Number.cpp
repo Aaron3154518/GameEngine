@@ -10,31 +10,6 @@ constexpr float CONVERT_NEG =
 const Number MAX_float = Number(std::numeric_limits<float>::max());
 const Number MIN_float = Number(std::numeric_limits<float>::min());
 
-/*struct Pows {
-public:
-    static float getPow(int exp) {
-        pows[MAX_EXP] = 1.;
-        int idx = exp + MAX_EXP;
-        if (idx < 0 || idx > pows.size()) { return 0.; }
-        if (idx < MAX_EXP) {
-            for (lb; lb >= idx; --lb) {
-        pows[lb] = pows[lb + 1] * .1;
-    }
-}
-else {
-    for (ub; ub <= idx; ++ub) {
-        pows[ub] = pows[ub - 1] * 10;
-    }
-}
-return pows[idx];
-    }
-Gprivate:
-    static std::array<float, MAX_EXP * 2 + 1> pows;
-    static size_t lb, ub;
-};
-std::array<float, MAX_EXP * 2 + 1> Pows::pows;
-size_t Pows::lb = MAX_EXP - 1, Pows::ub = MAX_EXP + 1;*/
-
 Number::Number(int layer, float exp, int sign)
     : mLayer(layer), mExp(exp), mSign((sign > 0) - (sign < 0)) {
     balance();
@@ -331,6 +306,9 @@ Number &Number::logBase(const Number &base) {
     balance();
     return *this;
 }
+
+// Returns n^.5
+Number &Number::sqrt() { return power(.5); }
 
 // Floor and ceiling functions
 Number &Number::floorNum() {

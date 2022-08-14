@@ -83,6 +83,8 @@ class Number {
     Number &logTen();
     // logb(n)
     Number &logBase(const Number &base);
+    // n^.5
+    Number &sqrt();
     // Floor and ceiling functions
     Number &floorNum();
     Number &ceilNum();
@@ -97,6 +99,7 @@ class Number {
     }
     Number floorCopy() const { return copy().floorNum(); }
     Number ceilCopy() const { return copy().ceilNum(); }
+    Number sqrtCopy() const { return copy().sqrt(); }
 
     // Comparison Functions
     bool equal(const Number &other) const;
