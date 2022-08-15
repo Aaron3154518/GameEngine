@@ -9,7 +9,7 @@ float Timer::getPercent() const { return fmax(0, length - timer) / length; }
 
 // TimerObservableBase
 TimerObservableBase::SubscriptionPtr TimerObservableBase::subscribe(
-    std::function<bool()> func, const Timer& timer) {
+    std::function<bool(Timer&)> func, const Timer& timer) {
     return subscribe(
         func, [](Time dt, Timer& t) {}, timer);
 }
@@ -35,7 +35,7 @@ void TimerObservableBase::onUpdate(Time dt) {
         data.timer -= dt;
         sub->get<ON_UPDATE>()(dt, data);
         while (data.timer <= 0) {
-            if (!sub->get<ON_TRIGGER>()()) {
+            if (!sub->get<ON_TRIGGER>()(data)) {
                 data.active = false;
                 it = erase(it);
                 if (it == end()) {

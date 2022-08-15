@@ -203,7 +203,7 @@ class TimerTest : public TestBase {
    private:
     void init();
 
-    bool onTimer();
+    bool onTimer(Timer& timer);
 
     void onTimerUpdate(Time dt, Timer &t);
 

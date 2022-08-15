@@ -26,7 +26,7 @@ struct Timer {
     bool active = true;
 };
 
-typedef Observable<bool(), void(Time, Timer&), Timer> TimerObservableType;
+typedef Observable<bool(Timer&), void(Time, Timer&), Timer> TimerObservableType;
 
 class TimerObservableBase : public TimerObservableType, public Component {
    public:
@@ -35,7 +35,8 @@ class TimerObservableBase : public TimerObservableType, public Component {
     enum : size_t { ON_TRIGGER = 0, ON_UPDATE, DATA };
 
     using TimerObservableType::subscribe;
-    SubscriptionPtr subscribe(std::function<bool()> func, const Timer& timer);
+    SubscriptionPtr subscribe(std::function<bool(Timer&)> func,
+                              const Timer& timer);
 
     void onSubscribe(SubscriptionPtr sub);
 
