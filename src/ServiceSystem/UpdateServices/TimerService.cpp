@@ -5,6 +5,8 @@ Timer::Timer(int len) : length(len), timer(len) {}
 
 bool Timer::isActive() const { return active; }
 
+float Timer::getPercent() const { return (float)timer / length; }
+
 // TimerObservableBase
 TimerObservableBase::SubscriptionPtr TimerObservableBase::subscribe(
     std::function<bool()> func, const Timer& timer) {

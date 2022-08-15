@@ -15,6 +15,7 @@ struct Timer {
     Timer(int len);
 
     bool isActive() const;
+    float getPercent() const;
 
     int length = 0;
     int timer = 0;
