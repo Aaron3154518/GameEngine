@@ -6,6 +6,8 @@
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
     reset(w, h, bkgrnd);
 }
+TextureBuilder::TextureBuilder(const std::string &src)
+    : TextureBuilder(AssetManager::getTexture(src), true) {}
 TextureBuilder::TextureBuilder(SharedTexture src, bool copy) {
     if (copy) {
         SDL_Point dim = getTextureSize(src.get());

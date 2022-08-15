@@ -7,6 +7,7 @@ other visual modifications.
 #ifndef TEXTURE_BUILDER_H
 #define TEXTURE_BUILDER_H
 
+#include <RenderSystem/AssetManager.h>
 #include <RenderSystem/RenderTypes.h>
 #include <RenderSystem/Shapes.h>
 #include <SDL.h>
@@ -18,6 +19,7 @@ class TextureBuilder {
    public:
     TextureBuilder() = default;
     TextureBuilder(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
+    TextureBuilder(const std::string &src);
     TextureBuilder(SharedTexture src, bool copy = true);
     ~TextureBuilder() = default;
 
