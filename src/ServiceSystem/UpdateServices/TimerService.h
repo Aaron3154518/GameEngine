@@ -1,6 +1,8 @@
 #ifndef TIMER_SERVICE_H
 #define TIMER_SERVICE_H
 
+#include <cmath>
+
 #include "ServiceSystem/Component.h"
 #include "ServiceSystem/CoreServices/UpdateService.h"
 #include "ServiceSystem/Observable.h"
