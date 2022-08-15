@@ -1,13 +1,13 @@
 #include "TextureBuilder.h"
 
-//#define RENDER_DEBUG
+#define RENDER_DEBUG
 
 // TextureBuilder
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
     reset(w, h, bkgrnd);
 }
 TextureBuilder::TextureBuilder(SharedTexture src) {
-    SDL_Point dim = getTextureSize();
+    SDL_Point dim = getTextureSize(src.get());
     reset(dim.x, dim.y);
 
     Renderer::setRenderTarget(mTex.get());
@@ -245,7 +245,7 @@ SDL_Point TextureBuilder::getTextureSize() {
 SDL_Point TextureBuilder::getTextureSize(SDL_Texture *tex) {
     SDL_Point p;
     if (SDL_QueryTexture(tex, NULL, NULL, &p.x, &p.y) != 0) {
-#ifndef RENDER_DEBUG
+#ifdef RENDER_DEBUG
         std::cerr << "getTextureSize(): "
                   << "could not query source texture" << std::endl;
 #endif
