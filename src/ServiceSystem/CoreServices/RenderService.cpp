@@ -45,10 +45,10 @@ void RenderOrderObservable::sort() {
     }
 
     // Sort remaining components
-    mComponents.sort(
-        [](const UIComponentSubWPtr &a, const UIComponentSubWPtr &b) {
-            return a.lock()->mVal->elevation < b.lock()->mVal->elevation;
-        });
+    mComponents.sort([](const SubscriptionTypeWPtr<UIComponentPtr> &a,
+                        const SubscriptionTypeWPtr<UIComponentPtr> &b) {
+        return a.lock()->mVal->elevation < b.lock()->mVal->elevation;
+    });
 
     // Create render order
     mUnderMouse.reset();
@@ -65,7 +65,8 @@ void RenderOrderObservable::sort() {
     }
 }
 
-void RenderOrderObservable::addComponent(UIComponentSubWPtr sub) {
+void RenderOrderObservable::addComponent(
+    SubscriptionTypeWPtr<UIComponentPtr> sub) {
     mToAdd.push_back(sub);
 }
 

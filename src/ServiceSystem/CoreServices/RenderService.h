@@ -26,8 +26,6 @@ struct UIComponent {
 
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
 
-typedef std::weak_ptr<SubscriptionType<UIComponentPtr>> UIComponentSubWPtr;
-
 struct UIComponentCompare {
     bool operator()(const UIComponentPtr &a, const UIComponentPtr &b) const;
 };
@@ -40,14 +38,14 @@ class RenderOrderObservable
     void computeUnderMouse(SDL_Point mouse);
     UIComponentPtr getUnderMouse() const;
 
-    void addComponent(UIComponentSubWPtr sub);
+    void addComponent(SubscriptionTypeWPtr<UIComponentPtr> sub);
 
     const std::unordered_map<UIComponentPtr, int> &getOrder() const;
 
    private:
     void sort();
 
-    std::list<UIComponentSubWPtr> mToAdd, mComponents;
+    std::list<SubscriptionTypeWPtr<UIComponentPtr>> mToAdd, mComponents;
     UIComponentPtr mUnderMouse;
     std::unordered_map<UIComponentPtr, int> mRenderOrder;
 };

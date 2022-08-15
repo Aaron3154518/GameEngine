@@ -9,7 +9,7 @@
 #include "Utils/Time.h"
 
 struct Timer {
-    friend class TimerObservable;
+    friend class TimerObservableBase;
 
     Timer() = default;
     Timer(int len);
@@ -23,23 +23,33 @@ struct Timer {
     bool active = true;
 };
 
-typedef Observable<bool(), void(Time, Timer&), Timer> TimerObservableBase;
+typedef Observable<bool(), void(Time, Timer&), Timer> TimerObservableType;
 
-class TimerObservable : public TimerObservableBase, public Component {
+class TimerObservableBase : public TimerObservableType, public Component {
    public:
+    typedef SubscriptionTypePtr<std::function<void(Time)>> UpdateSubPtr;
+
     enum : size_t { ON_TRIGGER = 0, ON_UPDATE, DATA };
 
-    using TimerObservableBase::subscribe;
+    using TimerObservableType::subscribe;
     SubscriptionPtr subscribe(std::function<bool()> func, const Timer& timer);
 
     void onSubscribe(SubscriptionPtr sub);
+
+   protected:
+    virtual UpdateSubPtr getUpdateSub(std::function<void(Time)> func);
 
    private:
     void init();
 
     void onUpdate(Time dt);
 
-    UpdateObservable::SubscriptionPtr mUpdateSub;
+    UpdateSubPtr mUpdateSub;
+};
+
+class TimerObservable : public TimerObservableBase {
+   private:
+    UpdateSubPtr getUpdateSub(std::function<void(Time)> func);
 };
 
 class TimerService : public Service<TimerObservable> {};

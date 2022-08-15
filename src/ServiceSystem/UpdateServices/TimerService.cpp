@@ -5,24 +5,28 @@ Timer::Timer(int len) : length(len), timer(len) {}
 
 bool Timer::isActive() const { return active; }
 
-// TimerObservable
-TimerObservable::SubscriptionPtr TimerObservable::subscribe(
+// TimerObservableBase
+TimerObservableBase::SubscriptionPtr TimerObservableBase::subscribe(
     std::function<bool()> func, const Timer& timer) {
     return subscribe(
         func, [](Time dt, Timer& t) {}, timer);
 }
 
-void TimerObservable::onSubscribe(SubscriptionPtr sub) {
+void TimerObservableBase::onSubscribe(SubscriptionPtr sub) {
     sub->get<DATA>().active = true;
 }
 
-void TimerObservable::init() {
-    mUpdateSub =
-        ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
-            std::bind(&TimerObservable::onUpdate, this, std::placeholders::_1));
+TimerObservableBase::UpdateSubPtr TimerObservableBase::getUpdateSub(
+    std::function<void(Time)> func) {
+    return nullptr;
 }
 
-void TimerObservable::onUpdate(Time dt) {
+void TimerObservableBase::init() {
+    mUpdateSub = getUpdateSub(
+        std::bind(&TimerObservableBase::onUpdate, this, std::placeholders::_1));
+}
+
+void TimerObservableBase::onUpdate(Time dt) {
     for (auto it = begin(); it != end(); ++it) {
         auto sub = *it;
         Timer& data = sub->get<DATA>();
@@ -40,4 +44,11 @@ void TimerObservable::onUpdate(Time dt) {
             data.timer += data.length;
         }
     }
+}
+
+// TimerObservable
+TimerObservable::UpdateSubPtr TimerObservable::getUpdateSub(
+    std::function<void(Time)> func) {
+    return ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
+        func);
 }

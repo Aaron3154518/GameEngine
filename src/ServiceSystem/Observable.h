@@ -24,6 +24,11 @@ struct SubscriptionType {
     T mVal;
 };
 
+template <class T>
+using SubscriptionTypePtr = std::shared_ptr<SubscriptionType<T>>;
+template <class T>
+using SubscriptionTypeWPtr = std::weak_ptr<SubscriptionType<T>>;
+
 template <std::size_t i, class T>
 struct SubImpl : SubscriptionType<T> {
     using SubscriptionType<T>::SubscriptionType;
