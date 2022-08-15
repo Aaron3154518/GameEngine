@@ -8,17 +8,10 @@ This file contains color constants and functions related to colors.
 #include <SDL.h>
 
 // ARGB masks for creating surfaces and colors
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 constexpr Uint32 rmask = 0xff000000;
 constexpr Uint32 gmask = 0x00ff0000;
 constexpr Uint32 bmask = 0x0000ff00;
 constexpr Uint32 amask = 0x000000ff;
-#else
-constexpr Uint32 rmask = 0x000000ff;
-constexpr Uint32 gmask = 0x0000ff00;
-constexpr Uint32 bmask = 0x00ff0000;
-constexpr Uint32 amask = 0xff000000;
-#endif
 
 // Colors
 constexpr SDL_Color TRANSPARENT{0, 0, 0, 0};
