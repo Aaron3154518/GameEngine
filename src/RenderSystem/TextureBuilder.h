@@ -18,7 +18,7 @@ class TextureBuilder {
    public:
     TextureBuilder() = default;
     TextureBuilder(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
-    TextureBuilder(SharedTexture src);
+    TextureBuilder(SharedTexture src, bool copy = true);
     ~TextureBuilder() = default;
 
     // Get texture

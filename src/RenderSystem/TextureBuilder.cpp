@@ -6,16 +6,18 @@
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
     reset(w, h, bkgrnd);
 }
-TextureBuilder::TextureBuilder(SharedTexture src) {
-    SDL_Point dim = getTextureSize(src.get());
-    reset(dim.x, dim.y);
+TextureBuilder::TextureBuilder(SharedTexture src, bool copy) {
+    if (copy) {
+        SDL_Point dim = getTextureSize(src.get());
+        reset(dim.x, dim.y);
 
-    Renderer::setRenderTarget(mTex.get());
-    RenderData data;
-    data.dest = Rect(0, 0, dim.x, dim.y);
-    data.texture = src;
-    draw(data);
-    Renderer::resetRenderTarget();
+        RenderData data;
+        data.dest = Rect(0, 0, dim.x, dim.y);
+        data.texture = src;
+        draw(data);
+    } else {
+        mTex = src;
+    }
 }
 
 // Get texture
