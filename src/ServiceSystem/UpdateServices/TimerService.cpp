@@ -5,7 +5,11 @@ Timer::Timer(int len) : length(len), timer(len) {}
 
 bool Timer::isActive() const { return active; }
 
-float Timer::getPercent() const { return fmax(0, length - timer) / length; }
+int Timer::getTimePassed() const { return length - timer; }
+
+int Timer::getTimeLeft() const { return timer; }
+
+float Timer::getPercent() const { return fmax(0, getTimePassed()) / length; }
 
 // TimerObservableBase
 TimerObservableBase::SubscriptionPtr TimerObservableBase::subscribe(

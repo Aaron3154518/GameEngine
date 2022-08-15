@@ -17,6 +17,8 @@ struct Timer {
     Timer(int len);
 
     bool isActive() const;
+    int getTimePassed() const;
+    int getTimeLeft() const;
     float getPercent() const;
 
     int length = 0;
