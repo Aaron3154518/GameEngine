@@ -34,20 +34,3 @@ void MouseObservable::onEvent(Event e) {
         next(e[Event::LEFT]);
     }
 }
-
-void *MouseObservable::requestLock() {
-    return mLocks.insert(std::make_unique<bool>()).first->get();
-}
-
-void MouseObservable::releaseLock(void *&lock) {
-    auto it = std::find_if(mLocks.begin(), mLocks.end(),
-                           [lock](const std::unique_ptr<bool> &ptr) -> bool {
-                               return ptr.get() == lock;
-                           });
-    if (it != mLocks.end()) {
-        mLocks.erase(it);
-    }
-    lock = NULL;
-}
-
-bool MouseObservable::isLocked() const { return mLocks.size() > 0; }

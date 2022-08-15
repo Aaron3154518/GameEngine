@@ -6,6 +6,7 @@
 #include <ServiceSystem/EventServices/HoverService.h>
 #include <ServiceSystem/EventServices/MouseService.h>
 #include <ServiceSystem/EventServices/ResizeService.h>
+#include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <ServiceSystem/UpdateServices/TimerService.h>
 #include <Utils/Colors.h>
@@ -170,7 +171,7 @@ class MouseLockTest : public TestBase {
 
     void onClick(Event::MouseButton b, bool clicked);
 
-    void *mMouseLock = NULL;
+    Lock mMouseLock;
     UpdateObservable::SubscriptionPtr mUpdateSub;
     MouseObservable::SubscriptionPtr mMouseSub;
 };

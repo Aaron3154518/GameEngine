@@ -7,6 +7,7 @@
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
 #include <ServiceSystem/EventServices/MouseService.h>
+#include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
 #include <ServiceSystem/ServiceSystem.h>
@@ -46,7 +47,7 @@ class DragObservable : public Component, public DragObservableBase {
 
     void onEvent(const Event& e);
 
-    void* mouseLock;
+    Lock mouseLock;
     SubscriptionPtr current;
 
     UpdateObservable::SubscriptionPtr updateSub;
