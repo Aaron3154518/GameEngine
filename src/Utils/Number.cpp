@@ -44,7 +44,7 @@ Number::Number(std::string str) {
     copy(Number(num1, exp1) ^ n);
 }
 
-float Number::tofloat() const {
+float Number::toFloat() const {
     if (absValCopy() >= MAX_float) {
         return mSign * std::numeric_limits<float>::max();
     }

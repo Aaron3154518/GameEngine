@@ -19,7 +19,7 @@ class Number {
     Number(std::string str);                 // From string
     ~Number() = default;
 
-    float tofloat() const;
+    float toFloat() const;
 
     Number copy() const;
     void copy(const Number &n);
