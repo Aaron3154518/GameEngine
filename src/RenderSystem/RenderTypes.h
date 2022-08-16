@@ -48,6 +48,7 @@ struct TextData {
     // For wrapping text
     // w > 0 will wrap text
     int w = 0;
+    bool autoFit = true;
     Rect::Align align = Rect::Align::CENTER;
 
     SharedFont font = makeSharedFont();

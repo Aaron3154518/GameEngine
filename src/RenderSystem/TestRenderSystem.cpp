@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
         "because bees don't care what humans think is impossible.";
     pp.tData.color = RED;
     pp.tData.w = pp.dest.w();
+    pp.tData.autoFit = false;
     pp.tData.align = Rect::Align::TOP_LEFT;
     pp.renderText();
     pp.fitToTexture();

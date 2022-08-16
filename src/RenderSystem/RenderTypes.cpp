@@ -182,16 +182,29 @@ Texture TextData::renderTextWrapped() {
         return tex;
     }
 
+    int maxLineW = 0;
+    if (autoFit) {
+        int lineW;
+        for (auto line : lines) {
+            TTF_SizeText(font.get(), line.c_str(), &lineW, NULL);
+            if (lineW > maxLineW) {
+                maxLineW = lineW;
+            }
+        }
+    } else {
+        maxLineW = w;
+    }
+
     // TODO: Switch to all SDL_Texture* (faster)?
     int lineH = TTF_FontHeight(font.get());
     int h = lineH * lines.size();
     Surface surf = makeSurface(
-        SDL_CreateRGBSurface(0, w, h, 32, rmask, gmask, bmask, amask));
+        SDL_CreateRGBSurface(0, maxLineW, h, 32, rmask, gmask, bmask, amask));
     if (bkgrnd != TRANSPARENT) {
         SDL_FillRect(surf.get(), NULL, toUint(bkgrnd));
     }
-    Rect lineR(0, 0, w, lineH);
-    for (std::string line : lines) {
+    Rect lineR(0, 0, maxLineW, lineH);
+    for (auto line : lines) {
         if (line != "") {
             Surface lineSurf = makeSurface(
                 TTF_RenderText_Blended(font.get(), line.c_str(), color));
