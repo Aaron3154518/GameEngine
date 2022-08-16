@@ -34,15 +34,15 @@ void Rect::move(float mag, float dX, float dY) {
     float factor = dMag == 0 ? 0 : mag / dMag;
     setPos(_x + dX * factor, _y + dY * factor, Align::TOP_LEFT);
 }
-void Rect::moveFactor(float factorX, float factorY, Align aX) {
-    moveFactor(factorX, factorY, aX, aX);
+void Rect::moveFactor(float factorX, float factorY, Align a) {
+    moveFactor(factorX, factorY, a, a);
 }
 void Rect::moveFactor(float factorX, float factorY, Align aX, Align aY) {
     setPosX(getX(aX) * factorX, aX);
     setPosY(getY(aY) * factorY, aY);
 }
-void Rect::resize(float factor, Align aX) {
-    setDim(_w * factor, _h * factor, aX, aX);
+void Rect::resize(float factor, Align a) {
+    setDim(_w * factor, _h * factor, a, a);
 }
 void Rect::resize(float factor, Align aX, Align aY) {
     setDim(_w * factor, _h * factor, aX, aY);
@@ -86,6 +86,10 @@ float Rect::getY(Align a) const {
             return cY();
     }
 }
+SDL_FPoint Rect::getPos(Align a) const { return {getX(a), getY(a)}; }
+SDL_FPoint Rect::getPos(Align aX, Align aY) const {
+    return {getX(aX), getY(aY)};
+}
 
 int Rect::X() const { return (int)(_x + copysign(ERR, _x)); }
 int Rect::Y() const { return (int)(_y + copysign(ERR, _y)); }
@@ -108,7 +112,7 @@ int Rect::CY() const {
     return (int)(_cY + copysign(ERR, _cY));
 }
 
-float Rect::GetX(Align a) const {
+int Rect::GetX(Align a) const {
     switch (a) {
         case Align::TOP_LEFT:
         case Align::CORNERS:
@@ -119,7 +123,7 @@ float Rect::GetX(Align a) const {
             return CX();
     }
 }
-float Rect::GetY(Align a) const {
+int Rect::GetY(Align a) const {
     switch (a) {
         case Align::TOP_LEFT:
         case Align::CORNERS:
@@ -129,6 +133,10 @@ float Rect::GetY(Align a) const {
         case Align::CENTER:
             return CY();
     }
+}
+SDL_Point Rect::GetPos(Align a) const { return {GetX(a), GetY(a)}; }
+SDL_Point Rect::GetPos(Align aX, Align aY) const {
+    return {GetX(aX), GetY(aY)};
 }
 
 Rect Rect::getMinRect(SDL_Texture *tex, float maxW, float maxH) {

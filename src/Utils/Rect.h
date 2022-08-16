@@ -31,9 +31,9 @@ class Rect : private SDL_Rect {
     void normalize();
     void move(float dX, float dY);
     void move(float mag, float dX, float dY);
-    void moveFactor(float factorX, float factorY, Align aX = Align::TOP_LEFT);
+    void moveFactor(float factorX, float factorY, Align a = Align::TOP_LEFT);
     void moveFactor(float factorX, float factorY, Align aX, Align aY);
-    void resize(float factor, Align aX = Align::TOP_LEFT);
+    void resize(float factor, Align a = Align::TOP_LEFT);
     void resize(float factor, Align aX, Align aY);
     void fitWithin(const Rect &boundary);
 
@@ -51,6 +51,8 @@ class Rect : private SDL_Rect {
 
     float getX(Align a = Align::TOP_LEFT) const;
     float getY(Align a = Align::TOP_LEFT) const;
+    SDL_FPoint getPos(Align a = Align::TOP_LEFT) const;
+    SDL_FPoint getPos(Align aX, Align aY) const;
 
     int X() const;
     int Y() const;
@@ -61,8 +63,10 @@ class Rect : private SDL_Rect {
     int CX() const;
     int CY() const;
 
-    float GetX(Align a = Align::TOP_LEFT) const;
-    float GetY(Align a = Align::TOP_LEFT) const;
+    int GetX(Align a = Align::TOP_LEFT) const;
+    int GetY(Align a = Align::TOP_LEFT) const;
+    SDL_Point GetPos(Align a = Align::TOP_LEFT) const;
+    SDL_Point GetPos(Align aX, Align aY) const;
 
     static Rect getMinRect(SDL_Texture *tex, float maxW, float maxH);
     static Rect getMinRect(float w, float h, float maxW, float maxH);
