@@ -63,6 +63,7 @@ void testObservable() {
 
     std::cerr << "Order should now be 1" << std::endl;
     sub2->setActive(false);
+    std::cerr << m.getNumActive() << std::endl;
     m.next(-1, true);
 }
 

@@ -158,6 +158,14 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         mSubscriptions.push_back(sub);
     };
 
+    int getNumActive() const {
+        int i = 0;
+        for (auto sub : *this) {
+            i++;
+        }
+        return i;
+    }
+
    protected:
     SubscriptionList mSubscriptions;
 
@@ -189,11 +197,9 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         return reverse_iterator(mSubscriptions.rbegin(), mSubscriptions.rend());
     }
     const_iterator begin() const {
-        prune();
         return const_iterator(mSubscriptions.cbegin(), mSubscriptions.cend());
     }
     const_reverse_iterator rbegin() const {
-        prune();
         return const_reverse_iterator(mSubscriptions.crbegin(),
                                       mSubscriptions.crend());
     }
