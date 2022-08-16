@@ -26,6 +26,8 @@ struct SubscriptionBase {
     bool mActive = true;
 };
 
+typedef std::shared_ptr<SubscriptionBase> SubscriptionBasePtr;
+
 template <class T>
 struct SubscriptionType {
     SubscriptionType(T t) : mVal(t) {}
