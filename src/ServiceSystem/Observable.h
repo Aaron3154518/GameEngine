@@ -17,6 +17,15 @@ struct Wrapper {};
 template <class T>
 using Func = std::function<T>;
 
+struct SubscriptionBase {
+   public:
+    void setActive(bool active) { mActive = active; }
+    bool isActive() const { return mActive; }
+
+   private:
+    bool mActive = true;
+};
+
 template <class T>
 struct SubscriptionType {
     SubscriptionType(T t) : mVal(t) {}
@@ -49,7 +58,7 @@ template <class... ArgTs, class... BaseTs>
 struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
     : public ObservableBase {
    public:
-    struct SubscriptionT : public BaseTs... {
+    struct SubscriptionT : public SubscriptionBase, public BaseTs... {
        public:
         SubscriptionT(ArgTs... args) : BaseTs(args)... {}
 
@@ -67,12 +76,6 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         get() {
             return static_cast<BaseType<I>*>(this)->mVal;
         }
-
-        void setActive(bool active) { mActive = active; }
-        bool isActive() const { return mActive; }
-
-       private:
-        bool mActive = true;
     };
 
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
