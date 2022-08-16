@@ -27,6 +27,7 @@ struct SubscriptionBase {
 };
 
 typedef std::shared_ptr<SubscriptionBase> SubscriptionBasePtr;
+typedef std::weak_ptr<SubscriptionBase> SubscriptionBaseWPtr;
 
 template <class T>
 struct SubscriptionType {
