@@ -57,8 +57,12 @@ void testObservable() {
     sub2->get<2>() += " Other";
 
     m.next();
+
     std::cerr << "Order should now be 2, 1" << std::endl;
     m.next(200, false);
+
+    std::cerr << "Order should now be 1" << std::endl;
+    sub2->setActive(false);
     m.next(-1, true);
 }
 

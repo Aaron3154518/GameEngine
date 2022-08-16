@@ -67,6 +67,12 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         get() {
             return static_cast<BaseType<I>*>(this)->mVal;
         }
+
+        void setActive(bool active) { mActive = active; }
+        bool isActive() const { return mActive; }
+
+       private:
+        bool mActive = true;
     };
 
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
@@ -79,17 +85,13 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
        public:
         Iterator(const ItT& end) : Iterator(end, end) {}
         Iterator(const ItT& it, const ItT& end) : mIt(it), mEnd(end) {
-            while (mIt != mEnd && !mIt->lock()) {
-                ++mIt;
-            }
+            skipInvalid();
         }
 
         // Prefix ++
         Iterator& operator++() {
             ++mIt;
-            while (mIt != mEnd && !mIt->lock()) {
-                ++mIt;
-            }
+            skipInvalid();
             return *this;
         }
         // Postfix ++
@@ -114,6 +116,21 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         operator bool() const { return mIt != mEnd && mIt->lock(); }
 
        private:
+        bool isInvalid() const {
+            if (mIt == mEnd) {
+                return false;
+            }
+
+            auto sub = mIt->lock();
+            return !sub || !sub->isActive();
+        }
+
+        void skipInvalid() {
+            while (isInvalid()) {
+                ++mIt;
+            }
+        }
+
         ItT mIt, mEnd;
     };
     typedef std::list<SubscriptionWPtr> SubscriptionList;
