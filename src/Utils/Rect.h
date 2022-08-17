@@ -87,7 +87,7 @@ class Rect : private SDL_Rect {
 
     void setPos(const Rect &r, Align a = Align::TOP_LEFT);
     void setPos(const Rect &r, Align aX, Align aY);
-    void setPos(float vx, float vy, Align aX = Align::TOP_LEFT);
+    void setPos(float vx, float vy, Align a = Align::TOP_LEFT);
     void setPos(float vx, float vy, Align aX, Align aY);
 
     void setDim(float nW, float nH, Align a = Align::TOP_LEFT);

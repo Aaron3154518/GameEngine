@@ -212,8 +212,8 @@ void Rect::set(const Rect &r, Align aX, Align aY) {
     set(r.getX(aX), r.getY(aY), aX == Align::CORNERS ? r.x2() : r._w,
         aY == Align::CORNERS ? r.y2() : r._h, aX, aY);
 }
-void Rect::set(float v1x, float v1y, float v2x, float v2y, Align aX) {
-    set(v1x, v1y, v2x, v2y, aX, aX);
+void Rect::set(float v1x, float v1y, float v2x, float v2y, Align a) {
+    set(v1x, v1y, v2x, v2y, a, a);
 }
 void Rect::set(float v1x, float v1y, float v2x, float v2y, Align aX, Align aY) {
     setPosX(v1x, aX);
