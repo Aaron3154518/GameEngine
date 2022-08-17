@@ -230,18 +230,18 @@ void Rect::set(float v1x, float v1y, float v2x, float v2y, Align aX, Align aY) {
     }
 }
 
-void Rect::setPos(const Rect &r, Align aX) { setPos(r, aX, aX); }
+void Rect::setPos(const Rect &r, Align a) { setPos(r, a, a); }
 void Rect::setPos(const Rect &r, Align aX, Align aY) {
     setPosX(r.getX(aX), aX);
     setPosY(r.getY(aY), aY);
 }
-void Rect::setPos(float vx, float vy, Align aX) { setPos(vx, vy, aX, aX); }
+void Rect::setPos(float vx, float vy, Align a) { setPos(vx, vy, a, a); }
 void Rect::setPos(float vx, float vy, Align aX, Align aY) {
     setPosX(vx, aX);
     setPosY(vy, aY);
 }
 
-void Rect::setDim(float nW, float nH, Align aX) { setDim(nW, nH, aX, aX); }
+void Rect::setDim(float nW, float nH, Align a) { setDim(nW, nH, a, a); }
 void Rect::setDim(float nW, float nH, Align aX, Align aY) {
     setWidth(nW, aX);
     setHeight(nH, aY);

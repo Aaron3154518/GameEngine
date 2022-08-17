@@ -79,18 +79,18 @@ class Rect : private SDL_Rect {
 
     // Setters
     // Set positions and dimensionsd
-    void set(const Rect &r, Align aX = Align::TOP_LEFT);
+    void set(const Rect &r, Align a = Align::TOP_LEFT);
     void set(const Rect &r, Align aX, Align aY);
     void set(float v1x, float v1y, float v2x, float v2y,
              Align aX = Align::TOP_LEFT);
     void set(float v1x, float v1y, float v2x, float v2y, Align aX, Align aY);
 
-    void setPos(const Rect &r, Align aX = Align::TOP_LEFT);
+    void setPos(const Rect &r, Align a = Align::TOP_LEFT);
     void setPos(const Rect &r, Align aX, Align aY);
     void setPos(float vx, float vy, Align aX = Align::TOP_LEFT);
     void setPos(float vx, float vy, Align aX, Align aY);
 
-    void setDim(float nW, float nH, Align aX = Align::TOP_LEFT);
+    void setDim(float nW, float nH, Align a = Align::TOP_LEFT);
     void setDim(float nW, float nH, Align aX, Align aY);
 
     void setPosX(float val, Align a = Align::TOP_LEFT);
