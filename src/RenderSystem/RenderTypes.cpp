@@ -228,12 +228,17 @@ Texture TextData::renderTextWrapped() {
 }
 
 // RenderData
-void RenderData::fitToTexture(Rect::Align align) {
-    fitToTexture(dest.w(), dest.h(), align);
+void RenderData::shrinkToTexture(Rect::Align align) {
+    shrinkToTexture(dest.w(), dest.h(), align);
 }
-void RenderData::fitToTexture(int maxW, int maxH, Rect::Align align) {
+void RenderData::shrinkToTexture(int maxW, int maxH, Rect::Align align) {
     Rect tmp = dest;
     dest = Rect::getMinRect(texture.get(), maxW, maxH);
+    dest.setPos(tmp, align);
+}
+void RenderData::fitToTexture(Rect::Align align) {
+    Rect tmp = dest;
+    dest = Rect::fitToTexture(texture.get());
     dest.setPos(tmp, align);
 }
 

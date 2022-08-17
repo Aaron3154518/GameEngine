@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     RenderData image;
     image.texture = AssetManager::getTexture("res/wizards/Catalyst.png");
     image.dest = Rect(125, 100, 250, 250);
-    image.fitToTexture();
+    image.shrinkToTexture();
 
     TextRenderData pp;
     pp.dest = image.dest;
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     pp.tData.autoFit = false;
     pp.tData.align = Rect::Align::TOP_LEFT;
     pp.renderText();
-    pp.fitToTexture();
+    pp.shrinkToTexture();
 
     ProgressBar pb;
     pb.set(RED, LGRAY).set(Rect(100, 400, 300, 50));
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     timer.tData.color = BLUE;
     timer.tData.text = std::to_string(timerVal);
     timer.renderText();
-    timer.fitToTexture(0, timer.dest.h());
+    timer.shrinkToTexture(0, timer.dest.h());
 
     RenderData shapes;
     shapes.dest = Rect(0, 0, pb.rect.h(), pb.rect.h());
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
                                std::to_string(dim.y) + " - " +
                                std::to_string(timerVal);
             timer.renderText();
-            timer.fitToTexture(0, timer.dest.h());
+            timer.shrinkToTexture(0, timer.dest.h());
 
             switch (pp.tData.align) {
                 case Rect::Align::TOP_LEFT:
@@ -118,12 +118,12 @@ int main(int argc, char *argv[]) {
                     break;
             }
             pp.renderText();
-            pp.fitToTexture();
+            pp.shrinkToTexture();
 
             image.texture = AssetManager::getTexture(
                 (int)pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
             image.dest = Rect(125, 100, 250, 250);
-            image.fitToTexture();
+            image.shrinkToTexture();
         }
 
         // FPS

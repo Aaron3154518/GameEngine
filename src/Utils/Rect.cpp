@@ -176,6 +176,19 @@ Rect Rect::getMinRect(float _w, float _h, float maxW, float maxH) {
     }
     return Rect(0, 0, wSign * _w * factor, hSign * _h * factor);
 }
+Rect Rect::fitToTexture(SDL_Texture *tex) {
+    int imgW, imgH;
+    if (SDL_QueryTexture(tex, NULL, NULL, &imgW, &imgH) != 0) {
+        SDL_Log("SDL_QueryTexture failed: %s", SDL_GetError());
+        return Rect(0, 0, 0, 0);
+    }
+    Rect r(0, 0, imgW, imgH);
+#ifdef DEBUG
+    std::cerr << "Got " << r << " from image with size " << imgW << " _x "
+              << imgH << std::endl;
+#endif
+    return r;
+}
 
 std::string Rect::toString() const {
     std::stringstream ss;

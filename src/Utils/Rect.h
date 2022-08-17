@@ -70,6 +70,7 @@ class Rect : private SDL_Rect {
 
     static Rect getMinRect(SDL_Texture *tex, float maxW, float maxH);
     static Rect getMinRect(float w, float h, float maxW, float maxH);
+    static Rect fitToTexture(SDL_Texture *tex);
 
     std::string toString() const;
     std::string ToString() const;
