@@ -16,8 +16,9 @@ struct Test {
 };
 
 // MyObservable
-class MyObservable
-    : public Observable<void(), int(const Test&), std::string, void(bool)> {
+typedef Observable<void(), int(const Test&), std::string, void(bool)>
+    MyObservableBase;
+class MyObservable : public ObservableCopy<MyObservableBase> {
    public:
     void next() {
         for (auto sub : *this) {

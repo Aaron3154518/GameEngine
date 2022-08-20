@@ -54,7 +54,7 @@ struct ObservableBase {
 
 // This struct is used to combine all arguments into one parameter pack
 // Apparently g++ doesn't like multiple variadic inheritance
-template <class, class>
+template <class, class...>
 struct ObservableImplBase;
 
 template <class... ArgTs, class... BaseTs>
@@ -64,6 +64,9 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
     struct SubscriptionT : public SubscriptionBase, public BaseTs... {
        public:
         SubscriptionT(ArgTs... args) : BaseTs(args)... {}
+
+        typedef Wrapper<ArgTs...> ArgTsWrapper;
+        typedef Wrapper<BaseTs...> BaseTsWrapper;
 
         template <int N>
         using ArgType =
@@ -235,6 +238,13 @@ struct ObservableImpl<Ctr, Range<Idxs...>, Wrapper<Ts...>>
 // Expose the implementation
 template <class... Ts>
 using Observable = ObservableImpl<0, Range<>, Wrapper<>, Ts...>;
+
+template <class SubT>
+using ObservableOf = ObservableImplBase<typename SubT::ArgTsWrapper,
+                                        typename SubT::BaseTsWrapper>;
+
+template <class ObsT>
+using ObservableCopy = ObservableOf<typename ObsT::SubscriptionT>;
 
 // ForwardObservable
 template <size_t, class, class, class...>
