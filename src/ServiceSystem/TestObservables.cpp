@@ -28,7 +28,15 @@ class MyObservable : public ObservableCopy<MyObservableBase> {
     }
 
     void next(int i, bool b) {
-        for (auto it = rbegin(), itEnd = rend(); it != itEnd; it++) {
+        for (auto it = rbegin(), itEnd = rend(); it != itEnd; ++it) {
+            Test t(i > 0);
+            (*it)->get<1>()(t);
+            (*it)->get<3>()(i > 0 && b);
+        }
+    }
+
+    void anext(int i, bool b) {
+        for (auto it = arbegin(), itEnd = arend(); it != itEnd; ++it) {
             Test t(i > 0);
             (*it)->get<1>()(t);
             (*it)->get<3>()(i > 0 && b);
@@ -66,6 +74,8 @@ void testObservable() {
     sub2->setActive(false);
     std::cerr << m.getNumActive() << std::endl;
     m.next(-1, true);
+    std::cerr << "Order should be back to 2, 1" << std::endl;
+    m.anext(-1, true);
 }
 
 // SimpleObservable

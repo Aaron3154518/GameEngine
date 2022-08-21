@@ -86,8 +86,9 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
 
     typedef std::shared_ptr<SubscriptionT> SubscriptionPtr;
     typedef std::weak_ptr<SubscriptionT> SubscriptionWPtr;
+    typedef std::list<SubscriptionWPtr> SubscriptionList;
 
-    template <class ItT>
+    template <class ItT, bool ignoreActive>
     struct Iterator {
         friend class ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>;
 
@@ -96,6 +97,7 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         Iterator(const ItT& it, const ItT& end) : mIt(it), mEnd(end) {
             skipInvalid();
         }
+        virtual ~Iterator() = default;
 
         // Prefix ++
         Iterator& operator++() {
@@ -122,16 +124,16 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
             return mIt->lock();
         }
 
-        operator bool() const { return mIt != mEnd && mIt->lock(); }
+        operator bool() const { return !isInvalid(); }
 
-       private:
-        bool isInvalid() const {
+       protected:
+        virtual bool isInvalid() const {
             if (mIt == mEnd) {
                 return false;
             }
 
             auto sub = mIt->lock();
-            return !sub || !sub->isActive();
+            return !sub || (ignoreActive && !sub->isActive());
         }
 
         void skipInvalid() {
@@ -142,13 +144,21 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
 
         ItT mIt, mEnd;
     };
-    typedef std::list<SubscriptionWPtr> SubscriptionList;
-    typedef Iterator<typename SubscriptionList::iterator> iterator;
-    typedef Iterator<typename SubscriptionList::reverse_iterator>
-        reverse_iterator;
-    typedef Iterator<typename SubscriptionList::const_iterator> const_iterator;
-    typedef Iterator<typename SubscriptionList::const_reverse_iterator>
-        const_reverse_iterator;
+
+    // Iterator types
+    template <bool ignoreActive = true>
+    using iterator =
+        Iterator<typename SubscriptionList::iterator, ignoreActive>;
+    template <bool ignoreActive = true>
+    using reverse_iterator =
+        Iterator<typename SubscriptionList::reverse_iterator, ignoreActive>;
+    template <bool ignoreActive = true>
+    using const_iterator =
+        Iterator<typename SubscriptionList::const_iterator, ignoreActive>;
+    template <bool ignoreActive = true>
+    using const_reverse_iterator =
+        Iterator<typename SubscriptionList::const_reverse_iterator,
+                 ignoreActive>;
 
     SubscriptionPtr subscribe(ArgTs... args) {
         SubscriptionPtr sub = std::make_shared<SubscriptionT>(args...);
@@ -187,30 +197,76 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
         }
     }
 
-    iterator erase(const iterator& it) {
-        return iterator(mSubscriptions.erase(it.mIt), it.mEnd);
+    template <bool ignoreActive>
+    iterator<ignoreActive> erase(const iterator<ignoreActive>& it) {
+        return iterator<ignoreActive>(mSubscriptions.erase(it.mIt), it.mEnd);
     }
 
-    iterator begin() {
+    // Ignores active
+    // Normal
+    auto begin() { return _begin<true>(); }
+    // Const
+    auto begin() const { return _begin<true>(); }
+    // Reverse
+    auto rbegin() { return _rbegin<true>(); }
+    // Const reverse
+    auto rbegin() const { return _rbegin<true>(); }
+
+    auto end() { return _end<true>(); }
+    auto end() const { return _end<true>(); }
+    auto rend() { return _rend<true>(); }
+    auto rend() const { return _rend<true>(); }
+
+    // Includes active
+    auto abegin() { return _begin<false>(); }
+    auto abegin() const { return _begin<false>(); }
+    auto arbegin() { return _rbegin<false>(); }
+    auto arbegin() const { return _rbegin<false>(); }
+
+    auto aend() { return _end<false>(); }
+    auto aend() const { return _end<false>(); }
+    auto arend() { return _rend<false>(); }
+    auto arend() const { return _rend<false>(); }
+
+   private:
+    template <bool ignoreActive>
+    iterator<ignoreActive> _begin() {
         prune();
-        return iterator(mSubscriptions.begin(), mSubscriptions.end());
+        return iterator<ignoreActive>(mSubscriptions.begin(),
+                                      mSubscriptions.end());
     }
-    reverse_iterator rbegin() {
+    template <bool ignoreActive>
+    const_iterator<ignoreActive> _begin() const {
+        return const_iterator<ignoreActive>(mSubscriptions.cbegin(),
+                                            mSubscriptions.cend());
+    }
+    template <bool ignoreActive>
+    reverse_iterator<ignoreActive> _rbegin() {
         prune();
-        return reverse_iterator(mSubscriptions.rbegin(), mSubscriptions.rend());
+        return reverse_iterator<ignoreActive>(mSubscriptions.rbegin(),
+                                              mSubscriptions.rend());
     }
-    const_iterator begin() const {
-        return const_iterator(mSubscriptions.cbegin(), mSubscriptions.cend());
+    template <bool ignoreActive>
+    const_reverse_iterator<ignoreActive> _rbegin() const {
+        return const_reverse_iterator<ignoreActive>(mSubscriptions.crbegin(),
+                                                    mSubscriptions.crend());
     }
-    const_reverse_iterator rbegin() const {
-        return const_reverse_iterator(mSubscriptions.crbegin(),
-                                      mSubscriptions.crend());
+
+    template <bool ignoreActive>
+    iterator<ignoreActive> _end() {
+        return iterator<ignoreActive>(mSubscriptions.end());
     }
-    iterator end() { return iterator(mSubscriptions.end()); }
-    reverse_iterator rend() { return reverse_iterator(mSubscriptions.rend()); }
-    const_iterator end() const { return const_iterator(mSubscriptions.cend()); }
-    const_reverse_iterator rend() const {
-        return const_reverse_iterator(mSubscriptions.crend());
+    template <bool ignoreActive>
+    const_iterator<ignoreActive> _end() const {
+        return const_iterator<ignoreActive>(mSubscriptions.cend());
+    }
+    template <bool ignoreActive>
+    reverse_iterator<ignoreActive> _rend() {
+        return reverse_iterator<ignoreActive>(mSubscriptions.rend());
+    }
+    template <bool ignoreActive>
+    const_reverse_iterator<ignoreActive> _rend() const {
+        return const_reverse_iterator<ignoreActive>(mSubscriptions.crend());
     }
 };
 
