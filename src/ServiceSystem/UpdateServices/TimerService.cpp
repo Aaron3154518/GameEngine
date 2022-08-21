@@ -3,6 +3,8 @@
 // Timer
 Timer::Timer(int len) : length(len), timer(len) {}
 
+void Timer::reset() { timer = length; }
+
 bool Timer::isActive() const { return active; }
 
 int Timer::getTimePassed() const { return length - timer; }

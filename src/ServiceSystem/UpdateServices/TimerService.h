@@ -16,6 +16,7 @@ struct Timer {
     Timer() = default;
     Timer(int len);
 
+    void reset();
     bool isActive() const;
     int getTimePassed() const;
     int getTimeLeft() const;
