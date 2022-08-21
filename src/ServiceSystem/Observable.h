@@ -3,6 +3,7 @@
 
 #include <Utils/Range.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <exception>
 #include <functional>
@@ -170,6 +171,14 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
     void subscribe(const SubscriptionPtr& sub) {
         mSubscriptions.push_back(sub);
     };
+
+    void unsubscribe(const SubscriptionPtr& sub) {
+        mSubscriptions.erase(
+            std::remove_if(
+                mSubscriptions.begin(), mSubscriptions.end(),
+                [sub](const SubscriptionWPtr& s) { return s.lock() == sub; }),
+            mSubscriptions.end());
+    }
 
     int getNumActive() const {
         int i = 0;

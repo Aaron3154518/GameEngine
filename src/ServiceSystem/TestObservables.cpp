@@ -76,9 +76,14 @@ void testObservable() {
     m.next(-1, true);
     std::cerr << "Order should be back to 2, 1" << std::endl;
     m.anext(-1, true);
-    sub2.reset();
     std::cerr << "And back to just 1" << std::endl;
+    sub2.reset();
     m.anext(-1, true);
+    std::cerr << "And finally nothing should print" << std::endl;
+    m.subscribe(sub1);
+    m.subscribe(sub1);
+    m.unsubscribe(sub1);
+    m.next(-1, true);
 }
 
 // SimpleObservable
