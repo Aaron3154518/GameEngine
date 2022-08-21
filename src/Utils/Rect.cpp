@@ -147,8 +147,9 @@ Rect Rect::getMinRect(SDL_Texture *tex, float maxW, float maxH) {
     }
     Rect r = getMinRect(imgW, imgH, maxW, maxH);
 #ifdef DEBUG
-    std::cerr << "Got " << r << " from image with size " << imgW << " _x "
-              << imgH << std::endl;
+    std::cerr << "Got " << r << " from image with size " << imgW << " x "
+              << imgH << " and max dimensions " << maxW << " x " << maxH
+              << std::endl;
 #endif
     return r;
 }
