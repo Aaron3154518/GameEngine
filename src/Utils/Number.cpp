@@ -7,8 +7,8 @@ constexpr float CONVERT_DOWN =
     log10(CONVERT_UP);  // Value at which to decrease the layer
 constexpr float CONVERT_NEG =
     1 / CONVERT_UP;  // Value at which to make the layer negative
-const Number MAX_float = Number(std::numeric_limits<float>::max());
-const Number MIN_float = Number(std::numeric_limits<float>::min());
+const Number MAX_FLOAT = Number(std::numeric_limits<float>::max());
+const Number MIN_FLOAT = Number(std::numeric_limits<float>::min());
 
 Number::Number(int layer, float exp, int sign)
     : mLayer(layer), mExp(exp), mSign((sign > 0) - (sign < 0)) {
@@ -45,10 +45,10 @@ Number::Number(std::string str) {
 }
 
 float Number::toFloat() const {
-    if (absValCopy() >= MAX_float) {
+    if (absValCopy() >= MAX_FLOAT) {
         return mSign * std::numeric_limits<float>::max();
     }
-    if (absValCopy() <= MIN_float) {
+    if (absValCopy() <= MIN_FLOAT) {
         return mSign * std::numeric_limits<float>::min();
     }
     if (mLayer == 0) {
@@ -63,6 +63,8 @@ float Number::toFloat() const {
     }
     return mSign * pow(10, -val);
 }
+
+int Number::toInt() const { return static_cast<int>(toFloat()); }
 
 Number Number::copy() const { return Number(mLayer, mExp, mSign); }
 void Number::copy(const Number &n) {

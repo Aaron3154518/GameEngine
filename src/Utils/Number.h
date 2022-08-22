@@ -20,6 +20,7 @@ class Number {
     ~Number() = default;
 
     float toFloat() const;
+    int toInt() const;
 
     Number copy() const;
     void copy(const Number &n);
