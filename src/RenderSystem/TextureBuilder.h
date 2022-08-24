@@ -31,7 +31,7 @@ class TextureBuilder {
 
     // Draw textures/text
     void draw(const RenderData &data);
-    void draw(const ShapeData &data);
+    void draw(const Shape &data);
 
     // Brighten texture
     void brighten(Uint8 strength);
@@ -42,8 +42,8 @@ class TextureBuilder {
    private:
     SharedTexture mTex = makeSharedTexture();
 
-    void startDrawShape(const ShapeData &data);
-    Rect getShapeBounds(const ShapeData &data);
+    void startDrawShape(const Shape &data);
+    Rect getShapeBounds(const Shape &data);
     void endDrawShape();
 };
 

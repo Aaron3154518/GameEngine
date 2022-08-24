@@ -15,10 +15,10 @@ int main(int argc, char *argv[]) {
     TextureBuilder screen;
 
     const int halfScreenW = options.width / 2;
-    CircleData screenCd;
+    CircleShape screenCd;
     screenCd.color = CYAN;
-    screenCd.set({halfScreenW, halfScreenW}, halfScreenW, -10)
-        .setAngleDeg(-90, 480)
+    screenCd.set({halfScreenW, halfScreenW}, halfScreenW, -5)
+        .setAngleDeg(-90, 495)
         .setDashed(100);
 
     RenderData image;
@@ -56,18 +56,19 @@ int main(int argc, char *argv[]) {
     timer.shrinkToTexture(0, timer.dest.h());
 
     RenderData shapes;
-    shapes.dest = Rect(0, 0, pb.rect.h(), pb.rect.h());
-    shapes.dest.setPos(pb.rect.x(), pb.rect.cY(), Rect::Align::CENTER);
+    shapes.dest = Rect(0, 0, pb.get().rect.h(), pb.get().rect.h());
+    shapes.dest.setPos(pb.get().rect.x(), pb.get().rect.cY(),
+                       Rect::Align::CENTER);
     TextureBuilder shapesTex(shapes.dest.w(), shapes.dest.h());
     shapes.texture = shapesTex.getTexture();
 
-    CircleData cd;
+    CircleShape cd;
     cd.color = BLUE;
     int halfW = shapes.dest.w() / 2;
     shapesTex.draw(cd.set(SDL_Point{halfW, halfW}, halfW));
-    RectData rd;
+    RectShape rd;
     rd.color = GREEN;
-    int w = cd.r2 * sqrt(2) * .9;
+    int w = cd.get().r2 * sqrt(2) * .9;
     Rect rdR(0, 0, w, w);
     rdR.setPos(halfW, halfW, Rect::Align::CENTER);
     shapesTex.draw(rd.set(rdR, 3));

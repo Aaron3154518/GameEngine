@@ -22,14 +22,14 @@ constexpr float DEG_TO_RAD = M_PI / 180;
 class TextureBuilder;
 
 // Shape rendering struct
-struct ShapeData {
-    virtual ~ShapeData() = default;
+struct Shape {
+    virtual ~Shape() = default;
 
     SDL_Color color = BLACK;
     Rect boundary;
     SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 
-    void copy(const ShapeData &data);
+    void copy(const Shape &data);
 
     Rect getBounds() const;
 
@@ -37,29 +37,39 @@ struct ShapeData {
 };
 
 // Rectangle
-struct RectData : public ShapeData {
-    RectData &set();
-    RectData &set(const Rect &r);
-    RectData &set(Rect r, int thickness, bool center = false);
-
+struct RectData {
     Rect r1, r2;
+};
+
+struct RectShape : public Shape {
+    const RectData &get() const;
+
+    RectShape &set(const Rect &r = Rect(0, 0, 0, 0));
+    RectShape &set(Rect r, int thickness, bool center = false);
 
     void draw(TextureBuilder &tex) const;
+
+   private:
+    RectData data;
 };
 
 // Circle
-struct CircleData : public ShapeData {
-    CircleData &set(SDL_Point _c, int r);
-    CircleData &set(SDL_Point _c, int r, int thickness, bool center = false);
-    CircleData &setFullCircle();
-    CircleData &setAngleRad(float _a1, float _a2);
-    CircleData &setAngleDeg(float _a1, float _a2);
-    CircleData &setDashed(unsigned int d);
-
+struct CircleData {
     SDL_Point c{0, 0};
     int r1 = 0, r2 = 0;
     float a1 = 0, a2 = TWO_PI;
     unsigned int dashes = 0;
+};
+
+struct CircleShape : public Shape {
+    const CircleData &get() const;
+
+    CircleShape &set(SDL_Point c, int r);
+    CircleShape &set(SDL_Point c, int r, int thickness, bool center = false);
+    CircleShape &setFullCircle();
+    CircleShape &setAngleRad(float a1, float a2);
+    CircleShape &setAngleDeg(float a1, float a2);
+    CircleShape &setDashed(unsigned int dashes);
 
     struct Sector {
         float a1, a2;
@@ -69,23 +79,34 @@ struct CircleData : public ShapeData {
     void draw(TextureBuilder &tex) const;
 
    private:
+    CircleData data;
+
     void drawCircle(const Rect &bounds) const;
     void drawSectors(const Rect &bounds) const;
     void drawSector(const Sector &s, const Rect &bounds) const;
     void drawDashed(const Rect &bounds) const;
 };
 
-struct ProgressBar : public ShapeData {
+// Progress Base
+struct ProgressBarData {
+    Rect rect;
+    float perc = 0.;
+};
+
+struct ProgressBar : public Shape {
+    SDL_Color bkgrnd = GRAY;
+
+    const ProgressBarData &get() const;
+
     ProgressBar &set(const Rect &r);
     ProgressBar &set(SDL_Color foreground, SDL_Color background);
     ProgressBar &set(float amnt, float cap, bool log = false);
     ProgressBar &set(float percent);
 
-    Rect rect;
-    float perc = 0.;
-    SDL_Color bkgrnd = GRAY;
-
     void draw(TextureBuilder &tex) const;
+
+   private:
+    ProgressBarData data;
 };
 
 #endif

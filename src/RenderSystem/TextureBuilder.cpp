@@ -31,7 +31,7 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
                                                SDL_PIXELFORMAT_RGBA8888,
                                                SDL_TEXTUREACCESS_TARGET, w, h));
     SDL_SetTextureBlendMode(mTex.get(), SDL_BLENDMODE_BLEND);
-    RectData r;
+    RectShape r;
     r.color = bkgrnd;
     r.blendMode = SDL_BLENDMODE_BLEND;
     draw(r.set());
@@ -114,12 +114,12 @@ void TextureBuilder::draw(const RenderData &data) {
     Renderer::resetRenderTarget();
 }
 // Draw shapes
-void TextureBuilder::startDrawShape(const ShapeData &data) {
+void TextureBuilder::startDrawShape(const Shape &data) {
     Renderer::setRenderTarget(mTex.get());
     Renderer::setBlendMode(data.blendMode);
     Renderer::setDrawColor(data.color);
 }
-void TextureBuilder::draw(const ShapeData &data) {
+void TextureBuilder::draw(const Shape &data) {
     startDrawShape(data);
     data.draw(*this);
     endDrawShape();
@@ -132,7 +132,7 @@ void TextureBuilder::endDrawShape() {
 
 // Brighten texture
 void TextureBuilder::brighten(Uint8 strength) {
-    RectData r;
+    RectShape r;
     r.color = SDL_Color{strength, strength, strength, 255};
     r.blendMode = SDL_BLENDMODE_ADD;
     draw(r.set());
