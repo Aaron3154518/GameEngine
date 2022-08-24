@@ -89,11 +89,11 @@ struct CircleShape : public Shape {
 
 // Progress Base
 struct ProgressBarData {
-    Rect rect;
     float perc = 0.;
 };
 
 struct ProgressBar : public Shape {
+    Rect dest;
     SDL_Color bkgrnd = GRAY;
 
     const ProgressBarData &get() const;

@@ -56,9 +56,8 @@ int main(int argc, char *argv[]) {
     timer.shrinkToTexture(0, timer.dest.h());
 
     RenderData shapes;
-    shapes.dest = Rect(0, 0, pb.get().rect.h(), pb.get().rect.h());
-    shapes.dest.setPos(pb.get().rect.x(), pb.get().rect.cY(),
-                       Rect::Align::CENTER);
+    shapes.dest = Rect(0, 0, pb.dest.h(), pb.dest.h());
+    shapes.dest.setPos(pb.dest.x(), pb.dest.cY(), Rect::Align::CENTER);
     TextureBuilder shapesTex(shapes.dest.w(), shapes.dest.h());
     shapes.texture = shapesTex.getTexture();
 

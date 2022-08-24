@@ -294,7 +294,7 @@ void CircleShape::drawDashed(const Rect &bounds) const {
 const ProgressBarData &ProgressBar::get() const { return data; }
 
 ProgressBar &ProgressBar::set(const Rect &r) {
-    data.rect = r;
+    dest = r;
     return *this;
 }
 ProgressBar &ProgressBar::set(SDL_Color foreground, SDL_Color background) {
@@ -334,9 +334,9 @@ void ProgressBar::draw(TextureBuilder &tex) const {
         RectShape r;
         r.copy(*this);
         r.color = bkgrnd;
-        tex.draw(r.set(data.rect));
+        tex.draw(r.set(dest));
 
-        Rect progR = data.rect;
+        Rect progR = dest;
         progR.setWidth(progR.w() * data.perc);
         if (!progR.empty()) {
             r.color = color;
