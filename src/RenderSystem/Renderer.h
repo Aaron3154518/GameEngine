@@ -25,6 +25,7 @@ void initRenderSystem(const Options &options);
 
 // Renderer
 class Renderer {
+    friend class ShapeData;
     friend class TextureBuilder;
     friend void RenderSystem::initRenderSystem(const Options &options);
 

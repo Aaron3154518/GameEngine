@@ -119,120 +119,15 @@ void TextureBuilder::startDrawShape(const ShapeData &data) {
     Renderer::setBlendMode(data.blendMode);
     Renderer::setDrawColor(data.color);
 }
-Rect TextureBuilder::getShapeBounds(const ShapeData &data) {
-    // Start with bounds as the target dimensions
-    Rect bounds;
-    SDL_Point size = Renderer::getTargetSize();
-    bounds.setDim(size.x, size.y);
-    if (data.boundary.empty()) {
-        return bounds;
-    }
-    // Interesect screen and shape boundary
-    SDL_Rect result;
-    SDL_IntersectRect(data.boundary, bounds, &result);
-    bounds = result;
-    return bounds;
+void TextureBuilder::draw(const ShapeData &data) {
+    startDrawShape(data);
+    data.draw();
+    endDrawShape();
 }
 void TextureBuilder::endDrawShape() {
     Renderer::resetDrawColor();
     Renderer::resetBlendMode();
     Renderer::resetRenderTarget();
-}
-void TextureBuilder::draw(const RectData &data) {
-    startDrawShape(data);
-    Rect bounds = getShapeBounds(data);
-    if (!bounds.empty()) {
-        SDL_Rect intersect;
-        // Fill entire render target
-        if (data.r2.empty()) {
-            SDL_RenderFillRect(Renderer::get(), bounds);
-            // Intersect r2 and bounds
-        } else if (SDL_IntersectRect(data.r2, bounds, &intersect) == SDL_TRUE) {
-            bounds = intersect;
-            // Fill r2 if r is empty or not within bounds
-            // Intersect r with bounds
-            if (data.r1.empty() ||
-                SDL_IntersectRect(bounds, data.r1, &intersect) == SDL_FALSE) {
-                SDL_RenderFillRect(Renderer::get(), bounds);
-                // Fill bounds except for r
-            } else {
-                // Start at r1
-                Rect r = data.r1;
-                // bounds is inclusive so draw once more when r = bounds
-                float oldW, oldH;
-                do {
-                    oldW = r.w();
-                    oldH = r.h();
-                    // Expand rect
-                    if (r.X() > bounds.X()) {
-                        r.setWidth(r.w() + 1, Rect::Align::BOT_RIGHT);
-                    }
-                    if (r.Y() > bounds.Y()) {
-                        r.setHeight(r.h() + 1, Rect::Align::BOT_RIGHT);
-                    }
-                    if (r.X2() < bounds.X2()) {
-                        r.setWidth(r.w() + 1, Rect::Align::TOP_LEFT);
-                    }
-                    if (r.Y2() < bounds.Y2()) {
-                        r.setHeight(r.h() + 1, Rect::Align::TOP_LEFT);
-                    }
-                    SDL_RenderDrawRect(Renderer::get(), r);
-                } while (oldW != r.w() || oldH != r.h());
-            }
-        }
-    }
-    endDrawShape();
-}
-void TextureBuilder::draw(const CircleData &data) {
-    startDrawShape(data);
-    Rect bounds = getShapeBounds(data);
-    if (!bounds.empty()) {
-        // Circle
-        int dx = -1;
-        while (++dx < data.r2) {
-            int dy1 = dx >= data.r1
-                          ? 0
-                          : (int)(std::sqrt(data.r1 * data.r1 - dx * dx) + .5);
-            int dy2 = (int)(std::sqrt(data.r2 * data.r2 - dx * dx) + .5);
-            // Iterate through dx, -dx
-            do {
-                int x = data.c.x + dx;
-                // Make sure x is in bounds
-                if (x >= bounds.X() && x <= bounds.X2()) {
-                    // Iterate through [dy1, dy2], [-dy2, -dy1]
-                    do {
-                        int y1 = std::max(data.c.y + dy1, bounds.Y());
-                        int y2 = std::min(data.c.y + dy2, bounds.Y2());
-                        // Make sure at least one y is in bounds
-                        if (y1 <= bounds.Y2() && y2 >= bounds.Y()) {
-                            SDL_RenderDrawLine(Renderer::get(), x, y1, x, y2);
-                        }
-                        int tmp = -dy1;
-                        dy1 = -dy2;
-                        dy2 = tmp;
-                    } while (dy1 < 0);
-                }
-            } while ((dx *= -1) < 0);
-        }
-    }
-    endDrawShape();
-}
-void TextureBuilder::draw(const ProgressBar &data) {
-    startDrawShape(data);
-    Rect bounds = getShapeBounds(data);
-    if (!bounds.empty()) {
-        RectData r;
-        r.copy(data);
-        r.color = data.bkgrnd;
-        draw(r.set(data.rect));
-        Rect progR = data.rect;
-        progR.setWidth(progR.w() * data.perc);
-        if (!progR.empty()) {
-            r.color = data.color;
-            draw(r.set(progR));
-        }
-    }
-    endDrawShape();
 }
 
 // Brighten texture

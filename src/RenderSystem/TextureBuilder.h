@@ -31,9 +31,7 @@ class TextureBuilder {
 
     // Draw textures/text
     void draw(const RenderData &data);
-    void draw(const RectData &data);
-    void draw(const CircleData &data);
-    void draw(const ProgressBar &data);
+    void draw(const ShapeData &data);
 
     // Brighten texture
     void brighten(Uint8 strength);
