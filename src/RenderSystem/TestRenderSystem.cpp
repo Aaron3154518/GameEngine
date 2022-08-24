@@ -17,7 +17,8 @@ int main(int argc, char *argv[]) {
     const int halfScreenW = options.width / 2;
     CircleShape screenCd;
     screenCd.color = CYAN;
-    screenCd.set({halfScreenW, halfScreenW}, halfScreenW, -5)
+    screenCd.setCenter({halfScreenW, halfScreenW})
+        .setRadius(halfScreenW, -5)
         .setAngleDeg(-90, 495)
         .setDashed(100);
 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
     CircleShape cd;
     cd.color = BLUE;
     int halfW = shapes.dest.w() / 2;
-    shapesTex.draw(cd.set(SDL_Point{halfW, halfW}, halfW));
+    shapesTex.draw(cd.setCenter({halfW, halfW}).setRadius(halfW));
     RectShape rd;
     rd.color = GREEN;
     int w = cd.get().r2 * sqrt(2) * .9;

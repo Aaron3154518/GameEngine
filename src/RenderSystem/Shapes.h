@@ -64,8 +64,9 @@ struct CircleData {
 struct CircleShape : public Shape {
     const CircleData &get() const;
 
-    CircleShape &set(SDL_Point c, int r);
-    CircleShape &set(SDL_Point c, int r, int thickness, bool center = false);
+    CircleShape &setCenter(SDL_Point c);
+    CircleShape &setRadius(int r);
+    CircleShape &setRadius(int r, int thickness, bool center = false);
     CircleShape &setFullCircle();
     CircleShape &setAngleRad(float a1, float a2);
     CircleShape &setAngleDeg(float a1, float a2);

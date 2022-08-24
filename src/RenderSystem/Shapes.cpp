@@ -106,14 +106,16 @@ void RectShape::draw(TextureBuilder &tex) const {
 // CircleShape
 const CircleData &CircleShape::get() const { return data; }
 
-CircleShape &CircleShape::set(SDL_Point c, int r) {
+CircleShape &CircleShape::setCenter(SDL_Point c) {
     data.c = c;
+    return *this;
+}
+CircleShape &CircleShape::setRadius(int r) {
     data.r1 = 0;
     data.r2 = std::abs(r);
     return *this;
 }
-CircleShape &CircleShape::set(SDL_Point c, int r, int thickness, bool center) {
-    data.c = c;
+CircleShape &CircleShape::setRadius(int r, int thickness, bool center) {
     r = std::abs(r);
     if (center) {
         data.r2 = r + std::abs(thickness) / 2;
@@ -284,7 +286,7 @@ void CircleShape::drawDashed(const Rect &bounds) const {
     const float da = M_PI / data.dashes;
     const float maxA = data.a1 <= data.a2 ? data.a2 : data.a2 + TWO_PI;
     CircleShape cd;
-    cd.set(data.c, data.r1, data.r2 - data.r1);
+    cd.setCenter(data.c).setRadius(data.r1, data.r2 - data.r1);
     for (float sA1 = data.a1; sA1 < maxA; sA1 += da * 2) {
         cd.setAngleRad(sA1, fminf(sA1 + da, maxA)).drawSectors(bounds);
     }
