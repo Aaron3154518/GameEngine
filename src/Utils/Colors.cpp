@@ -7,6 +7,11 @@ bool operator==(const SDL_Color &lhs, const SDL_Color &rhs) {
 bool operator!=(const SDL_Color &lhs, const SDL_Color &rhs) {
     return !(lhs == rhs);
 }
+std::ostream &operator<<(std::ostream &os, const SDL_Color &rhs) {
+    os << "(" << (int)rhs.r << ", " << (int)rhs.g << ", " << (int)rhs.b << ", "
+       << (int)rhs.a << ")";
+    return os;
+}
 
 Uint32 toUint(SDL_Color c) {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN

@@ -7,6 +7,8 @@ This file contains color constants and functions related to colors.
 
 #include <SDL.h>
 
+#include <iostream>
+
 // ARGB masks for creating surfaces and colors
 constexpr Uint32 rmask = 0xff000000;
 constexpr Uint32 gmask = 0x00ff0000;
@@ -30,6 +32,7 @@ constexpr SDL_Color PURPLE{128, 0, 128, 255};
 
 bool operator==(const SDL_Color &lhs, const SDL_Color &rhs);
 bool operator!=(const SDL_Color &lhs, const SDL_Color &rhs);
+std::ostream &operator<<(std::ostream &os, const SDL_Color &rhs);
 
 Uint32 toUint(SDL_Color c);
 

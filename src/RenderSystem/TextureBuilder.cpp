@@ -121,7 +121,7 @@ void TextureBuilder::startDrawShape(const ShapeData &data) {
 }
 void TextureBuilder::draw(const ShapeData &data) {
     startDrawShape(data);
-    data.draw();
+    data.draw(*this);
     endDrawShape();
 }
 void TextureBuilder::endDrawShape() {

@@ -39,11 +39,6 @@ clean:
 	@find $(OBJ) -type f \( -name "*.o" -o -name "*.d" \) -delete
 
 test: RenderTest EventTest ServiceTest GameTest
-	@$(BIN)/RenderTest
-	@$(BIN)/EventTest
-	@$(BIN)/ServiceTest
-	@$(BIN)/GameTest
-
 
 ifeq ($(O),)
 O := $(basename $(notdir $(T)))
@@ -60,18 +55,22 @@ endif
 
 RenderTest: $(call OBJS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+	@$(BIN)/RenderTest
 -include $(call DEPS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
 
 EventTest: $(call OBJS_ALL,$(SRC)/EventSystem/TestEventSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+	@$(BIN)/EventTest
 -include $(call DEPS_ALL,$(SRC)/EventSystem/TestEventSystem.cpp)
 
 ServiceTest: $(call OBJS_ALL,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+	@$(BIN)/ServiceTest
 -include $(call DEPS_ALL,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
 
 GameTest: $(SRC)/TestGameSystem.cpp $(LIB)/libGameEngine.a
 	$(CXX) $(CXXFLAGS) $< -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+	@$(BIN)/GameTest
 -include $(call DEPS_ALL,$(SRC)/TestGameSystem.cpp)
 
 $(OBJ)/%.o: $(SRC)/%.cpp

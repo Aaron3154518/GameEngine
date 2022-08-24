@@ -2,6 +2,8 @@
 
 #include <RenderSystem/RenderSystem.h>
 
+#include <ctime>
+
 int main(int argc, char *argv[]) {
     RenderSystem::Options options;
     options.title = "Render System Test";
@@ -11,6 +13,13 @@ int main(int argc, char *argv[]) {
     RenderSystem::initRenderSystem(options);
 
     TextureBuilder screen;
+
+    const int halfScreenW = options.width / 2;
+    CircleData screenCd;
+    screenCd.color = CYAN;
+    screenCd.set({halfScreenW, halfScreenW}, halfScreenW, -10)
+        .setAngleDeg(-90, 480)
+        .setDashed(100);
 
     RenderData image;
     image.texture = AssetManager::getTexture("res/wizards/Catalyst.png");
@@ -34,7 +43,7 @@ int main(int argc, char *argv[]) {
     pp.shrinkToTexture();
 
     ProgressBar pb;
-    pb.set(RED, LGRAY).set(Rect(100, 400, 300, 50));
+    pb.set(RED, GRAY).set(Rect(100, 400, 300, 50));
     float pbVal = 0.;
 
     int timerVal = 1;
@@ -65,6 +74,8 @@ int main(int argc, char *argv[]) {
 
     Uint32 time = SDL_GetTicks();
 
+    Uint32 t1, sum = 0, cnt = 0;
+
     bool running = true;
     while (running) {
         SDL_Event e;
@@ -78,8 +89,12 @@ int main(int argc, char *argv[]) {
         // Rendering
         RenderSystem::clearScreen(LGRAY);
 
-        pb.set(pbVal, 1000);
-        screen.draw(pb);
+        t1 = SDL_GetTicks();
+        screen.draw(screenCd);
+        sum += SDL_GetTicks() - t1;
+        cnt++;
+
+        screen.draw(pb.set(pbVal, 1000));
         screen.draw(shapes);
 
         screen.draw(timer);
@@ -129,6 +144,8 @@ int main(int argc, char *argv[]) {
         // FPS
         RenderSystem::enforceFPS(60);
     }
+
+    std::cerr << "Avg: " << ((float)sum / cnt) << "ms" << std::endl;
 
     RenderSystem::teardownRenderSystem();
 
