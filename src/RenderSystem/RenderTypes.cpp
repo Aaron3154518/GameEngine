@@ -271,7 +271,10 @@ RenderData &RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
 const Rect &RenderData::getRect() const { return mRect; }
 const Rect &RenderData::getDest() const { return mDest; }
 
-void RenderData::nextFrame() { mFrame = (mFrame + 1) % mFrameCnt; }
+unsigned int RenderData::getNumFrames() const { return mFrameCnt; }
+unsigned int RenderData::getFrame() const { return mFrame; }
+void RenderData::setFrame(unsigned int frame) { mFrame = frame % mFrameCnt; }
+void RenderData::nextFrame() { setFrame(mFrame + 1); }
 
 void RenderData::draw(TextureBuilder &tex) const {
     int w, h;

@@ -74,6 +74,9 @@ class RenderData : public Drawable {
     const Rect &getRect() const;
     const Rect &getDest() const;
 
+    unsigned int getNumFrames() const;
+    unsigned int getFrame() const;
+    void setFrame(unsigned int frame);
     void nextFrame();
 
     void draw(TextureBuilder &tex) const;
