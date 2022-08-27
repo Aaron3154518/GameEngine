@@ -69,6 +69,11 @@ int main(int argc, char *argv[]) {
         CircleShape(BLUE).setCenter({halfW, halfW}).setRadius(halfW));
     shapesTex.draw(RectShape(GREEN).set(rdR));
 
+    RenderData anim = RenderData()
+                          .set("res/wizards/wizard_ss.png", 5)
+                          .setFit(RenderData::FitMode::Fit)
+                          .setDest(Rect());
+
     Uint32 time = SDL_GetTicks();
 
     Uint32 t1, sum = 0, cnt = 0;

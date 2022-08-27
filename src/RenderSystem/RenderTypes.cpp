@@ -279,7 +279,7 @@ void RenderData::draw(TextureBuilder &tex) const {
     Rect renderBounds(0, 0, w, h);
 
     // Make sure we are actually drawing something
-    if (mRect.empty()) {
+    if (mDest.empty()) {
 #ifdef RENDER_DEBUG
         std::cerr << "draw(): Empty destination rect" << std::endl;
 #endif
