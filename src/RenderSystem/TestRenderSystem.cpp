@@ -72,7 +72,8 @@ int main(int argc, char *argv[]) {
     RenderData anim = RenderData()
                           .set("res/wizards/wizard_ss.png", 5)
                           .setFit(RenderData::FitMode::Fit)
-                          .setDest(Rect());
+                          .setDest(Rect(200, 525, 100, 100));
+    Uint32 animTimer = 0;
 
     Uint32 time = SDL_GetTicks();
 
@@ -103,6 +104,8 @@ int main(int argc, char *argv[]) {
 
         screen.draw(image);
         screen.draw(pp);
+
+        screen.draw(anim);
 
         RenderSystem::presentScreen();
 
@@ -136,6 +139,12 @@ int main(int argc, char *argv[]) {
             pp.set(ppText);
 
             image.set(pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
+        }
+
+        animTimer += dt;
+        while (animTimer > 150) {
+            animTimer -= 150;
+            anim.nextFrame();
         }
 
         // FPS
