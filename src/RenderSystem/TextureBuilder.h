@@ -8,12 +8,24 @@ other visual modifications.
 #define TEXTURE_BUILDER_H
 
 #include <RenderSystem/AssetManager.h>
-#include <RenderSystem/RenderTypes.h>
-#include <RenderSystem/Shapes.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <Utils/Colors.h>
 #include <Utils/Rect.h>
+
+// Forward declaration
+class TextureBuilder;
+
+struct Drawable {
+    Drawable(SDL_Color color = BLACK, SDL_BlendMode mode = SDL_BLENDMODE_NONE);
+    Drawable(SDL_BlendMode mode, SDL_Color color = BLACK);
+    virtual ~Drawable() = default;
+
+    SDL_BlendMode mBlendMode = SDL_BLENDMODE_NONE;
+    SDL_Color mColor = BLACK;
+
+    virtual void draw(TextureBuilder &tex) const;
+};
 
 class TextureBuilder {
    public:
@@ -30,8 +42,7 @@ class TextureBuilder {
     void reset(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
 
     // Draw textures/text
-    void draw(const RenderData &data);
-    void draw(const Shape &data);
+    void draw(const Drawable &drawable);
 
     // Brighten texture
     void brighten(Uint8 strength);
@@ -42,8 +53,6 @@ class TextureBuilder {
    private:
     SharedTexture mTex = makeSharedTexture();
 
-    void startDrawShape(const Shape &data);
-    Rect getShapeBounds(const Shape &data);
     void endDrawShape();
 };
 

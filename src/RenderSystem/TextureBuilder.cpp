@@ -1,6 +1,16 @@
 #include "TextureBuilder.h"
 
+#include "RenderTypes.h"
+#include "Shapes.h"
+
 #define RENDER_DEBUG
+
+// Drawable
+Drawable::Drawable(SDL_Color color, SDL_BlendMode mode)
+    : mColor(color), mBlendMode(mode) {}
+Drawable::Drawable(SDL_BlendMode mode, SDL_Color color)
+    : Drawable(color, mode) {}
+void Drawable::draw(TextureBuilder &tex) const {}
 
 // TextureBuilder
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
@@ -13,10 +23,7 @@ TextureBuilder::TextureBuilder(SharedTexture src, bool copy) {
         SDL_Point dim = getTextureSize(src.get());
         reset(dim.x, dim.y);
 
-        RenderData data;
-        data.dest = Rect(0, 0, dim.x, dim.y);
-        data.texture = src;
-        draw(data);
+        draw(RenderData().set(src).setDest(Rect(0, 0, dim.x, dim.y)));
     } else {
         mTex = src;
     }
@@ -31,111 +38,27 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
                                                SDL_PIXELFORMAT_RGBA8888,
                                                SDL_TEXTUREACCESS_TARGET, w, h));
     SDL_SetTextureBlendMode(mTex.get(), SDL_BLENDMODE_BLEND);
-    RectShape r;
-    r.color = bkgrnd;
-    r.blendMode = SDL_BLENDMODE_BLEND;
-    draw(r.set());
+    draw(RectShape(bkgrnd, SDL_BLENDMODE_BLEND).set());
 }
 
 // Draw textures/text
-void TextureBuilder::draw(const RenderData &data) {
+void TextureBuilder::draw(const Drawable &drawable) {
     Renderer::setRenderTarget(mTex.get());
+    Renderer::setDrawColor(drawable.mColor);
+    Renderer::setBlendMode(drawable.mBlendMode);
 
-    int w, h;
-    Renderer::getTargetSize(&w, &h);
-    Rect renderBounds(0, 0, w, h);
-
-    // Make sure we are actually drawing something
-    if (data.dest.empty()) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Empty destination rect" << std::endl;
-#endif
-        return;
-    }
-    // Check the texture to draw
-    if (!data.texture) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Invalid Texture" << std::endl;
-#endif
-        return;
-    }
-    // Get the boundary rect
-    Rect boundary = data.boundary;
-    SDL_Rect result;
-    if (boundary.empty()) {
-        boundary = renderBounds;
-    } else if (SDL_IntersectRect(boundary, renderBounds, &result) ==
-               SDL_FALSE) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Boundary rect " << boundary
-                  << " was outside the screen: " << renderBounds << std::endl;
-#endif
-        return;
-    }
-
-    Rect destRect = data.dest;
-    // Get fraction of item to draw
-    float leftFrac = fmax(boundary.x() - destRect.x(), 0) / destRect.w();
-    float topFrac = fmax(boundary.y() - destRect.y(), 0) / destRect.h();
-    float rightFrac = fmax(destRect.x2() - boundary.x2(), 0) / destRect.w();
-    float botFrac = fmax(destRect.y2() - boundary.y2(), 0) / destRect.h();
-    // Make sure the rect is actually in the boundary
-    if (leftFrac + rightFrac >= 1 || topFrac + botFrac >= 1) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Rect " << destRect
-                  << " was out side the boundary " << boundary << std::endl;
-#endif
-        return;
-    }
-
-    destRect = Rect(destRect.x() + destRect.w() * leftFrac,
-                    destRect.y() + destRect.h() * topFrac,
-                    destRect.w() * (1. - leftFrac - rightFrac),
-                    destRect.h() * (1. - topFrac - botFrac));
-
-    SDL_Point srcDim = getTextureSize(data.texture.get());
-    Rect areaRect =
-        data.area.empty() ? Rect(0, 0, srcDim.x, srcDim.y) : data.area;
-    Rect texRect = Rect(areaRect.x() + areaRect.w() * leftFrac,
-                        areaRect.y() + areaRect.h() * topFrac,
-                        areaRect.w() * (1. - leftFrac - rightFrac),
-                        areaRect.h() * (1. - topFrac - botFrac));
-    // Make sure at least one pixel will be drawn
-    if (texRect.empty()) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Can't draw from " << texRect << " to " << destRect
-                  << std::endl;
-#endif
-        return;
-    }
-
-    SDL_RenderCopy(Renderer::get(), data.texture.get(), texRect, destRect);
+    drawable.draw(*this);
 
     Renderer::resetRenderTarget();
-}
-// Draw shapes
-void TextureBuilder::startDrawShape(const Shape &data) {
-    Renderer::setRenderTarget(mTex.get());
-    Renderer::setBlendMode(data.blendMode);
-    Renderer::setDrawColor(data.color);
-}
-void TextureBuilder::draw(const Shape &data) {
-    startDrawShape(data);
-    data.draw(*this);
-    endDrawShape();
-}
-void TextureBuilder::endDrawShape() {
     Renderer::resetDrawColor();
     Renderer::resetBlendMode();
-    Renderer::resetRenderTarget();
 }
 
 // Brighten texture
 void TextureBuilder::brighten(Uint8 strength) {
-    RectShape r;
-    r.color = SDL_Color{strength, strength, strength, 255};
-    r.blendMode = SDL_BLENDMODE_ADD;
-    draw(r.set());
+    draw(RectShape(SDL_Color{strength, strength, strength, 255},
+                   SDL_BLENDMODE_ADD)
+             .set());
 }
 
 SDL_Point TextureBuilder::getTextureSize() {

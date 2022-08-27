@@ -6,7 +6,9 @@ Each struct contains data for rendering the item and functions to set the data.
 #ifndef SHAPES_H
 #define SHAPES_H
 
+#include <RenderSystem/AssetManager.h>
 #include <RenderSystem/Renderer.h>
+#include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <Utils/Colors.h>
 #include <Utils/Rect.h>
@@ -22,18 +24,14 @@ constexpr float DEG_TO_RAD = M_PI / 180;
 class TextureBuilder;
 
 // Shape rendering struct
-struct Shape {
+struct Shape : public Drawable {
+    using Drawable::Drawable;
+
+    Rect boundary;
+
     virtual ~Shape() = default;
 
-    SDL_Color color = BLACK;
-    Rect boundary;
-    SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
-
-    void copy(const Shape &data);
-
     Rect getBounds() const;
-
-    virtual void draw(TextureBuilder &tex) const;
 };
 
 // Rectangle
@@ -42,6 +40,8 @@ struct RectData {
 };
 
 struct RectShape : public Shape {
+    using Shape::Shape;
+
     const RectData &get() const;
 
     RectShape &set(const Rect &r = Rect(0, 0, 0, 0));
@@ -62,6 +62,8 @@ struct CircleData {
 };
 
 struct CircleShape : public Shape {
+    using Shape::Shape;
+
     const CircleData &get() const;
 
     CircleShape &setCenter(SDL_Point c);
@@ -94,8 +96,9 @@ struct ProgressBarData {
 };
 
 struct ProgressBar : public Shape {
+    using Shape::Shape;
+
     Rect dest;
-    SDL_Color bkgrnd = GRAY;
 
     const ProgressBarData &get() const;
 
@@ -107,6 +110,8 @@ struct ProgressBar : public Shape {
     void draw(TextureBuilder &tex) const;
 
    private:
+    SDL_Color mBkgrnd = GRAY;
+
     ProgressBarData data;
 };
 

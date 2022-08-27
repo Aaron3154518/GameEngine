@@ -3,12 +3,6 @@
 #include "TextureBuilder.h"
 
 // Shape
-void Shape::copy(const Shape &data) {
-    color = data.color;
-    blendMode = data.blendMode;
-    boundary = data.boundary;
-}
-
 Rect Shape::getBounds() const {
     // Start with bounds as the target dimensions
     Rect bounds;
@@ -22,8 +16,6 @@ Rect Shape::getBounds() const {
     SDL_IntersectRect(boundary, bounds, &result);
     return result;
 }
-
-void Shape::draw(TextureBuilder &tex) const {}
 
 // RectShape
 const RectData &RectShape::get() const { return data; }
@@ -300,8 +292,8 @@ ProgressBar &ProgressBar::set(const Rect &r) {
     return *this;
 }
 ProgressBar &ProgressBar::set(SDL_Color foreground, SDL_Color background) {
-    color = foreground;
-    bkgrnd = background;
+    mColor = foreground;
+    mBkgrnd = background;
     return *this;
 }
 ProgressBar &ProgressBar::set(float amnt, float cap, bool log) {
@@ -333,15 +325,14 @@ ProgressBar &ProgressBar::set(float percent) {
 void ProgressBar::draw(TextureBuilder &tex) const {
     Rect bounds = getBounds();
     if (!bounds.empty()) {
-        RectShape r;
-        r.copy(*this);
-        r.color = bkgrnd;
-        tex.draw(r.set(dest));
+        RectShape r = RectShape(mBkgrnd, mBlendMode).set(dest);
+        r.boundary = bounds;
+        tex.draw(r);
 
         Rect progR = dest;
         progR.setWidth(progR.w() * data.perc);
         if (!progR.empty()) {
-            r.color = color;
+            r.mColor = mColor;
             tex.draw(r.set(progR));
         }
     }

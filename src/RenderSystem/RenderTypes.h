@@ -7,7 +7,9 @@ rendering text and textures.
 #ifndef RENDER_TYPES_H
 #define RENDER_TYPES_H
 
+#include <RenderSystem/AssetManager.h>
 #include <RenderSystem/Renderer.h>
+#include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <Utils/Rect.h>
@@ -15,25 +17,8 @@ rendering text and textures.
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <string>
 #include <vector>
-
-// Memory management for surfaces
-typedef std::unique_ptr<SDL_Surface, void (*)(SDL_Surface *)> Surface;
-typedef std::shared_ptr<SDL_Surface> SharedSurface;
-Surface makeSurface(SDL_Surface *surf = NULL);
-SharedSurface makeSharedSurface(SDL_Surface *surf = NULL);
-
-// Memory management for textures
-typedef std::unique_ptr<SDL_Texture, void (*)(SDL_Texture *)> Texture;
-typedef std::shared_ptr<SDL_Texture> SharedTexture;
-Texture makeTexture(SDL_Texture *tex = NULL);
-SharedTexture makeSharedTexture(SDL_Texture *tex = NULL);
-
-// Memory management for fonts
-typedef std::unique_ptr<TTF_Font, void (*)(TTF_Font *)> Font;
-typedef std::shared_ptr<TTF_Font> SharedFont;
-Font makeFont(TTF_Font *font = NULL);
-SharedFont makeSharedFont(TTF_Font *font = NULL);
 
 // Helper function to split text for wrapping
 std::vector<std::string> splitText(const std::string &text, SharedFont font,
@@ -54,30 +39,53 @@ struct TextData {
     SharedFont font = makeSharedFont();
 
     // Functions to render text to a texture
-    Texture renderText();
-    Texture renderTextLine();
-    Texture renderTextWrapped();
+    Texture renderText() const;
+    Texture renderTextLine() const;
+    Texture renderTextWrapped() const;
 };
 
 // To draw a texture
-struct RenderData {
-    SharedTexture texture;
-    Rect dest, area, boundary;
+class RenderData : public Drawable {
+    friend class AnimationData;
 
-    void shrinkToTexture(Rect::Align a = Rect::Align::CENTER);
-    void shrinkToTexture(Rect::Align aX, Rect::Align aY);
-    void shrinkToTexture(int maxW, int maxH,
-                         Rect::Align a = Rect::Align::CENTER);
-    void shrinkToTexture(int maxW, int maxH, Rect::Align aX, Rect::Align aY);
-    void fitToTexture(Rect::Align aX, Rect::Align aY);
-    void fitToTexture(Rect::Align a = Rect::Align::CENTER);
-};
+   public:
+    enum FitMode : uint8_t {
+        Dest = 0,  // Uses dest rect
+        Fit,       // Uses largest rect smaller than dest rect with image
+                   // dimensions
+        Texture,   // Uses image dimensions
+    };
 
-// To draw a texture from text
-struct TextRenderData : public RenderData {
-    TextData tData;
+    using Drawable::Drawable;
 
-    void renderText();
+    RenderData &set(SharedTexture tex, unsigned int frameCnt = 1);
+    RenderData &set(const std::string &file, unsigned int frameCnt = 1);
+    RenderData &set(const TextData &tData, unsigned int frameCnt = 1);
+
+    RenderData &setDest(Rect r);
+    RenderData &setArea(Rect r);
+    RenderData &setBoundary(Rect r);
+    RenderData &addBoundary(Rect r);
+
+    RenderData &setFit(FitMode fit);
+    RenderData &setFitAlign(Rect::Align a = Rect::Align::CENTER);
+    RenderData &setFitAlign(Rect::Align aX, Rect::Align aY);
+
+    const Rect &getRect() const;
+    const Rect &getDest() const;
+
+    void nextFrame();
+
+    void draw(TextureBuilder &tex) const;
+
+   private:
+    SharedTexture mTex;
+    SDL_Point mDim;
+    unsigned int mFrameCnt = 1, mFrame = 0;
+    FitMode mFit = FitMode::Dest;
+    Rect::Align mFitAlignX = Rect::Align::CENTER,
+                mFitAlignY = Rect::Align::CENTER;
+    Rect mRect, mDest, mBounds, mArea;
 };
 
 #endif

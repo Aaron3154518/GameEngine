@@ -153,29 +153,29 @@ Rect Rect::getMinRect(SDL_Texture *tex, float maxW, float maxH) {
 #endif
     return r;
 }
-Rect Rect::getMinRect(float _w, float _h, float maxW, float maxH) {
-    // Save signs and make _w/_h positive
+Rect Rect::getMinRect(float w, float h, float maxW, float maxH) {
+    // Save signs and make w/h positive
     int wSign = 1, hSign = 1;
-    if (_w < 0) {
-        _w *= -1;
+    if (w < 0) {
+        w *= -1;
         wSign = -1;
     }
-    if (_h < 0) {
-        _h *= -1;
+    if (h < 0) {
+        h *= -1;
         hSign = -1;
     }
 
-    // maxW/maxH <= 0 or _w/_h <= 0 means ignore that dimensions
-    bool noW = maxW <= 0 || _w <= 0, noH = maxH <= 0 || _h <= 0;
+    // maxW/maxH <= 0 or w/h <= 0 means ignore that dimensions
+    bool noW = maxW <= 0 || w <= 0, noH = maxH <= 0 || h <= 0;
     float factor = 1.;
     if (!noW && !noH) {
-        factor = std::fmin((float)maxW / _w, (float)maxH / _h);
+        factor = std::fmin((float)maxW / w, (float)maxH / h);
     } else if (noW && !noH) {
-        factor = (float)maxH / _h;
+        factor = (float)maxH / h;
     } else if (!noW && noH) {
-        factor = (float)maxW / _w;
+        factor = (float)maxW / w;
     }
-    return Rect(0, 0, wSign * _w * factor, hSign * _h * factor);
+    return Rect(0, 0, wSign * w * factor, hSign * h * factor);
 }
 Rect Rect::fitToTexture(SDL_Texture *tex) {
     int imgW, imgH;
