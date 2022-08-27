@@ -82,7 +82,7 @@ class RenderData : public Drawable {
     SharedTexture mTex;
     SDL_Point mDim;
     unsigned int mFrameCnt = 1, mFrame = 0;
-    FitMode mFit = FitMode::Dest;
+    FitMode mFit = FitMode::Fit;
     Rect::Align mFitAlignX = Rect::Align::CENTER,
                 mFitAlignY = Rect::Align::CENTER;
     Rect mRect, mDest, mBounds, mArea;

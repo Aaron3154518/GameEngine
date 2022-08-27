@@ -23,11 +23,9 @@ int main(int argc, char *argv[]) {
 
     RenderData image = RenderData()
                            .set("res/wizards/Catalyst.png")
-                           .setFit(RenderData::FitMode::Fit)
                            .setDest(Rect(125, 100, 250, 250));
 
-    RenderData pp =
-        RenderData().setFit(RenderData::FitMode::Fit).setDest(image.getDest());
+    RenderData pp = RenderData().setDest(image.getDest());
     TextData ppText;
     ppText.font = AssetManager::getFont(FontData{-1, 25, "|"});
     ppText.text =
@@ -50,10 +48,8 @@ int main(int argc, char *argv[]) {
     timerText.font = AssetManager::getFont(FontData{-1, 25, "|"});
     timerText.color = BLUE;
     timerText.text = std::to_string(timerVal);
-    RenderData timer = RenderData()
-                           .set(timerText)
-                           .setFit(RenderData::FitMode::Fit)
-                           .setDest(Rect(250, 450, 0, 50));
+    RenderData timer =
+        RenderData().set(timerText).setDest(Rect(250, 450, 0, 50));
 
     Rect shapesDest(0, 0, pb.dest.h(), pb.dest.h());
     shapesDest.setPos(pb.dest.x(), pb.dest.cY(), Rect::Align::CENTER);
@@ -71,7 +67,6 @@ int main(int argc, char *argv[]) {
 
     RenderData anim = RenderData()
                           .set("res/wizards/wizard_ss.png", 5)
-                          .setFit(RenderData::FitMode::Fit)
                           .setDest(Rect(200, 525, 100, 100));
     Uint32 animTimer = 0;
 
