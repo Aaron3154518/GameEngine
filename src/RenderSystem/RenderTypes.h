@@ -12,6 +12,7 @@ rendering text and textures.
 #include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <Utils/AnimationData.h>
 #include <Utils/Rect.h>
 
 #include <iostream>
@@ -61,6 +62,7 @@ class RenderData : public Drawable {
     RenderData &set(SharedTexture tex, unsigned int frameCnt = 1);
     RenderData &set(const std::string &file, unsigned int frameCnt = 1);
     RenderData &set(const TextData &tData, unsigned int frameCnt = 1);
+    RenderData &set(const AnimationData &animData);
 
     RenderData &setDest(Rect r);
     RenderData &setArea(Rect r);

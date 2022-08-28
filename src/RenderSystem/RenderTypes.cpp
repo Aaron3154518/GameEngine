@@ -223,6 +223,9 @@ RenderData &RenderData::set(const std::string &file, unsigned int frameCnt) {
 RenderData &RenderData::set(const TextData &tData, unsigned int frameCnt) {
     return set(tData.renderText(), frameCnt);
 }
+RenderData &RenderData::set(const AnimationData &animData) {
+    return set(animData.file, animData.num_frames);
+}
 
 RenderData &RenderData::setDest(Rect r) {
     mRect = r;

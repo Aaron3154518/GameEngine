@@ -67,8 +67,9 @@ int main(int argc, char *argv[]) {
         CircleShape(BLUE).setCenter({halfW, halfW}).setRadius(halfW));
     shapesTex.draw(RectShape(GREEN).set(rdR));
 
+    const AnimationData animData{"res/wizards/wizard_ss.png", 5, 150};
     RenderData anim = RenderData()
-                          .set("res/wizards/wizard_ss.png", 5)
+                          .set(animData)
                           .setDest(Rect(200, 525, 100, 100))
                           .setRotationRad(M_PI * 8 / 7);
     Uint32 animTimer = 0;
@@ -140,8 +141,8 @@ int main(int argc, char *argv[]) {
         }
 
         animTimer += dt;
-        while (animTimer > 150) {
-            animTimer -= 150;
+        while (animTimer > animData.frame_ms) {
+            animTimer -= animData.frame_ms;
             anim.nextFrame();
         }
 
