@@ -13,8 +13,8 @@ LIB := lib
 SDL_INC := i686-w64-mingw32/include/SDL2
 SDL_LIB := i686-w64-mingw32/lib
 
-INCLUDE_PATHS := -I$(SRC) -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL_INC) -I$(INC)/SDL2_ttf-2.0.15/$(SDL_INC)
-LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL_LIB) -L$(INC)/SDL2_ttf-2.0.15/$(SDL_LIB)
+INCLUDE_PATHS := -I$(SRC) -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL_INC) -I$(INC)/SDL2_ttf-2.20.1/$(SDL_INC)
+LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL_LIB) -L$(INC)/SDL2_ttf-2.20.1/$(SDL_LIB)
 LINKER_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 GAME_LIBRARY := -L$(LIB) -lGameEngine
 
