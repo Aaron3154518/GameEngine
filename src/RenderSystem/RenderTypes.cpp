@@ -202,6 +202,7 @@ Texture TextData::renderTextWrapped() const {
 RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
     mTex = tex;
     mFrameCnt = frameCnt;
+    mFrame = 0;
     if (!AssetManager::getTextureSize(mTex.get(), &mDim.x, &mDim.y)) {
         std::cerr << "RenderData::setTexture(): Failed to query texture size"
                   << std::endl;
