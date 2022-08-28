@@ -244,6 +244,14 @@ RenderData &RenderData::addBoundary(Rect r) {
     return *this;
 }
 
+RenderData &RenderData::setRotationRad(float rotation) {
+    return setRotationDeg(rotation * 180 / M_PI);
+}
+RenderData &RenderData::setRotationDeg(float rotation) {
+    mRotation = rotation;
+    return *this;
+}
+
 RenderData &RenderData::setFit(FitMode fit) {
     mFit = fit;
     switch (mFit) {
@@ -344,5 +352,6 @@ void RenderData::draw(TextureBuilder &tex) const {
         return;
     }
 
-    SDL_RenderCopy(Renderer::get(), mTex.get(), texRect, destRect);
+    SDL_RenderCopyEx(Renderer::get(), mTex.get(), texRect, destRect, mRotation,
+                     NULL, SDL_FLIP_NONE);
 }

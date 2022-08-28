@@ -67,6 +67,9 @@ class RenderData : public Drawable {
     RenderData &setBoundary(Rect r);
     RenderData &addBoundary(Rect r);
 
+    RenderData &setRotationRad(float rotation);
+    RenderData &setRotationDeg(float rotation);
+
     RenderData &setFit(FitMode fit);
     RenderData &setFitAlign(Rect::Align a = Rect::Align::CENTER);
     RenderData &setFitAlign(Rect::Align aX, Rect::Align aY);
@@ -84,11 +87,15 @@ class RenderData : public Drawable {
    private:
     SharedTexture mTex;
     SDL_Point mDim{0, 0};
-    unsigned int mFrameCnt = 1, mFrame = 0;
+    Rect mRect, mDest, mBounds, mArea;
+
+    float mRotation = 0;
+
     FitMode mFit = FitMode::Fit;
     Rect::Align mFitAlignX = Rect::Align::CENTER,
                 mFitAlignY = Rect::Align::CENTER;
-    Rect mRect, mDest, mBounds, mArea;
+
+    unsigned int mFrameCnt = 1, mFrame = 0;
 };
 
 #endif

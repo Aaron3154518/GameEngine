@@ -54,8 +54,10 @@ int main(int argc, char *argv[]) {
     Rect shapesDest(0, 0, pb.dest.h(), pb.dest.h());
     shapesDest.setPos(pb.dest.x(), pb.dest.cY(), Rect::Align::CENTER);
     TextureBuilder shapesTex(shapesDest.w(), shapesDest.h());
-    RenderData shapes =
-        RenderData().set(shapesTex.getTexture()).setDest(shapesDest);
+    RenderData shapes = RenderData()
+                            .set(shapesTex.getTexture())
+                            .setDest(shapesDest)
+                            .setRotationDeg(45);
 
     int halfW = shapesDest.w() / 2;
     int w = halfW * sqrt(2) * .9;
@@ -67,7 +69,8 @@ int main(int argc, char *argv[]) {
 
     RenderData anim = RenderData()
                           .set("res/wizards/wizard_ss.png", 5)
-                          .setDest(Rect(200, 525, 100, 100));
+                          .setDest(Rect(200, 525, 100, 100))
+                          .setRotationRad(M_PI * 8 / 7);
     Uint32 animTimer = 0;
 
     Uint32 time = SDL_GetTicks();
