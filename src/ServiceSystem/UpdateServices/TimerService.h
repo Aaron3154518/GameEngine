@@ -37,6 +37,8 @@ class TimerObservableBase : public TimerObservableType, public Component {
 
     enum : size_t { ON_TRIGGER = 0, ON_UPDATE, DATA };
 
+    virtual ~TimerObservableBase() = default;
+
     using TimerObservableType::subscribe;
     SubscriptionPtr subscribe(std::function<bool(Timer&)> func,
                               const Timer& timer);
