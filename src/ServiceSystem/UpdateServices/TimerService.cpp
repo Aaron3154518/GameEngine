@@ -3,6 +3,8 @@
 // Timer
 Timer::Timer(int len) : length(len), timer(len) {}
 
+Timer::Timer(const AnimationData& animData) : Timer(animData.frame_ms) {}
+
 void Timer::reset() { timer = length; }
 
 bool Timer::isActive() const { return active; }

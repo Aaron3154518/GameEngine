@@ -8,6 +8,7 @@
 #include "ServiceSystem/Observable.h"
 #include "ServiceSystem/Service.h"
 #include "ServiceSystem/ServiceSystem.h"
+#include "Utils/AnimationData.h"
 #include "Utils/Time.h"
 
 struct Timer {
@@ -15,6 +16,7 @@ struct Timer {
 
     Timer() = default;
     Timer(int len);
+    Timer(const AnimationData& animData);
 
     void reset();
     bool isActive() const;
