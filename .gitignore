@@ -1,5 +1,5 @@
-obj/
-lib/
+obj/*
+lib/*
 bin/*
 testing.*
 src/Test
