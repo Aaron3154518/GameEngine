@@ -25,26 +25,6 @@ int main(int argc, char *argv[]) {
                            .set("res/wizards/Catalyst.png")
                            .setDest(Rect(125, 100, 250, 250));
 
-    RenderData pp = RenderData().setDest(image.getDest());
-    TextData ppText;
-    ppText.font = AssetManager::getFont(FontData{-1, 20, "|"});
-    ppText.text =
-        "According to all known laws of aviation, there is no way a bee should "
-        "be able to fly.\n"
-        "Its wings are too small to get its fat little body off the "
-        "ground.\nThe bee {ires/projectiles/fireball2.png}, of course, flies "
-        "anyway "
-        "because bees don't care what humans think is "
-        "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}wrapped";
-    // ppText.text =
-    //"Power Wizard empowers the Wizard and overloads the Crystal for "
-    //"increased Fireball power";
-    ppText.color = RED;
-    ppText.w = pp.getRect().w();
-    ppText.autoFit = false;
-    ppText.align = Rect::Align::TOP_LEFT;
-    pp.set(ppText);
-
     ProgressBar pb = ProgressBar().set(RED, GRAY).set(Rect(100, 400, 300, 50));
     Uint32 pbVal = 0;
 
@@ -52,7 +32,7 @@ int main(int argc, char *argv[]) {
     TextData timerText;
     timerText.font = AssetManager::getFont(FontData{-1, 25, "|"});
     timerText.color = BLUE;
-    timerText.text = std::to_string(timerVal);
+    timerText.setText(std::to_string(timerVal));
     RenderData timer =
         RenderData().set(timerText).setDest(Rect(250, 450, 0, 50));
 
@@ -78,6 +58,27 @@ int main(int argc, char *argv[]) {
                           .setDest(Rect(200, 525, 100, 100))
                           .setRotationRad(M_PI * 8 / 7);
     Uint32 animTimer = 0;
+
+    RenderData pp = RenderData().setDest(image.getDest());
+    TextData ppText;
+    ppText.font = AssetManager::getFont(FontData{-1, 20, "|"});
+    ppText.setText(
+        "According to all known laws of aviation, there is no way a bee should "
+        "be able to fly.\n"
+        "Its wings are too small to get its fat little body off the "
+        "ground.\nThe bee {i}, of course, "
+        "flies "
+        "anyway "
+        "because bees don't care what humans think is "
+        "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}wrapped",
+        pp.getRect().w(), {anim});
+    // ppText.text =
+    //"Power Wizard empowers the Wizard and overloads the Crystal for "
+    //"increased Fireball power";
+    ppText.color = RED;
+    ppText.autoFit = false;
+    ppText.align = Rect::Align::TOP_LEFT;
+    pp.set(ppText);
 
     Uint32 time = SDL_GetTicks();
 
@@ -107,7 +108,7 @@ int main(int argc, char *argv[]) {
 
         screen.draw(timer);
 
-        // screen.draw(image);
+        screen.draw(image);
         screen.draw(pp);
 
         screen.draw(anim);
@@ -125,9 +126,9 @@ int main(int argc, char *argv[]) {
             SDL_Point dim = RenderSystem::getWindowSize();
 
             timerVal *= 2;
-            timerText.text = std::to_string(dim.x) + "x" +
-                             std::to_string(dim.y) + " - " +
-                             std::to_string(timerVal);
+            timerText.setText(std::to_string(dim.x) + "x" +
+                              std::to_string(dim.y) + " - " +
+                              std::to_string(timerVal));
             timer.set(timerText);
 
             switch (ppText.align) {
@@ -153,6 +154,8 @@ int main(int argc, char *argv[]) {
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
             anim.nextFrame();
+            ppText.setTextImgs({anim});
+            pp.set(ppText);
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);

@@ -1,30 +1,120 @@
 #include "TextRender.h"
 
-#include <RenderSystem/RenderTypes.h>
+// TextData
+// Functions to render text to a texture
+TextData& TextData::setText(const std::string& text) {
+    return setText(text, 0, {});
+}
+TextData& TextData::setText(const std::string& text, int w,
+                            const std::initializer_list<RenderData>& imgs) {
+    mText = text;
+    mW = w;
+    mImgs = imgs;
+}
+TextData& TextData::setTextImgs(const std::initializer_list<RenderData>& imgs) {
+    if (imgs.size() != mImgs.size()) {
+        std::cerr << "TextData::setTextImgs(): Received " << imgs.size()
+                  << " images but expected " << mImgs.size()
+                  << "Call setText() to change the number of images"
+                  << std::endl;
+        return *this;
+    }
+    mImgs = imgs;
+    return *this;
+}
+
+SharedTexture TextData::renderText() const {
+    if (mW <= 0) {
+        return renderTextLine();
+    } else {
+        return renderTextWrapped();
+    }
+}
+SharedTexture TextData::renderTextLine() const {
+    SharedTexture tex = makeSharedTexture();
+    if (mText.empty()) {
+        return tex;
+    }
+    if (!font) {
+        std::cerr << "renderText(): Invalid font" << std::endl;
+        return tex;
+    }
+    Surface surface = makeSurface();
+    if (bkgrnd == TRANSPARENT) {
+        surface.reset(TTF_RenderText_Blended(font.get(), mText.c_str(), color));
+    } else {
+        surface.reset(
+            TTF_RenderText_Shaded(font.get(), mText.c_str(), color, bkgrnd));
+    }
+    if (!surface) {
+#ifdef DEBUG_RENDER
+        std::cerr << "renderText(): Unable to render text" << std::endl;
+#endif
+        return tex;
+    }
+    tex = makeSharedTexture(
+        SDL_CreateTextureFromSurface(Renderer::get(), surface.get()));
+    return tex;
+}
+SharedTexture TextData::renderTextWrapped() const {
+    if (!font) {
+        std::cerr << "renderTextWrapped(): Could not load font" << std::endl;
+        return makeSharedTexture();
+    }
+    std::string textCopy = mText;
+    std::unique_ptr<std::list<LinePtr>> lines =
+        splitText(textCopy, font, mW, mImgs);
+    if (lines->empty()) {
+        return makeSharedTexture();
+    }
+
+    int maxLineW = 0;
+    if (autoFit) {
+        for (auto& line : *lines) {
+            if (line->mW > maxLineW) {
+                maxLineW = line->mW;
+            }
+        }
+    } else {
+        maxLineW = mW;
+    }
+
+    int lineH = TTF_FontHeight(font.get());
+    int h = lineH * lines->size();
+    TextureBuilder tex(maxLineW, h, bkgrnd);
+    Rect lineR(0, 0, maxLineW, lineH);
+    for (auto& line : *lines) {
+        if (!line->empty()) {
+            line->draw(tex, lineR, *this, textCopy);
+        }
+        lineR.move(0, lineH);
+    }
+    return tex.getTexture();
+}
 
 // Element
 Element::Element(int w) : mW(w) {}
 
-void Element::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
-                   TTF_Font* font, std::string& text, SDL_Color color) const {}
+void Element::draw(TextureBuilder& tex, Rect rect, const TextData& td,
+                   std::string& text) {}
 
 // Text
 Text::Text(int startPos, int len, int w)
     : Element(w), mStartPos(startPos), mLen(len) {}
 
-void Text::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
-                TTF_Font* font, std::string& text, SDL_Color color) const {
+void Text::draw(TextureBuilder& tex, Rect rect, const TextData& td,
+                std::string& text) {
     Surface textSurf = makeSurface();
     size_t endPos = mStartPos + mLen;
     if (endPos != text.size()) {
         char tmp = text.at(endPos);
         text.replace(endPos, 1, 1, '\0');
-        textSurf = makeSurface(
-            TTF_RenderText_Blended(font, text.c_str() + mStartPos, color));
+        textSurf = makeSurface(TTF_RenderText_Blended(
+            td.font.get(), text.c_str() + mStartPos, td.color));
         text.replace(endPos, 1, 1, tmp);
     } else {
-        textSurf = makeSurface(
-            TTF_RenderText_Blended(font, text.c_str() + mStartPos, color));
+        textSurf = makeSurface(TTF_RenderText_Blended(
+            td.font.get(), text.c_str() + mStartPos, td.color));
     }
 
     SharedTexture textTex = makeSharedTexture(
@@ -32,16 +122,16 @@ void Text::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
     tex.draw(RenderData()
                  .set(textTex)
                  .setFit(RenderData::FitMode::Texture)
-                 .setFitAlign(align, Rect::Align::CENTER)
+                 .setFitAlign(td.align, Rect::Align::CENTER)
                  .setDest(rect));
 }
 
 // Image
-Image::Image(const std::string& img, int lineH) : Element(lineH), mImg(img) {}
+Image::Image(const RenderData& img, int lineH) : Element(lineH), mImg(img) {}
 
-void Image::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
-                 TTF_Font* font, std::string& text, SDL_Color color) const {
-    tex.draw(RenderData().set(mImg).setDest(rect));
+void Image::draw(TextureBuilder& tex, Rect rect, const TextData& td,
+                 std::string& text) {
+    tex.draw(mImg.setDest(rect));
 }
 
 // Line
@@ -54,21 +144,22 @@ void Line::addElement(ElementPtr e) {
     mElements.push_back(std::move(e));
 }
 
-void Line::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
-                TTF_Font* font, std::string& text, SDL_Color color) const {
+void Line::draw(TextureBuilder& tex, Rect rect, const TextData& td,
+                std::string& text) {
     Rect lineRect(0, 0, mW, rect.h());
-    lineRect.setPos(rect, align, Rect::Align::CENTER);
+    lineRect.setPos(rect, td.align, Rect::Align::CENTER);
     for (auto& e : mElements) {
         lineRect.setDim(e->mW, rect.h(), Rect::Align::TOP_LEFT,
                         Rect::Align::CENTER);
-        e->draw(tex, lineRect, align, font, text, color);
+        e->draw(tex, lineRect, td, text);
         lineRect.move(e->mW, 0);
     }
 }
 
 // splitText
-std::unique_ptr<std::list<LinePtr>> splitText(std::string& text,
-                                              SharedFont font, int maxW) {
+std::unique_ptr<std::list<LinePtr>> splitText(
+    std::string& text, SharedFont font, int maxW,
+    const std::vector<RenderData>& imgs) {
     std::unique_ptr<std::list<LinePtr>> lines =
         std::make_unique<std::list<LinePtr>>();
     lines->push_back(std::make_unique<Line>());
@@ -153,7 +244,7 @@ std::unique_ptr<std::list<LinePtr>> splitText(std::string& text,
 
     std::string delims = "\n{";
     size_t pos = 0, pos2, idx = text.find_first_of(delims, pos);
-    int backetCnt = 0;
+    int backetCnt = 0, imgIdx = 0;
     while (idx != std::string::npos) {
         addText(pos, idx);
         switch (text.at(idx)) {
@@ -164,6 +255,7 @@ std::unique_ptr<std::list<LinePtr>> splitText(std::string& text,
                 pos = idx + 1;
                 idx = text.find('}', pos);
                 if (idx == std::string::npos) {
+                    std::cerr << "splitText(): Unterminated '{'" << std::endl;
                     return lines;
                 }
                 if (idx == pos) {
@@ -173,14 +265,17 @@ std::unique_ptr<std::list<LinePtr>> splitText(std::string& text,
                     case 'b':
                         break;
                     case 'i':
-                        if (idx == pos + 1) {
+                        if (imgs.size() <= imgIdx) {
+                            std::cerr
+                                << "splitText(): Not enough images provided"
+                                << std::endl;
                             break;
                         }
                         if (lineH > lines->back()->getSpace(maxW)) {
                             lines->push_back(std::make_unique<Line>());
                         }
-                        lines->back()->addElement(std::make_unique<Image>(
-                            text.substr(pos + 1, idx - (pos + 1)), lineH));
+                        lines->back()->addElement(
+                            std::make_unique<Image>(imgs.at(imgIdx++), lineH));
                         break;
                 };
                 break;

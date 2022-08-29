@@ -9,38 +9,21 @@ rendering text and textures.
 
 #include <RenderSystem/AssetManager.h>
 #include <RenderSystem/Renderer.h>
-#include <RenderSystem/TextRender.h>
 #include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <Utils/AnimationData.h>
 #include <Utils/Rect.h>
 
+#include <initializer_list>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
-// To render text
-struct TextData {
-    std::string text = "";
-    SDL_Color color = BLACK;
-    SDL_Color bkgrnd = TRANSPARENT;
-
-    // For wrapping text
-    // w > 0 will wrap text
-    int w = 0;
-    bool autoFit = true;
-    Rect::Align align = Rect::Align::CENTER;
-
-    SharedFont font = makeSharedFont();
-
-    // Functions to render text to a texture
-    SharedTexture renderText() const;
-    SharedTexture renderTextLine() const;
-    SharedTexture renderTextWrapped() const;
-};
+// Forward Declaration
+class TextData;
 
 // To draw a texture
 class RenderData : public Drawable {

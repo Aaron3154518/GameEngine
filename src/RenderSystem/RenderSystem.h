@@ -9,6 +9,7 @@ This files contains the entry point to this module
 #include <RenderSystem/RenderTypes.h>
 #include <RenderSystem/Renderer.h>
 #include <RenderSystem/Shapes.h>
+#include <RenderSystem/TextRender.h>
 #include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
