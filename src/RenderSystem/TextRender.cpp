@@ -10,6 +10,7 @@ TextData& TextData::setText(const std::string& text, int w,
     mText = text;
     mW = w;
     mImgs = imgs;
+    return *this;
 }
 TextData& TextData::setTextImgs(const std::initializer_list<RenderData>& imgs) {
     if (imgs.size() != mImgs.size()) {

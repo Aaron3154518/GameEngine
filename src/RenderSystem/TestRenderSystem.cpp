@@ -66,12 +66,12 @@ int main(int argc, char *argv[]) {
         "According to all known laws of aviation, there is no way a bee should "
         "be able to fly.\n"
         "Its wings are too small to get its fat little body off the "
-        "ground.\nThe bee {i}, of course, "
+        "ground.\nThe bee \n{i}\n{i}\n, of course, "
         "flies "
         "anyway "
         "because bees don't care what humans think is "
         "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}wrapped",
-        pp.getRect().w(), {anim});
+        pp.getRect().w(), {anim, anim});
     // ppText.text =
     //"Power Wizard empowers the Wizard and overloads the Crystal for "
     //"increased Fireball power";
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
             anim.nextFrame();
-            ppText.setTextImgs({anim});
+            ppText.setTextImgs({anim, anim});
             pp.set(ppText);
         }
 
