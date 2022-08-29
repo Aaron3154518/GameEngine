@@ -41,7 +41,7 @@ SharedTexture TextData::renderTextWrapped() const {
         return makeSharedTexture();
     }
     std::string textCopy = text;
-    std::unique_ptr<std::list<LinePtr>> lines = splitText2(textCopy, font, w);
+    std::unique_ptr<std::list<LinePtr>> lines = splitText(textCopy, font, w);
     if (lines->empty()) {
         return makeSharedTexture();
     }

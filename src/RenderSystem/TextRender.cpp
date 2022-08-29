@@ -71,8 +71,8 @@ void Line::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
 }
 
 // splitText
-std::unique_ptr<std::list<LinePtr>> splitText2(std::string& text,
-                                               SharedFont font, int maxW) {
+std::unique_ptr<std::list<LinePtr>> splitText(std::string& text,
+                                              SharedFont font, int maxW) {
     std::unique_ptr<std::list<LinePtr>> lines =
         std::make_unique<std::list<LinePtr>>();
     lines->push_back(std::make_unique<Line>());
@@ -158,7 +158,7 @@ std::unique_ptr<std::list<LinePtr>> splitText2(std::string& text,
     std::string delims = "\n{";
     size_t pos = 0, pos2, idx = text.find_first_of(delims, pos);
     int backetCnt = 0;
-    do {
+    while (idx != std::string::npos) {
         addText(pos, idx);
         switch (text.at(idx)) {
             case '\n':
@@ -191,7 +191,7 @@ std::unique_ptr<std::list<LinePtr>> splitText2(std::string& text,
         }
         pos = idx + 1;
         idx = text.find_first_of(delims, pos);
-    } while (idx != std::string::npos);
+    }
     addText(pos, text.size());
 
     return lines;

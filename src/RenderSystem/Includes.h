@@ -6,6 +6,7 @@
 #include <RenderSystem/RenderTypes.h>
 #include <RenderSystem/Renderer.h>
 #include <RenderSystem/Shapes.h>
+#include <RenderSystem/TextRender.h>
 #include <RenderSystem/TextureBuilder.h>
 
 #endif
