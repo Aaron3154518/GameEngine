@@ -9,6 +9,7 @@ rendering text and textures.
 
 #include <RenderSystem/AssetManager.h>
 #include <RenderSystem/Renderer.h>
+#include <RenderSystem/TextRender.h>
 #include <RenderSystem/TextureBuilder.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -20,10 +21,6 @@ rendering text and textures.
 #include <sstream>
 #include <string>
 #include <vector>
-
-// Helper function to split text for wrapping
-std::vector<std::string> splitText(const std::string &text, SharedFont font,
-                                   int maxW);
 
 // To render text
 struct TextData {
@@ -40,9 +37,9 @@ struct TextData {
     SharedFont font = makeSharedFont();
 
     // Functions to render text to a texture
-    Texture renderText() const;
-    Texture renderTextLine() const;
-    Texture renderTextWrapped() const;
+    SharedTexture renderText() const;
+    SharedTexture renderTextLine() const;
+    SharedTexture renderTextWrapped() const;
 };
 
 // To draw a texture
@@ -85,9 +82,9 @@ class RenderData : public Drawable {
     void nextFrame();
 
     void draw(TextureBuilder &tex) const;
+    SharedTexture mTex;
 
    private:
-    SharedTexture mTex;
     SDL_Point mDim{0, 0};
     Rect mRect, mDest, mBounds, mArea;
 

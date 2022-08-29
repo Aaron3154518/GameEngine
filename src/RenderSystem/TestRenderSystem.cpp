@@ -32,8 +32,10 @@ int main(int argc, char *argv[]) {
         "According to all known laws of aviation, there is no way a bee should "
         "be able to fly.\n"
         "Its wings are too small to get its fat little body off the "
-        "ground.\nThe bee, of course, flies anyway"
-        "because bees don't care what humans think is impossible.";
+        "ground.\nThe bee {ires/projectiles/fireball2.png}, of course, flies "
+        "anyway"
+        "because bees don't care what humans think is "
+        "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}wrapped";
     ppText.color = RED;
     ppText.w = pp.getRect().w();
     ppText.autoFit = false;
@@ -77,9 +79,13 @@ int main(int argc, char *argv[]) {
     Uint32 time = SDL_GetTicks();
 
     Uint32 t1, sum = 0, cnt = 0;
+    Uint32 fpsT1, fpsCnt = 0;
+    float fpsSum = 0;
 
     bool running = true;
     while (running) {
+        fpsT1 = SDL_GetTicks();
+
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -91,10 +97,7 @@ int main(int argc, char *argv[]) {
         // Rendering
         RenderSystem::clearScreen(LGRAY);
 
-        t1 = SDL_GetTicks();
         screen.draw(screenCd);
-        sum += SDL_GetTicks() - t1;
-        cnt++;
 
         screen.draw(pb.set(pbVal, 1000));
         screen.draw(shapes);
@@ -135,7 +138,10 @@ int main(int argc, char *argv[]) {
                     ppText.align = Rect::Align::TOP_LEFT;
                     break;
             }
+            t1 = SDL_GetTicks();
             pp.set(ppText);
+            sum += SDL_GetTicks() - t1;
+            cnt++;
 
             image.set(pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
         }
@@ -146,11 +152,17 @@ int main(int argc, char *argv[]) {
             anim.nextFrame();
         }
 
+        fpsSum += (SDL_GetTicks() - fpsT1);
+        fpsCnt++;
+
         // FPS
         RenderSystem::enforceFPS(60);
     }
 
-    std::cerr << "Avg: " << ((float)sum / cnt) << "ms" << std::endl;
+    std::cerr << "Timer Avg: " << (cnt == 0 ? 0 : (float)sum / cnt) << "ms"
+              << std::endl;
+    std::cerr << "Frame Avg: " << (fpsCnt == 0 ? 0 : fpsSum / fpsCnt) << "ms"
+              << std::endl;
 
     RenderSystem::teardownRenderSystem();
 

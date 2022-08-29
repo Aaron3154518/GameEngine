@@ -34,11 +34,12 @@ SharedTexture TextureBuilder::getTexture() { return mTex; }
 
 // Start new texture
 void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
-    mTex = makeSharedTexture(SDL_CreateTexture(Renderer::get(),
-                                               SDL_PIXELFORMAT_RGBA8888,
-                                               SDL_TEXTUREACCESS_TARGET, w, h));
+    SDL_Texture *tex =
+        SDL_CreateTexture(Renderer::get(), SDL_PIXELFORMAT_RGBA8888,
+                          SDL_TEXTUREACCESS_TARGET, w, h);
+    mTex = makeSharedTexture(tex);
     SDL_SetTextureBlendMode(mTex.get(), SDL_BLENDMODE_BLEND);
-    draw(RectShape(bkgrnd, SDL_BLENDMODE_BLEND).set());
+    draw(RectShape(bkgrnd, SDL_BLENDMODE_NONE).set());
 }
 
 // Draw textures/text
