@@ -27,15 +27,18 @@ int main(int argc, char *argv[]) {
 
     RenderData pp = RenderData().setDest(image.getDest());
     TextData ppText;
-    ppText.font = AssetManager::getFont(FontData{-1, 25, "|"});
+    ppText.font = AssetManager::getFont(FontData{-1, 20, "|"});
     ppText.text =
         "According to all known laws of aviation, there is no way a bee should "
         "be able to fly.\n"
         "Its wings are too small to get its fat little body off the "
         "ground.\nThe bee {ires/projectiles/fireball2.png}, of course, flies "
-        "anyway"
+        "anyway "
         "because bees don't care what humans think is "
         "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}wrapped";
+    // ppText.text =
+    //"Power Wizard empowers the Wizard and overloads the Crystal for "
+    //"increased Fireball power";
     ppText.color = RED;
     ppText.w = pp.getRect().w();
     ppText.autoFit = false;
@@ -104,7 +107,7 @@ int main(int argc, char *argv[]) {
 
         screen.draw(timer);
 
-        screen.draw(image);
+        // screen.draw(image);
         screen.draw(pp);
 
         screen.draw(anim);

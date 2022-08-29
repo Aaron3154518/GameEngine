@@ -29,9 +29,11 @@ void Text::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
 
     SharedTexture textTex = makeSharedTexture(
         SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get()));
-    Rect lineRect = Rect(0, 0, textSurf->w, textSurf->h);
-    lineRect.setPos(rect, align, Rect::Align::CENTER);
-    tex.draw(RenderData().set(textTex).setDest(lineRect));
+    tex.draw(RenderData()
+                 .set(textTex)
+                 .setFit(RenderData::FitMode::Texture)
+                 .setFitAlign(align, Rect::Align::CENTER)
+                 .setDest(rect));
 }
 
 // Image
@@ -39,11 +41,7 @@ Image::Image(const std::string& img, int lineH) : Element(lineH), mImg(img) {}
 
 void Image::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
                  TTF_Font* font, std::string& text, SDL_Color color) const {
-    SharedTexture imgTex = AssetManager::getTexture(mImg);
-    SDL_FPoint c = rect.getPos(Rect::Align::CENTER);
-    rect = Rect::getMinRect(imgTex.get(), rect.w(), rect.h());
-    rect.setPos(c.x, c.y, Rect::Align::CENTER);
-    tex.draw(RenderData().set(imgTex).setDest(rect));
+    tex.draw(RenderData().set(mImg).setDest(rect));
 }
 
 // Line
@@ -60,8 +58,6 @@ void Line::draw(TextureBuilder& tex, Rect rect, Rect::Align align,
                 TTF_Font* font, std::string& text, SDL_Color color) const {
     Rect lineRect(0, 0, mW, rect.h());
     lineRect.setPos(rect, align, Rect::Align::CENTER);
-
-    Rect elRect;
     for (auto& e : mElements) {
         lineRect.setDim(e->mW, rect.h(), Rect::Align::TOP_LEFT,
                         Rect::Align::CENTER);
