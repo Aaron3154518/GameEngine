@@ -9,6 +9,9 @@ void Init(RenderSystem::Options options) {
 void Run() {
     Event e;
 
+    float mspfSum = 0;
+    Uint32 mspfT1, mspfCnt = 0;
+
     /** Game Loop:
      * 1) Interperet events
      * 2) Compute component under mouse
@@ -18,6 +21,8 @@ void Run() {
      * 6) Perform render
      */
     while (true) {
+        mspfT1 = SDL_GetTicks();
+
         // Check events
         e.update();
         // Check quit
@@ -45,9 +50,15 @@ void Run() {
         // Display screen
         RenderSystem::presentScreen();
 
+        mspfSum += SDL_GetTicks() - mspfT1;
+        mspfCnt++;
+
         // FPS
         RenderSystem::enforceFPS(60);
     }
+
+    std::cerr << "Average milliseconds per frame: "
+              << (mspfCnt == 0 ? 0 : mspfSum / mspfCnt) << "ms" << std::endl;
 }
 
 void Clean() { RenderSystem::teardownRenderSystem(); }
