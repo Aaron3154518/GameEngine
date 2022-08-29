@@ -4,6 +4,7 @@
 #include <RenderSystem/AssetManager.h>
 #include <RenderSystem/RenderTypes.h>
 #include <RenderSystem/Renderer.h>
+#include <RenderSystem/Shapes.h>
 #include <RenderSystem/TextureBuilder.h>
 #include <SDL_ttf.h>
 
@@ -15,89 +16,108 @@
 #include <utility>
 #include <vector>
 
+// Forward Declaration
+struct TextData;
+
+struct Text {
+   public:
+    Text(int startPos, int len, int w);
+
+    int w() const;
+
+    void draw(TextureBuilder& tex, Rect rect, const TextData& td,
+              std::string& text);
+
+   private:
+    int mStartPos, mLen, mW;
+};
+
+struct Image {
+   public:
+    Image(int lineH);
+
+    int w() const;
+
+    void draw(TextureBuilder& tex, Rect rect, RenderData data);
+
+   private:
+    int mW;
+};
+
+struct Line {
+   public:
+    enum Type : uint8_t {
+        TEXT = 0,
+        IMAGE,
+    };
+
+    bool empty() const;
+    int w() const;
+    int getSpace(int maxW) const;
+
+    void addElement(const Text& text);
+    void addElement(const Image& img);
+
+    void drawText(TextureBuilder& tex, Rect rect, const TextData& td,
+                  std::string& text);
+    size_t drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
+                      const std::vector<RenderData>& imgs, size_t startPos = 0);
+
+   private:
+    int mW = 0;
+    std::list<Type> mTypes;
+    std::list<Text> mText;
+    std::list<Image> mImgs;
+};
+
+typedef std::unique_ptr<Line> LinePtr;
+
+std::list<Line> splitText(std::string& text, SharedFont font, int maxW);
+
 // To render text
+struct TextDataData {
+    SDL_Color mColor = BLACK;
+    SDL_Color mBkgrnd = TRANSPARENT;
+
+    bool mAutoFit = true;
+    Rect::Align mAlign = Rect::Align::CENTER;
+
+    SharedFont mFont = makeSharedFont();
+    std::string mText = "";
+    // Members for wrapping text
+    // w > 0 will wrap text
+    int mW = 0;
+};
+
 struct TextData {
-    SDL_Color color = BLACK;
-    SDL_Color bkgrnd = TRANSPARENT;
+    SharedTexture get();
+    const TextDataData& data() const;
 
-    bool autoFit = true;
-    Rect::Align align = Rect::Align::CENTER;
+    TextData& setColor(SDL_Color color);
+    TextData& setBackground(SDL_Color bkgrnd);
 
-    SharedFont font = makeSharedFont();
+    TextData& setAutoFit(bool fit);
+    TextData& setAlign(Rect::Align a);
+
+    TextData& setFont(const FontData& font);
+    TextData& setFont(SharedFont font);
 
     TextData& setText(const std::string& text);
     TextData& setText(const std::string& text, int w,
                       const std::vector<RenderData>& imgs = {});
     TextData& setTextImgs(const std::vector<RenderData>& imgs);
 
-    // Functions to render text to a texture
-    SharedTexture renderText() const;
-    SharedTexture renderTextLine() const;
-    SharedTexture renderTextWrapped() const;
-
    private:
-    std::string mText = "";
-    // For wrapping text
-    // w > 0 will wrap text
-    int mW = 0;
+    enum Update : uint8_t { IMGS = 0, DRAW, SPLIT };
+    void setUpdateStatus(Update u);
+
+    Update mUpdateStatus = Update::SPLIT;
+
+    TextDataData mData;
+
+    SharedTexture mTex;
+    std::list<Line> mLines;
     std::vector<RenderData> mImgs;
 };
-
-struct Element {
-    Element(int w = 0);
-    virtual ~Element() = default;
-
-    virtual void draw(TextureBuilder& tex, Rect rect, const TextData& td,
-                      std::string& text);
-
-    int mW;
-};
-
-typedef std::unique_ptr<Element> ElementPtr;
-
-struct Text : public Element {
-   public:
-    Text(int startPos, int len, int w);
-
-    void draw(TextureBuilder& tex, Rect rect, const TextData& td,
-              std::string& text);
-
-   private:
-    int mStartPos, mLen;
-};
-
-typedef std::unique_ptr<Text> TextPtr;
-
-struct Image : public Element {
-   public:
-    Image(const RenderData& img, int lineH);
-
-    void draw(TextureBuilder& tex, Rect rect, const TextData& td,
-              std::string& text);
-
-   private:
-    RenderData mImg;
-};
-
-typedef std::unique_ptr<Image> ImagePtr;
-
-struct Line : public Element {
-   public:
-    bool empty() const;
-    int getSpace(int maxW) const;
-
-    void addElement(ElementPtr e);
-
-    void draw(TextureBuilder& tex, Rect rect, const TextData& td,
-              std::string& text);
-
-   private:
-    std::list<ElementPtr> mElements;
-};
-
-typedef std::unique_ptr<Line> LinePtr;
-
-std::list<Line> splitText(std::string& text, SharedFont font, int maxW,
-                          const std::vector<RenderData>& imgs = {});
 
 #endif

@@ -41,7 +41,7 @@ class RenderData : public Drawable {
 
     RenderData &set(SharedTexture tex, unsigned int frameCnt = 1);
     RenderData &set(const std::string &file, unsigned int frameCnt = 1);
-    RenderData &set(const TextData &tData, unsigned int frameCnt = 1);
+    RenderData &set(TextData &tData, unsigned int frameCnt = 1);
     RenderData &set(const AnimationData &animData);
 
     RenderData &setDest(Rect r);
@@ -65,9 +65,10 @@ class RenderData : public Drawable {
     void nextFrame();
 
     void draw(TextureBuilder &tex) const;
-    SharedTexture mTex;
 
    private:
+    SharedTexture mTex;
+
     SDL_Point mDim{0, 0};
     Rect mRect, mDest, mBounds, mArea;
 
