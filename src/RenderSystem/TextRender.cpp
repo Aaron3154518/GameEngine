@@ -63,17 +63,16 @@ SharedTexture TextData::renderTextWrapped() const {
         return makeSharedTexture();
     }
     std::string textCopy = mText;
-    std::unique_ptr<std::list<LinePtr>> lines =
-        splitText(textCopy, font, mW, mImgs);
-    if (lines->empty()) {
+    std::list<Line> lines = splitText(textCopy, font, mW, mImgs);
+    if (lines.empty()) {
         return makeSharedTexture();
     }
 
     int maxLineW = 0;
     if (autoFit) {
-        for (auto& line : *lines) {
-            if (line->mW > maxLineW) {
-                maxLineW = line->mW;
+        for (auto& line : lines) {
+            if (line.mW > maxLineW) {
+                maxLineW = line.mW;
             }
         }
     } else {
@@ -81,12 +80,12 @@ SharedTexture TextData::renderTextWrapped() const {
     }
 
     int lineH = TTF_FontHeight(font.get());
-    int h = lineH * lines->size();
+    int h = lineH * lines.size();
     TextureBuilder tex(maxLineW, h, bkgrnd);
     Rect lineR(0, 0, maxLineW, lineH);
-    for (auto& line : *lines) {
-        if (!line->empty()) {
-            line->draw(tex, lineR, *this, textCopy);
+    for (auto& line : lines) {
+        if (!line.empty()) {
+            line.draw(tex, lineR, *this, textCopy);
         }
         lineR.move(0, lineH);
     }
@@ -158,12 +157,10 @@ void Line::draw(TextureBuilder& tex, Rect rect, const TextData& td,
 }
 
 // splitText
-std::unique_ptr<std::list<LinePtr>> splitText(
-    std::string& text, SharedFont font, int maxW,
-    const std::vector<RenderData>& imgs) {
-    std::unique_ptr<std::list<LinePtr>> lines =
-        std::make_unique<std::list<LinePtr>>();
-    lines->push_back(std::make_unique<Line>());
+std::list<Line> splitText(std::string& text, SharedFont font, int maxW,
+                          const std::vector<RenderData>& imgs) {
+    std::list<Line> lines;
+    lines.push_back(Line());
     if (!font) {
         return lines;
     }
@@ -187,16 +184,16 @@ std::unique_ptr<std::list<LinePtr>> splitText(
         if (pos2 != text.size()) {
             char tmp = text.at(pos2);
             text.replace(pos2, 1, 1, '\0');
-            TTF_MeasureUTF8(font.get(), str, lines->back()->getSpace(maxW),
+            TTF_MeasureUTF8(font.get(), str, lines.back().getSpace(maxW),
                             &width, &count);
             text.replace(pos2, 1, 1, tmp);
         } else {
-            TTF_MeasureUTF8(font.get(), str, lines->back()->getSpace(maxW),
+            TTF_MeasureUTF8(font.get(), str, lines.back().getSpace(maxW),
                             &width, &count);
         }
 
         if (count == len) {  // Fit entire text onto line
-            lines->back()->addElement(std::make_unique<Text>(pos1, len, width));
+            lines.back().addElement(std::make_unique<Text>(pos1, len, width));
         } else {  // Break up text
             int idx;
             // Find last space, if any
@@ -213,8 +210,8 @@ std::unique_ptr<std::list<LinePtr>> splitText(
                 text.replace(pos1 + idx, 1, 1, ' ');
 
                 auto ptr = std::make_unique<Text>(pos1, idx, textW);
-                lines->back()->addElement(std::move(ptr));
-                lines->push_back(std::make_unique<Line>());
+                lines.back().addElement(std::move(ptr));
+                lines.push_back(Line());
                 addText(pos1 + idx + 1, pos2);
             } else {  // Won't fit on this line
                 // Get the length until the next break
@@ -230,13 +227,13 @@ std::unique_ptr<std::list<LinePtr>> splitText(
                     *spaceIt = tmp;
                 }
                 if (wordW <= maxW) {  // It will fit on the next line
-                    lines->push_back(std::make_unique<Line>());
+                    lines.push_back(Line());
                     addText(pos1, pos2);
                 } else {  // It is bigger than one line, split accross multiple
                           // lines
-                    lines->back()->addElement(
+                    lines.back().addElement(
                         std::make_unique<Text>(pos1, count, width));
-                    lines->push_back(std::make_unique<Line>());
+                    lines.push_back(Line());
                     addText(pos1 + count, pos2);
                 }
             }
@@ -250,7 +247,7 @@ std::unique_ptr<std::list<LinePtr>> splitText(
         addText(pos, idx);
         switch (text.at(idx)) {
             case '\n':
-                lines->push_back(std::make_unique<Line>());
+                lines.push_back(Line());
                 break;
             case '{':
                 pos = idx + 1;
@@ -272,10 +269,10 @@ std::unique_ptr<std::list<LinePtr>> splitText(
                                 << std::endl;
                             break;
                         }
-                        if (lineH > lines->back()->getSpace(maxW)) {
-                            lines->push_back(std::make_unique<Line>());
+                        if (lineH > lines.back().getSpace(maxW)) {
+                            lines.push_back(Line());
                         }
-                        lines->back()->addElement(
+                        lines.back().addElement(
                             std::make_unique<Image>(imgs.at(imgIdx++), lineH));
                         break;
                 };
@@ -286,5 +283,5 @@ std::unique_ptr<std::list<LinePtr>> splitText(
     }
     addText(pos, text.size());
 
-    return lines;
+    return std::move(lines);
 }

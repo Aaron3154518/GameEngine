@@ -97,8 +97,7 @@ struct Line : public Element {
 
 typedef std::unique_ptr<Line> LinePtr;
 
-std::unique_ptr<std::list<LinePtr>> splitText(
-    std::string& text, SharedFont font, int maxW,
-    const std::vector<RenderData>& imgs = {});
+std::list<Line> splitText(std::string& text, SharedFont font, int maxW,
+                          const std::vector<RenderData>& imgs = {});
 
 #endif
