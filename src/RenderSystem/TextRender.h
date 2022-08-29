@@ -27,8 +27,8 @@ struct TextData {
 
     TextData& setText(const std::string& text);
     TextData& setText(const std::string& text, int w,
-                      const std::initializer_list<RenderData>& imgs = {});
-    TextData& setTextImgs(const std::initializer_list<RenderData>& imgs);
+                      const std::vector<RenderData>& imgs = {});
+    TextData& setTextImgs(const std::vector<RenderData>& imgs);
 
     // Functions to render text to a texture
     SharedTexture renderText() const;

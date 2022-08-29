@@ -6,13 +6,13 @@ TextData& TextData::setText(const std::string& text) {
     return setText(text, 0, {});
 }
 TextData& TextData::setText(const std::string& text, int w,
-                            const std::initializer_list<RenderData>& imgs) {
+                            const std::vector<RenderData>& imgs) {
     mText = text;
     mW = w;
     mImgs = imgs;
     return *this;
 }
-TextData& TextData::setTextImgs(const std::initializer_list<RenderData>& imgs) {
+TextData& TextData::setTextImgs(const std::vector<RenderData>& imgs) {
     if (imgs.size() != mImgs.size()) {
         std::cerr << "TextData::setTextImgs(): Received " << imgs.size()
                   << " images but expected " << mImgs.size()
