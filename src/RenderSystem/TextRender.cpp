@@ -320,7 +320,7 @@ SharedTexture TextData::get() {
                 }
             }
             // We can only skip updating if we didn't do anything else
-            if (forceImgUpdate && !update) {
+            if (!forceImgUpdate && !update) {
                 break;
             }
 
