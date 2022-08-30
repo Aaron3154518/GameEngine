@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 
         screen.draw(screenCd);
 
-        screen.draw(pb.set(pbVal, 1000));
+        screen.draw(pb);
         screen.draw(shapes);
 
         t1 = SDL_GetTicks();
@@ -149,6 +149,7 @@ int main(int argc, char *argv[]) {
 
             image.set(pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
         }
+        pb.set(pbVal, 1000);
 
         animTimer += dt;
         while (animTimer > animData.frame_ms) {
