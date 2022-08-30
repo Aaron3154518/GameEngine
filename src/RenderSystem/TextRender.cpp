@@ -85,7 +85,7 @@ void Line::drawText(TextureBuilder& tex, Rect rect, const TextData& td,
 size_t Line::drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
                         const std::vector<RenderDataWPtr>& imgs,
                         size_t startPos) {
-    if (mImgs.size() >= imgs.size() - startPos) {
+    if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
                   << " images but received " << (imgs.size() - startPos)
                   << std::endl;
