@@ -104,7 +104,8 @@ size_t Line::drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
                 Image& i = *(imgIt++);
                 lineRect.setDim(i.w(), rect.h(), Rect::Align::TOP_LEFT,
                                 Rect::Align::CENTER);
-                tex.draw(RectShape(td.data().mBkgrnd).set(lineRect));
+                auto rectShape = RectShape(td.data().mBkgrnd).set(lineRect);
+                tex.draw(rectShape);
                 i.draw(tex, lineRect, imgs.at(startPos++));
                 lineRect.move(i.w(), 0);
             } break;
@@ -242,6 +243,7 @@ SharedTexture TextData::get() {
     }
 
     bool wrap = mData.mW > 0;
+    bool forceImgUpdate = false;
 
     switch (mUpdateStatus) {
         case Update::SPLIT: {
@@ -301,6 +303,7 @@ SharedTexture TextData::get() {
                 mTex = makeSharedTexture(SDL_CreateTextureFromSurface(
                     Renderer::get(), surface.get()));
             }
+            forceImgUpdate = true;
         }
         case Update::IMGS: {
             if (!wrap || !mTex) {
@@ -316,7 +319,8 @@ SharedTexture TextData::get() {
                     update = true;
                 }
             }
-            if (!update) {
+            // We can only skip updating if we didn't do anything else
+            if (forceImgUpdate && !update) {
                 break;
             }
 
