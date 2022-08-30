@@ -324,9 +324,11 @@ SharedTexture TextData::get() {
             SDL_Point dim = tex.getTextureSize();
             int lineH = dim.y / mLines.size();
             Rect lineR(0, 0, dim.x, lineH);
+            size_t imgStartPos = 0;
             for (auto& line : mLines) {
                 if (!line.empty()) {
-                    line.drawImages(tex, lineR, *this, mImgs);
+                    imgStartPos =
+                        line.drawImages(tex, lineR, *this, mImgs, imgStartPos);
                 }
                 lineR.move(0, lineH);
             }

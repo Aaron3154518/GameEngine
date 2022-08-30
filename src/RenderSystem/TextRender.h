@@ -61,8 +61,7 @@ struct Line {
     void drawText(TextureBuilder& tex, Rect rect, const TextData& td,
                   std::string& text);
     size_t drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
-                      const std::vector<RenderDataWPtr>& imgs,
-                      size_t startPos = 0);
+                      const std::vector<RenderDataWPtr>& imgs, size_t startPos);
 
    private:
     int mW = 0;
