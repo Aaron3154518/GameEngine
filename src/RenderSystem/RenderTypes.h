@@ -56,17 +56,24 @@ class RenderData : public Drawable {
     RenderData &setFitAlign(Rect::Align a = Rect::Align::CENTER);
     RenderData &setFitAlign(Rect::Align aX, Rect::Align aY);
 
+    RenderData &setFrame(unsigned int frame);
+    RenderData &nextFrame();
+
     const Rect &getRect() const;
     const Rect &getDest() const;
 
+    Uint32 getLastUpdated() const;
+
     unsigned int getNumFrames() const;
     unsigned int getFrame() const;
-    void setFrame(unsigned int frame);
-    void nextFrame();
 
     void draw(TextureBuilder &tex) const;
 
    private:
+    RenderData &update();
+
+    Uint32 mLastUpdated = 0;
+
     SharedTexture mTex;
 
     SDL_Point mDim{0, 0};

@@ -119,6 +119,7 @@ struct TextData {
     SharedTexture mTex;
     std::list<Line> mLines;
     std::vector<RenderDataWPtr> mImgs;
+    std::vector<Uint32> mImgVersions;
 };
 
 #endif

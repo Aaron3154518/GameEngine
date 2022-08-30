@@ -141,6 +141,10 @@ int main(int argc, char *argv[]) {
             }
             t1 = SDL_GetTicks();
             ppText.get();
+            ppText.get();
+            ppText.get();
+            ppText.get();
+            ppText.get();
             sum += SDL_GetTicks() - t1;
             cnt++;
 
@@ -151,6 +155,14 @@ int main(int argc, char *argv[]) {
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
             anim->nextFrame();
+            t1 = SDL_GetTicks();
+            ppText.get();
+            ppText.get();
+            ppText.get();
+            ppText.get();
+            ppText.get();
+            sum += SDL_GetTicks() - t1;
+            cnt++;
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);

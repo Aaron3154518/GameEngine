@@ -324,8 +324,8 @@ std::ostream &operator<<(std::ostream &os, const SDL_Rect &rhs) {
     return os;
 }
 
-bool Rect::operator==(const Rect &rhs) {
+bool Rect::operator==(const Rect &rhs) const {
     return eq(_x, rhs._x, ERR) && eq(_y, rhs._y, ERR) && eq(_w, rhs._w, ERR) &&
            eq(_h, rhs._h, ERR);
 }
-bool Rect::operator!=(const Rect &rhs) { return !(*this == rhs); }
+bool Rect::operator!=(const Rect &rhs) const { return !(*this == rhs); }

@@ -306,6 +306,20 @@ SharedTexture TextData::get() {
             if (!wrap || !mTex) {
                 break;
             }
+
+            bool update = false;
+            for (size_t i = 0; i < mImgs.size(); i++) {
+                auto ptr = mImgs.at(i).lock();
+                Uint32 lastUpdated = ptr ? ptr->getLastUpdated() : 0;
+                if (mImgVersions.at(i) != lastUpdated) {
+                    mImgVersions.at(i) = lastUpdated;
+                    update = true;
+                }
+            }
+            if (!update) {
+                break;
+            }
+
             TextureBuilder tex(mTex, false);
             SDL_Point dim = tex.getTextureSize();
             int lineH = dim.y / mLines.size();
@@ -364,6 +378,7 @@ TextData& TextData::setText(const std::string& text, int w,
     mData.mText = text;
     mData.mW = w;
     mImgs = imgs;
+    mImgVersions.resize(mImgs.size(), 0);
     setUpdateStatus(Update::SPLIT);
     return *this;
 }
@@ -376,7 +391,7 @@ TextData& TextData::setTextImgs(const std::vector<RenderDataWPtr>& imgs) {
         return *this;
     }
     mImgs = imgs;
-    setUpdateStatus(Update::IMGS);
+    mImgVersions.resize(mImgs.size(), 0);
     return *this;
 }
 

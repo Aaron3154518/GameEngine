@@ -39,17 +39,17 @@ RenderData &RenderData::setArea(Rect r) {
     SDL_Rect result;
     SDL_IntersectRect(Rect(0, 0, mDim.x, mDim.y), r, &result);
     mArea = result;
-    return *this;
+    return update();
 }
 RenderData &RenderData::setBoundary(Rect r) {
     mBounds = r;
-    return *this;
+    return update();
 }
 RenderData &RenderData::addBoundary(Rect r) {
     SDL_Rect result;
     SDL_IntersectRect(mBounds, r, &result);
     mBounds = result;
-    return *this;
+    return update();
 }
 
 RenderData &RenderData::setRotationRad(float rotation) {
@@ -57,7 +57,7 @@ RenderData &RenderData::setRotationRad(float rotation) {
 }
 RenderData &RenderData::setRotationDeg(float rotation) {
     mRotation = rotation;
-    return *this;
+    return update();
 }
 
 RenderData &RenderData::setFit(FitMode fit) {
@@ -75,7 +75,7 @@ RenderData &RenderData::setFit(FitMode fit) {
             mDest.setPos(mRect, mFitAlignX, mFitAlignY);
             break;
     }
-    return *this;
+    return update();
 }
 RenderData &RenderData::setFitAlign(Rect::Align a) { return setFitAlign(a, a); }
 RenderData &RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
@@ -84,13 +84,27 @@ RenderData &RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
     return setFit(mFit);
 }
 
+RenderData &RenderData::setFrame(unsigned int frame) {
+    mFrame = frame % mFrameCnt;
+    return update();
+}
+RenderData &RenderData::nextFrame() {
+    setFrame(mFrame + 1);
+    return update();
+}
+
+RenderData &RenderData::update() {
+    mLastUpdated = SDL_GetTicks();
+    return *this;
+}
+
 const Rect &RenderData::getRect() const { return mRect; }
 const Rect &RenderData::getDest() const { return mDest; }
 
+Uint32 RenderData::getLastUpdated() const { return mLastUpdated; }
+
 unsigned int RenderData::getNumFrames() const { return mFrameCnt; }
 unsigned int RenderData::getFrame() const { return mFrame; }
-void RenderData::setFrame(unsigned int frame) { mFrame = frame % mFrameCnt; }
-void RenderData::nextFrame() { setFrame(mFrame + 1); }
 
 void RenderData::draw(TextureBuilder &tex) const {
     int w, h;
