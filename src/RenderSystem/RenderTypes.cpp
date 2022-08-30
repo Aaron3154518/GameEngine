@@ -29,6 +29,7 @@ RenderData &RenderData::set(TextDataWPtr tData) {
     mTextSrc = tData;
     return *this;
 }
+RenderData &RenderData::set(TextData &tData) { return set(tData.get()); }
 RenderData &RenderData::set(const AnimationData &animData) {
     return set(animData.file, animData.num_frames);
 }

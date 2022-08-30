@@ -44,6 +44,7 @@ class RenderData : public Drawable {
     RenderData &set(SharedTexture tex, unsigned int frameCnt = 1);
     RenderData &set(const std::string &file, unsigned int frameCnt = 1);
     RenderData &set(TextDataWPtr tData);
+    RenderData &set(TextData &tData);
     RenderData &set(const AnimationData &animData);
 
     RenderData &setDest(Rect r);
