@@ -102,10 +102,8 @@ struct TextData {
     TextData& setFont(const FontData& font);
     TextData& setFont(SharedFont font);
 
-    TextData& setText(const std::string& text);
-    TextData& setText(const std::string& text, int w,
-                      const std::vector<RenderDataWPtr>& imgs = {});
-    TextData& setTextImgs(const std::vector<RenderDataWPtr>& imgs);
+    TextData& setText(const std::string& text, int w = 0);
+    TextData& setImgs(const std::vector<RenderDataWPtr>& imgs);
 
    private:
     enum Update : uint8_t { IMGS = 0, DRAW, SPLIT };

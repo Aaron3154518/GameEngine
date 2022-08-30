@@ -76,7 +76,8 @@ int main(int argc, char *argv[]) {
             "because bees don't care what humans think is "
             "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}"
             "wrapped",
-            pp.getRect().w(), {anim, anim});
+            pp.getRect().w())
+        .setImgs({anim, anim});
     pp.set(ppText);
 
     Uint32 time = SDL_GetTicks();

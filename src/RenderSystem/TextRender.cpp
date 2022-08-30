@@ -376,26 +376,13 @@ TextData& TextData::setFont(SharedFont font) {
     return *this;
 }
 
-TextData& TextData::setText(const std::string& text) {
-    return setText(text, 0, {});
-}
-TextData& TextData::setText(const std::string& text, int w,
-                            const std::vector<RenderDataWPtr>& imgs) {
+TextData& TextData::setText(const std::string& text, int w) {
     mData.mText = text;
     mData.mW = w;
-    mImgs = imgs;
-    mImgVersions.resize(mImgs.size(), 0);
     setUpdateStatus(Update::SPLIT);
-    return *this;
+    return mData.mW <= 0 ? setImgs({}) : *this;
 }
-TextData& TextData::setTextImgs(const std::vector<RenderDataWPtr>& imgs) {
-    if (imgs.size() != mImgs.size()) {
-        std::cerr << "TextData::setTextImgs(): Received " << imgs.size()
-                  << " images but expected " << mImgs.size()
-                  << "Call setText() to change the number of images"
-                  << std::endl;
-        return *this;
-    }
+TextData& TextData::setImgs(const std::vector<RenderDataWPtr>& imgs) {
     mImgs = imgs;
     mImgVersions.resize(mImgs.size(), 0);
     return *this;
