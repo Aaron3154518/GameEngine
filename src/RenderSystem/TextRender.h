@@ -122,4 +122,6 @@ struct TextData {
     std::vector<Uint32> mImgVersions;
 };
 
+typedef std::shared_ptr<TextData> TextDataPtr;
+
 #endif

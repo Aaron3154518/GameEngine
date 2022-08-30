@@ -24,7 +24,7 @@ struct Drawable {
     SDL_BlendMode mBlendMode = SDL_BLENDMODE_NONE;
     SDL_Color mColor = BLACK;
 
-    virtual void draw(TextureBuilder &tex) const;
+    virtual void draw(TextureBuilder &tex);
 };
 
 class TextureBuilder {
@@ -42,7 +42,7 @@ class TextureBuilder {
     void reset(int w, int h, SDL_Color bkgrnd = TRANSPARENT);
 
     // Draw textures/text
-    void draw(const Drawable &drawable);
+    void draw(Drawable &drawable);
 
     // Brighten texture
     void brighten(Uint8 strength);

@@ -25,6 +25,8 @@ rendering text and textures.
 // Forward Declaration
 class TextData;
 
+typedef std::weak_ptr<TextData> TextDataWPtr;
+
 // To draw a texture
 class RenderData : public Drawable {
     friend class AnimationData;
@@ -41,7 +43,7 @@ class RenderData : public Drawable {
 
     RenderData &set(SharedTexture tex, unsigned int frameCnt = 1);
     RenderData &set(const std::string &file, unsigned int frameCnt = 1);
-    RenderData &set(TextData &tData, unsigned int frameCnt = 1);
+    RenderData &set(TextDataWPtr tData);
     RenderData &set(const AnimationData &animData);
 
     RenderData &setDest(Rect r);
@@ -67,7 +69,7 @@ class RenderData : public Drawable {
     unsigned int getNumFrames() const;
     unsigned int getFrame() const;
 
-    void draw(TextureBuilder &tex) const;
+    void draw(TextureBuilder &tex);
 
    private:
     RenderData &update();
@@ -75,6 +77,7 @@ class RenderData : public Drawable {
     Uint32 mLastUpdated = 0;
 
     SharedTexture mTex;
+    TextDataWPtr mTextSrc;
 
     SDL_Point mDim{0, 0};
     Rect mRect, mDest, mBounds, mArea;

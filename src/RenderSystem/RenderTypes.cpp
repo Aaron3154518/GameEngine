@@ -4,6 +4,7 @@
 
 // RenderData
 RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
+    mTextSrc.reset();
     mTex = tex;
     mFrameCnt = frameCnt;
     mFrame = 0;
@@ -24,8 +25,9 @@ RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
 RenderData &RenderData::set(const std::string &file, unsigned int frameCnt) {
     return set(AssetManager::getTexture(file), frameCnt);
 }
-RenderData &RenderData::set(TextData &tData, unsigned int frameCnt) {
-    return set(tData.get(), frameCnt);
+RenderData &RenderData::set(TextDataWPtr tData) {
+    mTextSrc = tData;
+    return *this;
 }
 RenderData &RenderData::set(const AnimationData &animData) {
     return set(animData.file, animData.num_frames);
@@ -106,7 +108,13 @@ Uint32 RenderData::getLastUpdated() const { return mLastUpdated; }
 unsigned int RenderData::getNumFrames() const { return mFrameCnt; }
 unsigned int RenderData::getFrame() const { return mFrame; }
 
-void RenderData::draw(TextureBuilder &tex) const {
+void RenderData::draw(TextureBuilder &tex) {
+    auto textSrc = mTextSrc.lock();
+    if (textSrc) {
+        set(textSrc->get());
+        mTextSrc = textSrc;
+    }
+
     int w, h;
     Renderer::getTargetSize(&w, &h);
     Rect renderBounds(0, 0, w, h);

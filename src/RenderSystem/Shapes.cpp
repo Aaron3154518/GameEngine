@@ -51,7 +51,7 @@ RectShape &RectShape::set(Rect r, int thickness, bool center) {
     return *this;
 }
 
-void RectShape::draw(TextureBuilder &tex) const {
+void RectShape::draw(TextureBuilder &tex) {
     Rect bounds = getBounds();
     if (!bounds.empty()) {
         SDL_Rect intersect;
@@ -141,7 +141,7 @@ CircleShape &CircleShape::setDashed(unsigned int d) {
     return *this;
 }
 
-void CircleShape::draw(TextureBuilder &tex) const {
+void CircleShape::draw(TextureBuilder &tex) {
     Rect bounds = getBounds();
     if (bounds.empty()) {
         return;
@@ -322,7 +322,7 @@ ProgressBar &ProgressBar::set(float percent) {
     return *this;
 }
 
-void ProgressBar::draw(TextureBuilder &tex) const {
+void ProgressBar::draw(TextureBuilder &tex) {
     Rect bounds = getBounds();
     if (!bounds.empty()) {
         RectShape r = RectShape(mBkgrnd, mBlendMode).set(dest);

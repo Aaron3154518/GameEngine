@@ -29,11 +29,12 @@ int main(int argc, char *argv[]) {
     Uint32 pbVal = 0;
 
     int timerVal = 1;
-    TextData timerText = TextData()
-                             .setFont(FontData{-1, 25, "|"})
-                             .setColor(BLUE)
-                             .setText(std::to_string(timerVal));
-    RenderData timer = RenderData().setDest(Rect(250, 450, 0, 50));
+    TextDataPtr timerText = std::make_shared<TextData>();
+    timerText->setFont(FontData{-1, 25, "|"})
+        .setColor(BLUE)
+        .setText(std::to_string(timerVal));
+    RenderData timer =
+        RenderData().set(timerText).setDest(Rect(250, 450, 0, 50));
 
     Rect shapesDest(0, 0, pb.dest.h(), pb.dest.h());
     shapesDest.setPos(pb.dest.x(), pb.dest.cY(), Rect::Align::CENTER);
@@ -59,24 +60,24 @@ int main(int argc, char *argv[]) {
     Uint32 animTimer = 0;
 
     RenderData pp = RenderData().setDest(image.getDest());
-    TextData ppText =
-        TextData()
-            .setFont(FontData{-1, 20, "|"})
-            .setColor(RED)
-            .setAutoFit(false)
-            .setAlign(Rect::Align::TOP_LEFT)
-            .setText(
-                "According to all known laws of aviation, there is no way a "
-                "bee should "
-                "be able to fly.\n"
-                "Its wings are too small to get its fat little body off the "
-                "ground.\nThe bee \n{i}\n{i}\n, of course, "
-                "flies "
-                "anyway "
-                "because bees don't care what humans think is "
-                "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}"
-                "wrapped",
-                pp.getRect().w(), {anim, anim});
+    TextDataPtr ppText = std::make_shared<TextData>();
+    ppText->setFont(FontData{-1, 20, "|"})
+        .setColor(RED)
+        .setAutoFit(false)
+        .setAlign(Rect::Align::TOP_LEFT)
+        .setText(
+            "According to all known laws of aviation, there is no way a "
+            "bee should "
+            "be able to fly.\n"
+            "Its wings are too small to get its fat little body off the "
+            "ground.\nThe bee \n{i}\n{i}\n, of course, "
+            "flies "
+            "anyway "
+            "because bees don't care what humans think is "
+            "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}"
+            "wrapped",
+            pp.getRect().w(), {anim, anim});
+    pp.set(ppText);
 
     Uint32 time = SDL_GetTicks();
 
@@ -104,10 +105,16 @@ int main(int argc, char *argv[]) {
         screen.draw(pb.set(pbVal, 1000));
         screen.draw(shapes);
 
-        screen.draw(timer.set(timerText));
+        t1 = SDL_GetTicks();
+        screen.draw(timer);
+        sum += SDL_GetTicks() - t1;
+        cnt++;
 
         screen.draw(image);
-        screen.draw(pp.set(ppText));
+        t1 = SDL_GetTicks();
+        screen.draw(pp);
+        sum += SDL_GetTicks() - t1;
+        cnt++;
 
         screen.draw(*anim);
 
@@ -124,29 +131,21 @@ int main(int argc, char *argv[]) {
             SDL_Point dim = RenderSystem::getWindowSize();
 
             timerVal *= 2;
-            timerText.setText(std::to_string(dim.x) + "x" +
-                              std::to_string(dim.y) + " - " +
-                              std::to_string(timerVal));
+            timerText->setText(std::to_string(dim.x) + "x" +
+                               std::to_string(dim.y) + " - " +
+                               std::to_string(timerVal));
 
-            switch (ppText.data().mAlign) {
+            switch (ppText->data().mAlign) {
                 case Rect::Align::TOP_LEFT:
-                    ppText.setAlign(Rect::Align::CENTER);
+                    ppText->setAlign(Rect::Align::CENTER);
                     break;
                 case Rect::Align::CENTER:
-                    ppText.setAlign(Rect::Align::BOT_RIGHT);
+                    ppText->setAlign(Rect::Align::BOT_RIGHT);
                     break;
                 default:
-                    ppText.setAlign(Rect::Align::TOP_LEFT);
+                    ppText->setAlign(Rect::Align::TOP_LEFT);
                     break;
             }
-            t1 = SDL_GetTicks();
-            ppText.get();
-            ppText.get();
-            ppText.get();
-            ppText.get();
-            ppText.get();
-            sum += SDL_GetTicks() - t1;
-            cnt++;
 
             image.set(pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
         }
@@ -155,14 +154,6 @@ int main(int argc, char *argv[]) {
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
             anim->nextFrame();
-            t1 = SDL_GetTicks();
-            ppText.get();
-            ppText.get();
-            ppText.get();
-            ppText.get();
-            ppText.get();
-            sum += SDL_GetTicks() - t1;
-            cnt++;
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);

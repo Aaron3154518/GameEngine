@@ -10,7 +10,7 @@ Drawable::Drawable(SDL_Color color, SDL_BlendMode mode)
     : mColor(color), mBlendMode(mode) {}
 Drawable::Drawable(SDL_BlendMode mode, SDL_Color color)
     : Drawable(color, mode) {}
-void Drawable::draw(TextureBuilder &tex) const {}
+void Drawable::draw(TextureBuilder &tex) {}
 
 // TextureBuilder
 TextureBuilder::TextureBuilder(int w, int h, SDL_Color bkgrnd) {
@@ -43,7 +43,7 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
 }
 
 // Draw textures/text
-void TextureBuilder::draw(const Drawable &drawable) {
+void TextureBuilder::draw(Drawable &drawable) {
     Renderer::setRenderTarget(mTex.get());
     Renderer::setDrawColor(drawable.mColor);
     Renderer::setBlendMode(drawable.mBlendMode);

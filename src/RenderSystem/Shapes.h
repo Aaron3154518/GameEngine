@@ -47,7 +47,7 @@ struct RectShape : public Shape {
     RectShape &set(const Rect &r = Rect(0, 0, 0, 0));
     RectShape &set(Rect r, int thickness, bool center = false);
 
-    void draw(TextureBuilder &tex) const;
+    void draw(TextureBuilder &tex);
 
    private:
     RectData data;
@@ -79,7 +79,7 @@ struct CircleShape : public Shape {
         int quad;
     };
 
-    void draw(TextureBuilder &tex) const;
+    void draw(TextureBuilder &tex);
 
    private:
     CircleData data;
@@ -107,7 +107,7 @@ struct ProgressBar : public Shape {
     ProgressBar &set(float amnt, float cap, bool log = false);
     ProgressBar &set(float percent);
 
-    void draw(TextureBuilder &tex) const;
+    void draw(TextureBuilder &tex);
 
    private:
     SDL_Color mBkgrnd = GRAY;
