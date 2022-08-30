@@ -52,10 +52,10 @@ int main(int argc, char *argv[]) {
     shapesTex.draw(RectShape(GREEN).set(rdR));
 
     const AnimationData animData{"res/wizards/wizard_ss.png", 5, 150};
-    RenderData anim = RenderData()
-                          .set(animData)
-                          .setDest(Rect(200, 525, 100, 100))
-                          .setRotationRad(M_PI * 2 / 7);
+    RenderDataPtr anim = std::make_shared<RenderData>();
+    anim->set(animData)
+        .setDest(Rect(200, 525, 100, 100))
+        .setRotationRad(M_PI * 2 / 7);
     Uint32 animTimer = 0;
 
     RenderData pp = RenderData().setDest(image.getDest());
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
         screen.draw(image);
         screen.draw(pp.set(ppText));
 
-        screen.draw(anim);
+        screen.draw(*anim);
 
         RenderSystem::presentScreen();
 
@@ -150,8 +150,7 @@ int main(int argc, char *argv[]) {
         animTimer += dt;
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
-            anim.nextFrame();
-            ppText.setTextImgs({anim, anim});
+            anim->nextFrame();
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);

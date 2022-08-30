@@ -36,9 +36,11 @@ Image::Image(int lineH) : mW(lineH) {}
 
 int Image::w() const { return mW; }
 
-void Image::draw(TextureBuilder& tex, Rect rect, RenderData data) {
-    tex.draw(RectShape(TRANSPARENT).set(rect));
-    tex.draw(data.setDest(rect));
+void Image::draw(TextureBuilder& tex, Rect rect, RenderDataWPtr data) {
+    auto rData = data.lock();
+    if (rData) {
+        tex.draw(RenderData(*rData).setDest(rect));
+    }
 }
 
 // Line
@@ -81,7 +83,8 @@ void Line::drawText(TextureBuilder& tex, Rect rect, const TextData& td,
     }
 }
 size_t Line::drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
-                        const std::vector<RenderData>& imgs, size_t startPos) {
+                        const std::vector<RenderDataWPtr>& imgs,
+                        size_t startPos) {
     if (mImgs.size() >= imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
                   << " images but received " << (imgs.size() - startPos)
@@ -101,6 +104,7 @@ size_t Line::drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
                 Image& i = *(imgIt++);
                 lineRect.setDim(i.w(), rect.h(), Rect::Align::TOP_LEFT,
                                 Rect::Align::CENTER);
+                tex.draw(RectShape(td.data().mBkgrnd).set(lineRect));
                 i.draw(tex, lineRect, imgs.at(startPos++));
                 lineRect.move(i.w(), 0);
             } break;
@@ -356,14 +360,14 @@ TextData& TextData::setText(const std::string& text) {
     return setText(text, 0, {});
 }
 TextData& TextData::setText(const std::string& text, int w,
-                            const std::vector<RenderData>& imgs) {
+                            const std::vector<RenderDataWPtr>& imgs) {
     mData.mText = text;
     mData.mW = w;
     mImgs = imgs;
     setUpdateStatus(Update::SPLIT);
     return *this;
 }
-TextData& TextData::setTextImgs(const std::vector<RenderData>& imgs) {
+TextData& TextData::setTextImgs(const std::vector<RenderDataWPtr>& imgs) {
     if (imgs.size() != mImgs.size()) {
         std::cerr << "TextData::setTextImgs(): Received " << imgs.size()
                   << " images but expected " << mImgs.size()

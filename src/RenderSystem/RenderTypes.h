@@ -81,4 +81,7 @@ class RenderData : public Drawable {
     unsigned int mFrameCnt = 1, mFrame = 0;
 };
 
+typedef std::shared_ptr<RenderData> RenderDataPtr;
+typedef std::weak_ptr<RenderData> RenderDataWPtr;
+
 #endif
