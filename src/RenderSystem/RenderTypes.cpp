@@ -9,8 +9,6 @@ RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
     mFrameCnt = frameCnt;
     mFrame = 0;
     if (!AssetManager::getTextureSize(mTex.get(), &mDim.x, &mDim.y)) {
-        std::cerr << "RenderData::setTexture(): Failed to query texture size"
-                  << std::endl;
         mDim = {0, 0};
     }
     if (fmod(mDim.x, mFrameCnt) != 0) {
