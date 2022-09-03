@@ -99,6 +99,7 @@ RenderData &RenderData::update() {
     return *this;
 }
 
+SDL_Point RenderData::getTexDim() const { return mDim; }
 const Rect &RenderData::getRect() const { return mRect; }
 const Rect &RenderData::getDest() const { return mDest; }
 
