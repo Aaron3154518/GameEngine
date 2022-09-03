@@ -62,7 +62,7 @@ class RenderData : public Drawable {
     RenderData &setFrame(unsigned int frame);
     RenderData &nextFrame();
 
-    SDL_Point getTexDim() const;
+    SDL_Point getTextureDim() const;
     const Rect &getRect() const;
     const Rect &getDest() const;
 
