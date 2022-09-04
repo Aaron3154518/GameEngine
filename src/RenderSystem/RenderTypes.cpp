@@ -25,7 +25,8 @@ RenderData &RenderData::set(const std::string &file, unsigned int frameCnt) {
 }
 RenderData &RenderData::set(TextDataWPtr tData) {
     mTextSrc = tData;
-    return *this;
+    auto textSrc = mTextSrc.lock();
+    return textSrc ? set(textSrc->get()) : *this;
 }
 RenderData &RenderData::set(TextData &tData) { return set(tData.get()); }
 RenderData &RenderData::set(const AnimationData &animData) {

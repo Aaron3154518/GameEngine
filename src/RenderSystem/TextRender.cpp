@@ -285,6 +285,10 @@ SharedTexture TextData::get() {
                 }
                 mTex = tex.getTexture();
             } else {
+                if (mData.mText.empty()) {
+                    mTex = makeSharedTexture();
+                    break;
+                }
                 Surface surface = makeSurface();
                 if (mData.mBkgrnd == TRANSPARENT) {
                     surface.reset(TTF_RenderText_Blended(
