@@ -5,6 +5,26 @@
 // RenderData
 RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
     mTextSrc.reset();
+    _set(tex, frameCnt);
+    return *this;
+}
+RenderData &RenderData::set(const std::string &file, unsigned int frameCnt) {
+    return set(AssetManager::getTexture(file), frameCnt);
+}
+RenderData &RenderData::set(TextDataWPtr tData) {
+    mTextSrc = tData;
+    auto textSrc = mTextSrc.lock();
+    if (textSrc) {
+        _set(textSrc->get());
+    }
+    return *this;
+}
+RenderData &RenderData::set(TextData &tData) { return set(tData.get()); }
+RenderData &RenderData::set(const AnimationData &animData) {
+    return set(animData.file, animData.num_frames);
+}
+
+void RenderData::_set(SharedTexture tex, unsigned int frameCnt) {
     mTex = tex;
     mFrameCnt = frameCnt;
     mFrame = 0;
@@ -18,19 +38,7 @@ RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
             std::to_string(mDim.x));
     }
     mDim.x /= mFrameCnt;
-    return setArea(Rect(0, 0, mDim.x, mDim.y)).setFit(mFit);
-}
-RenderData &RenderData::set(const std::string &file, unsigned int frameCnt) {
-    return set(AssetManager::getTexture(file), frameCnt);
-}
-RenderData &RenderData::set(TextDataWPtr tData) {
-    mTextSrc = tData;
-    auto textSrc = mTextSrc.lock();
-    return textSrc ? set(textSrc->get()) : *this;
-}
-RenderData &RenderData::set(TextData &tData) { return set(tData.get()); }
-RenderData &RenderData::set(const AnimationData &animData) {
-    return set(animData.file, animData.num_frames);
+    setArea(Rect(0, 0, mDim.x, mDim.y)).setFit(mFit);
 }
 
 RenderData &RenderData::setDest(Rect r) {
@@ -112,8 +120,7 @@ unsigned int RenderData::getFrame() const { return mFrame; }
 void RenderData::draw(TextureBuilder &tex) {
     auto textSrc = mTextSrc.lock();
     if (textSrc) {
-        set(textSrc->get());
-        mTextSrc = textSrc;
+        _set(textSrc->get());
     }
 
     int w, h;

@@ -74,6 +74,8 @@ class RenderData : public Drawable {
     void draw(TextureBuilder &tex);
 
    private:
+    void _set(SharedTexture tex, unsigned int frameCnt = 1);
+
     RenderData &update();
 
     Uint32 mLastUpdated = 0;
