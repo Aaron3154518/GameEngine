@@ -163,6 +163,12 @@ void RenderData::draw(TextureBuilder &tex) {
     float topFrac = fmaxf(boundary.y() - mDest.y(), 0) / mDest.h();
     float rightFrac = fmaxf(mDest.x2() - boundary.x2(), 0) / mDest.w();
     float botFrac = fmaxf(mDest.y2() - boundary.y2(), 0) / mDest.h();
+
+    Rect destRect(mDest.x() + mDest.w() * leftFrac,
+                  mDest.y() + mDest.h() * topFrac,
+                  mDest.w() * (1. - leftFrac - rightFrac),
+                  mDest.h() * (1. - topFrac - botFrac));
+
     // Make sure the rect is actually in the boundary
     if (leftFrac + rightFrac >= 1 || topFrac + botFrac >= 1) {
 #ifdef RENDER_DEBUG
@@ -171,11 +177,6 @@ void RenderData::draw(TextureBuilder &tex) {
 #endif
         return;
     }
-
-    Rect destRect(mDest.x() + mDest.w() * leftFrac,
-                  mDest.y() + mDest.h() * topFrac,
-                  mDest.w() * (1. - leftFrac - rightFrac),
-                  mDest.h() * (1. - topFrac - botFrac));
 
     Rect texRect(mArea.x() + mArea.w() * leftFrac + mDim.x * mFrame,
                  mArea.y() + mArea.h() * topFrac,
