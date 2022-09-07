@@ -96,6 +96,8 @@ class RenderData : public Drawable {
 };
 
 typedef std::shared_ptr<RenderData> RenderDataPtr;
+typedef std::shared_ptr<const RenderData> RenderDataCPtr;
 typedef std::weak_ptr<RenderData> RenderDataWPtr;
+typedef std::weak_ptr<const RenderData> RenderDataCWPtr;
 
 #endif
