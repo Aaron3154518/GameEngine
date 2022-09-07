@@ -85,6 +85,8 @@ void modify_test() {
     r.fitWithin(Rect(150, 150, 1000, 1000));
     print(r);
 
+    std::cerr << "Min: " << r.minDim() << ", Max: " << r.MaxDim() << std::endl;
+
     std::cerr << "\nEqual: "
               << (r == Rect(150, 150, 750.00001, 499.99999) ? "True" : "False")
               << std::endl;

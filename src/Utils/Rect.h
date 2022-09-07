@@ -48,6 +48,8 @@ class Rect : private SDL_Rect {
     float cY() const;
     float halfW() const;
     float halfH() const;
+    float minDim() const;
+    float maxDim() const;
 
     float getX(Align a = Align::TOP_LEFT) const;
     float getY(Align a = Align::TOP_LEFT) const;
@@ -62,6 +64,8 @@ class Rect : private SDL_Rect {
     int H() const;
     int CX() const;
     int CY() const;
+    int MinDim() const;
+    int MaxDim() const;
 
     int GetX(Align a = Align::TOP_LEFT) const;
     int GetY(Align a = Align::TOP_LEFT) const;

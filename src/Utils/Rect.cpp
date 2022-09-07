@@ -63,6 +63,8 @@ float Rect::cX() const { return _x + _w / 2.0; }
 float Rect::cY() const { return _y + _h / 2.0; }
 float Rect::halfW() const { return _w / 2.0; }
 float Rect::halfH() const { return _h / 2.0; }
+float Rect::minDim() const { return fminf(w(), h()); }
+float Rect::maxDim() const { return fmaxf(w(), h()); }
 
 float Rect::getX(Align a) const {
     switch (a) {
@@ -111,6 +113,8 @@ int Rect::CY() const {
     float _cY = cY();
     return (int)(_cY + copysign(ERR, _cY));
 }
+int Rect::MinDim() const { return std::min(W(), H()); }
+int Rect::MaxDim() const { return std::max(W(), H()); }
 
 int Rect::GetX(Align a) const {
     switch (a) {
