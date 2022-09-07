@@ -24,11 +24,12 @@ void Text::draw(TextureBuilder& tex, Rect rect, const TextData& td,
 
     SharedTexture textTex = makeSharedTexture(
         SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get()));
-    tex.draw(RenderData()
-                 .set(textTex)
-                 .setFit(RenderData::FitMode::Texture)
-                 .setFitAlign(tData.mAlign, Rect::Align::CENTER)
-                 .setDest(rect));
+    RenderData rd = RenderData()
+                        .set(textTex)
+                        .setFit(RenderData::FitMode::Texture)
+                        .setFitAlign(tData.mAlign, Rect::Align::CENTER)
+                        .setDest(rect);
+    tex.draw(rd);
 }
 
 // Image
@@ -36,10 +37,11 @@ Image::Image(int lineH) : mW(lineH) {}
 
 int Image::w() const { return mW; }
 
-void Image::draw(TextureBuilder& tex, Rect rect, RenderDataWPtr data) {
+void Image::draw(TextureBuilder& tex, Rect rect, RenderDataCWPtr data) {
     auto rData = data.lock();
     if (rData) {
-        tex.draw(RenderData(*rData).setDest(rect));
+        RenderData rd = RenderData(*rData).setDest(rect);
+        tex.draw(rd);
     }
 }
 
@@ -83,7 +85,7 @@ void Line::drawText(TextureBuilder& tex, Rect rect, const TextData& td,
     }
 }
 size_t Line::drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
-                        const std::vector<RenderDataWPtr>& imgs,
+                        const std::vector<RenderDataCWPtr>& imgs,
                         size_t startPos) {
     if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
@@ -386,7 +388,7 @@ TextData& TextData::setText(const std::string& text, int w) {
     setUpdateStatus(Update::SPLIT);
     return mData.mW <= 0 ? setImgs({}) : *this;
 }
-TextData& TextData::setImgs(const std::vector<RenderDataWPtr>& imgs) {
+TextData& TextData::setImgs(const std::vector<RenderDataCWPtr>& imgs) {
     mImgs = imgs;
     mImgVersions.resize(mImgs.size(), 0);
     return *this;

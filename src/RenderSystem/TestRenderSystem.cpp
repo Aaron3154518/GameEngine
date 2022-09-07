@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
     rdR.setPos(halfW, halfW, Rect::Align::CENTER);
     shapesTex.draw(
         CircleShape(BLUE).setCenter({halfW, halfW}).setRadius(halfW));
+    // Memory bug
     shapesTex.draw(RectShape(GREEN).set(rdR));
 
     const AnimationData animData{"res/wizards/wizard_ss.png", 5, 150};

@@ -23,7 +23,8 @@ TextureBuilder::TextureBuilder(SharedTexture src, bool copy) {
         SDL_Point dim = getTextureSize(src.get());
         reset(dim.x, dim.y);
 
-        draw(RenderData().set(src).setDest(Rect(0, 0, dim.x, dim.y)));
+        RenderData rd = RenderData().set(src).setDest(Rect(0, 0, dim.x, dim.y));
+        draw(rd);
     } else {
         mTex = src;
     }
@@ -39,7 +40,8 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
                           SDL_TEXTUREACCESS_TARGET, w, h);
     mTex = makeSharedTexture(tex);
     SDL_SetTextureBlendMode(mTex.get(), SDL_BLENDMODE_BLEND);
-    draw(RectShape(bkgrnd, SDL_BLENDMODE_NONE).set());
+    RectShape rs = RectShape(bkgrnd, SDL_BLENDMODE_NONE).set();
+    draw(rs);
 }
 
 // Draw textures/text
@@ -57,9 +59,10 @@ void TextureBuilder::draw(Drawable &drawable) {
 
 // Brighten texture
 void TextureBuilder::brighten(Uint8 strength) {
-    draw(RectShape(SDL_Color{strength, strength, strength, 255},
-                   SDL_BLENDMODE_ADD)
-             .set());
+    RectShape rs = RectShape(SDL_Color{strength, strength, strength, 255},
+                             SDL_BLENDMODE_ADD)
+                       .set();
+    draw(rs);
 }
 
 SDL_Point TextureBuilder::getTextureSize() {
