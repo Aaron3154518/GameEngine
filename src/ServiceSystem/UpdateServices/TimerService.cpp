@@ -37,21 +37,23 @@ void TimerObservableBase::init() {
 }
 
 void TimerObservableBase::onUpdate(Time dt) {
-    for (auto it = begin(); it != end(); ++it) {
+    for (auto it = begin(); it != end();) {
         auto sub = *it;
         Timer& data = sub->get<DATA>();
         data.timer -= dt;
         sub->get<ON_UPDATE>()(dt, data);
+        bool erased = false;
         while (data.timer <= 0) {
             if (!sub->get<ON_TRIGGER>()(data)) {
                 data.active = false;
                 it = erase(it);
-                if (it == end()) {
-                    return;
-                }
+                erased = true;
                 break;
             }
             data.timer += data.length;
+        }
+        if (!erased) {
+            ++it;
         }
     }
 }

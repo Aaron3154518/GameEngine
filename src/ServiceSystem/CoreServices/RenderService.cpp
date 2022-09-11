@@ -34,13 +34,14 @@ void RenderOrderObservable::next() {
 
 void RenderOrderObservable::sort() {
     // Prune deleted components
-    for (auto it = mComponents.begin(), end = mComponents.end(); it != end;
-         ++it) {
+    for (auto it = mComponents.begin(), end = mComponents.end(); it != end;) {
+        bool erased = false;
         while (it != end && !it->lock()) {
             it = mComponents.erase(it);
+            erased = true;
         }
-        if (it == end) {
-            break;
+        if (!erased) {
+            ++it;
         }
     }
 

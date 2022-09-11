@@ -49,18 +49,16 @@ void Event::update() {
         b.status &= Button::HELD;
     }
     // Update keys
-    for (auto it = mKeyButtons.begin(); it != mKeyButtons.end(); ++it) {
+    for (auto it = mKeyButtons.begin(); it != mKeyButtons.end();) {
         auto &b = it->second;
         if (bitsSet(b.status, Button::HELD)) {
             b.duration += mDt;
             // Reset pressed/released
             b.status = Button::HELD;
+            ++it;
         } else {
             // Remove key
             it = mKeyButtons.erase(it);
-            if (it == mKeyButtons.end()) {
-                break;
-            }
         }
     }
     // Handle events

@@ -196,12 +196,14 @@ struct ObservableImplBase<Wrapper<ArgTs...>, Wrapper<BaseTs...>>
     // Prune unsubscribed
     void prune() {
         for (auto it = mSubscriptions.begin(), end = mSubscriptions.end();
-             it != end; ++it) {
+             it != end;) {
+            bool erased = false;
             while (it != end && !it->lock()) {
                 it = mSubscriptions.erase(it);
+                erased = true;
             }
-            if (it == end) {
-                break;
+            if (!erased) {
+                ++it;
             }
         }
     }
