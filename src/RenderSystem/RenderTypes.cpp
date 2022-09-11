@@ -2,29 +2,8 @@
 
 #include <RenderSystem/TextRender.h>
 
-// RenderData
-RenderData &RenderData::set(SharedTexture tex, unsigned int frameCnt) {
-    mTextSrc.reset();
-    _set(tex, frameCnt);
-    return *this;
-}
-RenderData &RenderData::set(const std::string &file, unsigned int frameCnt) {
-    return set(AssetManager::getTexture(file), frameCnt);
-}
-RenderData &RenderData::set(TextDataWPtr tData) {
-    mTextSrc = tData;
-    auto textSrc = mTextSrc.lock();
-    if (textSrc) {
-        _set(textSrc->get());
-    }
-    return *this;
-}
-RenderData &RenderData::set(TextData &tData) { return set(tData.get()); }
-RenderData &RenderData::set(const AnimationData &animData) {
-    return set(animData.file, animData.num_frames);
-}
-
-void RenderData::_set(SharedTexture tex, unsigned int frameCnt) {
+// RenderTexture
+RenderTexture::RenderTexture(SharedTexture tex, unsigned int frameCnt) {
     mTex = tex;
     mFrameCnt = frameCnt;
     mFrame = 0;
@@ -38,109 +17,148 @@ void RenderData::_set(SharedTexture tex, unsigned int frameCnt) {
             std::to_string(mDim.x));
     }
     mDim.x /= mFrameCnt;
-    setArea(Rect(0, 0, mDim.x, mDim.y)).setFit(mFit);
+    update();
+}
+RenderTexture::RenderTexture(const std::string &file, unsigned int frameCnt)
+    : RenderTexture(AssetManager::getTexture(file), frameCnt) {}
+RenderTexture::RenderTexture(TextData &tData) : RenderTexture(tData.get()) {}
+RenderTexture::RenderTexture(const AnimationData &animData)
+    : RenderTexture(animData.file, animData.num_frames) {}
+RenderTexture::RenderTexture(TextDataWPtr tData) : mTextSrc(tData) {
+    auto textSrc = mTextSrc.lock();
 }
 
-RenderData &RenderData::setDest(Rect r) {
-    mRect = r;
-    return setFit(mFit);
+SharedTexture RenderTexture::get() const {
+    auto ptr = mTextSrc.lock();
+    if (ptr) {
+        return ptr->get();
+    }
+
+    return mTex;
 }
-RenderData &RenderData::setArea(Rect r) {
+
+void RenderTexture::setFrame(unsigned int frame) {
+    mFrame = frame % mFrameCnt;
+    update();
+}
+void RenderTexture::nextFrame() {
+    setFrame(mFrame + 1);
+    update();
+}
+unsigned int RenderTexture::getNumFrames() const { return mFrameCnt; }
+unsigned int RenderTexture::getFrame() const { return mFrame; }
+
+SDL_Point RenderTexture::getTextureDim() const {
+    auto ptr = mTextSrc.lock();
+    if (ptr) {
+        return TextureBuilder::getTextureSize(ptr->get().get());
+    }
+
+    return mDim;
+}
+
+void RenderTexture::update() { mLastUpdated = SDL_GetTicks(); }
+Uint32 RenderTexture::getLastUpdated() const { return mLastUpdated; }
+
+// RenderData
+void RenderData::set(RenderTextureCPtr tex) { mTex = tex; }
+void RenderData::set(SharedTexture tex) {
+    set(std::make_shared<RenderTexture>(tex));
+}
+void RenderData::set(const std::string &file) {
+    set(std::make_shared<RenderTexture>(file));
+}
+void RenderData::set(TextData &tData) {
+    set(std::make_shared<RenderTexture>(tData));
+}
+void RenderData::set(TextDataWPtr tData) {
+    set(std::make_shared<RenderTexture>(tData));
+}
+
+void RenderData::setDest(Rect r) { mRect = r; }
+void RenderData::setArea(Rect r) {
+    SDL_Point texDim = mTex->getTextureDim();
+
+    if (texDim.x == 0 || texDim.y == 0) {
+        mArea = Rect();
+        return;
+    }
+
     SDL_Rect result;
-    SDL_IntersectRect(Rect(0, 0, mDim.x, mDim.y), r, &result);
-    mArea = result;
-    return update();
+    Rect tmp(0, 0, texDim.x, texDim.y);
+    SDL_IntersectRect(r, tmp, &result);
+    tmp = result;
+    mArea = Rect(tmp.x() / texDim.x, tmp.y() / texDim.y, tmp.w() / texDim.x,
+                 tmp.h() / texDim.y);
 }
-RenderData &RenderData::setBoundary(Rect r) {
-    mBounds = r;
-    return update();
+void RenderData::setAreaFrac(Rect r) {
+    mArea = Rect(fminf(r.x(), 1), fminf(r.y(), 1), fminf(r.w(), 1),
+                 fminf(r.h(), 1));
 }
-RenderData &RenderData::addBoundary(Rect r) {
+void RenderData::setBoundary(Rect r) { mBounds = r; }
+void RenderData::addBoundary(Rect r) {
     SDL_Rect result;
     SDL_IntersectRect(mBounds, r, &result);
     mBounds = result;
-    return update();
 }
 
-RenderData &RenderData::setRotationRad(float rotation) {
-    return setRotationDeg(rotation * 180 / M_PI);
+void RenderData::setRotationRad(float rotation) {
+    setRotationDeg(rotation * 180 / M_PI);
 }
-RenderData &RenderData::setRotationDeg(float rotation) {
-    mRotation = rotation;
-    return update();
-}
+void RenderData::setRotationDeg(float rotation) { mRotation = rotation; }
 
-RenderData &RenderData::setFit(FitMode fit) {
-    mFit = fit;
-    switch (mFit) {
-        case FitMode::Dest:
-            mDest = mRect;
-            break;
-        case FitMode::Fit:
-            mDest = Rect::getMinRect(mDim.x, mDim.y, mRect.w(), mRect.h());
-            mDest.setPos(mRect, mFitAlignX, mFitAlignY);
-            break;
-        case FitMode::Texture:
-            mDest = Rect(0, 0, mDim.x, mDim.y);
-            mDest.setPos(mRect, mFitAlignX, mFitAlignY);
-            break;
-    }
-    return update();
-}
-RenderData &RenderData::setFitAlign(Rect::Align a) { return setFitAlign(a, a); }
-RenderData &RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
+void RenderData::setFit(FitMode fit) { mFit = fit; }
+void RenderData::setFitAlign(Rect::Align a) { setFitAlign(a, a); }
+void RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
     mFitAlignX = aX;
     mFitAlignY = aY;
-    return setFit(mFit);
 }
 
-RenderData &RenderData::setFrame(unsigned int frame) {
-    mFrame = frame % mFrameCnt;
-    return update();
-}
-RenderData &RenderData::nextFrame() {
-    setFrame(mFrame + 1);
-    return update();
-}
-
-RenderData &RenderData::update() {
-    mLastUpdated = SDL_GetTicks();
-    return *this;
-}
-
-SDL_Point RenderData::getTextureDim() const { return mDim; }
+RenderTextureCPtr RenderData::get() const { return mTex; }
 const Rect &RenderData::getRect() const { return mRect; }
-const Rect &RenderData::getDest() const { return mDest; }
 
-Uint32 RenderData::getLastUpdated() const { return mLastUpdated; }
-
-unsigned int RenderData::getNumFrames() const { return mFrameCnt; }
-unsigned int RenderData::getFrame() const { return mFrame; }
-
+#define RENDER_DEBUG
 void RenderData::draw(TextureBuilder &tex) {
-    auto textSrc = mTextSrc.lock();
-    if (textSrc) {
-        _set(textSrc->get());
+    // Check the texture to draw
+    if (!mTex || !mTex->get()) {
+#ifdef RENDER_DEBUG
+        std::cerr << "draw(): Invalid Texture" << std::endl;
+#endif
+        return;
+    }
+
+    SDL_Point texDim = mTex->getTextureDim();
+
+    Rect dest;
+    switch (mFit) {
+        case FitMode::Dest:
+            dest = mRect;
+            break;
+        case FitMode::Fit:
+            dest = Rect::getMinRect(texDim.x, texDim.y, mRect.w(), mRect.h());
+            dest.setPos(mRect, mFitAlignX, mFitAlignY);
+            break;
+        case FitMode::Texture:
+            dest = Rect(0, 0, texDim.x, texDim.y);
+            dest.setPos(mRect, mFitAlignX, mFitAlignY);
+            break;
+    }
+
+    Rect area(mArea.x() * texDim.x, mArea.y() * texDim.y, mArea.w() * texDim.x,
+              mArea.h() * texDim.y);
+
+    // Make sure we are actually drawing something
+    if (dest.empty() || area.empty()) {
+#ifdef RENDER_DEBUG
+        std::cerr << "draw(): Empty destination rect" << std::endl;
+#endif
+        return;
     }
 
     int w, h;
     Renderer::getTargetSize(&w, &h);
     Rect renderBounds(0, 0, w, h);
 
-    // Make sure we are actually drawing something
-    if (mDest.empty()) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Empty destination rect" << std::endl;
-#endif
-        return;
-    }
-    // Check the texture to draw
-    if (!mTex) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Invalid Texture" << std::endl;
-#endif
-        return;
-    }
     // Get the boundary rect
     Rect boundary = mBounds;
     SDL_Rect result;
@@ -159,38 +177,38 @@ void RenderData::draw(TextureBuilder &tex) {
     }
 
     // Get fraction of item to draw
-    float leftFrac = fmaxf(boundary.x() - mDest.x(), 0) / mDest.w();
-    float topFrac = fmaxf(boundary.y() - mDest.y(), 0) / mDest.h();
-    float rightFrac = fmaxf(mDest.x2() - boundary.x2(), 0) / mDest.w();
-    float botFrac = fmaxf(mDest.y2() - boundary.y2(), 0) / mDest.h();
+    float leftFrac = fmaxf(boundary.x() - dest.x(), 0) / dest.w();
+    float topFrac = fmaxf(boundary.y() - dest.y(), 0) / dest.h();
+    float rightFrac = fmaxf(dest.x2() - boundary.x2(), 0) / dest.w();
+    float botFrac = fmaxf(dest.y2() - boundary.y2(), 0) / dest.h();
 
-    Rect destRect(mDest.x() + mDest.w() * leftFrac,
-                  mDest.y() + mDest.h() * topFrac,
-                  mDest.w() * (1. - leftFrac - rightFrac),
-                  mDest.h() * (1. - topFrac - botFrac));
+    dest = Rect(dest.x() + dest.w() * leftFrac, dest.y() + dest.h() * topFrac,
+                dest.w() * (1. - leftFrac - rightFrac),
+                dest.h() * (1. - topFrac - botFrac));
 
     // Make sure the rect is actually in the boundary
     if (leftFrac + rightFrac >= 1 || topFrac + botFrac >= 1) {
 #ifdef RENDER_DEBUG
-        std::cerr << "draw(): Rect " << destRect
-                  << " was out side the boundary " << boundary << std::endl;
+        std::cerr << "draw(): Rect " << dest << " was out side the boundary "
+                  << boundary << std::endl;
 #endif
         return;
     }
 
-    Rect texRect(mArea.x() + mArea.w() * leftFrac + mDim.x * mFrame,
-                 mArea.y() + mArea.h() * topFrac,
-                 mArea.w() * (1.f - leftFrac - rightFrac),
-                 mArea.h() * (1.f - topFrac - botFrac));
+    area = Rect(area.x() + area.w() * leftFrac + texDim.x * mTex->getFrame(),
+                area.y() + area.h() * topFrac,
+                area.w() * (1.f - leftFrac - rightFrac),
+                area.h() * (1.f - topFrac - botFrac));
+
     // Make sure at least one pixel will be drawn
-    if (texRect.empty()) {
+    if (area.empty()) {
 #ifdef RENDER_DEBUG
-        std::cerr << "draw(): Can't draw from " << texRect << " to " << destRect
+        std::cerr << "draw(): Can't draw from " << area << " to " << dest
                   << std::endl;
 #endif
         return;
     }
 
-    SDL_RenderCopyEx(Renderer::get(), mTex.get(), texRect, destRect, mRotation,
+    SDL_RenderCopyEx(Renderer::get(), mTex->get().get(), area, dest, mRotation,
                      NULL, SDL_FLIP_NONE);
 }

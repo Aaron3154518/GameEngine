@@ -38,7 +38,7 @@ struct Image {
 
     int w() const;
 
-    void draw(TextureBuilder& tex, Rect rect, RenderDataCWPtr data);
+    void draw(TextureBuilder& tex, Rect rect, RenderTextureCPtr data);
 
    private:
     int mW;
@@ -61,7 +61,7 @@ struct Line {
     void drawText(TextureBuilder& tex, Rect rect, const TextData& td,
                   std::string& text);
     size_t drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
-                      const std::vector<RenderDataCWPtr>& imgs,
+                      const std::vector<RenderTextureCPtr>& imgs,
                       size_t startPos);
 
    private:
@@ -104,7 +104,7 @@ struct TextData {
     TextData& setFont(SharedFont font);
 
     TextData& setText(const std::string& text, int w = 0);
-    TextData& setImgs(const std::vector<RenderDataCWPtr>& imgs);
+    TextData& setImgs(const std::vector<RenderTextureCPtr>& imgs);
 
    private:
     enum Update : uint8_t { IMGS = 0, DRAW, SPLIT };
@@ -116,7 +116,7 @@ struct TextData {
 
     SharedTexture mTex;
     std::list<Line> mLines;
-    std::vector<RenderDataCWPtr> mImgs;
+    std::vector<RenderTextureCPtr> mImgs;
     std::vector<Uint32> mImgVersions;
 };
 

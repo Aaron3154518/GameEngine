@@ -27,6 +27,40 @@ class TextData;
 
 typedef std::weak_ptr<TextData> TextDataWPtr;
 
+class RenderTexture {
+   public:
+    RenderTexture(SharedTexture tex, unsigned int frameCnt = 1);
+    RenderTexture(const std::string &file, unsigned int frameCnt = 1);
+    RenderTexture(TextData &tData);
+    RenderTexture(const AnimationData &animData);
+    RenderTexture(TextDataWPtr tData);
+
+    SharedTexture get() const;
+
+    void setFrame(unsigned int frame);
+    void nextFrame();
+    unsigned int getNumFrames() const;
+    unsigned int getFrame() const;
+
+    SDL_Point getTextureDim() const;
+
+    Uint32 getLastUpdated() const;
+
+   private:
+    void update();
+
+    Uint32 mLastUpdated = 0;
+    SDL_Point mDim;
+
+    SharedTexture mTex;
+    TextDataWPtr mTextSrc;
+
+    unsigned int mFrameCnt = 1, mFrame = 0;
+};
+
+typedef std::shared_ptr<RenderTexture> RenderTexturePtr;
+typedef std::shared_ptr<const RenderTexture> RenderTextureCPtr;
+
 // To draw a texture
 class RenderData : public Drawable {
     friend class AnimationData;
@@ -41,63 +75,44 @@ class RenderData : public Drawable {
 
     using Drawable::Drawable;
 
-    RenderData &set(SharedTexture tex, unsigned int frameCnt = 1);
-    RenderData &set(const std::string &file, unsigned int frameCnt = 1);
-    RenderData &set(TextDataWPtr tData);
-    RenderData &set(TextData &tData);
-    RenderData &set(const AnimationData &animData);
+    void set(RenderTextureCPtr tex);
+    void set(SharedTexture tex);
+    void set(const std::string &file);
+    void set(TextData &tData);
+    void set(TextDataWPtr tData);
 
-    RenderData &setDest(Rect r);
-    RenderData &setArea(Rect r);
-    RenderData &setBoundary(Rect r);
-    RenderData &addBoundary(Rect r);
+    void setDest(Rect r);
+    void setArea(Rect r);
+    void setAreaFrac(Rect r);
+    void setBoundary(Rect r);
+    void addBoundary(Rect r);
 
-    RenderData &setRotationRad(float rotation);
-    RenderData &setRotationDeg(float rotation);
+    void setRotationRad(float rotation);
+    void setRotationDeg(float rotation);
 
-    RenderData &setFit(FitMode fit);
-    RenderData &setFitAlign(Rect::Align a = Rect::Align::CENTER);
-    RenderData &setFitAlign(Rect::Align aX, Rect::Align aY);
+    void setFit(FitMode fit);
+    void setFitAlign(Rect::Align a = Rect::Align::CENTER);
+    void setFitAlign(Rect::Align aX, Rect::Align aY);
 
-    RenderData &setFrame(unsigned int frame);
-    RenderData &nextFrame();
-
-    SDL_Point getTextureDim() const;
+    RenderTextureCPtr get() const;
     const Rect &getRect() const;
-    const Rect &getDest() const;
-
-    Uint32 getLastUpdated() const;
-
-    unsigned int getNumFrames() const;
-    unsigned int getFrame() const;
 
     void draw(TextureBuilder &tex);
 
    private:
-    void _set(SharedTexture tex, unsigned int frameCnt = 1);
+    RenderTextureCPtr mTex =
+        std::make_shared<RenderTexture>(makeSharedTexture());
 
-    RenderData &update();
-
-    Uint32 mLastUpdated = 0;
-
-    SharedTexture mTex;
-    TextDataWPtr mTextSrc;
-
-    SDL_Point mDim{0, 0};
-    Rect mRect, mDest, mBounds, mArea;
+    Rect mRect, mBounds, mArea = Rect(0, 0, 1, 1);
 
     float mRotation = 0;
 
     FitMode mFit = FitMode::Fit;
     Rect::Align mFitAlignX = Rect::Align::CENTER,
                 mFitAlignY = Rect::Align::CENTER;
-
-    unsigned int mFrameCnt = 1, mFrame = 0;
 };
 
 typedef std::shared_ptr<RenderData> RenderDataPtr;
 typedef std::shared_ptr<const RenderData> RenderDataCPtr;
-typedef std::weak_ptr<RenderData> RenderDataWPtr;
-typedef std::weak_ptr<const RenderData> RenderDataCWPtr;
 
 #endif

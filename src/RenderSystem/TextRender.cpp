@@ -24,11 +24,11 @@ void Text::draw(TextureBuilder& tex, Rect rect, const TextData& td,
 
     SharedTexture textTex = makeSharedTexture(
         SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get()));
-    RenderData rd = RenderData()
-                        .set(textTex)
-                        .setFit(RenderData::FitMode::Texture)
-                        .setFitAlign(tData.mAlign, Rect::Align::CENTER)
-                        .setDest(rect);
+    RenderData rd;
+    rd.set(textTex);
+    rd.setFit(RenderData::FitMode::Texture);
+    rd.setFitAlign(tData.mAlign, Rect::Align::CENTER);
+    rd.setDest(rect);
     tex.draw(rd);
 }
 
@@ -37,12 +37,11 @@ Image::Image(int lineH) : mW(lineH) {}
 
 int Image::w() const { return mW; }
 
-void Image::draw(TextureBuilder& tex, Rect rect, RenderDataCWPtr data) {
-    auto rData = data.lock();
-    if (rData) {
-        RenderData rd = RenderData(*rData).setDest(rect);
-        tex.draw(rd);
-    }
+void Image::draw(TextureBuilder& tex, Rect rect, RenderTextureCPtr data) {
+    RenderData rd;
+    rd.set(data);
+    rd.setDest(rect);
+    tex.draw(rd);
 }
 
 // Line
@@ -85,7 +84,7 @@ void Line::drawText(TextureBuilder& tex, Rect rect, const TextData& td,
     }
 }
 size_t Line::drawImages(TextureBuilder& tex, Rect rect, const TextData& td,
-                        const std::vector<RenderDataCWPtr>& imgs,
+                        const std::vector<RenderTextureCPtr>& imgs,
                         size_t startPos) {
     if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
@@ -318,7 +317,7 @@ SharedTexture TextData::get() {
 
             bool update = false;
             for (size_t i = 0; i < mImgs.size(); i++) {
-                auto ptr = mImgs.at(i).lock();
+                auto ptr = mImgs.at(i);
                 Uint32 lastUpdated = ptr ? ptr->getLastUpdated() : 0;
                 if (mImgVersions.at(i) != lastUpdated) {
                     mImgVersions.at(i) = lastUpdated;
@@ -388,7 +387,7 @@ TextData& TextData::setText(const std::string& text, int w) {
     setUpdateStatus(Update::SPLIT);
     return mData.mW <= 0 ? setImgs({}) : *this;
 }
-TextData& TextData::setImgs(const std::vector<RenderDataCWPtr>& imgs) {
+TextData& TextData::setImgs(const std::vector<RenderTextureCPtr>& imgs) {
     mImgs = imgs;
     mImgVersions.resize(mImgs.size(), 0);
     return *this;

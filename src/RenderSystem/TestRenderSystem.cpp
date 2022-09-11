@@ -21,9 +21,10 @@ int main(int argc, char *argv[]) {
                                .setAngleDeg(-90, 495)
                                .setDashed(100);
 
-    RenderData image = RenderData()
-                           .set("res/wizards/Catalyst.png")
-                           .setDest(Rect(125, 100, 250, 250));
+    RenderData image;
+    image.set("res/wizards/Catalyst.png");
+    image.setDest(Rect(125, 100, 250, 250));
+    image.setAreaFrac(Rect(.05, .05, .9, .9));
 
     ProgressBar pb = ProgressBar().set(RED, GRAY).set(Rect(100, 400, 300, 50));
     Uint32 pbVal = 0;
@@ -33,16 +34,17 @@ int main(int argc, char *argv[]) {
     timerText->setFont(FontData{-1, 25, "|"})
         .setColor(BLUE)
         .setText(std::to_string(timerVal));
-    RenderData timer =
-        RenderData().set(timerText).setDest(Rect(250, 450, 0, 50));
+    RenderData timer;
+    timer.set(timerText);
+    timer.setDest(Rect(250, 450, 0, 50));
 
     Rect shapesDest(0, 0, pb.dest.h(), pb.dest.h());
     shapesDest.setPos(pb.dest.x(), pb.dest.cY(), Rect::Align::CENTER);
     TextureBuilder shapesTex(shapesDest.w(), shapesDest.h());
-    RenderData shapes = RenderData()
-                            .set(shapesTex.getTexture())
-                            .setDest(shapesDest)
-                            .setRotationDeg(45);
+    RenderData shapes;
+    shapes.set(shapesTex.getTexture());
+    shapes.setDest(shapesDest);
+    shapes.setRotationDeg(45);
 
     int halfW = shapesDest.w() / 2;
     int w = halfW * sqrt(2) * .9;
@@ -54,13 +56,16 @@ int main(int argc, char *argv[]) {
     shapesTex.draw(RectShape(GREEN).set(rdR));
 
     const AnimationData animData{"res/wizards/wizard_ss.png", 5, 150};
+    RenderTexturePtr animTex = std::make_shared<RenderTexture>(animData);
     RenderDataPtr anim = std::make_shared<RenderData>();
-    anim->set(animData)
-        .setDest(Rect(200, 525, 100, 100))
-        .setRotationRad(M_PI * 2 / 7);
+    anim->set(animTex);
+    anim->setDest(Rect(200, 525, 100, 100));
+    anim->setRotationRad(M_PI * 2 / 7);
+
     Uint32 animTimer = 0;
 
-    RenderData pp = RenderData().setDest(image.getDest());
+    RenderData pp;
+    pp.setDest(image.getRect());
     TextDataPtr ppText = std::make_shared<TextData>();
     ppText->setFont(FontData{-1, 20, "|"})
         .setColor(RED)
@@ -78,7 +83,7 @@ int main(int argc, char *argv[]) {
             "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}"
             "wrapped",
             pp.getRect().w())
-        .setImgs({anim, anim});
+        .setImgs({animTex, animTex});
     pp.set(ppText);
 
     Uint32 time = SDL_GetTicks();
@@ -156,7 +161,7 @@ int main(int argc, char *argv[]) {
         animTimer += dt;
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
-            anim->nextFrame();
+            animTex->nextFrame();
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);

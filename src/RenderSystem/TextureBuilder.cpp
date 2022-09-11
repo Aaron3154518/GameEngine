@@ -23,7 +23,9 @@ TextureBuilder::TextureBuilder(SharedTexture src, bool copy) {
         SDL_Point dim = getTextureSize(src.get());
         reset(dim.x, dim.y);
 
-        RenderData rd = RenderData().set(src).setDest(Rect(0, 0, dim.x, dim.y));
+        RenderData rd;
+        rd.set(src);
+        rd.setDest(Rect(0, 0, dim.x, dim.y));
         draw(rd);
     } else {
         mTex = src;
