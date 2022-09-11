@@ -4,8 +4,10 @@ bool eq(float v1, float v2, float err) { return std::abs(v1 - v2) <= err; }
 
 // Constructors
 Rect::Rect() : Rect(0, 0, 0, 0) {}
-Rect::Rect(float _x, float _y, float _w, float _h) { set(_x, _y, _w, _h); }
-Rect::Rect(const SDL_Rect &other) { set(other.x, other.y, other.w, other.h); }
+Rect::Rect(float x, float y, float w, float h) : _x(x), _y(y), _w(w), _h(h) {
+    normalize();
+}
+Rect::Rect(const SDL_Rect &other) : Rect(other.x, other.y, other.w, other.h) {}
 
 // Rect
 bool Rect::empty() const { return eq(_w, 0., ERR) || eq(_h, 0., ERR); }
@@ -212,7 +214,7 @@ SDL_Rect Rect::toSDLRect() const { return {X(), Y(), W(), H()}; }
 
 // Setters
 // Entire rect
-void Rect::set(const Rect &r, Align aX) { set(r, aX, aX); }
+void Rect::set(const Rect &r, Align a) { set(r, a, a); }
 void Rect::set(const Rect &r, Align aX, Align aY) {
     set(r.getX(aX), r.getY(aY), aX == Align::CORNERS ? r.x2() : r._w,
         aY == Align::CORNERS ? r.y2() : r._h, aX, aY);

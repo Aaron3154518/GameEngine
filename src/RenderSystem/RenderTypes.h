@@ -117,6 +117,8 @@ class RenderData : public Drawable {
 // To manage an animation
 class RenderAnimation : public RenderData {
    public:
+    using RenderData::RenderData;
+
     RenderTexturePtr operator->() const;
     operator RenderTextureCPtr() const;
 
