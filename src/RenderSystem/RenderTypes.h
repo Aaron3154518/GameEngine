@@ -112,15 +112,16 @@ class RenderData : public Drawable {
 };
 
 // To manage an animation
-struct RenderAnimation : public Drawable {
-    RenderTexturePtr mAnim;
-    RenderData mData;
-
+class RenderAnimation : public RenderData {
+   public:
+    RenderTexturePtr operator->() const;
     operator RenderTextureCPtr() const;
 
     void set(const AnimationData &data);
 
-    void draw(TextureBuilder &tex);
+   private:
+    RenderTexturePtr mAnim =
+        std::make_shared<RenderTexture>(makeSharedTexture());
 };
 
 #endif

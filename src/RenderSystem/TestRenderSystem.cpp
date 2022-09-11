@@ -58,8 +58,8 @@ int main(int argc, char *argv[]) {
     const AnimationData animData{"res/wizards/wizard_ss.png", 5, 150};
     RenderAnimation anim;
     anim.set(animData);
-    anim.mData.setDest(Rect(200, 525, 100, 100));
-    anim.mData.setRotationRad(M_PI * 2 / 7);
+    anim.setDest(Rect(200, 525, 100, 100));
+    anim.setRotationRad(M_PI * 2 / 7);
 
     Uint32 animTimer = 0;
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
         animTimer += dt;
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
-            anim.mAnim->nextFrame();
+            anim->nextFrame();
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);

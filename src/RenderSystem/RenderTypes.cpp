@@ -213,11 +213,11 @@ void RenderData::draw(TextureBuilder &tex) {
 }
 
 // RenderAnimation
+RenderTexturePtr RenderAnimation::operator->() const { return mAnim; }
+
 RenderAnimation::operator RenderTextureCPtr() const { return mAnim; }
 
 void RenderAnimation::set(const AnimationData &data) {
     mAnim = std::make_shared<RenderTexture>(data);
-    mData.set(mAnim);
+    RenderData::set(mAnim);
 }
-
-void RenderAnimation::draw(TextureBuilder &tex) { tex.draw(mData); }
