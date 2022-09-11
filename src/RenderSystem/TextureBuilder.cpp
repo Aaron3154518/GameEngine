@@ -3,7 +3,7 @@
 #include "RenderTypes.h"
 #include "Shapes.h"
 
-#define RENDER_DEBUG
+//#define RENDER_DEBUG
 
 // Drawable
 Drawable::Drawable(SDL_Color color, SDL_BlendMode mode)
