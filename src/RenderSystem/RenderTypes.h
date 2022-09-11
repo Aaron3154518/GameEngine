@@ -27,6 +27,7 @@ class TextData;
 
 typedef std::weak_ptr<TextData> TextDataWPtr;
 
+// To store a texture from tex, file, animation, etc.
 class RenderTexture {
    public:
     RenderTexture(SharedTexture tex, unsigned int frameCnt = 1);
@@ -63,8 +64,6 @@ typedef std::shared_ptr<const RenderTexture> RenderTextureCPtr;
 
 // To draw a texture
 class RenderData : public Drawable {
-    friend class AnimationData;
-
    public:
     enum FitMode : uint8_t {
         Dest = 0,  // Uses dest rect
@@ -112,7 +111,16 @@ class RenderData : public Drawable {
                 mFitAlignY = Rect::Align::CENTER;
 };
 
-typedef std::shared_ptr<RenderData> RenderDataPtr;
-typedef std::shared_ptr<const RenderData> RenderDataCPtr;
+// To manage an animation
+struct RenderAnimation : public Drawable {
+    RenderTexturePtr mAnim;
+    RenderData mData;
+
+    operator RenderTextureCPtr() const;
+
+    void set(const AnimationData &data);
+
+    void draw(TextureBuilder &tex);
+};
 
 #endif

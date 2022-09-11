@@ -117,7 +117,6 @@ void RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
 RenderTextureCPtr RenderData::get() const { return mTex; }
 const Rect &RenderData::getRect() const { return mRect; }
 
-#define RENDER_DEBUG
 void RenderData::draw(TextureBuilder &tex) {
     // Check the texture to draw
     if (!mTex || !mTex->get()) {
@@ -212,3 +211,13 @@ void RenderData::draw(TextureBuilder &tex) {
     SDL_RenderCopyEx(Renderer::get(), mTex->get().get(), area, dest, mRotation,
                      NULL, SDL_FLIP_NONE);
 }
+
+// RenderAnimation
+RenderAnimation::operator RenderTextureCPtr() const { return mAnim; }
+
+void RenderAnimation::set(const AnimationData &data) {
+    mAnim = std::make_shared<RenderTexture>(data);
+    mData.set(mAnim);
+}
+
+void RenderAnimation::draw(TextureBuilder &tex) { tex.draw(mData); }

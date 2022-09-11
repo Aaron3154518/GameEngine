@@ -56,11 +56,10 @@ int main(int argc, char *argv[]) {
     shapesTex.draw(RectShape(GREEN).set(rdR));
 
     const AnimationData animData{"res/wizards/wizard_ss.png", 5, 150};
-    RenderTexturePtr animTex = std::make_shared<RenderTexture>(animData);
-    RenderDataPtr anim = std::make_shared<RenderData>();
-    anim->set(animTex);
-    anim->setDest(Rect(200, 525, 100, 100));
-    anim->setRotationRad(M_PI * 2 / 7);
+    RenderAnimation anim;
+    anim.set(animData);
+    anim.mData.setDest(Rect(200, 525, 100, 100));
+    anim.mData.setRotationRad(M_PI * 2 / 7);
 
     Uint32 animTimer = 0;
 
@@ -83,7 +82,7 @@ int main(int argc, char *argv[]) {
             "impossible.\nIamareallyreallyreallylong{b}wordthatneedstobe{b}"
             "wrapped",
             pp.getRect().w())
-        .setImgs({animTex, animTex});
+        .setImgs({anim, anim});
     pp.set(ppText);
 
     Uint32 time = SDL_GetTicks();
@@ -123,7 +122,7 @@ int main(int argc, char *argv[]) {
         sum += SDL_GetTicks() - t1;
         cnt++;
 
-        screen.draw(*anim);
+        screen.draw(anim);
 
         RenderSystem::presentScreen();
 
@@ -161,7 +160,7 @@ int main(int argc, char *argv[]) {
         animTimer += dt;
         while (animTimer > animData.frame_ms) {
             animTimer -= animData.frame_ms;
-            animTex->nextFrame();
+            anim.mAnim->nextFrame();
         }
 
         fpsSum += (SDL_GetTicks() - fpsT1);
