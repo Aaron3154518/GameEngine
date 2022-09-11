@@ -73,6 +73,7 @@ class RenderData : public Drawable {
     };
 
     using Drawable::Drawable;
+    virtual ~RenderData() = default;
 
     void set(RenderTextureCPtr tex);
     void set(SharedTexture tex);
@@ -103,7 +104,8 @@ class RenderData : public Drawable {
     RenderTextureCPtr mTex =
         std::make_shared<RenderTexture>(makeSharedTexture());
 
-    Rect mRect, mBounds, mArea = Rect(0, 0, 1, 1);
+    Rect mRect, mBounds;
+    Rect mArea = Rect(0, 0, 1, 1);
 
     float mRotation = 0;
 
