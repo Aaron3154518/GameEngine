@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     Uint32 animTimer = 0;
 
     RenderData pp;
-    pp.setDest(image.getRect());
+    pp.setDest(image.getDest());
     TextDataPtr ppText = std::make_shared<TextData>();
     ppText->setFont(FontData{-1, 20, "|"})
         .setColor(RED)

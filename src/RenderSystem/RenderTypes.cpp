@@ -116,16 +116,7 @@ void RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
 
 RenderTextureCPtr RenderData::get() const { return mTex; }
 const Rect &RenderData::getRect() const { return mRect; }
-
-void RenderData::draw(TextureBuilder &tex) {
-    // Check the texture to draw
-    if (!mTex || !mTex->get()) {
-#ifdef RENDER_DEBUG
-        std::cerr << "draw(): Invalid Texture" << std::endl;
-#endif
-        return;
-    }
-
+Rect RenderData::getDest() const {
     SDL_Point texDim = mTex->getTextureDim();
 
     Rect dest;
@@ -141,7 +132,22 @@ void RenderData::draw(TextureBuilder &tex) {
             dest = Rect(0, 0, texDim.x, texDim.y);
             dest.setPos(mRect, mFitAlignX, mFitAlignY);
             break;
+    };
+    return dest;
+}
+
+void RenderData::draw(TextureBuilder &tex) {
+    // Check the texture to draw
+    if (!mTex || !mTex->get()) {
+#ifdef RENDER_DEBUG
+        std::cerr << "draw(): Invalid Texture" << std::endl;
+#endif
+        return;
     }
+
+    SDL_Point texDim = mTex->getTextureDim();
+
+    Rect dest = getDest();
 
     Rect area(mArea.x() * texDim.x, mArea.y() * texDim.y, mArea.w() * texDim.x,
               mArea.h() * texDim.y);

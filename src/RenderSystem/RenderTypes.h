@@ -95,6 +95,7 @@ class RenderData : public Drawable {
 
     RenderTextureCPtr get() const;
     const Rect &getRect() const;
+    Rect getDest() const;
 
     void draw(TextureBuilder &tex);
 
