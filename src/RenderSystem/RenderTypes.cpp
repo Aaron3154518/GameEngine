@@ -115,6 +115,7 @@ void RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
 }
 
 RenderTextureCPtr RenderData::get() const { return mTex; }
+
 const Rect &RenderData::getRect() const { return mRect; }
 Rect RenderData::getDest() const {
     SDL_Point texDim = mTex->getTextureDim();
@@ -135,6 +136,8 @@ Rect RenderData::getDest() const {
     };
     return dest;
 }
+
+float RenderData::getRotationRad() const { return mRotation; }
 
 void RenderData::draw(TextureBuilder &tex) {
     // Check the texture to draw

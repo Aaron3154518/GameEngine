@@ -95,8 +95,11 @@ class RenderData : public Drawable {
     void setFitAlign(Rect::Align aX, Rect::Align aY);
 
     RenderTextureCPtr get() const;
+
     const Rect &getRect() const;
     Rect getDest() const;
+
+    float getRotationRad() const;
 
     void draw(TextureBuilder &tex);
 
