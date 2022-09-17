@@ -103,7 +103,7 @@ void RenderData::addBoundary(Rect r) {
 }
 
 void RenderData::setRotationRad(float rotation) {
-    setRotationDeg(rotation * 180 / M_PI);
+    mRotation = rotation / DEG_TO_RAD;
 }
 void RenderData::setRotationDeg(float rotation) { mRotation = rotation; }
 
@@ -137,7 +137,8 @@ Rect RenderData::getDest() const {
     return dest;
 }
 
-float RenderData::getRotationRad() const { return mRotation; }
+float RenderData::getRotationRad() const { return mRotation * DEG_TO_RAD; }
+float RenderData::getRotationDeg() const { return mRotation; }
 
 void RenderData::draw(TextureBuilder &tex) {
     // Check the texture to draw

@@ -100,6 +100,7 @@ class RenderData : public Drawable {
     Rect getDest() const;
 
     float getRotationRad() const;
+    float getRotationDeg() const;
 
     void draw(TextureBuilder &tex);
 
