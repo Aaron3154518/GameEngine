@@ -76,7 +76,7 @@ void Number::copy(const Number &n) {
 
 void Number::balance() {
     //    std::cout << mLayer << ", " << mExp << ", " << mSign << " -> ";
-    if (mSign == 0 || (mLayer == 0 & mExp == 0)) {
+    if (mSign == 0 || (mLayer == 0 && mExp == 0)) {
         mSign = 0;
         mLayer = 0;
         mExp = 0.;
