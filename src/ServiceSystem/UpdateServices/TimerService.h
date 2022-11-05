@@ -23,6 +23,7 @@ struct Timer {
     int getTimePassed() const;
     int getTimeLeft() const;
     float getPercent() const;
+    void setLength(int len, bool keepProg = true);
 
     int length = 0;
     int timer = 0;

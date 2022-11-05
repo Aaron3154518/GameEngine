@@ -15,6 +15,15 @@ int Timer::getTimeLeft() const { return timer; }
 
 float Timer::getPercent() const { return fmax(0, getTimePassed()) / length; }
 
+void Timer::setLength(int len, bool keepProg) {
+    if (keepProg) {
+        timer = length == 0 ? 0 : len * (timer / length);
+    } else {
+        timer = fminf(len, timer);
+    }
+    length = len;
+}
+
 // TimerObservableBase
 TimerObservableBase::SubscriptionPtr TimerObservableBase::subscribe(
     std::function<bool(Timer&)> func, const Timer& timer) {
