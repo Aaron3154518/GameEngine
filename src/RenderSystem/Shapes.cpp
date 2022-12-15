@@ -289,7 +289,7 @@ const ProgressBarData &ProgressBar::get() const { return data; }
 
 ProgressBar &ProgressBar::set(const Rect &r) {
     dest = r;
-    return *this;
+    return set(data.perc);
 }
 ProgressBar &ProgressBar::set(SDL_Color foreground, SDL_Color background) {
     mColor = foreground;
@@ -319,6 +319,9 @@ ProgressBar &ProgressBar::set(float amnt, float cap, bool log) {
 }
 ProgressBar &ProgressBar::set(float percent) {
     data.perc = fmax(0., fmin(1., percent));
+    data.fullRect = Rect(dest.x(), dest.y(), dest.w() * data.perc, dest.h());
+    data.emptyRect = Rect(data.fullRect.x2(), dest.y(),
+                          dest.w() - data.fullRect.w(), dest.h());
     return *this;
 }
 

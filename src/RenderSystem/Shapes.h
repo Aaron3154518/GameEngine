@@ -93,6 +93,7 @@ struct CircleShape : public Shape {
 // Progress Base
 struct ProgressBarData {
     float perc = 0.;
+    Rect fullRect, emptyRect;
 };
 
 struct ProgressBar : public Shape {

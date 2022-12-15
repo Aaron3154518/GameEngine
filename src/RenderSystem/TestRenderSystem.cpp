@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
 
     ProgressBar pb = ProgressBar().set(RED, GRAY).set(Rect(100, 400, 300, 50));
     Uint32 pbVal = 0;
+    RectShape pbRdFull(WHITE), pbRdEmpty(BLACK);
 
     int timerVal = 1;
     TextDataPtr timerText = std::make_shared<TextData>();
@@ -109,6 +110,8 @@ int main(int argc, char *argv[]) {
         screen.draw(screenCd);
 
         screen.draw(pb);
+        screen.draw(pbRdFull);
+        screen.draw(pbRdEmpty);
         screen.draw(shapes);
 
         t1 = SDL_GetTicks();
@@ -156,6 +159,8 @@ int main(int argc, char *argv[]) {
             image.set(pbVal % 2 == 0 ? "res/wizards/Catalyst.png" : "oops");
         }
         pb.set(pbVal, 1000);
+        pbRdFull.set(pb.get().fullRect, 1);
+        pbRdEmpty.set(pb.get().emptyRect, 1);
 
         animTimer += dt;
         while (animTimer > animData.frame_ms) {
