@@ -25,6 +25,7 @@ struct UIComponent {
 };
 
 typedef std::shared_ptr<UIComponent> UIComponentPtr;
+typedef std::shared_ptr<const UIComponent> UIComponentCPtr;
 
 struct UIComponentCompare {
     bool operator()(const UIComponentPtr &a, const UIComponentPtr &b) const;
