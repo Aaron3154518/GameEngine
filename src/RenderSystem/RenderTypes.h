@@ -45,11 +45,10 @@ class RenderTexture {
 
     SDL_Point getTextureDim() const;
 
+    void update();
     Uint32 getLastUpdated() const;
 
    private:
-    void update();
-
     Uint32 mLastUpdated = 0;
     SDL_Point mDim;
 
