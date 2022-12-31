@@ -95,7 +95,7 @@ void RectShape::draw(TextureBuilder &tex) {
                data.r2.y2() - data.r2.y()),
           Rect(data.r2.x(), data.r2.y(), data.r2.x2() - data.r2.x(),
                data.r1.y() - data.r2.y()),
-          Rect(data.r2.x(), data.r2.y2(), data.r2.x2() - data.r2.x(),
+          Rect(data.r2.x(), data.r1.y2(), data.r2.x2() - data.r2.x(),
                data.r2.y2() - data.r1.y2())}) {
         if (!side.empty()) {
             rs.set(side).draw(tex);

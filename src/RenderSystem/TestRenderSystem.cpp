@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
     RenderSystem::Options options;
     options.title = "Render System Test";
-    options.width = options.height = 750;
+    options.width = options.height = 900;
     options.defaultTexture = "res/default.png";
 
     RenderSystem::initRenderSystem(options);
@@ -28,8 +28,10 @@ int main(int argc, char *argv[]) {
 
     RectShape truncR;
     truncR.mColor = ORANGE;
-    truncR.boundary = Rect(50, 0, 50, 150);
-    truncR.set(Rect(5, 15, 90, 80), Rect(5, 5, 100, 100));
+    truncR.boundary = Rect(166, 10, 668, 80);
+    truncR.set(Rect(766, 58, 32, 32), 4, true);
+    RectShape truncB;
+    truncB.set(truncR.boundary, 5);
 
     ProgressBar pb = ProgressBar().set(RED, GRAY).set(Rect(100, 400, 300, 50));
     Uint32 pbVal = 0;
@@ -126,6 +128,7 @@ int main(int argc, char *argv[]) {
 
         screen.draw(image);
         screen.draw(truncR);
+        screen.draw(truncB);
         t1 = SDL_GetTicks();
         screen.draw(pp);
         sum += SDL_GetTicks() - t1;
