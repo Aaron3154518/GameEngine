@@ -57,6 +57,10 @@ SDL_Point RenderTexture::getTextureDim() const {
     return mDim;
 }
 
+Rect RenderTexture::getMinRect(int w, int h) const {
+    return Rect::getMinRect(mDim.x, mDim.y, w, h);
+}
+
 void RenderTexture::update() { mLastUpdated = SDL_GetTicks(); }
 Uint32 RenderTexture::getLastUpdated() const { return mLastUpdated; }
 

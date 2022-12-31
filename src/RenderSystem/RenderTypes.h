@@ -44,6 +44,7 @@ class RenderTexture {
     unsigned int getFrame() const;
 
     SDL_Point getTextureDim() const;
+    Rect getMinRect(int w, int h) const;
 
     void update();
     Uint32 getLastUpdated() const;
