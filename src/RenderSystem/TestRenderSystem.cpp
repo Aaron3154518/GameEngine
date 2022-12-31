@@ -26,6 +26,11 @@ int main(int argc, char *argv[]) {
     image.setDest(Rect(125, 100, 250, 250));
     image.setAreaFrac(Rect(.05, .05, .9, .9));
 
+    RectShape truncR;
+    truncR.mColor = ORANGE;
+    truncR.boundary = Rect(50, 0, 50, 150);
+    truncR.set(Rect(5, 15, 90, 80), Rect(5, 5, 100, 100));
+
     ProgressBar pb = ProgressBar().set(RED, GRAY).set(Rect(100, 400, 300, 50));
     Uint32 pbVal = 0;
     RectShape pbRdFull(WHITE), pbRdEmpty(BLACK);
@@ -120,6 +125,7 @@ int main(int argc, char *argv[]) {
         cnt++;
 
         screen.draw(image);
+        screen.draw(truncR);
         t1 = SDL_GetTicks();
         screen.draw(pp);
         sum += SDL_GetTicks() - t1;

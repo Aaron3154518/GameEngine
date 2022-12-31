@@ -45,6 +45,7 @@ struct RectShape : public Shape {
     const RectData &get() const;
 
     RectShape &set(const Rect &r = Rect(0, 0, 0, 0));
+    RectShape &set(const Rect &r1, const Rect &r2);
     RectShape &set(Rect r, int thickness, bool center = false);
 
     void draw(TextureBuilder &tex);

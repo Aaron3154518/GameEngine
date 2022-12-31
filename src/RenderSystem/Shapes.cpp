@@ -26,6 +26,13 @@ RectShape &RectShape::set(const Rect &r) {
     data.r2.normalize();
     return *this;
 }
+RectShape &RectShape::set(const Rect &r1, const Rect &r2) {
+    SDL_Rect res;
+    SDL_IntersectRect(r1, r2, &res);
+    data.r1 = res;
+    data.r2 = r2;
+    return *this;
+}
 RectShape &RectShape::set(Rect r, int thickness, bool center) {
     r.normalize();
     data.r1 = data.r2 = r;
@@ -53,44 +60,45 @@ RectShape &RectShape::set(Rect r, int thickness, bool center) {
 
 void RectShape::draw(TextureBuilder &tex) {
     Rect bounds = getBounds();
-    if (!bounds.empty()) {
-        SDL_Rect intersect;
-        // Fill entire render target
-        if (data.r2.empty()) {
-            SDL_RenderFillRect(Renderer::get(), bounds);
-            // Intersect r2 and bounds
-        } else if (SDL_IntersectRect(data.r2, bounds, &intersect) == SDL_TRUE) {
-            bounds = intersect;
-            // Fill r2 if r is empty or not within bounds
-            // Intersect r with bounds
-            if (data.r1.empty() ||
-                SDL_IntersectRect(bounds, data.r1, &intersect) == SDL_FALSE) {
-                SDL_RenderFillRect(Renderer::get(), bounds);
-                // Fill bounds except for r
-            } else {
-                // Start at r1
-                Rect r = data.r1;
-                // bounds is inclusive so draw once more when r = bounds
-                float oldW, oldH;
-                do {
-                    oldW = r.w();
-                    oldH = r.h();
-                    // Expand rect
-                    if (r.X() > bounds.X()) {
-                        r.setWidth(r.w() + 1, Rect::Align::BOT_RIGHT);
-                    }
-                    if (r.Y() > bounds.Y()) {
-                        r.setHeight(r.h() + 1, Rect::Align::BOT_RIGHT);
-                    }
-                    if (r.X2() < bounds.X2()) {
-                        r.setWidth(r.w() + 1, Rect::Align::TOP_LEFT);
-                    }
-                    if (r.Y2() < bounds.Y2()) {
-                        r.setHeight(r.h() + 1, Rect::Align::TOP_LEFT);
-                    }
-                    SDL_RenderDrawRect(Renderer::get(), r);
-                } while (oldW != r.w() || oldH != r.h());
-            }
+    if (bounds.empty()) {
+        return;
+    }
+
+    // Fill entire render target
+    if (data.r2.empty()) {
+        SDL_RenderFillRect(Renderer::get(), bounds);
+        return;
+    }
+
+    SDL_Rect intersect;
+    // Intersect r2 and bounds
+    if (SDL_IntersectRect(data.r2, bounds, &intersect) == SDL_FALSE) {
+        return;
+    }
+
+    bounds = intersect;
+    // Intersect r1 with bounds
+    if (data.r1.empty() ||
+        SDL_IntersectRect(bounds, data.r1, &intersect) == SDL_FALSE) {
+        // Fill intersection if r1 is empty or not within bounds
+        SDL_RenderFillRect(Renderer::get(), bounds);
+        return;
+    }
+
+    // Fill bounds except for r
+    RectShape rs = *this;
+    // Left, right, top, bottom
+    for (Rect side :
+         {Rect(data.r2.x(), data.r2.y(), data.r1.x() - data.r2.x(),
+               data.r2.y2() - data.r2.y()),
+          Rect(data.r1.x2(), data.r2.y(), data.r2.x2() - data.r1.x2(),
+               data.r2.y2() - data.r2.y()),
+          Rect(data.r2.x(), data.r2.y(), data.r2.x2() - data.r2.x(),
+               data.r1.y() - data.r2.y()),
+          Rect(data.r2.x(), data.r2.y2(), data.r2.x2() - data.r2.x(),
+               data.r2.y2() - data.r1.y2())}) {
+        if (!side.empty()) {
+            rs.set(side).draw(tex);
         }
     }
 }
