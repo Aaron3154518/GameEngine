@@ -116,6 +116,10 @@ void RenderData::setFitAlign(Rect::Align aX, Rect::Align aY) {
 
 RenderTextureCPtr RenderData::get() const { return mTex; }
 
+RenderTextureCPtr RenderData::operator->() const { return mTex; }
+
+RenderData::operator RenderTextureCPtr() const { return mTex; }
+
 const Rect &RenderData::getRect() const { return mRect; }
 Rect RenderData::getDest() const {
     SDL_Point texDim = mTex->getTextureDim();

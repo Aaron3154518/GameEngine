@@ -94,6 +94,8 @@ class RenderData : public Drawable {
     void setFitAlign(Rect::Align aX, Rect::Align aY);
 
     RenderTextureCPtr get() const;
+    RenderTextureCPtr operator->() const;
+    operator RenderTextureCPtr() const;
 
     const Rect &getRect() const;
     Rect getDest() const;
