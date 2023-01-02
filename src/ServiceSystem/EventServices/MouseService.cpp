@@ -3,7 +3,7 @@
 // MouseObservable
 void MouseObservable::init() {
     eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
-        std::bind(&MouseObservable::onEvent, this, std::placeholders::_1));
+        [this](const Event& e) { onEvent(e); });
 }
 
 void MouseObservable::onSubscribe(SubscriptionPtr sub) {

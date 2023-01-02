@@ -41,8 +41,7 @@ TimerObservableBase::UpdateSubPtr TimerObservableBase::getUpdateSub(
 }
 
 void TimerObservableBase::init() {
-    mUpdateSub = getUpdateSub(
-        std::bind(&TimerObservableBase::onUpdate, this, std::placeholders::_1));
+    mUpdateSub = getUpdateSub([this](Time dt) { onUpdate(dt); });
 }
 
 void TimerObservableBase::onUpdate(Time dt) {

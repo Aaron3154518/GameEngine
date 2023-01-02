@@ -1,2 +1,2 @@
-find src/ -name "*.h" -o -name "*.cpp" | xargs wc -w -l
-
+#!/bin/bash
+find src/ -name "*.h" -o -name "*.cpp" | xargs wc -l

@@ -85,7 +85,9 @@ void RenderObservable::init() {
     // RenderService
     renderOrderSub =
         ServiceSystem::Get<RenderService, RenderOrderObservable>()->subscribe(
-            std::bind(&RenderObservable::sort, this, std::placeholders::_1));
+            [this](const std::unordered_map<UIComponentPtr, int> &m) {
+                sort(m);
+            });
 }
 
 void RenderObservable::onSubscribe(SubscriptionPtr sub) {

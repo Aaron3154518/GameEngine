@@ -3,7 +3,7 @@
 // HoverObservable
 void HoverObservable::init() {
     mEventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
-        std::bind(&HoverObservable::onEvent, this, std::placeholders::_1));
+        [this](const Event& e) { onEvent(e); });
 }
 
 void HoverObservable::onSubscribe(SubscriptionPtr sub) {

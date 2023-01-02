@@ -4,9 +4,9 @@
 void DragObservable::init() {
     updateSub =
         ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
-            std::bind(&DragObservable::onUpdate, this, std::placeholders::_1));
+            [this](Time dt) { onUpdate(dt); });
     eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
-        std::bind(&DragObservable::onEvent, this, std::placeholders::_1));
+        [this](const Event &e) { onEvent(e); });
 }
 
 void DragObservable::onSubscribe(SubscriptionPtr sub) {
