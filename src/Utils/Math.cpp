@@ -9,4 +9,8 @@ float distance(SDL_Point p1, SDL_Point p2) {
     float dx = p1.x - p2.x, dy = p1.y - p2.y;
     return sqrt(dx * dx + dy * dy);
 }
+
+float round(float val, float precision) {
+    return floor(val / precision + 0.5) * precision;
+}
 }  // namespace Math

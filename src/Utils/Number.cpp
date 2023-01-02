@@ -4,14 +4,14 @@ constexpr auto MAX_Es = 5;         // Max number of e's to display for tetration
 constexpr auto TOLERANCE = 1e-10;  // Error tolerance when comparing floats
 constexpr float CONVERT_UP = 1e10;  // Value at which to increase the layer
 constexpr float CONVERT_DOWN =
-    log10(CONVERT_UP);  // Value at which to decrease the layer
+    log10f(CONVERT_UP);  // Value at which to decrease the layer
 constexpr float CONVERT_NEG =
     1 / CONVERT_UP;  // Value at which to make the layer negative
 const Number MAX_FLOAT = Number(std::numeric_limits<float>::max());
 const Number MIN_FLOAT = Number(std::numeric_limits<float>::min());
 
 Number::Number(int layer, float exp, int sign)
-    : mLayer(layer), mExp(exp), mSign((sign > 0) - (sign < 0)) {
+    : mExp(exp), mLayer(layer), mSign((sign > 0) - (sign < 0)) {
     balance();
 }
 Number::Number(float val) : Number(0, std::abs(val), (val > 0.) - (val < 0.)) {}
@@ -139,7 +139,14 @@ void Number::balance() {
     //    std::cout << mLayer << ", " << mExp << ", " << mSign << " = ";
     //    std::cout << *this << std::endl;
 }
+bool Number::isZero() const { return mSign == 0; }
 
+// Math functions/operators
+Number &Number::negate() {
+    mSign *= -1;
+    return *this;
+}
+// n + m
 Number &Number::add(const Number &num) {
     if (num.mSign == 0) {
         return *this;
@@ -182,10 +189,12 @@ Number &Number::add(const Number &num) {
     }
     return *this;
 }
+// n - m
 Number &Number::subtract(const Number &num) {
     add(-num);
     return *this;
 }
+// n * m
 Number &Number::multiply(const Number &num) {
     if (mSign == 0 || num.mSign == 0) {
         mSign = 0;
@@ -204,6 +213,7 @@ Number &Number::multiply(const Number &num) {
     }
     return *this;
 }
+// n / m
 Number &Number::divide(const Number &num) {
     if (mSign == 0) {
         return *this;
@@ -225,6 +235,7 @@ Number &Number::divide(const Number &num) {
     }
     return *this;
 }
+// n ^ m
 Number &Number::power(const Number &pow) {
     if (mSign == 0) {
         if (pow.mSign != 1) {
@@ -242,7 +253,7 @@ Number &Number::power(const Number &pow) {
     int sign = mSign;
     getExponent().multiply(pow).powTen();
     // If our base is negative, we only want the real component of the answer
-    // If the power's layer is greater than 0, rounding will cause pow to
+    // If the power's layer is greater than 0, Math::rounding will cause pow to
     //     be a multiple of 10 and thus pow*pi will be a multiple of 2pi
     // If the layer is less than 0, pow * pi will essentially be 0*2pi
     if (sign == -1 && pow.mLayer == 0) {
@@ -281,13 +292,19 @@ Number &Number::getReciprocal() {
     return *this;
 }
 
+// Returns |n|
+Number &Number::absVal() {
+    mSign *= mSign;
+    return *this;
+}
+
 // Returns 10^n
 Number &Number::powTen() {
     if (mSign == 0 || mLayer < 0) {
         mSign = mExp = 1;
         mLayer = 0;
     } else {
-        mLayer = mSign * (++mLayer);
+        mLayer = mSign * (mLayer + 1);
         mSign = 1;
     }
     balance();
@@ -334,7 +351,20 @@ Number &Number::ceilNum() {
     return *this;
 }
 
-// Comparison Operators
+// Copy math function
+Number Number::getExponentCopy() const { return copy().getExponent(); }
+Number Number::getReciprocalCopy() const { return copy().getReciprocal(); }
+Number Number::absValCopy() const { return copy().absVal(); }
+Number Number::powTenCopy() const { return copy().powTen(); }
+Number Number::logTenCopy() const { return copy().logTen(); }
+Number Number::logBaseCopy(const Number &base) const {
+    return copy().logBase(base);
+}
+Number Number::floorCopy() const { return copy().floorNum(); }
+Number Number::ceilCopy() const { return copy().ceilNum(); }
+Number Number::sqrtCopy() const { return copy().sqrt(); }
+
+// Comparison functions and operators
 bool Number::equal(const Number &num) const {
     return mLayer == num.mLayer && std::abs(mExp - num.mExp) < TOLERANCE &&
            mSign == num.mSign;
@@ -352,14 +382,54 @@ bool Number::less(const Number &num) const {
     // At this point the layers and signs are equal
     return (mExp < num.mExp) == (mSign == 1);
 }
+Number Number::min(const Number &a, const Number &b) { return a <= b ? a : b; }
+Number Number::max(const Number &a, const Number &b) { return a >= b ? a : b; }
 
+// Unary operators
+Number Number::operator-() const { return copy().negate(); }
+Number &Number::operator+=(const Number &rhs) {
+    add(rhs);
+    return *this;
+}
+Number &Number::operator-=(const Number &rhs) {
+    subtract(rhs);
+    return *this;
+}
+Number &Number::operator*=(const Number &rhs) {
+    multiply(rhs);
+    return *this;
+}
+Number &Number::operator/=(const Number &rhs) {
+    divide(rhs);
+    return *this;
+}
+Number &Number::operator^=(const Number &rhs) {
+    power(rhs);
+    return *this;
+}
+
+// Binary operators
+Number Number::operator+(const Number &rhs) const { return copy() += rhs; }
+Number Number::operator-(const Number &rhs) const { return copy() -= rhs; }
+Number Number::operator*(const Number &rhs) const { return copy() *= rhs; }
+Number Number::operator/(const Number &rhs) const { return copy() /= rhs; }
+Number Number::operator^(const Number &rhs) const { return copy() ^= rhs; }
+bool Number::operator==(const Number &rhs) const { return equal(rhs); }
+bool Number::operator!=(const Number &rhs) const { return !equal(rhs); }
+bool Number::operator<(const Number &rhs) const { return less(rhs); }
+bool Number::operator<=(const Number &rhs) const { return !rhs.less(*this); }
+bool Number::operator>(const Number &rhs) const { return rhs.less(*this); }
+bool Number::operator>=(const Number &rhs) const { return !less(rhs); }
+
+// String/print operations
 void Number::printAll() const {
     std::cout << "Layer = " << mLayer << ", Exponent = " << mExp
               << ", Sign = " << mSign << std::endl;
 }
-
-float round(float val, float precision) {
-    return floor(val / precision + 0.5) * precision;
+std::string Number::toString() const {
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
 }
 
 std::ostream &operator<<(std::ostream &os, const Number &rhs) {
@@ -381,11 +451,11 @@ std::ostream &operator<<(std::ostream &os, const Number &rhs) {
         } else {
             os << "10^^" << std::abs(rhs.mLayer) << "^";
         }
-        if (rhs.mExp == 0. || 0.01 <= rhs.mExp && rhs.mExp < 1000) {
-            os << round(rhs.mExp, 0.01);
+        if (rhs.mExp == 0. || (0.01 <= rhs.mExp && rhs.mExp < 1000)) {
+            os << Math::round(rhs.mExp, 0.01);
         } else {
             float val = log10(rhs.mExp);
-            os << round(pow(10, val - (int)val), 0.01) << "e" << (int)val;
+            os << Math::round(pow(10, val - (int)val), 0.01) << "e" << (int)val;
         }
     }
     return os;
