@@ -9,10 +9,11 @@
 #include <unordered_map>
 #include <vector>
 
+constexpr int NUM_MICE = 3;
+
 class Event {
    public:
-    Event() = default;
-    ~Event() = default;
+    Event();
 
     enum Mouse : uint8_t { LEFT = 0, RIGHT, MIDDLE };
     enum Button : uint8_t {
@@ -23,6 +24,7 @@ class Event {
     };
 
     struct MouseButton {
+        Mouse mouse;
         uint8_t status = 0;
         SDL_Point clickPos{0, 0};
         uint32_t duration;
@@ -94,7 +96,7 @@ class Event {
     // Inputted text
     std::string mInputText;
 
-    std::array<MouseButton, 3> mMouseButtons;
+    std::array<MouseButton, NUM_MICE> mMouseButtons;
     std::unordered_map<SDL_KeyCode, KeyButton> mKeyButtons;
 };
 

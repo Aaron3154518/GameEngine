@@ -4,7 +4,7 @@
 Lock::Lock() : Lock(nullptr) {}
 Lock::Lock(bool* lock) : mLock(lock) {}
 
-Lock::operator bool() const { return mLock != nullptr; }
+Lock::operator bool() const { return mLock; }
 
 // Lockable
 Lock Lockable::requestLock() {

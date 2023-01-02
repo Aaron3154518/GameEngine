@@ -26,6 +26,12 @@ bool Event::KeyButton::held() const {
 }
 
 // Event
+Event::Event() {
+    for (auto btn : {Mouse::LEFT, Mouse::RIGHT, Mouse::MIDDLE}) {
+        mMouseButtons[btn].mouse = btn;
+    }
+}
+
 void Event::update() {
     static uint32_t time = 0;
     // Reset/update variables

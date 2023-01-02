@@ -51,7 +51,8 @@ void DragObservable::next(const Event &e) {
                 if ((dragDelay < 0 && e.mouseMoved()) ||
                     (dragDelay >= 0 && left.duration >= dragDelay)) {
                     current = sub;
-                    mouseLock = GetMouseObservable()->requestLock();
+                    mouseLock =
+                        GetMouseObservable()->requestLock({Event::Mouse::LEFT});
                     dragData->dragging = true;
                     current->get<DRAG_START>()();
                     current->get<DRAG>()(mousePos.x, mousePos.y, e.mouseDx(),
@@ -64,7 +65,7 @@ void DragObservable::next(const Event &e) {
 }
 
 void DragObservable::onUpdate(Time dt) {
-    if (mouseLock && !current) {
+    if (mouseLock.isLocked() && !current) {
         GetMouseObservable()->releaseLock(mouseLock);
     }
 }

@@ -8,6 +8,7 @@
 struct Lock {
     friend class Lockable;
 
+   public:
     Lock();
     Lock(bool* lock);
 

@@ -40,7 +40,7 @@ class ClickRenderTest : public TestBase {
 
     void onClick(Event::MouseButton b, bool clicked);
 
-    bool color = false;
+    SDL_Color color = RED;
     MouseObservable::SubscriptionPtr mMouseSub;
 };
 
@@ -169,7 +169,7 @@ class MouseLockTest : public TestBase {
 
     void onClick(Event::MouseButton b, bool clicked);
 
-    Lock mMouseLock;
+    MouseObservable::Lock mMouseLock;
     UpdateObservable::SubscriptionPtr mUpdateSub;
     MouseObservable::SubscriptionPtr mMouseSub;
 };

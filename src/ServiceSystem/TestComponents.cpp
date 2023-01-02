@@ -27,7 +27,7 @@ void TestBase::onRender(SDL_Renderer *renderer) {
 // ClickRenderTest
 ClickRenderTest::ClickRenderTest(Rect r, int e) : TestBase(r, e) {}
 
-SDL_Color ClickRenderTest::getColor() const { return color ? GREEN : RED; }
+SDL_Color ClickRenderTest::getColor() const { return color; }
 
 void ClickRenderTest::init() {
     TestBase::init();
@@ -36,7 +36,22 @@ void ClickRenderTest::init() {
 }
 
 void ClickRenderTest::onClick(Event::MouseButton b, bool clicked) {
-    color = clicked;
+    if (!clicked) {
+        color = RED;
+        return;
+    }
+
+    switch (b.mouse) {
+        case Event::Mouse::LEFT:
+            color = GREEN;
+            break;
+        case Event::Mouse::RIGHT:
+            color = {0, 128, 0, 255};
+            break;
+        case Event::Mouse::MIDDLE:
+            color = {0, 64, 0, 255};
+            break;
+    }
 }
 
 // ChangeSubTest
@@ -243,7 +258,7 @@ void MultiUnsubTest::onRender(SDL_Renderer *renderer) {
 MouseLockTest::MouseLockTest(Rect r, int e) : TestBase(r, e) {}
 
 SDL_Color MouseLockTest::getColor() const {
-    return mMouseLock ? PURPLE : GREEN;
+    return mMouseLock.isLocked() ? PURPLE : GREEN;
 }
 
 void MouseLockTest::init() {
@@ -256,14 +271,15 @@ void MouseLockTest::init() {
 }
 
 void MouseLockTest::onUpdate(Time dt) {
-    if (mMouseLock && std::rand() % 150 == 0) {
+    if (mMouseLock.isLocked() && std::rand() % 150 == 0) {
         GetMouseObservable()->releaseLock(mMouseLock);
     }
 }
 
 void MouseLockTest::onClick(Event::MouseButton b, bool clicked) {
     if (clicked) {
-        mMouseLock = GetMouseObservable()->requestLock();
+        mMouseLock = GetMouseObservable()->requestLock(
+            {Event::Mouse::LEFT, Event::Mouse::RIGHT});
     }
 }
 
