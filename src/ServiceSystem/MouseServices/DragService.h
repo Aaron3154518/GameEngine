@@ -6,7 +6,7 @@
 #include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
-#include <ServiceSystem/EventServices/MouseService.h>
+#include <ServiceSystem/MouseServices/MouseService.h>
 #include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>

@@ -2,10 +2,10 @@
 #include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
-#include <ServiceSystem/EventServices/DragService.h>
-#include <ServiceSystem/EventServices/HoverService.h>
-#include <ServiceSystem/EventServices/MouseService.h>
-#include <ServiceSystem/EventServices/ResizeService.h>
+#include <ServiceSystem/MouseServices/DragService.h>
+#include <ServiceSystem/MouseServices/HoverService.h>
+#include <ServiceSystem/MouseServices/MouseService.h>
+#include <ServiceSystem/MouseServices/ResizeService.h>
 #include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <ServiceSystem/UpdateServices/TimerService.h>
