@@ -2,6 +2,7 @@
 #define EVENT_H
 
 #include <SDL.h>
+#include <Utils/Math.h>
 
 #include <array>
 #include <cmath>
@@ -73,10 +74,6 @@ class Event {
     static const KeyButton &unusedKey();
 
     static Mouse toMouse(Uint8 sdlButtonType);
-
-    // Don't belong in Event
-    static bool bitsSet(uint8_t val, uint8_t check);
-    static float distance(SDL_Point p1, SDL_Point p2);
 
    private:
     static constexpr int MAX_CLICK_DIFF = 10;

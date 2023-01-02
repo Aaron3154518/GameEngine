@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     Event e;
 
-    int delay = 1000 / 60;
+    uint32_t delay = 1000 / 60;
     Uint32 time = SDL_GetTicks();
     while (true) {
         e.update();

@@ -1,4 +1,4 @@
-CXX := g++
+CXX := g++ -Wall
 CXXFLAGS :=  
 
 AR := ar

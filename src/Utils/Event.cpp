@@ -2,27 +2,27 @@
 
 // MouseButton
 bool Event::MouseButton::pressed() const {
-    return bitsSet(status, Event::Button::PRESSED);
+    return Math::bitsSet(status, Event::Button::PRESSED);
 }
 bool Event::MouseButton::released() const {
-    return bitsSet(status, Event::Button::RELEASED);
+    return Math::bitsSet(status, Event::Button::RELEASED);
 }
 bool Event::MouseButton::held() const {
-    return bitsSet(status, Event::Button::HELD);
+    return Math::bitsSet(status, Event::Button::HELD);
 }
 bool Event::MouseButton::clicked() const {
-    return bitsSet(status, Event::Button::CLICKED);
+    return Math::bitsSet(status, Event::Button::CLICKED);
 }
 
 // KeyButton
 bool Event::KeyButton::pressed() const {
-    return bitsSet(status, Event::Button::PRESSED);
+    return Math::bitsSet(status, Event::Button::PRESSED);
 }
 bool Event::KeyButton::released() const {
-    return bitsSet(status, Event::Button::RELEASED);
+    return Math::bitsSet(status, Event::Button::RELEASED);
 }
 bool Event::KeyButton::held() const {
-    return bitsSet(status, Event::Button::HELD);
+    return Math::bitsSet(status, Event::Button::HELD);
 }
 
 // Event
@@ -48,7 +48,7 @@ void Event::update() {
     mScroll = 0;
     // Update mouse buttons
     for (auto &b : mMouseButtons) {
-        if (bitsSet(b.status, Button::HELD)) {
+        if (Math::bitsSet(b.status, Button::HELD)) {
             b.duration += mDt;
         }
         // Reset pressed/released
@@ -57,7 +57,7 @@ void Event::update() {
     // Update keys
     for (auto it = mKeyButtons.begin(); it != mKeyButtons.end();) {
         auto &b = it->second;
-        if (bitsSet(b.status, Button::HELD)) {
+        if (Math::bitsSet(b.status, Button::HELD)) {
             b.duration += mDt;
             // Reset pressed/released
             b.status = Button::HELD;
@@ -108,10 +108,10 @@ void Event::update(SDL_Event &e) {
         } break;
         case SDL_MOUSEBUTTONUP: {
             MouseButton &b = mMouseButtons[toMouse(e.button.button)];
-            b.status =
-                (distance(b.clickPos, mMouse) < MAX_CLICK_DIFF ? Button::CLICKED
-                                                               : 0) |
-                Button::RELEASED;
+            b.status = (Math::distance(b.clickPos, mMouse) < MAX_CLICK_DIFF
+                            ? Button::CLICKED
+                            : 0) |
+                       Button::RELEASED;
             b.duration = 0;
         } break;
         case SDL_MOUSEMOTION: {
@@ -187,13 +187,6 @@ std::vector<SDL_KeyCode> Event::keys() const {
 const Event::KeyButton &Event::unusedKey() {
     static KeyButton UNUSED;
     return UNUSED;
-}
-
-bool Event::bitsSet(uint8_t val, uint8_t check) {
-    return (val & check) == check;
-}
-float Event::distance(SDL_Point p1, SDL_Point p2) {
-    return sqrt((p1.x - p2.x) ^ 2 + (p1.y - p2.y) ^ 2);
 }
 
 Event::Mouse Event::toMouse(Uint8 sdlButtonType) {
