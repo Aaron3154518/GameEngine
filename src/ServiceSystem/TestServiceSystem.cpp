@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     Event e;
 
-    int delay = 1000 / 60;
+    Uint32 delay = 1000 / 60;
     Uint32 time = SDL_GetTicks();
     Time dt;
     while (true) {
