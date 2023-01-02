@@ -78,6 +78,8 @@ float Rect::getX(Align a) const {
         case Align::CENTER:
             return cX();
     }
+
+    throw std::runtime_error("Rect::getX(): Invalid Align value");
 }
 float Rect::getY(Align a) const {
     switch (a) {
@@ -89,6 +91,8 @@ float Rect::getY(Align a) const {
         case Align::CENTER:
             return cY();
     }
+
+    throw std::runtime_error("Rect::getY(): Invalid Align value");
 }
 SDL_FPoint Rect::getPos(Align a) const { return {getX(a), getY(a)}; }
 SDL_FPoint Rect::getPos(Align aX, Align aY) const {
@@ -128,6 +132,8 @@ int Rect::GetX(Align a) const {
         case Align::CENTER:
             return CX();
     }
+
+    throw std::runtime_error("Rect::GetX(): Invalid Align value");
 }
 int Rect::GetY(Align a) const {
     switch (a) {
@@ -139,6 +145,8 @@ int Rect::GetY(Align a) const {
         case Align::CENTER:
             return CY();
     }
+
+    throw std::runtime_error("Rect::GetY(): Invalid Align value");
 }
 SDL_Point Rect::GetPos(Align a) const { return {GetX(a), GetY(a)}; }
 SDL_Point Rect::GetPos(Align aX, Align aY) const {

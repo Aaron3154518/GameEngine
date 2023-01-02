@@ -46,7 +46,7 @@ void teardownRenderSystem();
 void clearScreen(SDL_Color bkgrnd = BLACK);
 void presentScreen();
 
-void enforceFPS(int fps);
+void enforceFPS(uint32_t fps);
 
 SDL_Point getWindowSize();
 

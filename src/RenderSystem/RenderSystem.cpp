@@ -62,9 +62,9 @@ void clearScreen(SDL_Color bkgrnd) {
 
 void presentScreen() { SDL_RenderPresent(Renderer::get()); }
 
-void enforceFPS(int fps) {
+void enforceFPS(uint32_t fps) {
     static Uint32 time = 0;
-    int delay = 1000 / fps;
+    uint32_t delay = 1000 / fps;
     Uint32 dt = SDL_GetTicks() - time;
     if (dt < delay) {
         SDL_Delay(delay - dt);
