@@ -2,11 +2,11 @@
 #include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
+#include <ServiceSystem/EventServices/ResizeService.h>
+#include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/MouseServices/DragService.h>
 #include <ServiceSystem/MouseServices/HoverService.h>
 #include <ServiceSystem/MouseServices/MouseService.h>
-#include <ServiceSystem/MouseServices/ResizeService.h>
-#include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <ServiceSystem/UpdateServices/TimerService.h>
 #include <Utils/Colors.h>
@@ -203,7 +203,7 @@ class TimerTest : public TestBase {
    private:
     void init();
 
-    bool onTimer(Timer& timer);
+    bool onTimer(Timer &timer);
 
     void onTimerUpdate(Time dt, Timer &t);
 
