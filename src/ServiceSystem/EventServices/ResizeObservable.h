@@ -3,10 +3,13 @@
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/CoreServices/EventService.h>
+#include <ServiceSystem/EventServices/EventObservable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
 
+#include <memory>
+
+namespace EventServices {
 struct ResizeData {
     int oldW, oldH, newW, newH;
 };
@@ -21,6 +24,7 @@ class ResizeObservable : public Component,
     EventObservable::SubscriptionPtr mEventSub;
 };
 
-class ResizeService : public Service<ResizeObservable> {};
+typedef std::shared_ptr<ResizeObservable> ResizeObservablePtr;
+}  // namespace EventServices
 
 #endif

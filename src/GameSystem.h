@@ -4,9 +4,9 @@
 #include <EventSystem/EventSystem.h>
 #include <RenderSystem/RenderSystem.h>
 #include <SDL.h>
-#include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
+#include <ServiceSystem/EventServices/EventService.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
 

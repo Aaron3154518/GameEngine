@@ -1,9 +1,12 @@
-#include "MouseService.h"
+#include "MouseObservable.h"
 
+#include <ServiceSystem/EventServices/EventService.h>
+
+namespace EventServices {
 // MouseObservable
 void MouseObservable::init() {
-    eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
-        [this](const Event& e) { onEvent(e); });
+    eventSub =
+        GetEventObservable()->subscribe([this](const Event& e) { onEvent(e); });
 }
 
 void MouseObservable::onSubscribe(SubscriptionPtr sub) {
@@ -34,3 +37,4 @@ void MouseObservable::onEvent(Event e) {
         next(e[Event::LEFT]);
     }
 }
+}  // namespace EventServices

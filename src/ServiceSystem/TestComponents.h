@@ -1,12 +1,8 @@
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
-#include <ServiceSystem/EventServices/ResizeService.h>
+#include <ServiceSystem/EventServices/EventService.h>
 #include <ServiceSystem/Lockable.h>
-#include <ServiceSystem/MouseServices/DragService.h>
-#include <ServiceSystem/MouseServices/HoverService.h>
-#include <ServiceSystem/MouseServices/MouseService.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <ServiceSystem/UpdateServices/TimerService.h>
 #include <Utils/Colors.h>
@@ -15,6 +11,8 @@
 #include <Utils/Time.h>
 
 #include <random>
+
+using namespace EventServices;
 
 class TestBase : public Component {
    public:

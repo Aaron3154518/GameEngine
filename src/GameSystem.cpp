@@ -37,7 +37,7 @@ void Run() {
         // Send update
         ServiceSystem::Get<UpdateService, UpdateObservable>()->next(e.dt());
         // Send event
-        ServiceSystem::Get<EventService, EventObservable>()->next(e);
+        EventServices::GetEventObservable()->next(e);
 
         // Clear screen
         RenderSystem::clearScreen(LGRAY);

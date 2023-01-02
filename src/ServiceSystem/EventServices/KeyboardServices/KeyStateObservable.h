@@ -1,5 +1,5 @@
-#ifndef KEYBOARD_SERVICE_H
-#define KEYBOARD_SERVICE_H
+#ifndef KEY_STATE_SERVICE_H
+#define KEY_STATE_SERVICE_H
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
@@ -7,19 +7,17 @@
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
 
+#include <memory>
 #include <vector>
 
-typedef Observable<void(SDL_Keycode), std::vector<SDL_Keycode>>
-    KeyPressObservableBase;
+namespace EventServices {
 typedef Observable<void(SDL_Keycode), void(SDL_Keycode),
                    void(SDL_Keycode, uint32_t), std::vector<SDL_Keycode>>
     KeyStateObservableBase;
 
-class KeyPressObservable : public KeyPressObservableBase {};
-
 class KeyStateObservable : public KeyStateObservableBase {};
 
-class KeyboardService : public Service<KeyPressObservable, KeyStateObservable> {
-};
+typedef std::shared_ptr<KeyStateObservable> KeyStateObservablePtr;
+}  // namespace EventServices
 
 #endif

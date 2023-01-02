@@ -3,10 +3,10 @@
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/CoreServices/EventService.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/CoreServices/UpdateService.h>
-#include <ServiceSystem/MouseServices/MouseService.h>
+#include <ServiceSystem/EventServices/EventObservable.h>
+#include <ServiceSystem/EventServices/MouseServices/MouseObservable.h>
 #include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
@@ -18,6 +18,7 @@
 #include <memory>
 #include <set>
 
+namespace EventServices {
 struct DragComponent {
     DragComponent() = default;
     DragComponent(int _dragDelay) : dragDelay(_dragDelay) {}
@@ -54,6 +55,7 @@ class DragObservable : public Component, public DragObservableBase {
     EventObservable::SubscriptionPtr eventSub;
 };
 
-class DragService : public Service<DragObservable> {};
+typedef std::shared_ptr<DragObservable> DragObservablePtr;
+}  // namespace EventServices
 
 #endif

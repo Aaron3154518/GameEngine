@@ -6,10 +6,14 @@
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
 
+#include <memory>
+
+namespace EventServices {
 typedef Observable<void(const std::string&)> TypingObservableBase;
 
 class TypingObservable : public TypingObservableBase {};
 
-class KeyboardService : public Service<TypingObservable> {};
+typedef std::shared_ptr<TypingObservable> TypingObservablePtr;
+}  // namespace EventServices
 
 #endif

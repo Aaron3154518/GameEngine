@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/CoreServices/EventService.h>
+#include <ServiceSystem/EventServices/EventObservable.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
 #include <ServiceSystem/Lockable.h>
 #include <ServiceSystem/Observable.h>
@@ -15,6 +15,7 @@
 #include <memory>
 #include <set>
 
+namespace EventServices {
 typedef Observable<void(Event::MouseButton, bool), UIComponentPtr>
     MouseObservableBase;
 
@@ -36,6 +37,7 @@ class MouseObservable : public Component,
     EventObservable::SubscriptionPtr eventSub;
 };
 
-class MouseService : public Service<MouseObservable> {};
+typedef std::shared_ptr<MouseObservable> MouseObservablePtr;
+}  // namespace EventServices
 
 #endif

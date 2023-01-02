@@ -1,12 +1,15 @@
-#include "DragService.h"
+#include "DragObservable.h"
 
+#include <ServiceSystem/EventServices/EventService.h>
+
+namespace EventServices {
 // DragObservable
 void DragObservable::init() {
     updateSub =
         ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
             [this](Time dt) { onUpdate(dt); });
-    eventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
-        [this](const Event &e) { onEvent(e); });
+    eventSub =
+        GetEventObservable()->subscribe([this](const Event &e) { onEvent(e); });
 }
 
 void DragObservable::onSubscribe(SubscriptionPtr sub) {
@@ -48,9 +51,7 @@ void DragObservable::next(const Event &e) {
                 if ((dragDelay < 0 && e.mouseMoved()) ||
                     (dragDelay >= 0 && left.duration >= dragDelay)) {
                     current = sub;
-                    mouseLock =
-                        ServiceSystem::Get<MouseService, MouseObservable>()
-                            ->requestLock();
+                    mouseLock = GetMouseObservable()->requestLock();
                     dragData->dragging = true;
                     current->get<DRAG_START>()();
                     current->get<DRAG>()(mousePos.x, mousePos.y, e.mouseDx(),
@@ -64,9 +65,9 @@ void DragObservable::next(const Event &e) {
 
 void DragObservable::onUpdate(Time dt) {
     if (mouseLock && !current) {
-        ServiceSystem::Get<MouseService, MouseObservable>()->releaseLock(
-            mouseLock);
+        GetMouseObservable()->releaseLock(mouseLock);
     }
 }
 
 void DragObservable::onEvent(const Event &e) { next(e); }
+}  // namespace EventServices

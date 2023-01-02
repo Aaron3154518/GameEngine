@@ -1,9 +1,12 @@
-#include "HoverService.h"
+#include "HoverObservable.h"
 
+#include <ServiceSystem/EventServices/EventService.h>
+
+namespace EventServices {
 // HoverObservable
 void HoverObservable::init() {
-    mEventSub = ServiceSystem::Get<EventService, EventObservable>()->subscribe(
-        [this](const Event& e) { onEvent(e); });
+    mEventSub =
+        GetEventObservable()->subscribe([this](const Event& e) { onEvent(e); });
 }
 
 void HoverObservable::onSubscribe(SubscriptionPtr sub) {
@@ -13,7 +16,7 @@ void HoverObservable::onSubscribe(SubscriptionPtr sub) {
 
 void HoverObservable::next(SDL_Point mouse) {
     // If a lock exists, nobody gets hovered
-    if (ServiceSystem::Get<MouseService, MouseObservable>()->isLocked()) {
+    if (GetMouseObservable()->isLocked()) {
         SubscriptionPtr currHover = mCurrHover.lock();
         if (currHover) {
             currHover->get<ON_MOUSE_LEAVE>()();
@@ -58,3 +61,4 @@ void HoverObservable::next(SDL_Point mouse) {
 }
 
 void HoverObservable::onEvent(Event e) { next(e.mouse()); }
+}  // namespace EventServices

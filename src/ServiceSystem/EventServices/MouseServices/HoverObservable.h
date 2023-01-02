@@ -3,9 +3,9 @@
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/CoreServices/EventService.h>
+#include <ServiceSystem/EventServices/EventObservable.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
-#include <ServiceSystem/MouseServices/MouseService.h>
+#include <ServiceSystem/EventServices/MouseServices/MouseObservable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
 #include <ServiceSystem/ServiceSystem.h>
@@ -15,6 +15,7 @@
 #include <memory>
 #include <set>
 
+namespace EventServices {
 typedef Observable<void(), void(SDL_Point), void(), UIComponentPtr>
     HoverObservableBase;
 
@@ -35,6 +36,7 @@ class HoverObservable : public Component, public HoverObservableBase {
     EventObservable::SubscriptionPtr mEventSub;
 };
 
-class HoverService : public Service<HoverObservable> {};
+typedef std::shared_ptr<HoverObservable> HoverObservablePtr;
+}  // namespace EventServices
 
 #endif
