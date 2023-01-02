@@ -4,6 +4,7 @@
 #include <Utils/AnimationData.h>
 #include <Utils/Color.h>
 #include <Utils/Event.h>
+#include <Utils/Math.h>
 #include <Utils/Number.h>
 #include <Utils/Rect.h>
 #include <Utils/Time.h>
