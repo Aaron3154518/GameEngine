@@ -1,6 +1,7 @@
 #define SDL_MAIN_HANDLED
 
 #include <SDL_ttf.h>
+#include <ServiceSystem/EventServices/EventService.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <ServiceSystem/TestComponents.h>
 #include <Utils/Event.h>
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
     auto t15 = ComponentFactory<ResizeTest>::New();
     auto t16 = ComponentFactory<HoverTest>::New(Rect(5, 455, 40, 40), 9);
     auto t17 = ComponentFactory<NoMouseTest>::New(Rect(300, 225, 50, 50));
+    auto t18 = ComponentFactory<ScrollTest>::New(Rect(175, 15, 45, 470), 2);
 
     Event e;
 
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
             ->computeUnderMouse(e.mouse());
 
         ServiceSystem::Get<UpdateService, UpdateObservable>()->next(dt);
-        ServiceSystem::Get<EventService, EventObservable>()->next(e);
+        GetEventObservable()->next(e);
 
         // Rendering
         SDL_RenderClear(renderer);

@@ -23,7 +23,7 @@ class TestBase : public Component {
    protected:
     virtual void init();
 
-    void onRender(SDL_Renderer *renderer);
+    virtual void onRender(SDL_Renderer *renderer);
 
     std::shared_ptr<UIComponent> mPos;
     RenderObservable::SubscriptionPtr mRenderSub;
@@ -246,6 +246,32 @@ class NoMouseTest : public TestBase {
     NoMouseTest(Rect r);
 
     SDL_Color getColor() const;
+};
+
+class ScrollTest : public TestBase {
+    class ScrollBox : public TestBase {
+        friend class ScrollTest;
+
+       public:
+        ScrollBox(Rect r, int e);
+
+        SDL_Color getColor() const;
+    };
+
+    typedef std::unique_ptr<ScrollBox> ScrollBoxPtr;
+
+   public:
+    using TestBase::TestBase;
+
+   private:
+    void init();
+
+    void onRender(SDL_Renderer *r);
+
+    void onScroll(int scroll);
+
+    ScrollBoxPtr mBox;
+    ScrollObservable::SubscriptionPtr mScrollSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

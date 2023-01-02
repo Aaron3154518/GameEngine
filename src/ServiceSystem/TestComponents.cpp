@@ -225,9 +225,6 @@ void MultiUnsubTest::init() {
     }
     mMouseSub = GetMouseObservable()->subscribe(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
-    mRenderSub =
-        ServiceSystem::Get<RenderService, RenderObservable>()->subscribe(
-            [this](SDL_Renderer *r) { onRender(r); }, mPos);
 }
 
 void MultiUnsubTest::onUpdate(Time dt) { ctr++; }
@@ -386,6 +383,35 @@ void HoverTest::onHover(SDL_Point mouse) {
 NoMouseTest::NoMouseTest(Rect r) : TestBase(r, 100) { mPos->mouse = false; }
 
 SDL_Color NoMouseTest::getColor() const { return WHITE; }
+
+// ScrollTest::ScrollBox
+ScrollTest::ScrollBox::ScrollBox(Rect r, int e) : TestBase(r, e) {
+    mPos->mouse = false;
+}
+
+SDL_Color ScrollTest::ScrollBox::getColor() const { return SDL_Color(); }
+
+// ScrollTest
+void ScrollTest::init() {
+    Rect r(0, mPos->rect.y(), mPos->rect.minDim(), mPos->rect.minDim());
+    r.setPosX(mPos->rect.cX(), Rect::Align::CENTER);
+    mBox = ComponentFactory<ScrollBox>::New(r, mPos->elevation + 1);
+
+    TestBase::init();
+
+    mScrollSub =
+        GetScrollObservable()->subscribe([this](int s) { onScroll(s); }, mPos);
+}
+
+void ScrollTest::onRender(SDL_Renderer *r) {
+    SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
+    SDL_RenderDrawRect(r, mPos->rect);
+}
+
+void ScrollTest::onScroll(int scroll) {
+    mBox->mPos->rect.move(0, scroll * 8);
+    mBox->mPos->rect.fitWithin(mPos->rect);
+}
 
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
