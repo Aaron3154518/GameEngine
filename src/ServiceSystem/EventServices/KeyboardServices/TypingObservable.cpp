@@ -28,7 +28,30 @@ void TypingObservable::onEvent(const Event& e) {
 
     auto& comp = mText[sub->get<LOCK>()];
 
+    // Backspace and delete
+    int backCnt = std::min(e.textInputBackspace(), (int)comp.start.tellp());
+    if (backCnt > 0) {
+        int size = (int)comp.start.tellp() - backCnt;
+        comp.start.str(comp.start.str().substr(0, size));
+        comp.start.seekp(size);
+    }
+    int delCnt = std::min(e.textInputDelete(), (int)comp.end.tellp());
+    if (delCnt > 0) {
+        std::string end = comp.end.str();
+        comp.end.str("");
+        comp.end << end.substr(delCnt);
+    }
+
+    // New characters
+    comp.start << e.textInput();
+
+    // Cursor move
     int textMove = e.textInputMove();
+    if (e.textInputSeekStart()) {
+        textMove = -comp.start.tellp();
+    } else if (e.textInputSeekEnd()) {
+        textMove = comp.end.tellp();
+    }
     textMove = textMove >= 0 ? std::min(textMove, (int)comp.end.tellp())
                              : -std::min(-textMove, (int)comp.start.tellp());
     if (textMove > 0) {
@@ -44,13 +67,6 @@ void TypingObservable::onEvent(const Event& e) {
         comp.end.str("");
         comp.end << start.substr(start.size() + textMove) << end;
     }
-
-    if (e.textInputBackspaced()) {
-        int size = std::max(0, (int)comp.start.tellp() - 1);
-        comp.start.str(comp.start.str().substr(0, size));
-        comp.start.seekp(size);
-    }
-    comp.start << e.textInput();
 
     sub->get<ON_INPUT>()(comp.start.str() + comp.end.str(), comp.start.tellp(),
                          e.textInput());

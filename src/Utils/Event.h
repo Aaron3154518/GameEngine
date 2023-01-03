@@ -68,7 +68,10 @@ class Event {
     int scroll() const;
 
     int textInputMove() const;
-    bool textInputBackspaced() const;
+    int textInputBackspace() const;
+    int textInputDelete() const;
+    bool textInputSeekStart() const;
+    bool textInputSeekEnd() const;
     bool textInputUpdated() const;
     const std::string &textInput() const;
 
@@ -103,9 +106,10 @@ class Event {
     int mScroll = 0;
 
     // Inputted text
+    enum InputSeek : uint8_t { NONE = 0, START, END };
     std::string mInputText;
-    bool mInputBackspace = false;
-    int mInputTextMove = 0;
+    int mInputBackspace = 0, mInputDelete = 0, mInputMove = 0;
+    InputSeek mInputSeek = InputSeek::NONE;
 
     std::array<MouseButton, NUM_MICE> mMouseButtons;
     std::unordered_map<SDL_KeyCode, KeyButton> mKeyButtons;

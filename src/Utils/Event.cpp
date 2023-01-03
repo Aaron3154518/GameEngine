@@ -41,8 +41,10 @@ void Event::update() {
     mQuit = mResized = false;
     // Reset text editing
     mInputText = "";
-    mInputBackspace = false;
-    mInputTextMove = 0;
+    mInputBackspace = 0;
+    mInputDelete = 0;
+    mInputMove = 0;
+    mInputSeek = InputSeek::NONE;
     // Update mouse
     SDL_GetMouseState(&mMouse.x, &mMouse.y);
     // Reset mouse movement
@@ -149,16 +151,25 @@ void Event::processTextInputKey(const KeyButton &b) {
     switch (b.key) {
         case SDLK_BACKSPACE: {
             if (mInputText.empty()) {
-                mInputBackspace = true;
+                mInputBackspace++;
             } else {
                 mInputText = mInputText.substr(0, mInputText.size() - 1);
             }
         } break;
+        case SDLK_DELETE: {
+            mInputDelete++;
+        } break;
         case SDLK_LEFT: {
-            mInputTextMove--;
+            mInputMove--;
         } break;
         case SDLK_RIGHT: {
-            mInputTextMove++;
+            mInputMove++;
+        } break;
+        case SDLK_HOME: {
+            mInputSeek = InputSeek::START;
+        } break;
+        case SDLK_END: {
+            mInputSeek = InputSeek::END;
         } break;
         default:
             break;
@@ -182,10 +193,17 @@ float Event::mouseDy() const { return mMouseDy; }
 bool Event::mouseMoved() const { return mMouseDx != 0 || mMouseDy != 0; }
 int Event::scroll() const { return mScroll; }
 
-int Event::textInputMove() const { return mInputTextMove; }
-bool Event::textInputBackspaced() const { return mInputBackspace; }
+int Event::textInputMove() const { return mInputMove; }
+int Event::textInputBackspace() const { return mInputBackspace; }
+int Event::textInputDelete() const { return mInputDelete; }
+bool Event::textInputSeekStart() const {
+    return mInputSeek == InputSeek::START;
+}
+bool Event::textInputSeekEnd() const { return mInputSeek == InputSeek::END; }
 bool Event::textInputUpdated() const {
-    return textInputBackspaced() || !mInputText.empty() || textInputMove() != 0;
+    return !mInputText.empty() || textInputMove() != 0 ||
+           textInputBackspace() != 0 || textInputDelete() != 0 ||
+           textInputSeekStart() || textInputSeekEnd();
 }
 const std::string &Event::textInput() const { return mInputText; }
 
