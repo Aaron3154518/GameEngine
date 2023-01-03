@@ -30,12 +30,12 @@ class KeyboardObservable : public Component, public KeyboardObservableBase {
     SubscriptionPtr subscribe(KeyFunc onKeyEvent, Event::Button keyBtn,
                               const std::unordered_set<SDL_KeyCode>& keys = {});
 
+    void next(const std::vector<Event::KeyButton>& keys);
+
     static const KeyFunc& DO_NOTHING();
 
    private:
     void init();
-
-    void next(const std::vector<Event::KeyButton>& keys);
 
     void onEvent(const Event& e);
 

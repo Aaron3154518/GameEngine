@@ -10,7 +10,9 @@
 #include <Utils/Rect.h>
 #include <Utils/Time.h>
 
+#include <algorithm>
 #include <random>
+#include <string>
 
 using namespace EventServices;
 
@@ -25,6 +27,8 @@ class TestBase : public Component {
 
     virtual void onRender(SDL_Renderer *renderer);
 
+    SDL_Color mColor = BLACK;
+
     std::shared_ptr<UIComponent> mPos;
     RenderObservable::SubscriptionPtr mRenderSub;
 };
@@ -33,14 +37,11 @@ class ClickRenderTest : public TestBase {
    public:
     ClickRenderTest(Rect r, int e);
 
-    SDL_Color getColor() const;
-
    private:
     void init();
 
     void onClick(Event::MouseButton b, bool clicked);
 
-    SDL_Color color = RED;
     MouseObservable::SubscriptionPtr mMouseSub;
 };
 
@@ -112,14 +113,11 @@ class InheritanceTestBase : public TestBase {
    public:
     InheritanceTestBase(Rect r, int e);
 
-    SDL_Color getColor() const;
-
    protected:
     virtual void init();
 
     void onClick(Event::MouseButton b, bool clicked, bool red);
 
-    SDL_Color color = BLACK;
     bool increaseColor = true;
     static const Uint8 COLOR_INC;
 
@@ -196,8 +194,6 @@ class TimerTest : public TestBase {
    public:
     TimerTest(Rect r, int e);
 
-    SDL_Color getColor() const;
-
    private:
     void init();
 
@@ -205,16 +201,12 @@ class TimerTest : public TestBase {
 
     void onTimerUpdate(Time dt, Timer &t);
 
-    SDL_Color color = PURPLE;
-
     TimerObservable::SubscriptionPtr mTimerSub;
 };
 
 class ResizeTest : public TestBase {
    public:
     ResizeTest();
-
-    SDL_Color getColor() const;
 
    private:
     void init();
@@ -228,8 +220,6 @@ class HoverTest : public TestBase {
    public:
     HoverTest(Rect r, int e);
 
-    SDL_Color getColor() const;
-
    private:
     void init();
 
@@ -237,7 +227,6 @@ class HoverTest : public TestBase {
     void onMouseLeave();
     void onHover(SDL_Point mouse);
 
-    SDL_Color mColor = CYAN;
     HoverObservable::SubscriptionPtr mHoverSub;
 };
 
@@ -254,8 +243,6 @@ class ScrollTest : public TestBase {
 
        public:
         ScrollBox(Rect r, int e);
-
-        SDL_Color getColor() const;
     };
 
     typedef std::unique_ptr<ScrollBox> ScrollBoxPtr;
@@ -278,8 +265,6 @@ class KeyTest : public TestBase {
    public:
     using TestBase::TestBase;
 
-    SDL_Color getColor() const;
-
    private:
     void init();
 
@@ -287,9 +272,22 @@ class KeyTest : public TestBase {
     void onSpaceHeld(Event::KeyButton k);
     void onSpaceReleased(Event::KeyButton k);
 
-    SDL_Color mColor = BLACK;
-
     KeyboardObservable::SubscriptionPtr mAllKeysPressSub, mSpaceHeldReleaseSub;
+};
+
+class TypingTest : public TestBase {
+   public:
+    using TestBase::TestBase;
+
+   private:
+    void init();
+
+    void onClick(Event::MouseButton b, bool clicked);
+
+    void onInput(const std::string &fullText, const std::string &newText);
+
+    MouseObservable::SubscriptionPtr mMouseSub;
+    TypingObservable::SubscriptionPtr mTypingSub, mTypingSub2;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);

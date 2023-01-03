@@ -39,14 +39,14 @@ class DragObservable : public Component, public DragObservableBase {
 
     void onSubscribe(SubscriptionPtr sub);
 
-    void next(const Event& e);
-
    private:
     void init();
 
     void onUpdate(Time dt);
 
     void onEvent(const Event& e);
+
+    void next(const Event& e);
 
     MouseObservable::Lock mouseLock;
     SubscriptionPtr current;

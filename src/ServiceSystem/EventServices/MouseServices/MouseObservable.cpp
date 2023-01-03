@@ -3,8 +3,10 @@
 #include <ServiceSystem/EventServices/EventService.h>
 
 namespace EventServices {
-const std::function<void(Event::MouseButton, bool)>
-    MouseObservable::DO_NOTHING = [](Event::MouseButton b, bool c) {};
+const MouseObservable::ClickFunc& MouseObservable::DO_NOTHING() {
+    const static ClickFunc DO_NOTHING = [](Event::MouseButton b, bool c) {};
+    return DO_NOTHING;
+}
 
 // MouseObservable::Lock
 MouseObservable::Lock::Lock(const MouseVector& mice) : mMice(mice) {
@@ -39,16 +41,33 @@ void MouseObservable::init() {
 }
 
 MouseObservable::SubscriptionPtr MouseObservable::subscribe(
-    std::function<void(Event::MouseButton, bool)> onClick, UIComponentPtr pos) {
-    return subscribe(onClick, onClick, onClick, pos);
+    ClickFunc onClick, UIComponentPtr pos,
+    const std::vector<Event::Mouse>& btns) {
+    if (btns.empty()) {
+        return subscribe(onClick, onClick, onClick, pos);
+    }
+
+    auto bIt = btns.begin(), eIt = btns.end();
+
+    bool l = std::find(bIt, eIt, Event::Mouse::LEFT) != eIt;
+    bool r = std::find(bIt, eIt, Event::Mouse::RIGHT) != eIt;
+    bool m = std::find(bIt, eIt, Event::Mouse::MIDDLE) != eIt;
+
+    return subscribe(l ? onClick : DO_NOTHING(), r ? onClick : DO_NOTHING(),
+                     m ? onClick : DO_NOTHING(), pos);
 }
 
-MouseObservable::SubscriptionPtr MouseObservable::subscribe(
-    std::function<void(Event::MouseButton, bool)> onClick, Event::Mouse btn,
-    UIComponentPtr pos) {
-    return subscribe(btn == Event::Mouse::LEFT ? onClick : DO_NOTHING,
-                     btn == Event::Mouse::RIGHT ? onClick : DO_NOTHING,
-                     btn == Event::Mouse::RIGHT ? onClick : DO_NOTHING, pos);
+MouseObservable::SubscriptionPtr MouseObservable::subscribeLeftClick(
+    ClickFunc onClick, UIComponentPtr pos) {
+    return subscribe(onClick, pos, {Event::Mouse::LEFT});
+}
+MouseObservable::SubscriptionPtr MouseObservable::subscribeRightClick(
+    ClickFunc onClick, UIComponentPtr pos) {
+    return subscribe(onClick, pos, {Event::Mouse::RIGHT});
+}
+MouseObservable::SubscriptionPtr MouseObservable::subscribeMiddleClick(
+    ClickFunc onClick, UIComponentPtr pos) {
+    return subscribe(onClick, pos, {Event::Mouse::MIDDLE});
 }
 
 void MouseObservable::onSubscribe(SubscriptionPtr sub) {
@@ -99,8 +118,8 @@ bool MouseObservable::isLocked() const {
     return false;
 }
 
-const std::function<void(Event::MouseButton, bool)>&
-MouseObservable::getOnClick(SubscriptionPtr sub, Event::Mouse btn) {
+const MouseObservable::ClickFunc& MouseObservable::getOnClick(
+    SubscriptionPtr sub, Event::Mouse btn) {
     switch (btn) {
         case Event::Mouse::LEFT:
             return sub->get<ON_LEFT>();
@@ -113,7 +132,7 @@ MouseObservable::getOnClick(SubscriptionPtr sub, Event::Mouse btn) {
     throw std::runtime_error("MouseObservable::getOnClick(): Invalid mouse: " +
                              std::to_string(btn));
 
-    return DO_NOTHING;
+    return DO_NOTHING();
 }
 
 void MouseObservable::onEvent(Event e) {

@@ -14,12 +14,15 @@ struct ResizeData {
     int oldW, oldH, newW, newH;
 };
 
-class ResizeObservable : public Component,
-                         public ForwardObservable<void(ResizeData)> {
+typedef ForwardObservable<void(ResizeData)> ResizeObservableBase;
+
+class ResizeObservable : public Component, public ResizeObservableBase {
    private:
     void init();
 
     void onEvent(const Event& e);
+
+    using ResizeObservableBase::next;
 
     EventObservable::SubscriptionPtr mEventSub;
 };

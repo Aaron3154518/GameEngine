@@ -1,6 +1,6 @@
-#include <ServiceSystem/EventServices/EventService.h>
-
 #include "KeyboardObservable.h"
+
+#include <ServiceSystem/EventServices/EventService.h>
 
 namespace EventServices {
 // KeyboardObservable
@@ -24,12 +24,11 @@ KeyboardObservable::SubscriptionPtr KeyboardObservable::subscribe(
         keyBtn == Event::Button::HELD ? onKeyEvent : DO_NOTHING(), keys);
 }
 
-void KeyboardObservable::init() {
-    mEventSub =
-        GetEventObservable()->subscribe([this](const Event& e) { onEvent(e); });
-}
-
 void KeyboardObservable::next(const std::vector<Event::KeyButton>& keys) {
+    if (SDL_IsTextInputActive() == SDL_TRUE) {
+        return;
+    }
+
     for (auto sub : *this) {
         auto& set = sub->get<KEYS>();
         for (auto& key : keys) {
@@ -46,6 +45,11 @@ void KeyboardObservable::next(const std::vector<Event::KeyButton>& keys) {
             }
         }
     }
+}
+
+void KeyboardObservable::init() {
+    mEventSub =
+        GetEventObservable()->subscribe([this](const Event& e) { onEvent(e); });
 }
 
 void KeyboardObservable::onEvent(const Event& e) {

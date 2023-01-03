@@ -20,9 +20,9 @@ class ScrollObservable : public Component, public ScrollObservableBase {
    private:
     void init();
 
-    void next(int scroll);
-
     void onEvent(const Event& e);
+
+    void next(int scroll);
 
     EventObservable::SubscriptionPtr mEventSub;
 };

@@ -131,7 +131,7 @@ void Event::update(SDL_Event &e) {
         case SDL_TEXTEDITING:
             break;
         case SDL_TEXTINPUT: {
-            mInputText = e.text.text;
+            mInputText += e.text.text;
         } break;
         default:
 #ifdef EVENT_DEBUG
@@ -158,7 +158,8 @@ float Event::mouseDy() const { return mMouseDy; }
 bool Event::mouseMoved() const { return mMouseDx != 0 || mMouseDy != 0; }
 int Event::scroll() const { return mScroll; }
 
-std::string Event::textInput() const { return mInputText; }
+bool Event::textInputUpdated() const { return !mInputText.empty(); }
+const std::string &Event::textInput() const { return mInputText; }
 
 Event::KeyButton &Event::get(SDL_KeyCode key) {
     return mKeyButtons.emplace(key, KeyButton{key}).first->second;

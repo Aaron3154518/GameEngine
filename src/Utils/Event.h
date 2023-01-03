@@ -67,7 +67,8 @@ class Event {
     bool mouseMoved() const;
     int scroll() const;
 
-    std::string textInput() const;
+    bool textInputUpdated() const;
+    const std::string &textInput() const;
 
     KeyButton &get(SDL_KeyCode key);
 

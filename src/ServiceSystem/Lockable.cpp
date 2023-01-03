@@ -2,9 +2,12 @@
 
 // Lock
 Lock::Lock() : Lock(nullptr) {}
-Lock::Lock(bool* lock) : mLock(lock) {}
+Lock::Lock(void* lock) : mLock(lock) {}
 
 Lock::operator bool() const { return mLock; }
+
+bool Lock::operator==(void* rhs) const { return mLock == rhs; }
+bool Lock::operator!=(void* rhs) const { return !(*this == rhs); }
 
 // Lockable
 Lock Lockable::requestLock() {
@@ -23,3 +26,7 @@ void Lockable::releaseLock(Lock& lock) {
 }
 
 bool Lockable::isLocked() const { return mLocks.size() > 0; }
+
+const std::list<std::unique_ptr<bool>>& Lockable::locks() const {
+    return mLocks;
+}

@@ -25,6 +25,8 @@ typedef Observable<void(Event::MouseButton, bool),
     MouseObservableBase;
 
 class MouseObservable : public Component, public MouseObservableBase {
+    typedef std::function<void(Event::MouseButton, bool)> ClickFunc;
+
    public:
     class Lock {
         friend class MouseObservable;
@@ -47,31 +49,28 @@ class MouseObservable : public Component, public MouseObservableBase {
     enum : size_t { ON_LEFT = 0, ON_RIGHT, ON_MIDDLE, DATA };
 
     using MouseObservableBase::subscribe;
-    SubscriptionPtr subscribe(
-        std::function<void(Event::MouseButton, bool)> onClick,
-        UIComponentPtr pos);
-    SubscriptionPtr subscribe(
-        std::function<void(Event::MouseButton, bool)> onClick, Event::Mouse btn,
-        UIComponentPtr pos);
+    SubscriptionPtr subscribe(ClickFunc onClick, UIComponentPtr pos,
+                              const std::vector<Event::Mouse>& btns = {});
+    SubscriptionPtr subscribeLeftClick(ClickFunc onClick, UIComponentPtr pos);
+    SubscriptionPtr subscribeRightClick(ClickFunc onClick, UIComponentPtr pos);
+    SubscriptionPtr subscribeMiddleClick(ClickFunc onClick, UIComponentPtr pos);
 
     void onSubscribe(SubscriptionPtr sub);
-
-    void next(Event::MouseButton mouse);
 
     Lock requestLock(const MouseVector& mice);
     void releaseLock(Lock& lock);
     bool isLocked(Event::Mouse mouse) const;
     bool isLocked() const;
 
-    static const std::function<void(Event::MouseButton, bool)>& getOnClick(
-        SubscriptionPtr sub, Event::Mouse btn);
+    static const ClickFunc& getOnClick(SubscriptionPtr sub, Event::Mouse btn);
+    static const ClickFunc& DO_NOTHING();
 
    private:
-    const static std::function<void(Event::MouseButton, bool)> DO_NOTHING;
-
     void init();
 
     void onEvent(Event e);
+
+    void next(Event::MouseButton mouse);
 
     EventObservable::SubscriptionPtr eventSub;
 

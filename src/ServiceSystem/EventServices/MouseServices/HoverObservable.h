@@ -3,8 +3,8 @@
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
-#include <ServiceSystem/EventServices/EventObservable.h>
 #include <ServiceSystem/CoreServices/RenderService.h>
+#include <ServiceSystem/EventServices/EventObservable.h>
 #include <ServiceSystem/EventServices/MouseServices/MouseObservable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/Service.h>
@@ -25,12 +25,12 @@ class HoverObservable : public Component, public HoverObservableBase {
 
     void onSubscribe(SubscriptionPtr sub);
 
-    void next(SDL_Point mouse);
-
    private:
     void init();
 
     void onEvent(Event e);
+
+    void next(SDL_Point mouse);
 
     SubscriptionWPtr mCurrHover;
     EventObservable::SubscriptionPtr mEventSub;

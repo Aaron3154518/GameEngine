@@ -5,7 +5,7 @@ using namespace EventServices;
 // TestBase
 TestBase::TestBase(Rect r, int e) : mPos(std::make_shared<UIComponent>(r, e)) {}
 
-SDL_Color TestBase::getColor() const { return BLACK; }
+SDL_Color TestBase::getColor() const { return mColor; }
 
 void TestBase::init() {
     mRenderSub =
@@ -25,9 +25,9 @@ void TestBase::onRender(SDL_Renderer *renderer) {
 }
 
 // ClickRenderTest
-ClickRenderTest::ClickRenderTest(Rect r, int e) : TestBase(r, e) {}
-
-SDL_Color ClickRenderTest::getColor() const { return color; }
+ClickRenderTest::ClickRenderTest(Rect r, int e) : TestBase(r, e) {
+    mColor = RED;
+}
 
 void ClickRenderTest::init() {
     TestBase::init();
@@ -37,19 +37,19 @@ void ClickRenderTest::init() {
 
 void ClickRenderTest::onClick(Event::MouseButton b, bool clicked) {
     if (!clicked) {
-        color = RED;
+        mColor = RED;
         return;
     }
 
     switch (b.mouse) {
         case Event::Mouse::LEFT:
-            color = GREEN;
+            mColor = GREEN;
             break;
         case Event::Mouse::RIGHT:
-            color = {0, 128, 0, 255};
+            mColor = {0, 128, 0, 255};
             break;
         case Event::Mouse::MIDDLE:
-            color = {0, 64, 0, 255};
+            mColor = {0, 64, 0, 255};
             break;
     }
 }
@@ -61,7 +61,7 @@ SDL_Color ChangeSubTest::getColor() const { return color ? ORANGE : PURPLE; }
 
 void ChangeSubTest::init() {
     TestBase::init();
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
 }
 
@@ -84,7 +84,7 @@ SDL_Color UnsubTest::getColor() const { return color ? YELLOW : BLUE; }
 
 void UnsubTest::init() {
     TestBase::init();
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
 }
 
@@ -118,7 +118,7 @@ void UpdateTest::init() {
     mUpdateSub =
         ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
             [this](Time dt) { onUpdate(dt); });
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
 }
 
@@ -142,7 +142,7 @@ void VisibilityTest::init() {
     mUpdateSub =
         ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
             [this](Time dt) { onUpdate(dt); });
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
 }
 
@@ -167,11 +167,9 @@ const Uint8 InheritanceTestBase::COLOR_INC = 50;
 
 InheritanceTestBase::InheritanceTestBase(Rect r, int e) : TestBase(r, e) {}
 
-SDL_Color InheritanceTestBase::getColor() const { return color; }
-
 void InheritanceTestBase::init() {
     TestBase::init();
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) {
             InheritanceTestBase::onClick(b, c, true);
         },
@@ -181,7 +179,7 @@ void InheritanceTestBase::init() {
 void InheritanceTestBase::onClick(Event::MouseButton b, bool clicked,
                                   bool red) {
     if (clicked) {
-        Uint8 &val = red ? color.r : color.g;
+        Uint8 &val = red ? mColor.r : mColor.g;
         if (increaseColor) {
             val = std::min(255, val + COLOR_INC);
             if (val == 255) {
@@ -202,7 +200,7 @@ InheritanceTestDerived::InheritanceTestDerived(Rect r, int e)
 
 void InheritanceTestDerived::init() {
     InheritanceTestBase::init();
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) {
             InheritanceTestDerived::onClick(b, c, false);
         },
@@ -223,7 +221,7 @@ void MultiUnsubTest::init() {
             ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
                 [this](Time dt) { onUpdate(dt); });
     }
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
 }
 
@@ -263,7 +261,7 @@ void MouseLockTest::init() {
     mUpdateSub =
         ServiceSystem::Get<UpdateService, UpdateObservable>()->subscribe(
             [this](Time dt) { onUpdate(dt); });
-    mMouseSub = GetMouseObservable()->subscribe(
+    mMouseSub = GetMouseObservable()->subscribeLeftClick(
         [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos);
 }
 
@@ -314,8 +312,6 @@ void DragTest::onDragEnd() {}
 // TimerTest
 TimerTest::TimerTest(Rect r, int e) : TestBase(r, e) {}
 
-SDL_Color TimerTest::getColor() const { return color; }
-
 void TimerTest::init() {
     TestBase::init();
     mTimerSub = ServiceSystem::Get<TimerService, TimerObservable>()->subscribe(
@@ -324,23 +320,21 @@ void TimerTest::init() {
 }
 
 bool TimerTest::onTimer(Timer &timer) {
-    color = PURPLE;
+    mColor = PURPLE;
     timer.length = rand() % 500 + 500;
     return rand() % 50 != 0;
 }
 
 void TimerTest::onTimerUpdate(Time dt, Timer &t) {
     if (t.timer < t.length / 3) {
-        color = RED;
+        mColor = RED;
     } else if (t.timer < t.length * 2 / 3) {
-        color = ORANGE;
+        mColor = ORANGE;
     }
 }
 
 // ResizeTest
-ResizeTest::ResizeTest() : TestBase(Rect(), 0) {}
-
-SDL_Color ResizeTest::getColor() const { return LGRAY; }
+ResizeTest::ResizeTest() : TestBase(Rect(), 0) { mColor = LGRAY; }
 
 void ResizeTest::init() {
     TestBase::init();
@@ -353,9 +347,7 @@ void ResizeTest::onResize(ResizeData data) {
 }
 
 // HoverTest
-HoverTest::HoverTest(Rect r, int e) : TestBase(r, e) {}
-
-SDL_Color HoverTest::getColor() const { return mColor; }
+HoverTest::HoverTest(Rect r, int e) : TestBase(r, e) { mColor = CYAN; }
 
 void HoverTest::init() {
     TestBase::init();
@@ -389,8 +381,6 @@ ScrollTest::ScrollBox::ScrollBox(Rect r, int e) : TestBase(r, e) {
     mPos->mouse = false;
 }
 
-SDL_Color ScrollTest::ScrollBox::getColor() const { return SDL_Color(); }
-
 // ScrollTest
 void ScrollTest::init() {
     Rect r(0, mPos->rect.y(), mPos->rect.minDim(), mPos->rect.minDim());
@@ -414,8 +404,6 @@ void ScrollTest::onScroll(int scroll) {
 }
 
 // KeyTest
-SDL_Color KeyTest::getColor() const { return mColor; }
-
 void KeyTest::init() {
     TestBase::init();
 
@@ -437,6 +425,53 @@ void KeyTest::onSpaceHeld(Event::KeyButton k) {
 }
 
 void KeyTest::onSpaceReleased(Event::KeyButton k) { mColor = BLUE; }
+
+// TypingTest
+void TypingTest::init() {
+    TestBase::init();
+
+    mMouseSub = GetMouseObservable()->subscribe(
+        [this](Event::MouseButton b, bool c) { onClick(b, c); }, mPos,
+        {Event::Mouse::LEFT, Event::Mouse::MIDDLE});
+
+    mTypingSub = GetTypingObservable()->subscribe(
+        [this](const std::string &s1, const std::string &s2) {
+            onInput(s1, s2);
+        });
+    mTypingSub2 = GetTypingObservable()->subscribe(
+        [this](const std::string &s1, const std::string &s2) {
+            onInput(s1, s2);
+        });
+}
+
+void TypingTest::onClick(Event::MouseButton b, bool clicked) {
+    bool left = b.mouse == Event::Mouse::LEFT;
+
+    if (clicked) {
+        GetTypingObservable()->requestKeyboard(left ? mTypingSub : mTypingSub2);
+        return;
+    }
+
+    GetTypingObservable()->releaseKeyboard(left ? mTypingSub : mTypingSub2);
+}
+
+void TypingTest::onInput(const std::string &fullText,
+                         const std::string &newText) {
+    std::string copy = fullText;
+    std::transform(fullText.begin(), fullText.end(), copy.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    static std::unordered_map<std::string, SDL_Color> COLORS = {
+        {"blue", BLUE}, {"green", GREEN}, {"red", RED}, {"cyan", CYAN}};
+    for (auto pair : COLORS) {
+        if (copy == pair.first) {
+            mColor = pair.second;
+            return;
+        }
+    }
+
+    uint8_t c = (uint8_t)(255 * fminf(1, (float)copy.size() / 25));
+    mColor = {c, c, c, 255};
+}
 
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {

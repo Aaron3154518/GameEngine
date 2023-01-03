@@ -4,11 +4,6 @@
 
 namespace EventServices {
 // ScrollObservable
-void ScrollObservable::init() {
-    mEventSub =
-        GetEventObservable()->subscribe([this](const Event& e) { onEvent(e); });
-}
-
 void ScrollObservable::next(int scroll) {
     auto underMouse = ServiceSystem::Get<RenderService, RenderOrderObservable>()
                           ->getUnderMouse();
@@ -23,6 +18,11 @@ void ScrollObservable::next(int scroll) {
             break;
         }
     }
+}
+
+void ScrollObservable::init() {
+    mEventSub =
+        GetEventObservable()->subscribe([this](const Event& e) { onEvent(e); });
 }
 
 void ScrollObservable::onEvent(const Event& e) {
