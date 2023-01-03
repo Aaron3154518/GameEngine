@@ -13,8 +13,8 @@
 #include <sstream>
 
 namespace EventServices {
-// Full text, new text
-typedef Observable<void(const std::string&, const std::string&), Lock>
+// Full text, size_t cursor, new text
+typedef Observable<void(const std::string&, size_t, const std::string&), Lock>
     TypingObservableBase;
 
 class TypingObservable : public Component, public TypingObservableBase {
@@ -26,7 +26,8 @@ class TypingObservable : public Component, public TypingObservableBase {
     enum : uint8_t { ON_INPUT = 0, LOCK };
 
     SubscriptionPtr subscribe(
-        std::function<void(const std::string&, const std::string&)> onInput);
+        std::function<void(const std::string&, size_t, const std::string&)>
+            onInput);
 
     void requestKeyboard(SubscriptionPtr sub);
     void releaseKeyboard(SubscriptionPtr sub);

@@ -5,7 +5,8 @@
 namespace EventServices {
 // TypingObservable
 TypingObservable::SubscriptionPtr TypingObservable::subscribe(
-    std::function<void(const std::string&, const std::string&)> onInput) {
+    std::function<void(const std::string&, size_t, const std::string&)>
+        onInput) {
     return TypingObservableBase::subscribe(onInput, Lock());
 }
 
@@ -51,7 +52,8 @@ void TypingObservable::onEvent(const Event& e) {
     }
     comp.start << e.textInput();
 
-    sub->get<ON_INPUT>()(comp.start.str() + comp.end.str(), e.textInput());
+    sub->get<ON_INPUT>()(comp.start.str() + comp.end.str(), comp.start.tellp(),
+                         e.textInput());
 }
 
 TypingObservable::SubscriptionPtr TypingObservable::getActiveSub() {

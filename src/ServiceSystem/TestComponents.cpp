@@ -435,12 +435,13 @@ void TypingTest::init() {
         {Event::Mouse::LEFT, Event::Mouse::MIDDLE});
 
     mTypingSub = GetTypingObservable()->subscribe(
-        [this](const std::string &s1, const std::string &s2) {
-            onInput(s1, s2);
+        [this](const std::string &s1, size_t p, const std::string &s2) {
+            std::cerr << s1.substr(0, p) << "|" << s1.substr(p) << std::endl;
+            onInput(s1);
         });
     mTypingSub2 = GetTypingObservable()->subscribe(
-        [this](const std::string &s1, const std::string &s2) {
-            onInput(s1, s2);
+        [this](const std::string &s1, size_t p, const std::string &s2) {
+            onInput(s1);
         });
 }
 
@@ -455,10 +456,9 @@ void TypingTest::onClick(Event::MouseButton b, bool clicked) {
     GetTypingObservable()->releaseKeyboard(sub);
 }
 
-void TypingTest::onInput(const std::string &fullText,
-                         const std::string &newText) {
-    std::string copy = fullText;
-    std::transform(fullText.begin(), fullText.end(), copy.begin(),
+void TypingTest::onInput(const std::string &text) {
+    std::string copy = text;
+    std::transform(text.begin(), text.end(), copy.begin(),
                    [](unsigned char c) { return std::tolower(c); });
     static std::unordered_map<std::string, SDL_Color> COLORS = {
         {"blue", BLUE}, {"green", GREEN}, {"red", RED}, {"cyan", CYAN}};

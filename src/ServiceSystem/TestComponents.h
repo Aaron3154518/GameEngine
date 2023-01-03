@@ -284,7 +284,7 @@ class TypingTest : public TestBase {
 
     void onClick(Event::MouseButton b, bool clicked);
 
-    void onInput(const std::string &fullText, const std::string &newText);
+    void onInput(const std::string &text);
 
     MouseObservable::SubscriptionPtr mMouseSub;
     TypingObservable::SubscriptionPtr mTypingSub, mTypingSub2;
