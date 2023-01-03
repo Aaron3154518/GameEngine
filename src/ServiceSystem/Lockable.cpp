@@ -15,14 +15,17 @@ Lock Lockable::requestLock() {
 }
 
 void Lockable::releaseLock(Lock& lock) {
+    releaseLock(lock.mLock);
+    lock.mLock = nullptr;
+}
+void Lockable::releaseLock(void* lock) {
     auto it = std::find_if(mLocks.begin(), mLocks.end(),
                            [lock](const std::unique_ptr<bool>& ptr) -> bool {
-                               return ptr.get() == lock.mLock;
+                               return ptr.get() == lock;
                            });
     if (it != mLocks.end()) {
         mLocks.erase(it);
     }
-    lock.mLock = nullptr;
 }
 
 bool Lockable::isLocked() const { return mLocks.size() > 0; }

@@ -25,7 +25,7 @@ KeyboardObservable::SubscriptionPtr KeyboardObservable::subscribe(
 }
 
 void KeyboardObservable::next(const std::vector<Event::KeyButton>& keys) {
-    if (SDL_IsTextInputActive() == SDL_TRUE) {
+    if (GetTypingObservable()->keyboardActive()) {
         return;
     }
 

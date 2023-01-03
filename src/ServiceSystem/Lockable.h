@@ -37,6 +37,7 @@ class Lockable {
 
     virtual Lock requestLock();
     virtual void releaseLock(Lock& lock);
+    virtual void releaseLock(void* lock);
     virtual bool isLocked() const;
 
     const std::list<std::unique_ptr<bool>>& locks() const;

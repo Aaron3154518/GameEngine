@@ -67,6 +67,7 @@ class Event {
     bool mouseMoved() const;
     int scroll() const;
 
+    bool textInputBackspaced() const;
     bool textInputUpdated() const;
     const std::string &textInput() const;
 
@@ -100,6 +101,7 @@ class Event {
 
     // Inputted text
     std::string mInputText;
+    bool mInputBackspace = false;
 
     std::array<MouseButton, NUM_MICE> mMouseButtons;
     std::unordered_map<SDL_KeyCode, KeyButton> mKeyButtons;

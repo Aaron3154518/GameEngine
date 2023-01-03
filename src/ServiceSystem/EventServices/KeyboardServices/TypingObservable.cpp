@@ -19,28 +19,55 @@ void TypingObservable::onEvent(const Event& e) {
         return;
     }
 
-    auto& currLock = mLocks.locks().back();
-    for (auto sub : *this) {
-        auto& lock = sub->get<LOCK>();
-        if (lock == currLock.get()) {
-            std::string newText = e.textInput();
-            auto& ss = mText[lock];
-            ss << newText;
-            sub->get<ON_INPUT>()(ss.str(), newText);
-            break;
+    auto sub = getActiveSub();
+
+    if (!sub) {
+        return;
+    }
+
+    auto& ss = mText[sub->get<LOCK>()];
+    if (e.textInputBackspaced()) {
+        int size = std::max(0, (int)ss.tellp() - 1);
+        ss.str(ss.str().substr(0, size));
+        ss.seekp(size);
+    }
+    ss << e.textInput();
+    sub->get<ON_INPUT>()(ss.str(), e.textInput());
+}
+
+TypingObservable::SubscriptionPtr TypingObservable::getActiveSub() {
+    auto lockIt = mLocks.locks().end();
+    while (lockIt != mLocks.locks().begin()) {
+        bool inactive = false;
+        auto& currLock = *(--lockIt);
+        for (auto it = abegin(); it != aend(); ++it) {
+            if (it) {
+                auto sub = *it;
+                if (sub->get<LOCK>() != currLock.get()) {
+                    continue;
+                }
+                if (sub->isActive()) {
+                    return sub;
+                }
+                inactive = true;
+                break;
+            }
+        }
+        if (!inactive) {
+            lockIt++;
+            mLocks.releaseLock(currLock.get());
         }
     }
+
+    return nullptr;
 }
 
 void TypingObservable::requestKeyboard(SubscriptionPtr sub) {
-    if (!keyboardActive()) {
-        SDL_StartTextInput();
-    }
     auto& lock = sub->get<LOCK>();
-    mText[lock] = std::stringstream();
     if (lock) {
         mLocks.releaseLock(lock);
     }
+    mText[lock] = std::stringstream();
     lock = mLocks.requestLock();
 }
 void TypingObservable::releaseKeyboard(SubscriptionPtr sub) {
@@ -50,9 +77,6 @@ void TypingObservable::releaseKeyboard(SubscriptionPtr sub) {
         mText.erase(it);
     }
     mLocks.releaseLock(lock);
-    if (!keyboardActive()) {
-        SDL_StopTextInput();
-    }
 }
-bool TypingObservable::keyboardActive() const { return mLocks.isLocked(); }
+bool TypingObservable::keyboardActive() { return (bool)getActiveSub(); }
 }  // namespace EventServices

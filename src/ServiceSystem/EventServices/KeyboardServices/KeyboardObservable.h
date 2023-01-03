@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
 #include <ServiceSystem/EventServices/EventObservable.h>
+#include <ServiceSystem/EventServices/KeyboardServices/TypingObservable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>

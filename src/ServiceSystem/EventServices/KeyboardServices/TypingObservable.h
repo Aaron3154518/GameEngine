@@ -8,6 +8,7 @@
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
 
+#include <cmath>
 #include <memory>
 #include <sstream>
 
@@ -25,12 +26,14 @@ class TypingObservable : public Component, public TypingObservableBase {
 
     void requestKeyboard(SubscriptionPtr sub);
     void releaseKeyboard(SubscriptionPtr sub);
-    bool keyboardActive() const;
+    bool keyboardActive();
 
    private:
     void init();
 
     void onEvent(const Event& e);
+
+    SubscriptionPtr getActiveSub();
 
     Lockable mLocks;
     std::unordered_map<Lock, std::stringstream> mText;

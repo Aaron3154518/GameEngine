@@ -436,6 +436,7 @@ void TypingTest::init() {
 
     mTypingSub = GetTypingObservable()->subscribe(
         [this](const std::string &s1, const std::string &s2) {
+            std::cerr << s1 << std::endl;
             onInput(s1, s2);
         });
     mTypingSub2 = GetTypingObservable()->subscribe(
@@ -445,14 +446,14 @@ void TypingTest::init() {
 }
 
 void TypingTest::onClick(Event::MouseButton b, bool clicked) {
-    bool left = b.mouse == Event::Mouse::LEFT;
+    auto sub = b.mouse == Event::Mouse::LEFT ? mTypingSub : mTypingSub2;
 
     if (clicked) {
-        GetTypingObservable()->requestKeyboard(left ? mTypingSub : mTypingSub2);
+        GetTypingObservable()->requestKeyboard(sub);
         return;
     }
 
-    GetTypingObservable()->releaseKeyboard(left ? mTypingSub : mTypingSub2);
+    GetTypingObservable()->releaseKeyboard(sub);
 }
 
 void TypingTest::onInput(const std::string &fullText,

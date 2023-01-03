@@ -41,6 +41,7 @@ void Event::update() {
     mQuit = mResized = false;
     // Reset text editing
     mInputText = "";
+    mInputBackspace = false;
     // Update mouse
     SDL_GetMouseState(&mMouse.x, &mMouse.y);
     // Reset mouse movement
@@ -121,6 +122,14 @@ void Event::update(SDL_Event &e) {
             KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
             if (!Math::bitsSet(b.status, Button::HELD)) {
                 b.duration = 0;
+                if (SDL_IsTextInputActive() && b.key == SDLK_BACKSPACE) {
+                    if (mInputText.empty()) {
+                        mInputBackspace = true;
+                    } else {
+                        mInputText =
+                            mInputText.substr(0, mInputText.size() - 1);
+                    }
+                }
             }
             b.status = Button::PRESSED | Button::HELD;
         } break;
@@ -158,7 +167,10 @@ float Event::mouseDy() const { return mMouseDy; }
 bool Event::mouseMoved() const { return mMouseDx != 0 || mMouseDy != 0; }
 int Event::scroll() const { return mScroll; }
 
-bool Event::textInputUpdated() const { return !mInputText.empty(); }
+bool Event::textInputBackspaced() const { return mInputBackspace; }
+bool Event::textInputUpdated() const {
+    return textInputBackspaced() || !mInputText.empty();
+}
 const std::string &Event::textInput() const { return mInputText; }
 
 Event::KeyButton &Event::get(SDL_KeyCode key) {
