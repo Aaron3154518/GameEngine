@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <ServiceSystem/Component.h>
+#include <ServiceSystem/EventServices/EventObservable.h>
 #include <ServiceSystem/Observable.h>
 #include <ServiceSystem/ServiceSystem.h>
 #include <Utils/Event.h>
@@ -14,7 +15,17 @@ namespace EventServices {
 typedef Observable<void(SDL_Keycode), std::vector<SDL_Keycode>>
     KeyPressObservableBase;
 
-class KeyPressObservable : public KeyPressObservableBase {};
+class KeyPressObservable : public Component, public KeyPressObservableBase {
+   public:
+   private:
+    void init();
+
+    void next(const std::vector<SDL_Keycode>& keys);
+
+    void onEvent(const Event& e);
+
+    EventObservable::SubscriptionPtr mEventSub;
+};
 
 typedef std::shared_ptr<KeyPressObservable> KeyPressObservablePtr;
 }  // namespace EventServices

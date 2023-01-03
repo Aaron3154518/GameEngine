@@ -69,6 +69,7 @@ int main(int argc, char *argv[]) {
     auto t16 = ComponentFactory<HoverTest>::New(Rect(5, 455, 40, 40), 9);
     auto t17 = ComponentFactory<NoMouseTest>::New(Rect(300, 225, 50, 50));
     auto t18 = ComponentFactory<ScrollTest>::New(Rect(175, 15, 45, 470), 2);
+    auto t19 = ComponentFactory<KeyTest>::New(Rect(455, 5, 40, 40), 3);
 
     Event e;
 

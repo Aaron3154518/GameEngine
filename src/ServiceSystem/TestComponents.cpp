@@ -413,6 +413,31 @@ void ScrollTest::onScroll(int scroll) {
     mBox->mPos->rect.fitWithin(mPos->rect);
 }
 
+// KeyTest
+SDL_Color KeyTest::getColor() const { return mColor; }
+
+void KeyTest::init() {
+    TestBase::init();
+
+    mAllKeysPressSub = GetKeyStateObservable()->subscribe(
+        [this](Event::KeyButton k) { onAnyKeyPressed(k); },
+        Event::Button::PRESSED);
+
+    mSpaceHeldReleaseSub = GetKeyStateObservable()->subscribe(
+        KeyStateObservable::DO_NOTHING(),
+        [this](Event::KeyButton k) { onSpaceReleased(k); },
+        [this](Event::KeyButton k) { onSpaceHeld(k); }, {SDLK_SPACE});
+}
+
+void KeyTest::onAnyKeyPressed(Event::KeyButton k) { mColor = RED; }
+
+void KeyTest::onSpaceHeld(Event::KeyButton k) {
+    float frac = fminf(1, (float)k.duration / 1000);
+    mColor = {(uint8_t)(255 * (1 - frac)), (uint8_t)(255 * frac), 0, 255};
+}
+
+void KeyTest::onSpaceReleased(Event::KeyButton k) { mColor = BLUE; }
+
 // Generate random test component
 std::shared_ptr<TestBase> randomTestComponent(int w, int h) {
     Rect r;

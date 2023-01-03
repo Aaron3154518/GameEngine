@@ -55,17 +55,13 @@ void Event::update() {
         b.status &= Button::HELD;
     }
     // Update keys
-    for (auto it = mKeyButtons.begin(); it != mKeyButtons.end();) {
+    for (auto it = mKeyButtons.begin(); it != mKeyButtons.end(); ++it) {
         auto &b = it->second;
         if (Math::bitsSet(b.status, Button::HELD)) {
             b.duration += mDt;
-            // Reset pressed/released
-            b.status = Button::HELD;
-            ++it;
-        } else {
-            // Remove key
-            it = mKeyButtons.erase(it);
         }
+        // Reset pressed/released
+        b.status &= Button::HELD;
     }
     // Handle events
     SDL_Event e;
@@ -122,12 +118,14 @@ void Event::update(SDL_Event &e) {
             mScroll = -e.wheel.y;
         } break;
         case SDL_KEYDOWN: {
-            KeyButton &b = mKeyButtons[(SDL_KeyCode)e.key.keysym.sym];
+            KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
+            if (!Math::bitsSet(b.status, Button::HELD)) {
+                b.duration = 0;
+            }
             b.status = Button::PRESSED | Button::HELD;
-            b.duration = 0;
         } break;
         case SDL_KEYUP: {
-            KeyButton &b = mKeyButtons[(SDL_KeyCode)e.key.keysym.sym];
+            KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
             b.status = Button::RELEASED;
         } break;
         case SDL_TEXTEDITING:
@@ -162,6 +160,10 @@ int Event::scroll() const { return mScroll; }
 
 std::string Event::textInput() const { return mInputText; }
 
+Event::KeyButton &Event::get(SDL_KeyCode key) {
+    return mKeyButtons.emplace(key, KeyButton{key}).first->second;
+}
+
 const Event::MouseButton &Event::operator[](Uint8 sdlButton) const {
     return (*this)[toMouse(sdlButton)];
 }
@@ -176,13 +178,15 @@ const Event::KeyButton &Event::operator[](SDL_KeyCode key) const {
         return unusedKey();
     }
 }
-std::vector<SDL_KeyCode> Event::keys() const {
-    std::vector<SDL_KeyCode> result;
-    result.reserve(mKeyButtons.size());
+std::vector<Event::KeyButton> Event::keys(
+    std::function<bool(const KeyButton &)> filter) const {
+    std::vector<KeyButton> res;
     for (auto &pair : mKeyButtons) {
-        result.push_back(pair.first);
+        if (filter(pair.second)) {
+            res.push_back(pair.second);
+        }
     }
-    return result;
+    return res;
 }
 const Event::KeyButton &Event::unusedKey() {
     static KeyButton UNUSED;

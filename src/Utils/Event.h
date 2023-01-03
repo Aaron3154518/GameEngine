@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cmath>
+#include <functional>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
@@ -36,6 +37,7 @@ class Event {
         bool clicked() const;
     };
     struct KeyButton {
+        SDL_KeyCode key;
         uint8_t status = 0;
         uint32_t duration;
 
@@ -67,10 +69,15 @@ class Event {
 
     std::string textInput() const;
 
+    KeyButton &get(SDL_KeyCode key);
+
     const MouseButton &operator[](Uint8 sdlButton) const;
     const MouseButton &operator[](Event::Mouse button) const;
     const KeyButton &operator[](SDL_KeyCode key) const;
-    std::vector<SDL_KeyCode> keys() const;
+    std::vector<KeyButton> keys(std::function<bool(const KeyButton &)> filter =
+                                    [](const KeyButton &k) {
+                                        return true;
+                                    }) const;
     static const KeyButton &unusedKey();
 
     static Mouse toMouse(Uint8 sdlButtonType);

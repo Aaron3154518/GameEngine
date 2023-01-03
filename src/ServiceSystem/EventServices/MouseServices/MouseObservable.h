@@ -65,9 +65,10 @@ class MouseObservable : public Component, public MouseObservableBase {
 
     static const std::function<void(Event::MouseButton, bool)>& getOnClick(
         SubscriptionPtr sub, Event::Mouse btn);
-    const static std::function<void(Event::MouseButton, bool)> DO_NOTHING;
 
    private:
+    const static std::function<void(Event::MouseButton, bool)> DO_NOTHING;
+
     void init();
 
     void onEvent(Event e);

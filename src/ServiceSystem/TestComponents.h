@@ -274,4 +274,22 @@ class ScrollTest : public TestBase {
     ScrollObservable::SubscriptionPtr mScrollSub;
 };
 
+class KeyTest : public TestBase {
+   public:
+    using TestBase::TestBase;
+
+    SDL_Color getColor() const;
+
+   private:
+    void init();
+
+    void onAnyKeyPressed(Event::KeyButton k);
+    void onSpaceHeld(Event::KeyButton k);
+    void onSpaceReleased(Event::KeyButton k);
+
+    SDL_Color mColor = BLACK;
+
+    KeyStateObservable::SubscriptionPtr mAllKeysPressSub, mSpaceHeldReleaseSub;
+};
+
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);
