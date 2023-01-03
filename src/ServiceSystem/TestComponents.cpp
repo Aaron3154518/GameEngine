@@ -436,7 +436,6 @@ void TypingTest::init() {
 
     mTypingSub = GetTypingObservable()->subscribe(
         [this](const std::string &s1, const std::string &s2) {
-            std::cerr << s1 << std::endl;
             onInput(s1, s2);
         });
     mTypingSub2 = GetTypingObservable()->subscribe(

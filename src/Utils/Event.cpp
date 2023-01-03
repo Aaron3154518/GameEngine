@@ -122,16 +122,15 @@ void Event::update(SDL_Event &e) {
             KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
             if (!Math::bitsSet(b.status, Button::HELD)) {
                 b.duration = 0;
-                if (SDL_IsTextInputActive() && b.key == SDLK_BACKSPACE) {
-                    if (mInputText.empty()) {
-                        mInputBackspace = true;
-                    } else {
-                        mInputText =
-                            mInputText.substr(0, mInputText.size() - 1);
-                    }
-                }
             }
             b.status = Button::PRESSED | Button::HELD;
+            if (SDL_IsTextInputActive() && b.key == SDLK_BACKSPACE) {
+                if (mInputText.empty()) {
+                    mInputBackspace = true;
+                } else {
+                    mInputText = mInputText.substr(0, mInputText.size() - 1);
+                }
+            }
         } break;
         case SDL_KEYUP: {
             KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
