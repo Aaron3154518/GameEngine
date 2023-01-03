@@ -19,11 +19,8 @@ HoverObservablePtr GetHoverObservable() {
 ScrollObservablePtr GetScrollObservable() {
     return ServiceSystem::Get<EventService, ScrollObservable>();
 }
-KeyStateObservablePtr GetKeyStateObservable() {
-    return ServiceSystem::Get<EventService, KeyStateObservable>();
-}
-KeyPressObservablePtr GetKeyPressObservable() {
-    return ServiceSystem::Get<EventService, KeyPressObservable>();
+KeyboardObservablePtr GetKeyboardObservable() {
+    return ServiceSystem::Get<EventService, KeyboardObservable>();
 }
 TypingObservablePtr GetTypingObservable() {
     return ServiceSystem::Get<EventService, TypingObservable>();

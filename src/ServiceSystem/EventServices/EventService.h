@@ -2,8 +2,7 @@
 #define EVENT_SERVICE_H
 
 #include <ServiceSystem/EventServices/EventObservable.h>
-#include <ServiceSystem/EventServices/KeyboardServices/KeyPressObservable.h>
-#include <ServiceSystem/EventServices/KeyboardServices/KeyStateObservable.h>
+#include <ServiceSystem/EventServices/KeyboardServices/KeyboardObservable.h>
 #include <ServiceSystem/EventServices/KeyboardServices/TypingObservable.h>
 #include <ServiceSystem/EventServices/MouseServices/DragObservable.h>
 #include <ServiceSystem/EventServices/MouseServices/HoverObservable.h>
@@ -20,15 +19,13 @@ MouseObservablePtr GetMouseObservable();
 DragObservablePtr GetDragObservable();
 HoverObservablePtr GetHoverObservable();
 ScrollObservablePtr GetScrollObservable();
-KeyStateObservablePtr GetKeyStateObservable();
-KeyPressObservablePtr GetKeyPressObservable();
+KeyboardObservablePtr GetKeyboardObservable();
 TypingObservablePtr GetTypingObservable();
 
 class EventService
     : public Service<EventObservable, ResizeObservable, MouseObservable,
                      DragObservable, HoverObservable, ScrollObservable,
-                     KeyPressObservable, KeyStateObservable, TypingObservable> {
-};
+                     KeyboardObservable, TypingObservable> {};
 }  // namespace EventServices
 
 #endif

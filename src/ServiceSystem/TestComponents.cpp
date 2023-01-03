@@ -419,12 +419,12 @@ SDL_Color KeyTest::getColor() const { return mColor; }
 void KeyTest::init() {
     TestBase::init();
 
-    mAllKeysPressSub = GetKeyStateObservable()->subscribe(
+    mAllKeysPressSub = GetKeyboardObservable()->subscribe(
         [this](Event::KeyButton k) { onAnyKeyPressed(k); },
         Event::Button::PRESSED);
 
-    mSpaceHeldReleaseSub = GetKeyStateObservable()->subscribe(
-        KeyStateObservable::DO_NOTHING(),
+    mSpaceHeldReleaseSub = GetKeyboardObservable()->subscribe(
+        KeyboardObservable::DO_NOTHING(),
         [this](Event::KeyButton k) { onSpaceReleased(k); },
         [this](Event::KeyButton k) { onSpaceHeld(k); }, {SDLK_SPACE});
 }

@@ -289,7 +289,7 @@ class KeyTest : public TestBase {
 
     SDL_Color mColor = BLACK;
 
-    KeyStateObservable::SubscriptionPtr mAllKeysPressSub, mSpaceHeldReleaseSub;
+    KeyboardObservable::SubscriptionPtr mAllKeysPressSub, mSpaceHeldReleaseSub;
 };
 
 std::shared_ptr<TestBase> randomTestComponent(int w, int h);
