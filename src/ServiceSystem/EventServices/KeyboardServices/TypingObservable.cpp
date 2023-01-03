@@ -25,14 +25,33 @@ void TypingObservable::onEvent(const Event& e) {
         return;
     }
 
-    auto& ss = mText[sub->get<LOCK>()];
-    if (e.textInputBackspaced()) {
-        int size = std::max(0, (int)ss.tellp() - 1);
-        ss.str(ss.str().substr(0, size));
-        ss.seekp(size);
+    auto& comp = mText[sub->get<LOCK>()];
+
+    int textMove = e.textInputMove();
+    textMove = textMove >= 0 ? std::min(textMove, (int)comp.end.tellp())
+                             : -std::min(-textMove, (int)comp.start.tellp());
+    if (textMove > 0) {
+        std::string end = comp.end.str();
+        comp.start << end.substr(0, textMove);
+        comp.end.str("");
+        comp.end << end.substr(textMove);
+    } else if (textMove < 0) {
+        std::string start = comp.start.str();
+        comp.start.str("");
+        comp.start << start.substr(0, start.size() + textMove);
+        std::string end = comp.end.str();
+        comp.end.str("");
+        comp.end << start.substr(start.size() + textMove) << end;
     }
-    ss << e.textInput();
-    sub->get<ON_INPUT>()(ss.str(), e.textInput());
+
+    if (e.textInputBackspaced()) {
+        int size = std::max(0, (int)comp.start.tellp() - 1);
+        comp.start.str(comp.start.str().substr(0, size));
+        comp.start.seekp(size);
+    }
+    comp.start << e.textInput();
+
+    sub->get<ON_INPUT>()(comp.start.str() + comp.end.str(), e.textInput());
 }
 
 TypingObservable::SubscriptionPtr TypingObservable::getActiveSub() {
@@ -67,7 +86,7 @@ void TypingObservable::requestKeyboard(SubscriptionPtr sub) {
     if (lock) {
         mLocks.releaseLock(lock);
     }
-    mText[lock] = std::stringstream();
+    mText[lock] = Composition();
     lock = mLocks.requestLock();
 }
 void TypingObservable::releaseKeyboard(SubscriptionPtr sub) {

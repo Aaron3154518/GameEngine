@@ -42,6 +42,7 @@ void Event::update() {
     // Reset text editing
     mInputText = "";
     mInputBackspace = false;
+    mInputTextMove = 0;
     // Update mouse
     SDL_GetMouseState(&mMouse.x, &mMouse.y);
     // Reset mouse movement
@@ -124,12 +125,8 @@ void Event::update(SDL_Event &e) {
                 b.duration = 0;
             }
             b.status = Button::PRESSED | Button::HELD;
-            if (SDL_IsTextInputActive() && b.key == SDLK_BACKSPACE) {
-                if (mInputText.empty()) {
-                    mInputBackspace = true;
-                } else {
-                    mInputText = mInputText.substr(0, mInputText.size() - 1);
-                }
+            if (SDL_IsTextInputActive()) {
+                processTextInputKey(b);
             }
         } break;
         case SDL_KEYUP: {
@@ -147,6 +144,25 @@ void Event::update(SDL_Event &e) {
 #endif
             break;
     }
+}
+void Event::processTextInputKey(const KeyButton &b) {
+    switch (b.key) {
+        case SDLK_BACKSPACE: {
+            if (mInputText.empty()) {
+                mInputBackspace = true;
+            } else {
+                mInputText = mInputText.substr(0, mInputText.size() - 1);
+            }
+        } break;
+        case SDLK_LEFT: {
+            mInputTextMove--;
+        } break;
+        case SDLK_RIGHT: {
+            mInputTextMove++;
+        } break;
+        default:
+            break;
+    };
 }
 
 uint32_t Event::dt() const { return mDt; }
@@ -166,9 +182,10 @@ float Event::mouseDy() const { return mMouseDy; }
 bool Event::mouseMoved() const { return mMouseDx != 0 || mMouseDy != 0; }
 int Event::scroll() const { return mScroll; }
 
+int Event::textInputMove() const { return mInputTextMove; }
 bool Event::textInputBackspaced() const { return mInputBackspace; }
 bool Event::textInputUpdated() const {
-    return textInputBackspaced() || !mInputText.empty();
+    return textInputBackspaced() || !mInputText.empty() || textInputMove() != 0;
 }
 const std::string &Event::textInput() const { return mInputText; }
 

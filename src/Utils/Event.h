@@ -67,6 +67,7 @@ class Event {
     bool mouseMoved() const;
     int scroll() const;
 
+    int textInputMove() const;
     bool textInputBackspaced() const;
     bool textInputUpdated() const;
     const std::string &textInput() const;
@@ -87,6 +88,8 @@ class Event {
    private:
     static constexpr int MAX_CLICK_DIFF = 10;
 
+    void processTextInputKey(const KeyButton &b);
+
     uint32_t mDt;
 
     bool mQuit = false;
@@ -102,6 +105,7 @@ class Event {
     // Inputted text
     std::string mInputText;
     bool mInputBackspace = false;
+    int mInputTextMove = 0;
 
     std::array<MouseButton, NUM_MICE> mMouseButtons;
     std::unordered_map<SDL_KeyCode, KeyButton> mKeyButtons;

@@ -18,6 +18,10 @@ typedef Observable<void(const std::string&, const std::string&), Lock>
     TypingObservableBase;
 
 class TypingObservable : public Component, public TypingObservableBase {
+    struct Composition {
+        std::stringstream start, end;
+    };
+
    public:
     enum : uint8_t { ON_INPUT = 0, LOCK };
 
@@ -36,7 +40,7 @@ class TypingObservable : public Component, public TypingObservableBase {
     SubscriptionPtr getActiveSub();
 
     Lockable mLocks;
-    std::unordered_map<Lock, std::stringstream> mText;
+    std::unordered_map<Lock, Composition> mText;
 
     EventObservable::SubscriptionPtr mEventSub;
 };
