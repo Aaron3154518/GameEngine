@@ -449,11 +449,17 @@ void TypingTest::onClick(Event::MouseButton b, bool clicked) {
     auto sub = b.mouse == Event::Mouse::LEFT ? mTypingSub : mTypingSub2;
 
     if (clicked) {
-        GetTypingObservable()->requestKeyboard(sub);
+        if (sub->isActive()) {
+            GetTypingObservable()->requestKeyboard(sub);
+            sub->setActive(false);
+        } else {
+            sub->setActive(true);
+        }
         return;
     }
 
     GetTypingObservable()->releaseKeyboard(sub);
+    sub->setActive(true);
 }
 
 void TypingTest::onInput(const std::string &text) {
