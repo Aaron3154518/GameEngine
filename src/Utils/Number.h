@@ -90,17 +90,17 @@ class Number {
     Number &operator^=(const Number &rhs);
 
     // Binary operators
-    Number operator+(const Number &rhs) const;
-    Number operator-(const Number &rhs) const;
-    Number operator*(const Number &rhs) const;
-    Number operator/(const Number &rhs) const;
-    Number operator^(const Number &rhs) const;
-    bool operator==(const Number &rhs) const;
-    bool operator!=(const Number &rhs) const;
-    bool operator<(const Number &rhs) const;
-    bool operator<=(const Number &rhs) const;
-    bool operator>(const Number &rhs) const;
-    bool operator>=(const Number &rhs) const;
+    friend Number operator+(const Number &lhs, const Number &rhs);
+    friend Number operator-(const Number &lhs, const Number &rhs);
+    friend Number operator*(const Number &lhs, const Number &rhs);
+    friend Number operator/(const Number &lhs, const Number &rhs);
+    friend Number operator^(const Number &lhs, const Number &rhs);
+    friend bool operator==(const Number &lhs, const Number &rhs);
+    friend bool operator!=(const Number &lhs, const Number &rhs);
+    friend bool operator<(const Number &lhs, const Number &rhs);
+    friend bool operator<=(const Number &lhs, const Number &rhs);
+    friend bool operator>(const Number &lhs, const Number &rhs);
+    friend bool operator>=(const Number &lhs, const Number &rhs);
 
     // String and print functions
     void printAll() const;
