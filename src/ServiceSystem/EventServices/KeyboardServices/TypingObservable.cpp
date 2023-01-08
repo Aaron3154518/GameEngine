@@ -93,9 +93,12 @@ TypingObservable::SubscriptionPtr TypingObservable::getActiveSub() {
         if (!inactive) {
             lockIt++;
             mLocks.releaseLock(currLock.get());
+            auto it = mText.find(currLock.get());
+            if (it != mText.end()) {
+                mText.erase(it);
+            }
         }
     }
-
     return nullptr;
 }
 
