@@ -409,17 +409,29 @@ Number &Number::operator^=(const Number &rhs) {
 }
 
 // Binary operators
-Number Number::operator+(const Number &rhs) const { return copy() += rhs; }
-Number Number::operator-(const Number &rhs) const { return copy() -= rhs; }
-Number Number::operator*(const Number &rhs) const { return copy() *= rhs; }
-Number Number::operator/(const Number &rhs) const { return copy() /= rhs; }
-Number Number::operator^(const Number &rhs) const { return copy() ^= rhs; }
-bool Number::operator==(const Number &rhs) const { return equal(rhs); }
-bool Number::operator!=(const Number &rhs) const { return !equal(rhs); }
-bool Number::operator<(const Number &rhs) const { return less(rhs); }
-bool Number::operator<=(const Number &rhs) const { return !rhs.less(*this); }
-bool Number::operator>(const Number &rhs) const { return rhs.less(*this); }
-bool Number::operator>=(const Number &rhs) const { return !less(rhs); }
+Number operator+(const Number &lhs, const Number &rhs) {
+    return lhs.copy() += rhs;
+}
+Number operator-(const Number &lhs, const Number &rhs) {
+    return lhs.copy() -= rhs;
+}
+Number operator*(const Number &lhs, const Number &rhs) {
+    return lhs.copy() *= rhs;
+}
+Number operator/(const Number &lhs, const Number &rhs) {
+    return lhs.copy() /= rhs;
+}
+Number operator^(const Number &lhs, const Number &rhs) {
+    return lhs.copy() ^= rhs;
+}
+bool operator==(const Number &lhs, const Number &rhs) { return lhs.equal(rhs); }
+bool operator!=(const Number &lhs, const Number &rhs) {
+    return !lhs.equal(rhs);
+}
+bool operator<(const Number &lhs, const Number &rhs) { return lhs.less(rhs); }
+bool operator<=(const Number &lhs, const Number &rhs) { return !rhs.less(lhs); }
+bool operator>(const Number &lhs, const Number &rhs) { return rhs.less(lhs); }
+bool operator>=(const Number &lhs, const Number &rhs) { return !lhs.less(rhs); }
 
 // String/print operations
 void Number::printAll() const {
