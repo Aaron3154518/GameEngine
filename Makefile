@@ -6,7 +6,7 @@ ARFLAGS := -rv
 
 INC := include
 BIN := bin
-SRC := src
+SRC := src2
 OBJ := obj
 LIB := lib
 

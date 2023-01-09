@@ -1,14 +1,16 @@
 #ifndef COMPONENT_MANAGER_H
 #define COMPONENT_MANAGER_H
 
+#include <Components/Component.h>
+#include <Entities/UUID.h>
+
+#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <typeindex>
 #include <unordered_map>
 
-#include "Component.h"
-#include "UUID.h"
-
+namespace Components {
 class ComponentManagerBase {
    public:
     virtual ~ComponentManagerBase() = default;
@@ -23,7 +25,7 @@ class ComponentManager : public ComponentManagerBase {
 
    public:
     template <class... ArgTs>
-    const CompT& newComponent(Game::UUID eId, ArgTs&&... args) {
+    const CompT& newComponent(Entities::UUID eId, ArgTs&&... args) {
         static_assert(std::is_constructible<CompT, ArgTs...>::value,
                       "ComponentManager::newComponent(): Cannot construct "
                       "component with the given arguments");
@@ -38,11 +40,11 @@ class ComponentManager : public ComponentManagerBase {
         return it->second;
     }
 
-    bool hasEntity(Game::UUID eId) {
+    bool hasEntity(Entities::UUID eId) {
         return mComponents.find(eId) != mComponents.end();
     }
 
-    const CompT& operator[](Game::UUID eId) {
+    const CompT& operator[](Entities::UUID eId) {
         auto it = mComponents.find(eId);
         if (it == mComponents.end()) {
             throw std::runtime_error("ComponentManager[]: Entity " +
@@ -53,7 +55,7 @@ class ComponentManager : public ComponentManagerBase {
     }
 
    private:
-    std::unordered_map<Game::UUID, CompT> mComponents;
+    std::unordered_map<Entities::UUID, CompT> mComponents;
 };
 
 class ComponentService {
@@ -79,11 +81,8 @@ class ComponentService {
 
    private:
     static std::unordered_map<std::type_index, ComponentManagerBasePtr>&
-    ComponentManagers() {
-        static std::unordered_map<std::type_index, ComponentManagerBasePtr>
-            MANAGERS;
-        return MANAGERS;
-    }
+    ComponentManagers();
 };
+}  // namespace Components
 
 #endif

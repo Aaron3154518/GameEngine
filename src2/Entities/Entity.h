@@ -1,6 +1,10 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <Components/Component.h>
+#include <Components/ComponentManager.h>
+#include <Entities/UUID.h>
+
 #include <array>
 #include <iostream>
 #include <memory>
@@ -8,25 +12,23 @@
 #include <typeinfo>
 #include <vector>
 
-#include "Component.h"
-#include "ComponentManager.h"
-#include "UUID.h"
-
+namespace Entities {
 class Entity {
    public:
-    Entity() : mId(Game::generateUUID()) { std::cerr << mId << std::endl; }
+    Entity();
     virtual ~Entity() = default;
 
    protected:
     template <class CompT, class... ArgTs>
     void addComponent(ArgTs&&... args) {
-        ComponentService::getComponentManager<CompT>().newComponent(
+        Components::ComponentService::getComponentManager<CompT>().newComponent(
             mId, std::forward<ArgTs>(args)...);
         std::cerr << "Added: " << typeid(CompT).name() << std::endl;
     }
 
    private:
-    Game::UUID mId;
+    UUID mId;
 };
+}  // namespace Entities
 
 #endif

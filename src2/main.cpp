@@ -1,36 +1,37 @@
+#include <Components/Component.h>
+#include <Entities/Entity.h>
+#include <Messages/MessageBus.h>
+#include <Messages/MessageSender.h>
+#include <Services/CommandService.h>
 #include <Windows.h>
 
 #include <iostream>
 
-#include "CommandService.h"
-#include "Component.h"
-#include "Entity.h"
-#include "Service.h"
+enum MyServiceMessage : Messages::EnumT { Hello = 0, World = 1 };
 
-enum MyServiceMessage : EnumT { Hello = 0, World = 1 };
-
-class MyService : public Service, public MessageSender<MyServiceMessage> {
+class MyService : public Messages::MessageSender<MyServiceMessage> {
    public:
    private:
 };
 
-class MyComponent : public Component {};
+class MyComponent : public Components::Component {};
 
-class MyEntity : public Entity {
+class MyEntity : public Entities::Entity {
    public:
     MyEntity(MyService& s) {
-        addComponent<Component>();
+        addComponent<Components::Component>();
         addComponent<MyComponent>();
-        MessageBus::subscribe(
-            s.getType(), MyServiceMessage::Hello,
-            [](const Message& m) { std::cerr << "Hello" << std::endl; });
+        Messages::MessageBus::subscribe(s.getType(), MyServiceMessage::Hello,
+                                        [](const Messages::Message& m) {
+                                            std::cerr << "Hello" << std::endl;
+                                        });
     }
 };
 
 DWORD WINAPI runCommand(LPVOID param) {
-    CommandService& cs = *(CommandService*)param;
+    Services::CommandService& cs = *(Services::CommandService*)param;
     while (cs.checkInput()) {
-        MessageBus::sendMessages();
+        Messages::MessageBus::sendMessages();
         Sleep(16);
     }
     return 0;
@@ -41,23 +42,25 @@ int main(int argc, char* argv[]) {
     system("echo");
 
     MyService s;
-    CommandService cs;
+    Services::CommandService cs;
     MyEntity e(s);
 
     s.sendMessage(MyServiceMessage::Hello);
     s.sendMessage(MyServiceMessage::World);
 
-    MessageBus::sendMessages();
+    Messages::MessageBus::sendMessages();
 
-    DWORD myThreadId;
-    HANDLE myHandle = CreateThread(0, 0, runCommand, &cs, 0, &myThreadId);
+    DWORD comThreadId;
+    HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);
 
     for (int i = 0; i < 10; i++) {
-        Sleep(1600);
+        Sleep(160);
     }
 
     std::cerr << "Hello World" << std::endl;
 
-    WaitForSingleObject(myHandle, INFINITE);
+    WaitForSingleObject(comThread, INFINITE);
+    CloseHandle(comThread);
+
     return 0;
 }

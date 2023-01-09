@@ -1,8 +1,7 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
-#include "Message.h"
-
+namespace Service {
 class Service {
    public:
     virtual ~Service() = default;
@@ -10,5 +9,6 @@ class Service {
    protected:
    private:
 };
+}  // namespace Service
 
 #endif
