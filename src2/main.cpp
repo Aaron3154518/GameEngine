@@ -32,7 +32,7 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
         static int cnt = 0;
         switch (m.code()) {
             case MyServiceMessage::Hello:
-                forEach(&MyComponent::onHello);
+                forEach([](MyComponent& c) { c.onHello(); });
                 break;
             case MyServiceMessage::World:
                 forEach(&MyComponent::onWorld, cnt);

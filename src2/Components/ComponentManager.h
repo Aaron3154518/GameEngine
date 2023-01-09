@@ -4,6 +4,7 @@
 #include <Components/Component.h>
 #include <Entities/UUID.h>
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <type_traits>
@@ -91,6 +92,16 @@ class ComponentManager : public ComponentManagerBase {
     void forEach(void (CompT::*func)(ArgTs...), ArgTs&&... args) {
         for (auto& comp : *this) {
             (comp.*func)(std::forward<ArgTs>(args)...);
+        }
+    }
+
+    template <typename F, class... ArgTs>
+    void forEach(const F& func, ArgTs&&... args) {
+        static_assert(std::is_invocable<F, CompT&, ArgTs&&...>::value,
+                      "ComponentManager::forEach(): Function must accept a "
+                      "Component reference and the provided arguments");
+        for (auto& comp : *this) {
+            func(comp, std::forward<ArgTs>(args)...);
         }
     }
 
