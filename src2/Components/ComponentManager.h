@@ -87,6 +87,13 @@ class ComponentManager : public ComponentManagerBase {
         return static_cast<const CompT&>(ComponentManagerBase::operator[](eId));
     }
 
+    template <class... ArgTs>
+    void forEach(void (CompT::*func)(ArgTs...), ArgTs&&... args) {
+        for (auto& comp : *this) {
+            (comp.*func)(std::forward<ArgTs>(args)...);
+        }
+    }
+
     typedef iterator<CompT> iterator;
 
     iterator begin() { return iterator(mComponents.begin()); }

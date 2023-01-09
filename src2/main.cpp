@@ -17,7 +17,7 @@ class MyService : public Messages::MessageSender<MyServiceMessage> {
 class MyComponent : public Components::Component {
    public:
     void onHello() { std::cerr << "Hello" << std::endl; }
-    void onWorld() { std::cerr << "World" << std::endl; }
+    void onWorld(int& num) { std::cerr << "World " << num++ << std::endl; }
 };
 
 class MyComponentManager : public Components::ComponentManager<MyComponent> {
@@ -29,16 +29,13 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
     }
 
     void onMyServiceMessage(const Messages::Message& m) {
+        static int cnt = 0;
         switch (m.code()) {
             case MyServiceMessage::Hello:
-                for (auto& comp : *this) {
-                    comp.onHello();
-                }
+                forEach(&MyComponent::onHello);
                 break;
             case MyServiceMessage::World:
-                for (auto& comp : *this) {
-                    comp.onWorld();
-                }
+                forEach(&MyComponent::onWorld, cnt);
                 break;
             default:
                 break;
