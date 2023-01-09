@@ -14,7 +14,7 @@
 
 class Entity {
    public:
-    Entity() : mId(generateUUID()) { std::cerr << mId << std::endl; }
+    Entity() : mId(Game::generateUUID()) { std::cerr << mId << std::endl; }
     virtual ~Entity() = default;
 
    protected:
@@ -26,7 +26,7 @@ class Entity {
     }
 
    private:
-    UUID mId;
+    Game::UUID mId;
 };
 
 #endif

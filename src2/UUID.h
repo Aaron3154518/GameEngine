@@ -6,6 +6,7 @@
 #include <random>
 #include <string>
 
+namespace Game {
 typedef std::array<uint64_t, 2> UUID;
 
 UUID generateUUID() {
@@ -15,15 +16,22 @@ UUID generateUUID() {
     return UUID{dist(mt), dist(mt)};
 }
 
-bool operator==(const UUID& lhs, const UUID& rhs) {
+struct CompareUUID {
+    bool operator()(const UUID& lhs, const UUID& rhs) { return lhs < rhs; }
+};
+}  // namespace Game
+
+bool operator==(const Game::UUID& lhs, const Game::UUID& rhs) {
     return lhs[0] == rhs[0] && lhs[1] == rhs[1];
 }
-bool operator!=(const UUID& lhs, const UUID& rhs) { return !(lhs == rhs); }
-bool operator<(const UUID& lhs, const UUID& rhs) {
+bool operator!=(const Game::UUID& lhs, const Game::UUID& rhs) {
+    return !(lhs == rhs);
+}
+bool operator<(const Game::UUID& lhs, const Game::UUID& rhs) {
     return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
 }
 
-std::ostream& operator<<(std::ostream& os, const UUID& rhs) {
+std::ostream& operator<<(std::ostream& os, const Game::UUID& rhs) {
     if (rhs[0] != 0) {
         os << rhs[0];
     }
@@ -31,15 +39,11 @@ std::ostream& operator<<(std::ostream& os, const UUID& rhs) {
     return os;
 }
 
-struct CompareUUID {
-    bool operator()(const UUID& lhs, const UUID& rhs) { return lhs < rhs; }
-};
-
 namespace std {
 template <>
-struct hash<UUID> {
+struct hash<Game::UUID> {
     // Based on Boost's hash_combine
-    size_t operator()(const UUID& id) const {
+    size_t operator()(const Game::UUID& id) const {
         std::hash<uint64_t> hasher;
         size_t hash = 0;
         hash ^= hasher(id[0]) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
@@ -48,7 +52,7 @@ struct hash<UUID> {
     }
 };
 
-std::string to_string(const UUID& id) {
+std::string to_string(const Game::UUID& id) {
     return to_string(id[0]) + to_string(id[1]);
 }
 }  // namespace std

@@ -23,7 +23,7 @@ class ComponentManager : public ComponentManagerBase {
 
    public:
     template <class... ArgTs>
-    const CompT& newComponent(UUID eId, ArgTs&&... args) {
+    const CompT& newComponent(Game::UUID eId, ArgTs&&... args) {
         static_assert(std::is_constructible<CompT, ArgTs...>::value,
                       "ComponentManager::newComponent(): Cannot construct "
                       "component with the given arguments");
@@ -38,11 +38,11 @@ class ComponentManager : public ComponentManagerBase {
         return it->second;
     }
 
-    bool hasEntity(UUID eId) {
+    bool hasEntity(Game::UUID eId) {
         return mComponents.find(eId) != mComponents.end();
     }
 
-    const CompT& operator[](UUID eId) {
+    const CompT& operator[](Game::UUID eId) {
         auto it = mComponents.find(eId);
         if (it == mComponents.end()) {
             throw std::runtime_error("ComponentManager[]: Entity " +
@@ -53,7 +53,7 @@ class ComponentManager : public ComponentManagerBase {
     }
 
    private:
-    std::unordered_map<UUID, CompT> mComponents;
+    std::unordered_map<Game::UUID, CompT> mComponents;
 };
 
 class ComponentService {

@@ -1,6 +1,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <queue>
@@ -33,11 +34,11 @@ typedef std::function<void(const Message&)> MessageFunc;
 class MessageSubscribers {
    public:
     void sendMessage(const Message& msg) {
-        for (auto& sub : mAllSubscribers) {
-            sub(msg);
+        for (auto& func : mAllSubscribers) {
+            func(msg);
         }
-        for (auto& sub : mSubscribers[msg.code()]) {
-            sub(msg);
+        for (auto& func : mSubscribers[msg.code()]) {
+            func(msg);
         }
     }
 
@@ -62,6 +63,9 @@ class MessageBus {
         auto& msgs = messages();
         while (!msgs.empty()) {
             auto& msg = msgs.front();
+            for (auto& func : allSubscribers()) {
+                func(msg);
+            }
             subscribers()[msg.type()].sendMessage(msg);
             msgs.pop();
         }
@@ -77,16 +81,25 @@ class MessageBus {
         subscribers()[msgType].subscribe(callback);
     }
 
+    static void subscribe(const MessageFunc& callback) {
+        allSubscribers().push_back(callback);
+    }
+
    private:
     static std::queue<Message>& messages() {
-        static std::queue<Message> MESSAGES;
-        return MESSAGES;
+        static std::queue<Message> messages;
+        return messages;
     }
 
     typedef std::unordered_map<MessageT, MessageSubscribers> SubscriberList;
     static SubscriberList& subscribers() {
-        static SubscriberList SUBSCRIBERS;
-        return SUBSCRIBERS;
+        static SubscriberList subscribers;
+        return subscribers;
+    }
+
+    static std::vector<MessageFunc>& allSubscribers() {
+        static std::vector<MessageFunc> allSubscribers;
+        return allSubscribers;
     }
 };
 
