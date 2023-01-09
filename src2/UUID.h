@@ -4,6 +4,7 @@
 #include <array>
 #include <ostream>
 #include <random>
+#include <string>
 
 typedef std::array<uint64_t, 2> UUID;
 
@@ -46,6 +47,10 @@ struct hash<UUID> {
         return hash;
     }
 };
+
+std::string to_string(const UUID& id) {
+    return to_string(id[0]) + to_string(id[1]);
+}
 }  // namespace std
 
 #endif

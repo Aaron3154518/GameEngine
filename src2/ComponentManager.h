@@ -38,6 +38,20 @@ class ComponentManager : public ComponentManagerBase {
         return it->second;
     }
 
+    bool hasEntity(UUID eId) {
+        return mComponents.find(eId) != mComponents.end();
+    }
+
+    const CompT& operator[](UUID eId) {
+        auto it = mComponents.find(eId);
+        if (it == mComponents.end()) {
+            throw std::runtime_error("ComponentManager[]: Entity " +
+                                     std::to_string(eId) + " Does not have " +
+                                     typeid(CompT).name());
+        }
+        return it->second;
+    }
+
    private:
     std::unordered_map<UUID, CompT> mComponents;
 };
