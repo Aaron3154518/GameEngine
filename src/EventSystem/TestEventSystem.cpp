@@ -97,15 +97,15 @@ int main(int argc, char *argv[]) {
         re << "Released: ";
         he << "Held: ";
         for (auto &key : e.keys()) {
-            const Event::KeyButton &kb = e[key];
+            const Event::KeyButton &kb = e[key.key];
             if (kb.pressed()) {
-                pr << SDL_GetKeyName(key) << " ";
+                pr << SDL_GetKeyName(key.key) << " ";
             }
             if (kb.released()) {
-                re << SDL_GetKeyName(key) << " ";
+                re << SDL_GetKeyName(key.key) << " ";
             }
             if (kb.held()) {
-                he << SDL_GetKeyName(key) << " ";
+                he << SDL_GetKeyName(key.key) << " ";
             }
         }
 

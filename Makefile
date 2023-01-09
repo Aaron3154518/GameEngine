@@ -1,5 +1,5 @@
-CXX := g++ -Wall
-CXXFLAGS :=  
+CXX := g++
+CXXFLAGS := -Wall
 
 AR := ar
 ARFLAGS := -rv
@@ -10,12 +10,21 @@ SRC := src
 OBJ := obj
 LIB := lib
 
-SDL_INC := i686-w64-mingw32/include/SDL2
-SDL_LIB := i686-w64-mingw32/lib
+# SDL Variables
+MINGW := x86_64-w64-mingw32
+# MINGW := i686-w64-mingw32
+SDL := $(INC)/SDL2-2.0.12/$(MINGW)
+SDL_IMG := $(INC)/SDL2_image-2.0.5/$(MINGW)
+SDL_TTF := $(INC)/SDL2_ttf-2.20.1/$(MINGW)
+SDL_DIRS := $(SDL) $(SDL_IMG) $(SDL_TTF)
+SDL_LIBS := SDL2 SDL2_image SDL2_ttf
+SDL_BIN := bin
+SDL_INC := include/SDL2
+SDL_LIB := lib
 
-INCLUDE_PATHS := -I$(SRC) -I$(INC)/SDL2-2.0.12/$(SDL_INC) -I$(INC)/SDL2_image-2.0.5/$(SDL_INC) -I$(INC)/SDL2_ttf-2.20.1/$(SDL_INC)
-LIBRARY_PATHS := -L$(INC)/SDL2-2.0.12/$(SDL_LIB) -L$(INC)/SDL2_image-2.0.5/$(SDL_LIB) -L$(INC)/SDL2_ttf-2.20.1/$(SDL_LIB)
-LINKER_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+INCLUDE_PATHS := -I$(SRC) $(foreach dir,$(SDL_DIRS),-I$(dir)/$(SDL_INC))
+LIBRARY_PATHS := $(foreach dir,$(SDL_DIRS),-L$(dir)/$(SDL_LIB))
+LINKER_FLAGS := -lSDL2main $(foreach lib,$(SDL_LIBS),-l$(lib))
 GAME_LIBRARY := -L$(LIB) -lGameEngine
 
 DEPFLAGS := -MM $(INCLUDE_PATHS)
@@ -40,43 +49,37 @@ clean:
 
 test: RenderTest EventTest ServiceTest GameTest
 
+$(OBJ)/%.o: $(SRC)/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+
 ifeq ($(O),)
 O := $(basename $(notdir $(T)))
 endif
 
 ifeq ($(T),)
 compile:
-	@echo "Please specify a compile target using 'T=path-to-file'"
+	@echo "Please specify a compile target using 'T=path-to-file'"	
+run: compile
 else
 compile: $(call OBJS_ALL,$(T))
+	for dir in $(SDL_DIRS); do \
+		cp $$dir/$(SDL_BIN)/*.dll ./; \
+	done
 	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$(O).exe $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
 -include $(call DEPS_ALL,$(T))
+run: compile
+	bin/$(O)
 endif
 
-RenderTest: $(call OBJS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
-	@$(BIN)/RenderTest
--include $(call DEPS_ALL,$(SRC)/RenderSystem/TestRenderSystem.cpp)
+RenderTest:
+	make run T=$(SRC)/RenderSystem/TestRenderSystem.cpp O=$@
+EventTest:
+	make run T=$(SRC)/EventSystem/TestEventSystem.cpp O=$@
+ServiceTest:
+	make run T=$(SRC)/ServiceSystem/TestServiceSystem.cpp O=$@
 
-EventTest: $(call OBJS_ALL,$(SRC)/EventSystem/TestEventSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
-	@$(BIN)/EventTest
--include $(call DEPS_ALL,$(SRC)/EventSystem/TestEventSystem.cpp)
-
-ServiceTest: $(call OBJS_ALL,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
-	$(CXX) $(CXXFLAGS) $^ -o $(BIN)/$@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
-	@$(BIN)/ServiceTest
--include $(call DEPS_ALL,$(SRC)/ServiceSystem/TestServiceSystem.cpp)
-
-GameTest: $(SRC)/TestGameSystem.cpp $(LIB)/libGameEngine.a
-	$(CXX) $(CXXFLAGS) $< -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
-	@$(BIN)/GameTest
--include $(call DEPS_ALL,$(SRC)/TestGameSystem.cpp)
-
-$(OBJ)/%.o: $(SRC)/%.cpp
-	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(LINKER_FLAGS)
-
+ifeq ($(SRC),src)
 .PHONY: GameLibrary
 GameLibrary: $(LIB)/libGameEngine.a
 
@@ -84,3 +87,9 @@ $(LIB)/libGameEngine.a: $(call OBJS,$(SRC)/Includes.h)
 	@mkdir -p $(@D)
 	$(AR) $(ARFLAGS) $@ $^
 -include $(call DEPS,$(SRC)/Includes.h)
+
+GameTest: $(SRC)/TestGameSystem.cpp $(LIB)/libGameEngine.a
+	$(CXX) $(CXXFLAGS) $< -o $(BIN)/$@ $(INCLUDE_PATHS) $(GAME_LIBRARY) $(LIBRARY_PATHS) $(LINKER_FLAGS)
+	@$(BIN)/GameTest
+-include $(call DEPS_ALL,$(SRC)/TestGameSystem.cpp)
+endif
