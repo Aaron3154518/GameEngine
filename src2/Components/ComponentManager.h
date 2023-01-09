@@ -21,6 +21,42 @@ class ComponentManagerBase {
 
    protected:
     std::unordered_map<Entities::UUID, Component> mComponents;
+
+   private:
+    class iterator_base {
+        typedef std::unordered_map<Entities::UUID, Component>::iterator
+            map_iterator;
+
+       public:
+        iterator_base(const map_iterator& it);
+        virtual ~iterator_base() = default;
+
+        bool operator==(const iterator_base& rhs) const;
+        bool operator!=(const iterator_base& rhs) const;
+
+        Component* operator->() const;
+        Component& operator*() const;
+
+        // Prefix ++
+        iterator_base& operator++();
+
+       private:
+        map_iterator mIt;
+    };
+
+   protected:
+    template <class CompT>
+    class iterator : public iterator_base {
+       public:
+        using iterator_base::iterator_base;
+
+        CompT* operator->() {
+            return static_cast<CompT*>(iterator_base::operator->());
+        }
+        CompT& operator*() {
+            return static_cast<CompT&>(iterator_base::operator*());
+        }
+    };
 };
 
 typedef std::unique_ptr<ComponentManagerBase> ComponentManagerBasePtr;
@@ -51,34 +87,7 @@ class ComponentManager : public ComponentManagerBase {
         return static_cast<const CompT&>(ComponentManagerBase::operator[](eId));
     }
 
-    class iterator {
-        typedef std::unordered_map<Entities::UUID, Component>::iterator
-            map_iterator;
-
-       public:
-        iterator(const map_iterator& it) : mIt(it) {}
-
-        bool operator==(const iterator& rhs) const { return mIt == rhs.mIt; }
-        bool operator!=(const iterator& rhs) const { return !(*this == rhs); }
-
-        CompT* operator->() { return static_cast<CompT*>(&mIt->second); }
-        CompT& operator*() { return static_cast<CompT&>(mIt->second); }
-
-        // Prefix ++
-        iterator& operator++() {
-            ++mIt;
-            return *this;
-        }
-        // Postfix ++
-        iterator operator++(int) {
-            iterator tmp(mIt);
-            ++*this;
-            return tmp;
-        }
-
-       private:
-        map_iterator mIt;
-    };
+    typedef iterator<CompT> iterator;
 
     iterator begin() { return iterator(mComponents.begin()); }
     iterator end() { return iterator(mComponents.end()); }
