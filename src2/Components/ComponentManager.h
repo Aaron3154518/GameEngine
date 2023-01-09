@@ -14,6 +14,13 @@ namespace Components {
 class ComponentManagerBase {
    public:
     virtual ~ComponentManagerBase() = default;
+
+    bool hasEntity(Entities::UUID eId);
+
+    const Component& operator[](Entities::UUID eId) const;
+
+   protected:
+    std::unordered_map<Entities::UUID, Component> mComponents;
 };
 
 typedef std::unique_ptr<ComponentManagerBase> ComponentManagerBasePtr;
@@ -37,46 +44,77 @@ class ComponentManager : public ComponentManagerBase {
             std::cerr << "Unsubscribe Me" << std::endl;
             it->second = CompT(std::forward<ArgTs>(args)...);
         }
-        return it->second;
+        return static_cast<const CompT&>(it->second);
     }
 
-    bool hasEntity(Entities::UUID eId) {
-        return mComponents.find(eId) != mComponents.end();
+    const CompT& operator[](Entities::UUID eId) const {
+        return static_cast<const CompT&>(ComponentManagerBase::operator[](eId));
     }
 
-    const CompT& operator[](Entities::UUID eId) {
-        auto it = mComponents.find(eId);
-        if (it == mComponents.end()) {
-            throw std::runtime_error("ComponentManager[]: Entity " +
-                                     std::to_string(eId) + " Does not have " +
-                                     typeid(CompT).name());
+    class iterator {
+        typedef std::unordered_map<Entities::UUID, Component>::iterator
+            map_iterator;
+
+       public:
+        iterator(const map_iterator& it) : mIt(it) {}
+
+        bool operator==(const iterator& rhs) const { return mIt == rhs.mIt; }
+        bool operator!=(const iterator& rhs) const { return !(*this == rhs); }
+
+        CompT* operator->() { return static_cast<CompT*>(&mIt->second); }
+        CompT& operator*() { return static_cast<CompT&>(mIt->second); }
+
+        // Prefix ++
+        iterator& operator++() {
+            ++mIt;
+            return *this;
         }
-        return it->second;
-    }
+        // Postfix ++
+        iterator operator++(int) {
+            iterator tmp(mIt);
+            ++*this;
+            return tmp;
+        }
 
-   private:
-    std::unordered_map<Entities::UUID, CompT> mComponents;
+       private:
+        map_iterator mIt;
+    };
+
+    iterator begin() { return iterator(mComponents.begin()); }
+    iterator end() { return iterator(mComponents.end()); }
 };
 
 class ComponentService {
    public:
-    template <class CompT>
-    static ComponentManager<CompT>& getComponentManager() {
+    template <class CompManT>
+    static CompManT& Get() {
         auto& cm = ComponentManagers();
-        auto key = std::type_index(typeid(CompT));
+        auto key = std::type_index(typeid(CompManT));
         auto it = cm.find(key);
         if (it == cm.end()) {
-            it = cm.emplace(key, std::make_unique<ComponentManager<CompT>>())
-                     .first;
+            it = cm.emplace(key, std::make_unique<CompManT>()).first;
         }
-        auto ptr = static_cast<ComponentManager<CompT>*>(it->second.get());
+        auto ptr = static_cast<CompManT*>(it->second.get());
         if (!ptr) {
             throw std::runtime_error(
-                "ComponentService::getComponentManager(): Could not get "
+                "ComponentService::Get(): Could not get "
                 "manager for " +
                 std::string(key.name()));
         }
         return *ptr;
+    }
+
+    template <class CompT, class CompManT = ComponentManager<CompT>>
+    static CompT& Get(Entities::UUID eId) {
+        static_assert(std::is_base_of<Component, CompT>::value,
+                      "ComponentService::Get(): Component type must derive "
+                      "from Component");
+        static_assert(
+            std::is_base_of<ComponentManagerBase, CompManT>::value,
+            "ComponentService::Get(): ComponentManager type must derive "
+            "from ComponentManagerBase");
+        CompManT& cm = Get<CompManT>();
+        return cm[eId];
     }
 
    private:

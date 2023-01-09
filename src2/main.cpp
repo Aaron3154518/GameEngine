@@ -14,17 +14,48 @@ class MyService : public Messages::MessageSender<MyServiceMessage> {
    private:
 };
 
-class MyComponent : public Components::Component {};
+class MyComponent : public Components::Component {
+   public:
+    void onHello() { std::cerr << "Hello" << std::endl; }
+    void onWorld() { std::cerr << "World" << std::endl; }
+};
+
+class MyComponentManager : public Components::ComponentManager<MyComponent> {
+   public:
+    MyComponentManager() {
+        Messages::MessageBus::subscribe(
+            MyService{}.getType(),
+            [this](const Messages::Message& m) { onMyServiceMessage(m); });
+    }
+
+    void onMyServiceMessage(const Messages::Message& m) {
+        switch (m.code()) {
+            case MyServiceMessage::Hello:
+                for (auto& comp : *this) {
+                    comp.onHello();
+                }
+                break;
+            case MyServiceMessage::World:
+                for (auto& comp : *this) {
+                    comp.onWorld();
+                }
+                break;
+            default:
+                break;
+        };
+    }
+};
 
 class MyEntity : public Entities::Entity {
    public:
-    MyEntity(MyService& s) {
-        addComponent<Components::Component>();
-        addComponent<MyComponent>();
-        Messages::MessageBus::subscribe(s.getType(), MyServiceMessage::Hello,
-                                        [](const Messages::Message& m) {
-                                            std::cerr << "Hello" << std::endl;
-                                        });
+    MyEntity(const MyService& s) {
+        addComponent<Components::ComponentManager<Components::Component>>();
+        addComponent<MyComponentManager>();
+        Messages::MessageBus::subscribe(
+            s.getType(), MyServiceMessage::Hello,
+            [s](const Messages::Message& m) {
+                s.sendMessage(MyServiceMessage::World);
+            });
     }
 };
 
@@ -56,8 +87,6 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < 10; i++) {
         Sleep(160);
     }
-
-    std::cerr << "Hello World" << std::endl;
 
     WaitForSingleObject(comThread, INFINITE);
     CloseHandle(comThread);

@@ -78,6 +78,8 @@ EventTest:
 	make run T=$(SRC)/EventSystem/TestEventSystem.cpp O=$@
 ServiceTest:
 	make run T=$(SRC)/ServiceSystem/TestServiceSystem.cpp O=$@
+ECSTest:
+	make run T=$(SRC)/main.cpp O=$@
 
 ifeq ($(SRC),src)
 .PHONY: GameLibrary

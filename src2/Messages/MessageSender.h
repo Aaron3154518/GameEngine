@@ -12,10 +12,7 @@ class MessageSenderBase {
    public:
     virtual ~MessageSenderBase() = default;
 
-    std::string getType();
-
-   private:
-    std::string className;
+    std::string getType() const;
 };
 
 template <class T>
@@ -26,7 +23,9 @@ class MessageSender : public MessageSenderBase {
    public:
     virtual ~MessageSender() = default;
 
-    void sendMessage(T t) { MessageBus::queueMessage(Message(getType(), t)); }
+    void sendMessage(T t) const {
+        MessageBus::queueMessage(Message(getType(), t));
+    }
 };
 }  // namespace Messages
 

@@ -2,13 +2,9 @@
 
 namespace Messages {
 // MessageSenderBase
-std::string MessageSenderBase::getType() {
-    if (className.empty()) {
-        className = typeid(*this).name();
-        className.erase(className.begin(),
-                        std::find_if(std::begin(className), std::end(className),
-                                     ::isalpha));
-    }
-    return className;
+std::string MessageSenderBase::getType() const {
+    std::string str = typeid(*this).name();
+    return str.substr(std::find_if(str.begin(), str.end(), ::isalpha) -
+                      str.begin());
 }
 }  // namespace Messages

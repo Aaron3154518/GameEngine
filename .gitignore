@@ -6,3 +6,4 @@ src/Test
 .vs/
 .vscode/
 *.dll
+test.*

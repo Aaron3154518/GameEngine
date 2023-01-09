@@ -18,12 +18,15 @@ class Entity {
     Entity();
     virtual ~Entity() = default;
 
+    operator UUID() const;
+
    protected:
-    template <class CompT, class... ArgTs>
+    template <class CompManT, class... ArgTs>
     void addComponent(ArgTs&&... args) {
-        Components::ComponentService::getComponentManager<CompT>().newComponent(
+        Components::ComponentService::Get<CompManT>().newComponent(
             mId, std::forward<ArgTs>(args)...);
-        std::cerr << "Added: " << typeid(CompT).name() << std::endl;
+        std::cerr << "Added Component to: " << typeid(CompManT).name()
+                  << std::endl;
     }
 
    private:
