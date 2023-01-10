@@ -4,6 +4,7 @@
 #include <Messages/Message.h>
 
 #include <functional>
+#include <iostream>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -14,7 +15,7 @@ class MessageBus {
 
     class MessageSubscribers {
        public:
-        void sendMessage(const Message& msg);
+        void sendMessage(MessagePtr& msg);
 
         void subscribe(EnumT code, const MessageFunc& callback);
         void subscribe(const MessageFunc& callback);
@@ -25,7 +26,7 @@ class MessageBus {
     };
 
    public:
-    static void queueMessage(const Message& msg);
+    static void queueMessage(MessagePtr msg);
 
     static void sendMessages();
 
@@ -37,7 +38,7 @@ class MessageBus {
     static void subscribe(const MessageFunc& callback);
 
    private:
-    static std::queue<Message>& messages();
+    static std::queue<MessagePtr>& messages();
 
     typedef std::unordered_map<MessageT, MessageSubscribers> SubscriberList;
     static SubscriberList& subscribers();

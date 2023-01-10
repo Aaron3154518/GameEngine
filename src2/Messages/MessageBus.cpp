@@ -2,12 +2,12 @@
 
 namespace Messages {
 // MessageBus::MessageSubscribers
-void MessageBus::MessageSubscribers::sendMessage(const Message& msg) {
+void MessageBus::MessageSubscribers::sendMessage(MessagePtr& msg) {
     for (auto& func : mAllSubscribers) {
-        func(msg);
+        func(*msg);
     }
-    for (auto& func : mSubscribers[msg.code()]) {
-        func(msg);
+    for (auto& func : mSubscribers[msg->code()]) {
+        func(*msg);
     }
 }
 
@@ -20,17 +20,19 @@ void MessageBus::MessageSubscribers::subscribe(const MessageFunc& callback) {
 }
 
 // MessageBus
-void MessageBus::queueMessage(const Message& msg) { messages().push(msg); }
+void MessageBus::queueMessage(MessagePtr msg) {
+    messages().push(std::move(msg));
+}
 
 void MessageBus::sendMessages() {
     auto& msgs = messages();
     while (!msgs.empty()) {
-        auto& msg = msgs.front();
-        for (auto& func : allSubscribers()) {
-            func(msg);
-        }
-        subscribers()[msg.type()].sendMessage(msg);
+        auto msg = std::move(msgs.front());
         msgs.pop();
+        for (auto& func : allSubscribers()) {
+            func(*msg);
+        }
+        subscribers()[msg->type()].sendMessage(msg);
     }
 }
 
@@ -48,8 +50,8 @@ void MessageBus::subscribe(const MessageFunc& callback) {
     allSubscribers().push_back(callback);
 }
 
-std::queue<Message>& MessageBus::messages() {
-    static std::queue<Message> messages;
+std::queue<MessagePtr>& MessageBus::messages() {
+    static std::queue<MessagePtr> messages;
     return messages;
 }
 

@@ -1,60 +1,7 @@
-#include <Components/Component.h>
-#include <Entities/Entity.h>
-#include <Messages/MessageBus.h>
-#include <Messages/MessageSender.h>
-#include <Services/CommandService.h>
+#include <Test.h>
 #include <Windows.h>
 
 #include <iostream>
-
-enum MyServiceMessage : Messages::EnumT { Hello = 0, World = 1 };
-
-class MyService : public Messages::MessageSender<MyServiceMessage> {
-   public:
-   private:
-};
-
-class MyComponent : public Components::Component {
-   public:
-    void onHello() { std::cerr << "Hello" << std::endl; }
-    void onWorld(int& num) { std::cerr << "World " << num++ << std::endl; }
-};
-
-class MyComponentManager : public Components::ComponentManager<MyComponent> {
-   public:
-    MyComponentManager() {
-        Messages::MessageBus::subscribe(
-            MyService{}.getType(),
-            [this](const Messages::Message& m) { onMyServiceMessage(m); });
-    }
-
-    void onMyServiceMessage(const Messages::Message& m) {
-        static int cnt = 0;
-        switch (m.code()) {
-            case MyServiceMessage::Hello:
-                forEach([](MyComponent& c) { c.onHello(); });
-                break;
-            case MyServiceMessage::World:
-                forEach(&MyComponent::onWorld, cnt);
-                break;
-            default:
-                break;
-        };
-    }
-};
-
-class MyEntity : public Entities::Entity {
-   public:
-    MyEntity(const MyService& s) {
-        addComponent<Components::ComponentManager<Components::Component>>();
-        addComponent<MyComponentManager>();
-        Messages::MessageBus::subscribe(
-            s.getType(), MyServiceMessage::Hello,
-            [s](const Messages::Message& m) {
-                s.sendMessage(MyServiceMessage::World);
-            });
-    }
-};
 
 DWORD WINAPI runCommand(LPVOID param) {
     Services::CommandService& cs = *(Services::CommandService*)param;

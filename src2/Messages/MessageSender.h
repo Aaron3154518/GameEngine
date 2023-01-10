@@ -24,7 +24,7 @@ class MessageSender : public MessageSenderBase {
     virtual ~MessageSender() = default;
 
     void sendMessage(T t) const {
-        MessageBus::queueMessage(Message(getType(), t));
+        MessageBus::queueMessage(std::make_unique<Message>(getType(), t));
     }
 };
 }  // namespace Messages

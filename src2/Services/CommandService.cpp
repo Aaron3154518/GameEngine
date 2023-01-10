@@ -1,5 +1,7 @@
 #include "CommandService.h"
 
+#include <Test.h>
+
 namespace Services {
 // CommandService
 CommandService::CommandService() {
@@ -25,8 +27,28 @@ bool CommandService::checkInput() {
     if (service == "MyService") {
         int code;
         if (ss >> code) {
-            Messages::MessageBus::queueMessage(
-                Messages::Message(service, code));
+            switch (code) {
+                case MyServiceMessage::Hello:
+                case MyServiceMessage::World:
+                    Messages::MessageBus::queueMessage(
+                        std::make_unique<Messages::Message>(service, code));
+                    break;
+                case MyServiceMessage::PrintCount:
+                case MyServiceMessage::IncreaseCount: {
+                    int val = 0;
+                    if (code == MyServiceMessage::IncreaseCount) {
+                        if (!(ss >> val)) {
+                            val = 1;
+                        }
+                    }
+                    auto m = std::make_unique<MyMessage>(
+                        service, MyServiceMessage::IncreaseCount);
+                    m->setCount(val);
+                    Messages::MessageBus::queueMessage(std::move(m));
+                } break;
+                default:
+                    break;
+            }
         }
     }
 

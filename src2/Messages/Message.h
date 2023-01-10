@@ -1,6 +1,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include <memory>
 #include <string>
 
 namespace Messages {
@@ -21,6 +22,8 @@ class Message {
     MessageT mType;
     EnumT mCode;
 };
+
+typedef std::unique_ptr<Message> MessagePtr;
 }  // namespace Messages
 
 #endif
