@@ -33,11 +33,8 @@ class MessageBus {
 
     void sendMessages();
 
-    MessageHandle subscribe(Entities::UUID eId, const MessageT& msgType,
-                            EnumT msgCode, const MessageFunc& callback);
-    MessageHandle subscribe(Entities::UUID eId, const MessageT& msgType,
-                            const MessageFunc& callback);
-    MessageHandle subscribe(Entities::UUID eId, const MessageFunc& callback);
+    MessageHandle subscribe(const MessageFunc& callback, Entities::UUID eId,
+                            const MessageT& msgType = "", EnumT msgCode = -1);
 
     void unsubscribe(MessageHandle handle);
 

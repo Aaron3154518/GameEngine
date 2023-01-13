@@ -2,8 +2,6 @@ obj/*
 lib/*
 bin/*
 testing.*
-src/Test
 .vs/
 .vscode/
 *.dll
-test.*

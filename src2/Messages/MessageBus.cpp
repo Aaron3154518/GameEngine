@@ -32,22 +32,12 @@ void MessageBus::sendMessage(const MessagePtr& msg) {
     }
 }
 
-MessageHandle MessageBus::subscribe(Entities::UUID eId, const MessageT& msgType,
-                                    EnumT msgCode,
-                                    const MessageFunc& callback) {
+MessageHandle MessageBus::subscribe(const MessageFunc& callback,
+                                    Entities::UUID eId, const MessageT& msgType,
+                                    EnumT msgCode) {
     auto& cnt = entity_counts[eId];
     subscribers[msgType][msgCode].push_back({eId, cnt, callback});
     return MessageHandle{eId, cnt++, msgType, msgCode};
-}
-
-MessageHandle MessageBus::subscribe(Entities::UUID eId, const MessageT& msgType,
-                                    const MessageFunc& callback) {
-    return subscribe(eId, msgType, -1, callback);
-}
-
-MessageHandle MessageBus::subscribe(Entities::UUID eId,
-                                    const MessageFunc& callback) {
-    return subscribe(eId, "", callback);
 }
 
 void MessageBus::unsubscribe(MessageHandle handle) {

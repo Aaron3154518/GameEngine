@@ -6,7 +6,6 @@ namespace Components {
 // ComponentManagerBase
 ComponentManagerBase::ComponentManagerBase() {
     attachSubscription(Messages::GetMessageBus().subscribe(
-        id(), Entities::Entity::TYPE(), Entities::Entity::Unsub,
         [this](const Messages::Message& m) {
             const auto& msg =
                 static_cast<const Entities::EntityUnsubMessage&>(m);
@@ -14,7 +13,8 @@ ComponentManagerBase::ComponentManagerBase() {
             if (it != mComponents.end()) {
                 mComponents.erase(it);
             }
-        }));
+        },
+        id(), Entities::Entity::TYPE(), Entities::Entity::Unsub));
 }
 
 bool ComponentManagerBase::hasEntity(Entities::UUID eId) {

@@ -6,10 +6,11 @@ namespace Services {
 // CommandService
 CommandService::CommandService() {
     attachSubscription(Messages::GetMessageBus().subscribe(
-        id(), [](const Messages::Message& msg) {
+        [](const Messages::Message& msg) {
             std::cerr << "\033[1;34m[Message]\033[0m " << msg.type() << " "
                       << msg.code() << std::endl;
-        }));
+        },
+        id()));
 }
 
 bool CommandService::checkInput() {
