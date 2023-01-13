@@ -1,7 +1,22 @@
 #include "ComponentManager.h"
 
+#include <Entities/Entity.h>
+
 namespace Components {
 // ComponentManagerBase
+ComponentManagerBase::ComponentManagerBase() {
+    attachSubscription(Messages::GetMessageBus().subscribe(
+        id(), Entities::Entity::TYPE(), Entities::Entity::Unsub,
+        [this](const Messages::Message& m) {
+            const auto& msg =
+                static_cast<const Entities::EntityUnsubMessage&>(m);
+            auto it = mComponents.find(msg.getId());
+            if (it != mComponents.end()) {
+                mComponents.erase(it);
+            }
+        }));
+}
+
 bool ComponentManagerBase::hasEntity(Entities::UUID eId) {
     return mComponents.find(eId) != mComponents.end();
 }

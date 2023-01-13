@@ -2,7 +2,20 @@
 
 namespace Entities {
 // Entity
-Entity::Entity() : mId(generateUUID()) { std::cerr << mId << std::endl; }
+Entity::~Entity() {
+    Messages::GetMessageBus().sendImmediateMessage(
+        std::make_unique<EntityUnsubMessage>(id()));
+}
 
-Entity::operator UUID() const { return mId; }
+const Messages::MessageT& Entity::TYPE() {
+    static Messages::MessageT TYPE = typeid(Entity).name();
+    return TYPE;
+}
+
+// EntityUnsubMessage
+EntityUnsubMessage::EntityUnsubMessage(UUID eId)
+    : Messages::Message(Entity::TYPE(), Entity::MessageCode::Unsub),
+      mEId(eId) {}
+
+UUID EntityUnsubMessage::getId() const { return mEId; }
 }  // namespace Entities

@@ -2,6 +2,7 @@
 #define COMMAND_SERVICE_H
 
 #include <Messages/MessageBus.h>
+#include <Services/Service.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -9,7 +10,7 @@
 #include <string>
 
 namespace Services {
-class CommandService {
+class CommandService : public Service {
    public:
     CommandService();
 

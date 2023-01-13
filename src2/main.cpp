@@ -6,7 +6,7 @@
 DWORD WINAPI runCommand(LPVOID param) {
     Services::CommandService& cs = *(Services::CommandService*)param;
     while (cs.checkInput()) {
-        Messages::MessageBus::sendMessages();
+        Messages::GetMessageBus().sendMessages();
         Sleep(16);
     }
     return 0;
@@ -18,12 +18,17 @@ int main(int argc, char* argv[]) {
 
     MyService s;
     Services::CommandService cs;
+
+    {
+        MyEntity e(s);
+
+        s.sendMessage(MyServiceMessage::Hello);
+        s.sendMessage(MyServiceMessage::World);
+
+        Messages::GetMessageBus().sendMessages();
+    }
+
     MyEntity e(s);
-
-    s.sendMessage(MyServiceMessage::Hello);
-    s.sendMessage(MyServiceMessage::World);
-
-    Messages::MessageBus::sendMessages();
 
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);

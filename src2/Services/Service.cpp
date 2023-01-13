@@ -1,5 +1,5 @@
 #include "Service.h"
 
-namespace Service {
+namespace Services {
 // Service
 }

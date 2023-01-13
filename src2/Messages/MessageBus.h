@@ -1,6 +1,7 @@
 #ifndef MESSAGE_BUS_H
 #define MESSAGE_BUS_H
 
+#include <Entities/UUID.h>
 #include <Messages/Message.h>
 
 #include <functional>
@@ -10,41 +11,51 @@
 #include <vector>
 
 namespace Messages {
+struct MessageHandle {
+    const Entities::UUID eId;
+    const uint32_t eNum;
+    const MessageT type;
+    const EnumT code;
+};
+
 class MessageBus {
     typedef std::function<void(const Message&)> MessageFunc;
 
-    class MessageSubscribers {
-       public:
-        void sendMessage(MessagePtr& msg);
-
-        void subscribe(EnumT code, const MessageFunc& callback);
-        void subscribe(const MessageFunc& callback);
-
-       private:
-        std::vector<MessageFunc> mAllSubscribers;
-        std::unordered_map<EnumT, std::vector<MessageFunc>> mSubscribers;
+    struct EntityCallback {
+        Entities::UUID eId;
+        uint32_t eNum;
+        MessageFunc func;
     };
 
    public:
-    static void queueMessage(MessagePtr msg);
+    void queueMessage(MessagePtr msg);
+    void sendImmediateMessage(MessagePtr msg);
 
-    static void sendMessages();
+    void sendMessages();
 
-    static void subscribe(const MessageT& msgType, EnumT msgCode,
-                          const MessageFunc& callback);
+    MessageHandle subscribe(Entities::UUID eId, const MessageT& msgType,
+                            EnumT msgCode, const MessageFunc& callback);
+    MessageHandle subscribe(Entities::UUID eId, const MessageT& msgType,
+                            const MessageFunc& callback);
+    MessageHandle subscribe(Entities::UUID eId, const MessageFunc& callback);
 
-    static void subscribe(const MessageT& msgType, const MessageFunc& callback);
-
-    static void subscribe(const MessageFunc& callback);
+    void unsubscribe(MessageHandle handle);
 
    private:
-    static std::queue<MessagePtr>& messages();
+    friend MessageBus& GetMessageBus();
+    MessageBus() = default;
 
-    typedef std::unordered_map<MessageT, MessageSubscribers> SubscriberList;
-    static SubscriberList& subscribers();
+    void sendMessage(const MessagePtr& msg);
 
-    static std::vector<MessageFunc>& allSubscribers();
+    std::queue<MessagePtr> messages;
+
+    typedef std::unordered_map<EnumT, std::vector<EntityCallback>>
+        MessageSubscribers;
+    std::unordered_map<MessageT, MessageSubscribers> subscribers;
+    std::unordered_map<Entities::UUID, uint32_t> entity_counts;
 };
+
+MessageBus& GetMessageBus();
 }  // namespace Messages
 
 #endif

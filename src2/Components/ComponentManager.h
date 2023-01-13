@@ -3,6 +3,7 @@
 
 #include <Components/Component.h>
 #include <Entities/UUID.h>
+#include <Messages/MessageReceiver.h>
 
 #include <functional>
 #include <iostream>
@@ -12,8 +13,9 @@
 #include <unordered_map>
 
 namespace Components {
-class ComponentManagerBase {
+class ComponentManagerBase : public Messages::MessageReceiver {
    public:
+    ComponentManagerBase();
     virtual ~ComponentManagerBase() = default;
 
     bool hasEntity(Entities::UUID eId);
@@ -68,6 +70,8 @@ class ComponentManager : public ComponentManagerBase {
                   "ComponentManager<>: Type must derive from Component");
 
    public:
+    virtual ~ComponentManager() = default;
+
     template <class... ArgTs>
     const CompT& newComponent(Entities::UUID eId, ArgTs&&... args) {
         static_assert(std::is_constructible<CompT, ArgTs...>::value,

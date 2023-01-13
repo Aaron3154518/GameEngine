@@ -1,67 +1,66 @@
 #include "MessageBus.h"
 
 namespace Messages {
-// MessageBus::MessageSubscribers
-void MessageBus::MessageSubscribers::sendMessage(MessagePtr& msg) {
-    for (auto& func : mAllSubscribers) {
-        func(*msg);
-    }
-    for (auto& func : mSubscribers[msg->code()]) {
-        func(*msg);
-    }
-}
-
-void MessageBus::MessageSubscribers::subscribe(EnumT code,
-                                               const MessageFunc& callback) {
-    mSubscribers[code].push_back(callback);
-}
-void MessageBus::MessageSubscribers::subscribe(const MessageFunc& callback) {
-    mAllSubscribers.push_back(callback);
-}
-
 // MessageBus
-void MessageBus::queueMessage(MessagePtr msg) {
-    messages().push(std::move(msg));
-}
+void MessageBus::queueMessage(MessagePtr msg) { messages.push(std::move(msg)); }
+
+void MessageBus::sendImmediateMessage(MessagePtr msg) { sendMessage(msg); }
 
 void MessageBus::sendMessages() {
-    auto& msgs = messages();
-    while (!msgs.empty()) {
-        auto msg = std::move(msgs.front());
-        msgs.pop();
-        for (auto& func : allSubscribers()) {
-            func(*msg);
-        }
-        subscribers()[msg->type()].sendMessage(msg);
+    while (!messages.empty()) {
+        sendMessage(messages.front());
+        messages.pop();
     }
 }
 
-void MessageBus::subscribe(const MessageT& msgType, EnumT msgCode,
-                           const MessageFunc& callback) {
-    subscribers()[msgType].subscribe(msgCode, callback);
+void MessageBus::sendMessage(const MessagePtr& msg) {
+    if (msg->type() != "") {
+        if (msg->code() != -1) {
+            // Subscribed to this message type and code
+            for (auto& callback : subscribers[msg->type()][msg->code()]) {
+                callback.func(*msg);
+            }
+        }
+        // Subscribed to all messages from this type
+        for (auto& callback : subscribers[msg->type()][-1]) {
+            callback.func(*msg);
+        }
+    }
+    // Subscribed to all messages
+    for (auto& callback : subscribers[""][-1]) {
+        callback.func(*msg);
+    }
 }
 
-void MessageBus::subscribe(const MessageT& msgType,
-                           const MessageFunc& callback) {
-    subscribers()[msgType].subscribe(callback);
+MessageHandle MessageBus::subscribe(Entities::UUID eId, const MessageT& msgType,
+                                    EnumT msgCode,
+                                    const MessageFunc& callback) {
+    auto& cnt = entity_counts[eId];
+    subscribers[msgType][msgCode].push_back({eId, cnt, callback});
+    return MessageHandle{eId, cnt++, msgType, msgCode};
 }
 
-void MessageBus::subscribe(const MessageFunc& callback) {
-    allSubscribers().push_back(callback);
+MessageHandle MessageBus::subscribe(Entities::UUID eId, const MessageT& msgType,
+                                    const MessageFunc& callback) {
+    return subscribe(eId, msgType, -1, callback);
 }
 
-std::queue<MessagePtr>& MessageBus::messages() {
-    static std::queue<MessagePtr> messages;
-    return messages;
+MessageHandle MessageBus::subscribe(Entities::UUID eId,
+                                    const MessageFunc& callback) {
+    return subscribe(eId, "", callback);
 }
 
-MessageBus::SubscriberList& MessageBus::subscribers() {
-    static SubscriberList subscribers;
-    return subscribers;
+void MessageBus::unsubscribe(MessageHandle handle) {
+    auto& callbackList = subscribers[handle.type][handle.code];
+    callbackList.erase(std::remove_if(callbackList.begin(), callbackList.end(),
+                                      [handle](const EntityCallback& ecb) {
+                                          return ecb.eId == handle.eId &&
+                                                 ecb.eNum == handle.eNum;
+                                      }));
 }
 
-std::vector<MessageBus::MessageFunc>& MessageBus::allSubscribers() {
-    static std::vector<MessageFunc> allSubscribers;
-    return allSubscribers;
+MessageBus& GetMessageBus() {
+    static MessageBus MSG_BUS;
+    return MSG_BUS;
 }
 }  // namespace Messages

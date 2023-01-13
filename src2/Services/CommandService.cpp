@@ -5,10 +5,11 @@
 namespace Services {
 // CommandService
 CommandService::CommandService() {
-    Messages::MessageBus::subscribe([](const Messages::Message& msg) {
-        std::cerr << "\033[1;34m[Message]\033[0m " << msg.type() << " "
-                  << msg.code() << std::endl;
-    });
+    attachSubscription(Messages::GetMessageBus().subscribe(
+        id(), [](const Messages::Message& msg) {
+            std::cerr << "\033[1;34m[Message]\033[0m " << msg.type() << " "
+                      << msg.code() << std::endl;
+        }));
 }
 
 bool CommandService::checkInput() {
@@ -30,7 +31,7 @@ bool CommandService::checkInput() {
             switch (code) {
                 case MyServiceMessage::Hello:
                 case MyServiceMessage::World:
-                    Messages::MessageBus::queueMessage(
+                    Messages::GetMessageBus().queueMessage(
                         std::make_unique<Messages::Message>(service, code));
                     break;
                 case MyServiceMessage::PrintCount:
@@ -44,7 +45,7 @@ bool CommandService::checkInput() {
                     auto m = std::make_unique<MyMessage>(
                         service, MyServiceMessage::IncreaseCount);
                     m->setCount(val);
-                    Messages::MessageBus::queueMessage(std::move(m));
+                    Messages::GetMessageBus().queueMessage(std::move(m));
                 } break;
                 default:
                     break;
