@@ -5,16 +5,15 @@
 namespace Components {
 // ComponentManagerBase
 ComponentManagerBase::ComponentManagerBase() {
-    attachSubscription(Messages::GetMessageBus().subscribe(
-        [this](const Messages::Message& m) {
-            const auto& msg =
-                static_cast<const Entities::EntityUnsubMessage&>(m);
-            auto it = mComponents.find(msg.getId());
-            if (it != mComponents.end()) {
-                mComponents.erase(it);
-            }
-        },
-        id(), Entities::Entity::TYPE(), Entities::Entity::Unsub));
+    attachSubscription(
+        Messages::GetMessageBus().subscribe<Entities::EntityUnsubMessage>(
+            [this](const Entities::EntityUnsubMessage& m) {
+                auto it = mComponents.find(m.getId());
+                if (it != mComponents.end()) {
+                    mComponents.erase(it);
+                }
+            },
+            id(), Entities::Entity::TYPE(), Entities::Entity::Unsub));
 }
 
 bool ComponentManagerBase::hasEntity(Entities::UUID eId) {

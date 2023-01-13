@@ -18,18 +18,25 @@ void MessageBus::sendMessage(const MessagePtr& msg) {
         if (msg->code() != -1) {
             // Subscribed to this message type and code
             for (auto& callback : subscribers[msg->type()][msg->code()]) {
-                callback.func(*msg);
+                callback.func(msg.get());
             }
         }
         // Subscribed to all messages from this type
         for (auto& callback : subscribers[msg->type()][-1]) {
-            callback.func(*msg);
+            callback.func(msg.get());
         }
     }
     // Subscribed to all messages
     for (auto& callback : subscribers[""][-1]) {
-        callback.func(*msg);
+        callback.func(msg.get());
     }
+}
+
+MessageHandle MessageBus::subscribe(
+    const std::function<void(const Message&)>& callback, Entities::UUID eId,
+    const MessageT& msgType, EnumT msgCode) {
+    return subscribe([callback](const Message* m) { callback(*m); }, eId,
+                     msgType, msgCode);
 }
 
 MessageHandle MessageBus::subscribe(const MessageFunc& callback,

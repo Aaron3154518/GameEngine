@@ -19,7 +19,7 @@ struct MessageHandle {
 };
 
 class MessageBus {
-    typedef std::function<void(const Message&)> MessageFunc;
+    typedef std::function<void(const Message*)> MessageFunc;
 
     struct EntityCallback {
         Entities::UUID eId;
@@ -33,12 +33,36 @@ class MessageBus {
 
     void sendMessages();
 
-    MessageHandle subscribe(const MessageFunc& callback, Entities::UUID eId,
-                            const MessageT& msgType = "", EnumT msgCode = -1);
+    MessageHandle subscribe(const std::function<void(const Message&)>& callback,
+                            Entities::UUID eId, const MessageT& msgType = "",
+                            EnumT msgCode = -1);
+
+    template <class MsgT>
+    MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
+                            Entities::UUID eId, const MessageT& msgType = "",
+                            EnumT msgCode = -1) {
+        static_assert(
+            std::is_base_of<Message, MsgT>::value,
+            "MessageBus::subscribe(): Message type must derive from Message");
+        return subscribe(
+            [callback](const Message* m) {
+                const MsgT* msg = static_cast<const MsgT*>(m);
+                if (!msg) {
+                    throw std::runtime_error(
+                        "Error: Message could not be converted to type: " +
+                        std::string(typeid(MsgT).name()));
+                }
+                callback(*msg);
+            },
+            eId, msgType, msgCode);
+    }
 
     void unsubscribe(MessageHandle handle);
 
    private:
+    MessageHandle subscribe(const MessageFunc& callback, Entities::UUID eId,
+                            const MessageT& msgType, EnumT msgCode);
+
     friend MessageBus& GetMessageBus();
     MessageBus() = default;
 

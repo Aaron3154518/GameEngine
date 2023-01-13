@@ -30,13 +30,11 @@ class MyService : public Messages::MessageSender<MyServiceMessage>,
                   public Messages::MessageReceiver {
    public:
     MyService() {
-        attachSubscription(Messages::GetMessageBus().subscribe(
-            [this](const Messages::Message& m) {
-                const MyMessage& mm = static_cast<const MyMessage&>(m);
-                mCnt += mm.getCount();
+        attachSubscription(Messages::GetMessageBus().subscribe<MyMessage>(
+            [this](const MyMessage& m) {
                 auto msg = std::make_unique<MyMessage>(
                     getType(), MyServiceMessage::PrintCount);
-                msg->setCount(mCnt);
+                msg->setCount(m.getCount());
                 Messages::GetMessageBus().queueMessage(std::move(msg));
             },
             id(), getType(), MyServiceMessage::IncreaseCount));
