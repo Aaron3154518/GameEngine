@@ -3,6 +3,16 @@
 #include <Test.h>
 
 namespace Services {
+// CommandMessage
+CommandMessage::CommandMessage(const std::string& line, Messages::EnumT code)
+    : Message(GameObjects::Get<CommandService>(), Command),
+      mLine(line),
+      mCmdCode(code) {}
+
+const std::string& CommandMessage::line() const { return mLine; }
+
+Messages::EnumT CommandMessage::cmdCode() const { return mCmdCode; }
+
 // CommandService
 void CommandService::init() {
     attachSubscription(Messages::GetMessageBus().subscribe(
@@ -21,41 +31,30 @@ bool CommandService::checkInput() {
     free(str);
 
     std::string service;
-    ss >> service;
+    if (!(ss >> service)) {
+        return true;
+    }
 
     if (service == "quit") {
         return false;
     }
 
-    Messages::MessageT type = Components::GetUUID(service);
-
-    if (type != Messages::NO_TYPE) {
-        int code;
-        if (ss >> code) {
-            switch (code) {
-                case MyServiceMessage::Hello:
-                case MyServiceMessage::World:
-                    Messages::GetMessageBus().queueMessage(
-                        std::make_unique<Messages::Message>(type, code));
-                    break;
-                case MyServiceMessage::PrintCount:
-                case MyServiceMessage::IncreaseCount: {
-                    int val = 0;
-                    if (code == MyServiceMessage::IncreaseCount) {
-                        if (!(ss >> val)) {
-                            val = 1;
-                        }
-                    }
-                    auto m = std::make_unique<MyMessage>(
-                        type, MyServiceMessage::IncreaseCount);
-                    m->setCount(val);
-                    Messages::GetMessageBus().queueMessage(std::move(m));
-                } break;
-                default:
-                    break;
-            }
-        }
+    auto uuid = Components::GetUUID(service);
+    if (uuid == Messages::NO_TYPE) {
+        return true;
     }
+    int code;
+    if (!(ss >> code)) {
+        return true;
+    }
+
+    std::string msgStr = ss.str();
+    msgStr = (long long unsigned int)ss.tellg() >= msgStr.size()
+                 ? ""
+                 : msgStr.substr(ss.tellg());
+    auto msg = std::make_unique<CommandMessage>(msgStr, code);
+    msg->setTarget(uuid);
+    Messages::GetMessageBus().queueMessage(std::move(msg));
 
     return true;
 }

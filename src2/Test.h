@@ -40,6 +40,40 @@ class MyService : public Services::Service {
                 Messages::GetMessageBus().queueMessage(std::move(msg));
             },
             id(), id(), MyServiceMessage::IncreaseCount));
+        attachSubscription(
+            Messages::GetMessageBus().subscribe<Services::CommandMessage>(
+                [this](const Services::CommandMessage& m) {
+                    onCommandMessage(m);
+                },
+                id(), GameObjects::Get<Services::CommandService>(),
+                Services::CommandMessage::Command));
+    }
+
+    void onCommandMessage(const Services::CommandMessage& m) {
+        auto code = m.cmdCode();
+        switch (code) {
+            case MyServiceMessage::Hello:
+            case MyServiceMessage::World:
+                Messages::GetMessageBus().queueMessage(
+                    std::make_unique<Messages::Message>(id(), code));
+                break;
+            case MyServiceMessage::PrintCount:
+            case MyServiceMessage::IncreaseCount: {
+                std::stringstream ss(m.line());
+                int val = 0;
+                if (code == MyServiceMessage::IncreaseCount) {
+                    if (!(ss >> val)) {
+                        val = 1;
+                    }
+                }
+                auto m = std::make_unique<MyMessage>(
+                    id(), MyServiceMessage::IncreaseCount);
+                m->setCount(val);
+                Messages::GetMessageBus().queueMessage(std::move(m));
+            } break;
+            default:
+                break;
+        }
     }
 
     int mCnt = 0;
