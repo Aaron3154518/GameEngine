@@ -9,13 +9,12 @@ Entity::~Entity() {
 
 // EntityUnsubMessage
 EntityUnsubMessage::EntityUnsubMessage(UUID eId)
-    : Messages::Message(EntityUnsubService::EUS(), EntityUnsubMessage::Unsub),
+    : Messages::Message(GameObjects::Get<EntityUnsubService>(),
+                        EntityUnsubMessage::Unsub),
       mEId(eId) {}
 
 UUID EntityUnsubMessage::getId() const { return mEId; }
 
-const EntityUnsubService& EntityUnsubService::EUS() {
-    static EntityUnsubService eus;
-    return eus;
-}
+// EntitiyUnsubService
+void EntityUnsubService::init() { setName("EntityUnsubService"); }
 }  // namespace Entities

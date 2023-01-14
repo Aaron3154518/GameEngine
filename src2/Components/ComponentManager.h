@@ -3,6 +3,7 @@
 
 #include <Components/Component.h>
 #include <Entities/UUID.h>
+#include <Messages/GameObjects.h>
 #include <Messages/Messager.h>
 
 #include <functional>
@@ -13,9 +14,10 @@
 #include <unordered_map>
 
 namespace Components {
-class ComponentManagerBase : public Messages::Receiver {
+class ComponentManagerBase : public Messages::Messager {
+    friend class ComponentService;
+
    public:
-    ComponentManagerBase();
     virtual ~ComponentManagerBase() = default;
 
     bool hasEntity(Entities::UUID eId);
@@ -23,11 +25,11 @@ class ComponentManagerBase : public Messages::Receiver {
     const Component& operator[](Entities::UUID eId) const;
 
    protected:
-    std::unordered_map<Entities::UUID, Component> mComponents;
+    std::unordered_map<Entities::UUID, ComponentPtr> mComponents;
 
    private:
     class iterator_base {
-        typedef std::unordered_map<Entities::UUID, Component>::iterator
+        typedef std::unordered_map<Entities::UUID, ComponentPtr>::iterator
             map_iterator;
 
        public:
@@ -43,11 +45,15 @@ class ComponentManagerBase : public Messages::Receiver {
         // Prefix ++
         iterator_base& operator++();
 
+        const Entities::UUID& id() const;
+
        private:
         map_iterator mIt;
     };
 
    protected:
+    void init();
+
     template <class CompT>
     class iterator : public iterator_base {
        public:
@@ -70,6 +76,8 @@ class ComponentManager : public ComponentManagerBase {
                   "ComponentManager<>: Type must derive from Component");
 
    public:
+    typedef CompT ComponentType;
+
     virtual ~ComponentManager() = default;
 
     template <class... ArgTs>
@@ -77,15 +85,9 @@ class ComponentManager : public ComponentManagerBase {
         static_assert(std::is_constructible<CompT, ArgTs...>::value,
                       "ComponentManager::newComponent(): Cannot construct "
                       "component with the given arguments");
-        auto it = mComponents.find(eId);
-        if (it == mComponents.end()) {
-            it = mComponents.emplace(eId, CompT(std::forward<ArgTs>(args)...))
-                     .first;
-        } else {
-            std::cerr << "Unsubscribe Me" << std::endl;
-            it->second = CompT(std::forward<ArgTs>(args)...);
-        }
-        return static_cast<const CompT&>(it->second);
+        auto& comp = mComponents[eId];
+        comp = std::make_unique<CompT>(std::forward<ArgTs>(args)...);
+        return *static_cast<CompT*>(comp.get());
     }
 
     const CompT& operator[](Entities::UUID eId) const {
@@ -115,43 +117,13 @@ class ComponentManager : public ComponentManagerBase {
     iterator end() { return iterator(mComponents.end()); }
 };
 
-class ComponentService {
-   public:
-    template <class CompManT>
-    static CompManT& Get() {
-        auto& cm = ComponentManagers();
-        auto key = std::type_index(typeid(CompManT));
-        auto it = cm.find(key);
-        if (it == cm.end()) {
-            it = cm.emplace(key, std::make_unique<CompManT>()).first;
-        }
-        auto ptr = static_cast<CompManT*>(it->second.get());
-        if (!ptr) {
-            throw std::runtime_error(
-                "ComponentService::Get(): Could not get "
-                "manager for " +
-                std::string(key.name()));
-        }
-        return *ptr;
-    }
-
-    template <class CompT, class CompManT = ComponentManager<CompT>>
-    static CompT& Get(Entities::UUID eId) {
-        static_assert(std::is_base_of<Component, CompT>::value,
-                      "ComponentService::Get(): Component type must derive "
-                      "from Component");
-        static_assert(
-            std::is_base_of<ComponentManagerBase, CompManT>::value,
-            "ComponentService::Get(): ComponentManager type must derive "
-            "from ComponentManagerBase");
-        CompManT& cm = Get<CompManT>();
-        return cm[eId];
-    }
-
-   private:
-    static std::unordered_map<std::type_index, ComponentManagerBasePtr>&
-    ComponentManagers();
-};
+template <class CompManT>
+typename CompManT::ComponentType& Get(Entities::UUID eId) {
+    static_assert(std::is_base_of<ComponentManagerBase, CompManT>::value,
+                  "Components::Get(): ComponentManager type must derive "
+                  "from ComponentManagerBase");
+    return GameObjects::Get<CompManT>()[eId];
+}
 }  // namespace Components
 
 #endif

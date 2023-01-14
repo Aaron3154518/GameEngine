@@ -4,11 +4,12 @@
 
 namespace Services {
 // CommandService
-CommandService::CommandService() {
+void CommandService::init() {
     attachSubscription(Messages::GetMessageBus().subscribe(
         [](const Messages::Message& msg) {
-            std::cerr << "\033[1;34m[Message]\033[0m " << msg.type() << " "
-                      << msg.code() << std::endl;
+            std::cerr << "\033[1;34m[Message]\033[0m "
+                      << Components::GetName(msg.type()) << " " << msg.code()
+                      << std::endl;
         },
         id()));
 }
@@ -26,8 +27,9 @@ bool CommandService::checkInput() {
         return false;
     }
 
-    if (service == "MyService") {
-        Messages::MessageT type = MyService::Get();
+    Messages::MessageT type = Components::GetUUID(service);
+
+    if (type != Messages::NO_TYPE) {
         int code;
         if (ss >> code) {
             switch (code) {

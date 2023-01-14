@@ -4,7 +4,7 @@
 
 namespace Components {
 // ComponentManagerBase
-ComponentManagerBase::ComponentManagerBase() {
+void ComponentManagerBase::init() {
     attachSubscription(
         Messages::GetMessageBus().subscribe<Entities::EntityUnsubMessage>(
             [this](const Entities::EntityUnsubMessage& m) {
@@ -13,7 +13,7 @@ ComponentManagerBase::ComponentManagerBase() {
                     mComponents.erase(it);
                 }
             },
-            id(), Entities::EntityUnsubService::EUS(),
+            id(), GameObjects::Get<Entities::EntityUnsubService>(),
             Entities::EntityUnsubMessage::Unsub));
 }
 
@@ -28,7 +28,7 @@ const Component& ComponentManagerBase::operator[](Entities::UUID eId) const {
                                  std::to_string(eId) +
                                  " Does not have component");
     }
-    return it->second;
+    return *it->second;
 }
 
 // ComponentManagerBase::iterator_base
@@ -45,10 +45,10 @@ bool ComponentManagerBase::iterator_base::operator!=(
 }
 
 Component* ComponentManagerBase::iterator_base::operator->() const {
-    return &mIt->second;
+    return mIt->second.get();
 }
 Component& ComponentManagerBase::iterator_base::operator*() const {
-    return mIt->second;
+    return *mIt->second;
 }
 
 // Prefix ++
@@ -58,11 +58,7 @@ ComponentManagerBase::iterator_base::operator++() {
     return *this;
 }
 
-// ComponentService
-std::unordered_map<std::type_index, ComponentManagerBasePtr>&
-ComponentService::ComponentManagers() {
-    static std::unordered_map<std::type_index, ComponentManagerBasePtr>
-        MANAGERS;
-    return MANAGERS;
+const Entities::UUID& ComponentManagerBase::iterator_base::id() const {
+    return mIt->first;
 }
 }  // namespace Components

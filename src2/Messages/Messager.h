@@ -6,15 +6,21 @@
 #include <Messages/MessageBus.h>
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <type_traits>
 #include <vector>
 
+// Forward declaration
+class GameObjects;
+
 namespace Messages {
 class Messager {
+    friend class ::GameObjects;
+
    public:
     Messager();
-    virtual ~Messager() = default;
+    virtual ~Messager();
 
     // No copying UUID
     Messager(const Messager& other) = delete;
@@ -23,33 +29,20 @@ class Messager {
     operator Entities::UUID() const;
     Entities::UUID id() const;
 
-   private:
-    const Entities::UUID mId;
-};
-
-class Receiver : public virtual Messager {
-   public:
-    virtual ~Receiver();
+    void setName(const std::string& name) const;
 
    protected:
+    virtual void init();
+
     void attachSubscription(const Messages::MessageHandle& handle);
 
    private:
+    const Entities::UUID mId;
+
     std::vector<MessageHandle> mSubscriptions;
 };
 
-template <class T>
-class Sender : public virtual Messager {
-    static_assert(std::is_enum<T>::value,
-                  "Sender<>: Message type must be enum");
-
-   public:
-    virtual ~Sender() = default;
-
-    void sendMessage(T t) const {
-        GetMessageBus().queueMessage(std::make_unique<Message>(id(), t));
-    }
-};
+typedef std::unique_ptr<Messager> MessagerPtr;
 }  // namespace Messages
 
 #endif

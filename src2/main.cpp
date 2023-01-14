@@ -16,19 +16,24 @@ int main(int argc, char* argv[]) {
     // Enables colored text
     system("echo");
 
-    auto& s = MyService::Get();
-    Services::CommandService cs;
+    auto& cs = GameObjects::Get<Services::CommandService>();
+
+    auto& s = GameObjects::Get<MyService>();
 
     {
-        MyEntity e;
+        auto e = GameObjects::New<MyEntity>();
 
-        s.sendMessage(MyServiceMessage::Hello);
-        s.sendMessage(MyServiceMessage::World);
+        Messages::GetMessageBus().queueMessage(std::make_unique<MyMessage>(
+            GameObjects::Get<MyService>(), MyServiceMessage::Hello));
+        Messages::GetMessageBus().queueMessage(std::make_unique<MyMessage>(
+            GameObjects::Get<MyService>(), MyServiceMessage::World));
 
         Messages::GetMessageBus().sendMessages();
+
+        e.reset();
     }
 
-    MyEntity e;
+    auto e = GameObjects::New<MyEntity>();
 
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);

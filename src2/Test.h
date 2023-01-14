@@ -2,7 +2,9 @@
 #define TEST_H
 
 #include <Components/Component.h>
+#include <Components/NameComponent.h>
 #include <Entities/Entity.h>
+#include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
 #include <Services/CommandService.h>
@@ -25,15 +27,10 @@ enum MyServiceMessage : Messages::EnumT {
     PrintCount
 };
 
-class MyService : public Services::Service<MyServiceMessage> {
-   public:
-    static const MyService& Get() {
-        static MyService s;
-        return s;
-    }
-
+class MyService : public Services::Service {
    private:
-    MyService() {
+    void init() {
+        setName("MyService");
         attachSubscription(Messages::GetMessageBus().subscribe<MyMessage>(
             [this](const MyMessage& m) {
                 mCnt += m.getCount();
@@ -58,11 +55,16 @@ class MyComponent : public Components::Component {
 };
 
 class MyComponentManager : public Components::ComponentManager<MyComponent> {
-   public:
-    MyComponentManager() {
+   private:
+    void init() {
+        Components::ComponentManager<MyComponent>::init();
+
         attachSubscription(Messages::GetMessageBus().subscribe(
             [this](const Messages::Message& m) { onMyServiceMessage(m); }, id(),
-            MyService::Get()));
+            GameObjects::Get<MyService>()));
+        attachSubscription(Messages::GetMessageBus().subscribe<MyMessage>(
+            [this](const MyMessage& m) { onMyServicePrintCount(m); }, id(),
+            GameObjects::Get<MyService>(), MyServiceMessage::PrintCount));
     }
 
     void onMyServiceMessage(const Messages::Message& m) {
@@ -73,27 +75,32 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
             case MyServiceMessage::World:
                 forEach(&MyComponent::onWorld, 8008135);
                 break;
-            case MyServiceMessage::PrintCount: {
-                const MyMessage& msg = static_cast<const MyMessage&>(m);
-                forEach(&MyComponent::onCount, msg.getCount());
-            } break;
             default:
                 break;
         };
     }
+
+    void onMyServicePrintCount(const MyMessage& m) {
+        forEach(&MyComponent::onCount, m.getCount());
+    }
 };
 
 class MyEntity : public Entities::Entity {
-   public:
-    MyEntity() {
+   private:
+    void init() {
+        setName("MyEntity");
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
         attachSubscription(Messages::GetMessageBus().subscribe(
             [](const Messages::Message& m) {
-                MyService::Get().sendMessage(MyServiceMessage::World);
+                Messages::GetMessageBus().queueMessage(
+                    std::make_unique<MyMessage>(GameObjects::Get<MyService>(),
+                                                MyServiceMessage::World));
             },
-            id(), MyService::Get(), MyServiceMessage::Hello));
+            id(), GameObjects::Get<MyService>(), MyServiceMessage::Hello));
     }
 };
+
+typedef std::unique_ptr<MyEntity> MyEntityPtr;
 
 #endif

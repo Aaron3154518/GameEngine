@@ -16,15 +16,15 @@
 #include <vector>
 
 namespace Entities {
-class Entity : public Messages::Receiver {
+class Entity : public Messages::Messager {
    public:
     virtual ~Entity();
 
    protected:
     template <class CompManT, class... ArgTs>
     void addComponent(ArgTs&&... args) {
-        Components::ComponentService::Get<CompManT>().newComponent(
-            id(), std::forward<ArgTs>(args)...);
+        GameObjects::Get<CompManT>().newComponent(id(),
+                                                  std::forward<ArgTs>(args)...);
         std::cerr << "Added Component to: " << typeid(CompManT).name()
                   << std::endl;
     }
@@ -42,9 +42,9 @@ class EntityUnsubMessage : public Messages::Message {
     const UUID mEId;
 };
 
-class EntityUnsubService : public Services::Service<EntityUnsubMessage::Code> {
-   public:
-    static const EntityUnsubService& EUS();
+class EntityUnsubService : public Services::Service {
+   private:
+    void init();
 };
 }  // namespace Entities
 
