@@ -5,7 +5,8 @@
 #include <Components/ComponentManager.h>
 #include <Entities/UUID.h>
 #include <Messages/MessageBus.h>
-#include <Messages/MessageReceiver.h>
+#include <Messages/Messager.h>
+#include <Services/Service.h>
 
 #include <array>
 #include <iostream>
@@ -15,12 +16,9 @@
 #include <vector>
 
 namespace Entities {
-class Entity : public Messages::MessageReceiver {
+class Entity : public Messages::Receiver {
    public:
     virtual ~Entity();
-
-    static const Messages::MessageT& TYPE();
-    enum MessageCode : Messages::EnumT { Unsub = 0 };
 
    protected:
     template <class CompManT, class... ArgTs>
@@ -34,12 +32,19 @@ class Entity : public Messages::MessageReceiver {
 
 class EntityUnsubMessage : public Messages::Message {
    public:
+    enum Code : Messages::EnumT { Unsub = 0 };
+
     EntityUnsubMessage(UUID eId);
 
     UUID getId() const;
 
    private:
     const UUID mEId;
+};
+
+class EntityUnsubService : public Services::Service<EntityUnsubMessage::Code> {
+   public:
+    static const EntityUnsubService& EUS();
 };
 }  // namespace Entities
 

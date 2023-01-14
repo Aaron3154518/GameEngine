@@ -3,7 +3,7 @@
 
 #include <Components/Component.h>
 #include <Entities/UUID.h>
-#include <Messages/MessageReceiver.h>
+#include <Messages/Messager.h>
 
 #include <functional>
 #include <iostream>
@@ -13,7 +13,7 @@
 #include <unordered_map>
 
 namespace Components {
-class ComponentManagerBase : public Messages::MessageReceiver {
+class ComponentManagerBase : public Messages::Receiver {
    public:
     ComponentManagerBase();
     virtual ~ComponentManagerBase() = default;

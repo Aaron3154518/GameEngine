@@ -1,11 +1,13 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include <Entities/UUID.h>
+
 #include <memory>
 #include <string>
 
 namespace Messages {
-typedef std::string MessageT;
+typedef Entities::UUID MessageT;
 typedef int EnumT;
 
 class Message {

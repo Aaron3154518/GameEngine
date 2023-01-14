@@ -4,8 +4,7 @@
 #include <Components/Component.h>
 #include <Entities/Entity.h>
 #include <Messages/MessageBus.h>
-#include <Messages/MessageReceiver.h>
-#include <Messages/MessageSender.h>
+#include <Messages/Messager.h>
 #include <Services/CommandService.h>
 
 class MyMessage : public Messages::Message {
@@ -26,22 +25,26 @@ enum MyServiceMessage : Messages::EnumT {
     PrintCount
 };
 
-class MyService : public Messages::MessageSender<MyServiceMessage>,
-                  public Messages::MessageReceiver {
+class MyService : public Services::Service<MyServiceMessage> {
    public:
+    static const MyService& Get() {
+        static MyService s;
+        return s;
+    }
+
+   private:
     MyService() {
         attachSubscription(Messages::GetMessageBus().subscribe<MyMessage>(
             [this](const MyMessage& m) {
+                mCnt += m.getCount();
                 auto msg = std::make_unique<MyMessage>(
-                    getType(), MyServiceMessage::PrintCount);
-                msg->setCount(m.getCount());
+                    id(), MyServiceMessage::PrintCount);
+                msg->setCount(mCnt);
                 Messages::GetMessageBus().queueMessage(std::move(msg));
             },
-            id(), getType(), MyServiceMessage::IncreaseCount));
+            id(), id(), MyServiceMessage::IncreaseCount));
     }
-    MyService(bool) {}
 
-   private:
     int mCnt = 0;
 };
 
@@ -59,7 +62,7 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
     MyComponentManager() {
         attachSubscription(Messages::GetMessageBus().subscribe(
             [this](const Messages::Message& m) { onMyServiceMessage(m); }, id(),
-            MyService(false).getType()));
+            MyService::Get()));
     }
 
     void onMyServiceMessage(const Messages::Message& m) {
@@ -82,14 +85,14 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
 
 class MyEntity : public Entities::Entity {
    public:
-    MyEntity(const MyService& s) {
+    MyEntity() {
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
         attachSubscription(Messages::GetMessageBus().subscribe(
-            [&s](const Messages::Message& m) {
-                s.sendMessage(MyServiceMessage::World);
+            [](const Messages::Message& m) {
+                MyService::Get().sendMessage(MyServiceMessage::World);
             },
-            id(), s.getType(), MyServiceMessage::Hello));
+            id(), MyService::Get(), MyServiceMessage::Hello));
     }
 };
 

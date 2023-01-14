@@ -1,16 +1,21 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
-#include <Messages/MessageReceiver.h>
+#include <Messages/Messager.h>
 
 namespace Services {
-class Service : public Messages::MessageReceiver {
+template <class T = void>
+class Service : public Messages::Receiver, public Messages::Sender<T> {
    public:
     virtual ~Service() = default;
-
-   protected:
-   private:
 };
+
+template <>
+class Service<> : public Messages::Receiver {
+   public:
+    virtual ~Service() = default;
+};
+
 }  // namespace Services
 
 #endif

@@ -27,13 +27,14 @@ bool CommandService::checkInput() {
     }
 
     if (service == "MyService") {
+        Messages::MessageT type = MyService::Get();
         int code;
         if (ss >> code) {
             switch (code) {
                 case MyServiceMessage::Hello:
                 case MyServiceMessage::World:
                     Messages::GetMessageBus().queueMessage(
-                        std::make_unique<Messages::Message>(service, code));
+                        std::make_unique<Messages::Message>(type, code));
                     break;
                 case MyServiceMessage::PrintCount:
                 case MyServiceMessage::IncreaseCount: {
@@ -44,7 +45,7 @@ bool CommandService::checkInput() {
                         }
                     }
                     auto m = std::make_unique<MyMessage>(
-                        service, MyServiceMessage::IncreaseCount);
+                        type, MyServiceMessage::IncreaseCount);
                     m->setCount(val);
                     Messages::GetMessageBus().queueMessage(std::move(m));
                 } break;

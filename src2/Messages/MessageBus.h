@@ -11,6 +11,9 @@
 #include <vector>
 
 namespace Messages {
+constexpr EnumT NO_CODE = -1;
+constexpr MessageT NO_TYPE = {0};
+
 struct MessageHandle {
     const Entities::UUID eId;
     const uint32_t eNum;
@@ -28,19 +31,23 @@ class MessageBus {
     };
 
    public:
+    // static const MessageT& NO_TYPE();
+
     void queueMessage(MessagePtr msg);
     void sendImmediateMessage(MessagePtr msg);
 
     void sendMessages();
 
     MessageHandle subscribe(const std::function<void(const Message&)>& callback,
-                            Entities::UUID eId, const MessageT& msgType = "",
-                            EnumT msgCode = -1);
+                            Entities::UUID eId,
+                            const MessageT& msgType = NO_TYPE,
+                            EnumT msgCode = NO_CODE);
 
     template <class MsgT>
     MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
-                            Entities::UUID eId, const MessageT& msgType = "",
-                            EnumT msgCode = -1) {
+                            Entities::UUID eId,
+                            const MessageT& msgType = NO_TYPE,
+                            EnumT msgCode = NO_CODE) {
         static_assert(
             std::is_base_of<Message, MsgT>::value,
             "MessageBus::subscribe(): Message type must derive from Message");

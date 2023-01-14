@@ -13,7 +13,8 @@ ComponentManagerBase::ComponentManagerBase() {
                     mComponents.erase(it);
                 }
             },
-            id(), Entities::Entity::TYPE(), Entities::Entity::Unsub));
+            id(), Entities::EntityUnsubService::EUS(),
+            Entities::EntityUnsubMessage::Unsub));
 }
 
 bool ComponentManagerBase::hasEntity(Entities::UUID eId) {

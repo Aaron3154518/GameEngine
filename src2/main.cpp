@@ -16,11 +16,11 @@ int main(int argc, char* argv[]) {
     // Enables colored text
     system("echo");
 
-    MyService s;
+    auto& s = MyService::Get();
     Services::CommandService cs;
 
     {
-        MyEntity e(s);
+        MyEntity e;
 
         s.sendMessage(MyServiceMessage::Hello);
         s.sendMessage(MyServiceMessage::World);
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
         Messages::GetMessageBus().sendMessages();
     }
 
-    MyEntity e(s);
+    MyEntity e;
 
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);

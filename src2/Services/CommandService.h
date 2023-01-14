@@ -10,7 +10,7 @@
 #include <string>
 
 namespace Services {
-class CommandService : public Service {
+class CommandService : public Service<> {
    public:
     CommandService();
 
