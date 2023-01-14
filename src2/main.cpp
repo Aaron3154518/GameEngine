@@ -19,9 +19,12 @@ int main(int argc, char* argv[]) {
     auto& cs = GameObjects::Get<Services::CommandService>();
 
     auto& s = GameObjects::Get<MyService>();
+    Entities::UUID id;
 
+    // Test unsubscribe
     {
         auto e = GameObjects::New<MyEntity>();
+        id = e->id();
 
         Messages::GetMessageBus().queueMessage(std::make_unique<MyMessage>(
             GameObjects::Get<MyService>(), MyServiceMessage::Hello));
@@ -34,6 +37,18 @@ int main(int argc, char* argv[]) {
     }
 
     auto e = GameObjects::New<MyEntity>();
+
+    // Test entity targetting
+    auto msg = std::make_unique<MyMessage>(GameObjects::Get<MyService>(),
+                                           MyServiceMessage::Hello);
+    msg->setTarget(id);
+    Messages::GetMessageBus().queueMessage(std::move(msg));
+    msg = std::make_unique<MyMessage>(GameObjects::Get<MyService>(),
+                                      MyServiceMessage::Hello);
+    msg->setTarget(e->id());
+    Messages::GetMessageBus().queueMessage(std::move(msg));
+
+    Messages::GetMessageBus().sendMessages();
 
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);

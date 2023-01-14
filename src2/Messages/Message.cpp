@@ -10,4 +10,7 @@ bool Message::operator==(const Message& other) {
 
 const MessageT& Message::type() const { return mType; }
 EnumT Message::code() const { return mCode; }
+
+const Entities::UUID& Message::target() const { return mTarget; }
+void Message::setTarget(const Entities::UUID& target) { mTarget = target; }
 }  // namespace Messages

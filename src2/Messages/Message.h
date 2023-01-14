@@ -20,9 +20,13 @@ class Message {
     const MessageT& type() const;
     EnumT code() const;
 
+    const Entities::UUID& target() const;
+    void setTarget(const Entities::UUID& target);
+
    private:
     MessageT mType;
     EnumT mCode;
+    Entities::UUID mTarget = {0};
 };
 
 typedef std::unique_ptr<Message> MessagePtr;

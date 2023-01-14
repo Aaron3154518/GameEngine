@@ -74,6 +74,8 @@ class MessageBus {
     MessageBus() = default;
 
     void sendMessage(const MessagePtr& msg);
+    void sendMessage(const MessagePtr& msg,
+                     const std::vector<EntityCallback>& targets);
 
     std::queue<MessagePtr> messages;
 

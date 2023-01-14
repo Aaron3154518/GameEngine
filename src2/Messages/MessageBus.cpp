@@ -22,18 +22,28 @@ void MessageBus::sendMessage(const MessagePtr& msg) {
     if (msg->type() != NO_TYPE) {
         if (msg->code() != NO_CODE) {
             // Subscribed to this message type and code
-            for (auto& callback : subscribers[msg->type()][msg->code()]) {
+            sendMessage(msg, subscribers[msg->type()][msg->code()]);
+        }
+        // Subscribed to all messages from this type
+        sendMessage(msg, subscribers[msg->type()][NO_CODE]);
+    }
+    // Subscribed to all messages
+    sendMessage(msg, subscribers[NO_TYPE][NO_CODE]);
+}
+
+void MessageBus::sendMessage(const MessagePtr& msg,
+                             const std::vector<EntityCallback>& targets) {
+    auto& target = msg->target();
+    if (target == NO_TYPE) {
+        for (auto& callback : targets) {
+            callback.func(msg.get());
+        }
+    } else {
+        for (auto& callback : targets) {
+            if (callback.eId == target) {
                 callback.func(msg.get());
             }
         }
-        // Subscribed to all messages from this type
-        for (auto& callback : subscribers[msg->type()][NO_CODE]) {
-            callback.func(msg.get());
-        }
-    }
-    // Subscribed to all messages
-    for (auto& callback : subscribers[NO_TYPE][NO_CODE]) {
-        callback.func(msg.get());
     }
 }
 
