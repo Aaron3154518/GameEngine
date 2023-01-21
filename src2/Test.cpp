@@ -1,7 +1,7 @@
 #include "Test.h"
 
 // MyService
-void MyService::init() {
+void MyService::service_init() {
     setName("MyService");
     attachSubscription(Messages::GetMessageBus().subscribe<MyCountMessage>(
         [this](const MyCountMessage& m) {

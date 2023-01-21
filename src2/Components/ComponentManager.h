@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <type_traits>
 #include <typeindex>
@@ -22,7 +23,9 @@ class ComponentManagerBase : public Messages::Messager {
 
     bool hasEntity(Entities::UUID eId);
 
-    const Component& operator[](Entities::UUID eId) const;
+    Component& operator[](Entities::UUID eId) const;
+
+    size_t size() const;
 
    protected:
     std::unordered_map<Entities::UUID, ComponentPtr> mComponents;
@@ -51,9 +54,10 @@ class ComponentManagerBase : public Messages::Messager {
         map_iterator mIt;
     };
 
-   protected:
-    void init();
+    void init() final;
+    virtual void manager_init();
 
+   protected:
     template <class CompT>
     class iterator : public iterator_base {
        public:
@@ -81,7 +85,7 @@ class ComponentManager : public ComponentManagerBase {
     virtual ~ComponentManager() = default;
 
     template <class... ArgTs>
-    const CompT& newComponent(Entities::UUID eId, ArgTs&&... args) {
+    CompT& newComponent(Entities::UUID eId, ArgTs&&... args) {
         static_assert(std::is_constructible<CompT, ArgTs...>::value,
                       "ComponentManager::newComponent(): Cannot construct "
                       "component with the given arguments");
@@ -90,8 +94,8 @@ class ComponentManager : public ComponentManagerBase {
         return *static_cast<CompT*>(comp.get());
     }
 
-    const CompT& operator[](Entities::UUID eId) const {
-        return static_cast<const CompT&>(ComponentManagerBase::operator[](eId));
+    CompT& operator[](Entities::UUID eId) {
+        return static_cast<CompT&>(ComponentManagerBase::operator[](eId));
     }
 
     template <typename F, class... ArgTs>

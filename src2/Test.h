@@ -4,6 +4,7 @@
 #include <Components/Component.h>
 #include <Components/NameComponent.h>
 #include <Entities/Entity.h>
+#include <Framework/RenderSystem/Services.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
@@ -18,7 +19,7 @@ enum MyServiceMessage : Messages::EnumT {
 
 class MyService : public Services::Service {
    private:
-    void init();
+    void service_init();
 
     void onCommandMessage(const Services::CommandMessage& m);
 
@@ -48,9 +49,7 @@ class MyComponent : public Components::Component {
 
 class MyComponentManager : public Components::ComponentManager<MyComponent> {
    private:
-    void init() {
-        Components::ComponentManager<MyComponent>::init();
-
+    void manager_init() {
         attachSubscription(Messages::GetMessageBus().subscribe(
             [this](const Messages::BaseMessage& m) { onMyServiceMessage(m); },
             id(), GameObjects::Get<MyService>()));
@@ -91,6 +90,11 @@ class MyEntity : public Entities::Entity {
                     MyServiceMessage::World);
             },
             id(), GameObjects::Get<MyService>(), MyServiceMessage::Hello));
+
+        addComponent<ElevationComponentManager>(1);
+        addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
+        addComponent<SpriteComponentManager>("res/wizards/wizard.png");
+        GameObjects::Get<RenderService>().subscribe(id());
     }
 };
 

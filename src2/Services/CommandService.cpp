@@ -4,7 +4,7 @@
 
 namespace Services {
 // CommandService
-void CommandService::init() {
+void CommandService::service_init() {
     attachSubscription(Messages::GetMessageBus().subscribe(
         [](const Messages::BaseMessage& msg) {
             std::cerr << "\033[1;34m[Message]\033[0m "

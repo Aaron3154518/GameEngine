@@ -13,5 +13,5 @@ EntityUnsubMessage::EntityUnsubMessage(const MessageData& msg, UUID eid)
     : EntityUnsubMessageBase(msg), eId(eid) {}
 
 // EntitiyUnsubService
-void EntityUnsubService::init() { setName("EntityUnsubService"); }
+void EntityUnsubService::service_init() { setName("EntityUnsubService"); }
 }  // namespace Entities

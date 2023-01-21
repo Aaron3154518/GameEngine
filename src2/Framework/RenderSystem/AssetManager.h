@@ -38,7 +38,7 @@ class AssetManager {
     static const std::string &getDefaultTexture();
     static void setDefaultTexture(const std::string &str);
 
-    static bool getTextureSize(SDL_Texture *tex, int *w, int *h);
+    static Dimensions getTextureSize(SDL_Texture *tex);
     static Dimensions getFontSize(std::string fileName, int size);
     static Dimensions getTextSize(std::string fileName, int size,
                                   std::string sampleText);

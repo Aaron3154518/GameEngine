@@ -79,8 +79,10 @@ void AssetManager::setDefaultTexture(const std::string &str) {
     mDefaultTexture = str;
 }
 
-bool AssetManager::getTextureSize(SDL_Texture *tex, int *w, int *h) {
-    return SDL_QueryTexture(tex, NULL, NULL, w, h) == 0;
+Dimensions AssetManager::getTextureSize(SDL_Texture *tex) {
+    Dimensions d;
+    SDL_QueryTexture(tex, NULL, NULL, &d.w, &d.h);
+    return d;
 }
 Dimensions AssetManager::getFontSize(std::string fileName, int size) {
     Dimensions d;

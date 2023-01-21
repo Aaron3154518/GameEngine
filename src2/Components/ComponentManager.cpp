@@ -15,13 +15,19 @@ void ComponentManagerBase::init() {
             },
             id(), GameObjects::Get<Entities::EntityUnsubService>(),
             Entities::EntityUnsubService::Unsub));
+
+    manager_init();
 }
+
+void ComponentManagerBase::manager_init() {}
 
 bool ComponentManagerBase::hasEntity(Entities::UUID eId) {
     return mComponents.find(eId) != mComponents.end();
 }
 
-const Component& ComponentManagerBase::operator[](Entities::UUID eId) const {
+size_t ComponentManagerBase::size() const { return mComponents.size(); }
+
+Component& ComponentManagerBase::operator[](Entities::UUID eId) const {
     auto it = mComponents.find(eId);
     if (it == mComponents.end()) {
         throw std::runtime_error("ComponentManager[]: Entity " +

@@ -2,7 +2,10 @@
 
 namespace Messages {
 // MessageBus
-void MessageBus::queueMessage(MessagePtr msg) { messages.push(std::move(msg)); }
+void MessageBus::queueMessage(MessagePtr msg) {
+    // messages.push(std::move(msg));
+    sendMessage(msg);
+}
 
 void MessageBus::sendImmediateMessage(MessagePtr msg) { sendMessage(msg); }
 

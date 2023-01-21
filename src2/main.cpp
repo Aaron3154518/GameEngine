@@ -10,7 +10,6 @@
 DWORD WINAPI runCommand(LPVOID param) {
     Services::CommandService& cs = *(Services::CommandService*)param;
     while (cs.checkInput()) {
-        Messages::GetMessageBus().sendMessages();
     }
     return 0;
 }
@@ -36,8 +35,6 @@ int main(int argc, char* argv[]) {
         mb.queueMessage<MyMessage>(MyServiceMessage::Hello);
         mb.queueMessage<MyMessage>(MyServiceMessage::World);
 
-        Messages::GetMessageBus().sendMessages();
-
         e.reset();
     }
 
@@ -46,8 +43,6 @@ int main(int argc, char* argv[]) {
     // Test entity targetting
     mb.queueMessage<MyMessage>(MyServiceMessage::Hello, {id});
     mb.queueMessage<MyMessage>(MyServiceMessage::World, {e->id()});
-
-    Messages::GetMessageBus().sendMessages();
 
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);
@@ -58,6 +53,9 @@ int main(int argc, char* argv[]) {
         if (EventSystem::get().quit) {
             break;
         }
+
+        // Messages::GetMessageBus().queueMessage<RenderServiceMessage>(
+        // RenderService::Code::Render);
 
         RenderSystem::enforceFPS(60);
     }

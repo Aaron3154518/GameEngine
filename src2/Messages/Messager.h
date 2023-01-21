@@ -33,11 +33,11 @@ class Messager {
     void setName(const std::string& name) const;
 
    protected:
-    virtual void init();
-
     void attachSubscription(const Messages::MessageHandle& handle);
 
    private:
+    virtual void init();
+
     const Entities::UUID mId;
 
     std::vector<MessageHandle> mSubscriptions;

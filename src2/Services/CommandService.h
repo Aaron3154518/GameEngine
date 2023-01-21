@@ -18,7 +18,7 @@ class CommandService : public Service {
     bool checkInput();
 
    private:
-    void init();
+    void service_init();
 };
 
 typedef Messages::Message<CommandService, CommandService::Code>
