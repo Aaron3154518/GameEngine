@@ -1,6 +1,7 @@
 #include "Messager.h"
 
 #include <Components/NameComponent.h>
+#include <Messages/MessageBus.h>
 
 namespace Messages {
 // Messager

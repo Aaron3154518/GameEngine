@@ -1,5 +1,7 @@
 #include "NameComponent.h"
 
+#include <Messages/MessageBus.h>
+
 // NameComponent
 Components::NameComponent::NameComponent(const std::string& name)
     : mName(name) {}

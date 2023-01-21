@@ -2,8 +2,6 @@
 #define MESSAGER_H
 
 #include <Entities/UUID.h>
-#include <Messages/Message.h>
-#include <Messages/MessageBus.h>
 
 #include <algorithm>
 #include <memory>
@@ -15,6 +13,9 @@
 class GameObjects;
 
 namespace Messages {
+// Forward declaration
+class MessageHandle;
+
 class Messager {
     friend class ::GameObjects;
 

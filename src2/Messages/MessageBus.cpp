@@ -1,11 +1,6 @@
 #include "MessageBus.h"
 
 namespace Messages {
-// const MessageT& MessageBus::NO_TYPE() {
-//   static const MessageT TYPE;
-// return TYPE;
-//}
-
 // MessageBus
 void MessageBus::queueMessage(MessagePtr msg) { messages.push(std::move(msg)); }
 
@@ -19,13 +14,13 @@ void MessageBus::sendMessages() {
 }
 
 void MessageBus::sendMessage(const MessagePtr& msg) {
-    if (msg->type() != NO_TYPE) {
-        if (msg->code() != NO_CODE) {
+    if (msg->data.type != NO_TYPE) {
+        if (msg->data.code != NO_CODE) {
             // Subscribed to this message type and code
-            sendMessage(msg, subscribers[msg->type()][msg->code()]);
+            sendMessage(msg, subscribers[msg->data.type][msg->data.code]);
         }
         // Subscribed to all messages from this type
-        sendMessage(msg, subscribers[msg->type()][NO_CODE]);
+        sendMessage(msg, subscribers[msg->data.type][NO_CODE]);
     }
     // Subscribed to all messages
     sendMessage(msg, subscribers[NO_TYPE][NO_CODE]);
@@ -33,7 +28,7 @@ void MessageBus::sendMessage(const MessagePtr& msg) {
 
 void MessageBus::sendMessage(const MessagePtr& msg,
                              const std::vector<EntityCallback>& targets) {
-    auto& target = msg->target();
+    auto& target = msg->data.opts.target;
     if (target == NO_TYPE) {
         for (auto& callback : targets) {
             callback.func(msg.get());
@@ -48,9 +43,9 @@ void MessageBus::sendMessage(const MessagePtr& msg,
 }
 
 MessageHandle MessageBus::subscribe(
-    const std::function<void(const Message&)>& callback, Entities::UUID eId,
+    const std::function<void(const BaseMessage&)>& callback, Entities::UUID eId,
     const MessageT& msgType, EnumT msgCode) {
-    return subscribe([callback](const Message* m) { callback(*m); }, eId,
+    return subscribe([callback](const BaseMessage* m) { callback(*m); }, eId,
                      msgType, msgCode);
 }
 

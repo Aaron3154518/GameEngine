@@ -11,26 +11,24 @@
 #include <string>
 
 namespace Services {
-class CommandMessage : public Messages::Message {
-   public:
-    enum : Messages::EnumT { Command = 0 };
-
-    CommandMessage(const std::string& line, Messages::EnumT code);
-
-    const std::string& line() const;
-    Messages::EnumT cmdCode() const;
-
-   private:
-    std::string mLine;
-    Messages::EnumT mCmdCode;
-};
-
 class CommandService : public Service {
    public:
+    enum Code : Messages::EnumT { Command = 0 };
+
     bool checkInput();
 
    private:
     void init();
+};
+
+typedef Messages::Message<CommandService, CommandService::Code>
+    CommandMessageBase;
+struct CommandMessage : public CommandMessageBase {
+    CommandMessage(const MessageData& msg, const std::string& str,
+                   Messages::EnumT code);
+
+    std::string line;
+    Messages::EnumT cmdCode;
 };
 }  // namespace Services
 

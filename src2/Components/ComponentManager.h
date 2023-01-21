@@ -94,16 +94,20 @@ class ComponentManager : public ComponentManagerBase {
         return static_cast<const CompT&>(ComponentManagerBase::operator[](eId));
     }
 
-    template <class... ArgTs>
-    void forEach(void (CompT::*func)(ArgTs...), ArgTs&&... args) {
-        for (auto& comp : *this) {
-            (comp.*func)(std::forward<ArgTs>(args)...);
-        }
+    template <typename F, class... ArgTs>
+    typename std::enable_if<std::is_member_function_pointer<F>::value>::type
+    forEach(const F& func, ArgTs&&... args) {
+        forEach(
+            [func](CompT& c, ArgTs&&... args) {
+                (c.*func)(std::forward<ArgTs>(args)...);
+            },
+            std::forward<ArgTs>(args)...);
     }
 
     template <typename F, class... ArgTs>
-    void forEach(const F& func, ArgTs&&... args) {
-        static_assert(std::is_invocable<F, CompT&, ArgTs&&...>::value,
+    typename std::enable_if<!std::is_member_function_pointer<F>::value>::type
+    forEach(const F& func, ArgTs&&... args) {
+        static_assert(std::is_invocable<F, CompT&, ArgTs...>::value,
                       "ComponentManager::forEach(): Function must accept a "
                       "Component reference and the provided arguments");
         for (auto& comp : *this) {

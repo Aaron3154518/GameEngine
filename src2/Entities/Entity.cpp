@@ -4,16 +4,13 @@ namespace Entities {
 // Entity
 Entity::~Entity() {
     Messages::GetMessageBus().sendImmediateMessage(
-        std::make_unique<EntityUnsubMessage>(id()));
+        Messages::make_unique_msg<EntityUnsubMessage>(EntityUnsubService::Unsub,
+                                                      {}, id()));
 }
 
 // EntityUnsubMessage
-EntityUnsubMessage::EntityUnsubMessage(UUID eId)
-    : Messages::Message(GameObjects::Get<EntityUnsubService>(),
-                        EntityUnsubMessage::Unsub),
-      mEId(eId) {}
-
-UUID EntityUnsubMessage::getId() const { return mEId; }
+EntityUnsubMessage::EntityUnsubMessage(const MessageData& msg, UUID eid)
+    : EntityUnsubMessageBase(msg), eId(eid) {}
 
 // EntitiyUnsubService
 void EntityUnsubService::init() { setName("EntityUnsubService"); }

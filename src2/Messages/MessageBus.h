@@ -22,7 +22,7 @@ struct MessageHandle {
 };
 
 class MessageBus {
-    typedef std::function<void(const Message*)> MessageFunc;
+    typedef std::function<void(const BaseMessage*)> MessageFunc;
 
     struct EntityCallback {
         Entities::UUID eId;
@@ -31,28 +31,36 @@ class MessageBus {
     };
 
    public:
-    // static const MessageT& NO_TYPE();
-
+    template <class T, class... ArgTs>
+    void queueMessage(typename T::EnumType code, MessageOptions opts,
+                      ArgTs&&... args) {
+        queueMessage(
+            make_unique_msg<T>(code, opts, std::forward<ArgTs>(args)...));
+    }
+    template <class T>
+    void queueMessage(typename T::EnumType code) {
+        queueMessage(make_unique_msg<T>(code));
+    }
     void queueMessage(MessagePtr msg);
     void sendImmediateMessage(MessagePtr msg);
 
     void sendMessages();
 
-    MessageHandle subscribe(const std::function<void(const Message&)>& callback,
-                            Entities::UUID eId,
-                            const MessageT& msgType = NO_TYPE,
-                            EnumT msgCode = NO_CODE);
+    MessageHandle subscribe(
+        const std::function<void(const BaseMessage&)>& callback,
+        Entities::UUID eId, const MessageT& msgType = NO_TYPE,
+        EnumT msgCode = NO_CODE);
 
     template <class MsgT>
     MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
                             Entities::UUID eId,
                             const MessageT& msgType = NO_TYPE,
                             EnumT msgCode = NO_CODE) {
-        static_assert(
-            std::is_base_of<Message, MsgT>::value,
-            "MessageBus::subscribe(): Message type must derive from Message");
+        static_assert(std::is_base_of<BaseMessage, MsgT>::value,
+                      "MessageBus::subscribe(): Message type must derive from "
+                      "BaseMessage");
         return subscribe(
-            [callback](const Message* m) {
+            [callback](const BaseMessage* m) {
                 const MsgT* msg = static_cast<const MsgT*>(m);
                 if (!msg) {
                     throw std::runtime_error(

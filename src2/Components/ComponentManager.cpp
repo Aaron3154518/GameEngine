@@ -8,13 +8,13 @@ void ComponentManagerBase::init() {
     attachSubscription(
         Messages::GetMessageBus().subscribe<Entities::EntityUnsubMessage>(
             [this](const Entities::EntityUnsubMessage& m) {
-                auto it = mComponents.find(m.getId());
+                auto it = mComponents.find(m.eId);
                 if (it != mComponents.end()) {
                     mComponents.erase(it);
                 }
             },
             id(), GameObjects::Get<Entities::EntityUnsubService>(),
-            Entities::EntityUnsubMessage::Unsub));
+            Entities::EntityUnsubService::Unsub));
 }
 
 bool ComponentManagerBase::hasEntity(Entities::UUID eId) {

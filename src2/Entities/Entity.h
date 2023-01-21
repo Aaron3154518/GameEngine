@@ -30,21 +30,21 @@ class Entity : public Messages::Messager {
     }
 };
 
-class EntityUnsubMessage : public Messages::Message {
+class EntityUnsubService : public Services::Service {
    public:
     enum Code : Messages::EnumT { Unsub = 0 };
 
-    EntityUnsubMessage(UUID eId);
-
-    UUID getId() const;
-
-   private:
-    const UUID mEId;
-};
-
-class EntityUnsubService : public Services::Service {
    private:
     void init();
+};
+
+typedef Messages::Message<EntityUnsubService, EntityUnsubService::Code>
+    EntityUnsubMessageBase;
+struct EntityUnsubMessage : public EntityUnsubMessageBase {
+   public:
+    EntityUnsubMessage(const MessageData& msg, UUID eid);
+
+    const UUID eId;
 };
 }  // namespace Entities
 

@@ -3,23 +3,13 @@
 #include <Test.h>
 
 namespace Services {
-// CommandMessage
-CommandMessage::CommandMessage(const std::string& line, Messages::EnumT code)
-    : Message(GameObjects::Get<CommandService>(), Command),
-      mLine(line),
-      mCmdCode(code) {}
-
-const std::string& CommandMessage::line() const { return mLine; }
-
-Messages::EnumT CommandMessage::cmdCode() const { return mCmdCode; }
-
 // CommandService
 void CommandService::init() {
     attachSubscription(Messages::GetMessageBus().subscribe(
-        [](const Messages::Message& msg) {
+        [](const Messages::BaseMessage& msg) {
             std::cerr << "\033[1;34m[Message]\033[0m "
-                      << Components::GetName(msg.type()) << " " << msg.code()
-                      << std::endl;
+                      << Components::GetName(msg.data.type) << " "
+                      << msg.data.code << std::endl;
         },
         id()));
 }
@@ -52,10 +42,15 @@ bool CommandService::checkInput() {
     msgStr = (long long unsigned int)ss.tellg() >= msgStr.size()
                  ? ""
                  : msgStr.substr(ss.tellg());
-    auto msg = std::make_unique<CommandMessage>(msgStr, code);
-    msg->setTarget(uuid);
-    Messages::GetMessageBus().queueMessage(std::move(msg));
+    Messages::GetMessageBus().queueMessage<CommandMessage>(
+        Code::Command, {uuid}, msgStr, code);
 
     return true;
 }
+
+// CommandMessage
+CommandMessage::CommandMessage(const MessageData& msg, const std::string& str,
+                               Messages::EnumT code)
+    : CommandMessageBase(msg), line(str), cmdCode(code) {}
+
 }  // namespace Services
