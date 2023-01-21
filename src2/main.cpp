@@ -1,3 +1,6 @@
+#define SDL_MAIN_HANDLED
+
+#include <Framework/RenderSystem/RenderSystem.h>
 #include <Test.h>
 #include <Windows.h>
 
@@ -15,6 +18,9 @@ DWORD WINAPI runCommand(LPVOID param) {
 int main(int argc, char* argv[]) {
     // Enables colored text
     system("echo");
+
+    RenderSystem::Options opts{500, 500};
+    RenderSystem::init(opts);
 
     auto& cs = GameObjects::Get<Services::CommandService>();
 
@@ -52,6 +58,8 @@ int main(int argc, char* argv[]) {
 
     WaitForSingleObject(comThread, INFINITE);
     CloseHandle(comThread);
+
+    RenderSystem::clean();
 
     return 0;
 }

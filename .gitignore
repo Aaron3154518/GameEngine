@@ -5,3 +5,4 @@ testing.*
 .vs/
 .vscode/
 *.dll
+test.*
