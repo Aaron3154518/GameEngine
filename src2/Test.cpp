@@ -10,6 +10,11 @@ void MyService::service_init() {
                 MyServiceMessage::PrintCount, {}, mCnt);
         },
         id(), id(), MyServiceMessage::IncreaseCount));
+
+    GameObjects::Get<Services::CommandComponentManager>().newComponent(
+        id(), std::vector<Messages::EnumT>{MyServiceMessage::PrintCount,
+                                           MyServiceMessage::IncreaseCount});
+    GameObjects::Get<Services::CommandService>().subscribe(id());
     attachSubscription(
         Messages::GetMessageBus().subscribe<Services::CommandMessage>(
             [this](const Services::CommandMessage& m) { onCommandMessage(m); },
@@ -20,11 +25,6 @@ void MyService::service_init() {
 void MyService::onCommandMessage(const Services::CommandMessage& m) {
     auto code = m.cmdCode;
     switch (code) {
-        case MyServiceMessage::Hello:
-        case MyServiceMessage::World:
-            Messages::GetMessageBus().queueMessage<MyMessage>(
-                static_cast<MyServiceMessage>(code));
-            break;
         case MyServiceMessage::PrintCount:
         case MyServiceMessage::IncreaseCount: {
             int val = mCnt;

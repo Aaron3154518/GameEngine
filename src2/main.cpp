@@ -7,9 +7,14 @@
 
 #include <iostream>
 
+struct ThreadData {
+    Services::CommandService* cs;
+    std::queue<Messages::MessagePtr> msgs;
+};
+
 DWORD WINAPI runCommand(LPVOID param) {
-    Services::CommandService& cs = *(Services::CommandService*)param;
-    while (cs.checkInput()) {
+    ThreadData* data = (ThreadData*)param;
+    while (data->cs->checkInput(data->msgs)) {
     }
     return 0;
 }
@@ -44,8 +49,10 @@ int main(int argc, char* argv[]) {
     mb.queueMessage<MyMessage>(MyServiceMessage::Hello, {id});
     mb.queueMessage<MyMessage>(MyServiceMessage::World, {e->id()});
 
+    ThreadData data{&cs, {}};
+
     DWORD comThreadId;
-    HANDLE comThread = CreateThread(0, 0, runCommand, &cs, 0, &comThreadId);
+    HANDLE comThread = CreateThread(0, 0, runCommand, &data, 0, &comThreadId);
 
     while (true) {
         EventSystem::update();
@@ -54,8 +61,11 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        // Messages::GetMessageBus().queueMessage<RenderServiceMessage>(
-        // RenderService::Code::Render);
+        // mb.queueMessage<RenderServiceMessage>(RenderService::Code::Render);
+        while (!data.msgs.empty()) {
+            mb.queueMessage(std::move(data.msgs.front()));
+            data.msgs.pop();
+        }
 
         RenderSystem::enforceFPS(60);
     }

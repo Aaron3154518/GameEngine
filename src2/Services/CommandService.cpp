@@ -14,7 +14,7 @@ void CommandService::service_init() {
         id()));
 }
 
-bool CommandService::checkInput() {
+bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs) {
     char* str = (char*)malloc(sizeof(char) * 255);
     std::cin.getline(str, 255);
     std::stringstream ss(str);
@@ -38,12 +38,27 @@ bool CommandService::checkInput() {
         return true;
     }
 
-    std::string msgStr = ss.str();
-    msgStr = (long long unsigned int)ss.tellg() >= msgStr.size()
-                 ? ""
-                 : msgStr.substr(ss.tellg());
-    Messages::GetMessageBus().queueMessage<CommandMessage>(
-        Code::Command, {uuid}, msgStr, code);
+    auto& commMan = GameObjects::Get<CommandComponentManager>();
+    if (std::find(mEntities.begin(), mEntities.end(), uuid) !=
+            mEntities.end() &&
+        commMan.hasEntity(uuid)) {
+        auto& codes = commMan[uuid].get();
+        if (std::find(codes.begin(), codes.end(), code) != codes.end()) {
+            std::string msgStr = ss.str();
+            msgStr = (long long unsigned int)ss.tellg() >= msgStr.size()
+                         ? ""
+                         : msgStr.substr(ss.tellg());
+            msgs.push(std::make_unique<CommandMessage>(
+                CommandMessage::MessageData(Code::Command, {uuid}), msgStr,
+                code));
+            //            Messages::GetMessageBus().queueMessage<CommandMessage>(
+            // Code::Command, {uuid}, msgStr, code);
+            return true;
+        }
+    }
+
+    msgs.push(std::make_unique<Messages::BaseMessage>(
+        Messages::BaseMessageData(uuid, code)));
 
     return true;
 }
