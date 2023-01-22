@@ -25,22 +25,17 @@ typedef Components::ComponentManager<CommandComponent> CommandComponentManager;
 class CommandService : public Service {
    public:
     enum Code : Messages::EnumT { Command = 0 };
+    struct CommandData {
+        std::string line;
+        Messages::EnumT cmdCode;
+    };
+    typedef Messages::Message<CommandService, CommandData> Message;
 
     bool checkInput(std::queue<Messages::MessagePtr>& msgs,
                     CRITICAL_SECTION* msgQueue);
 
    private:
     void service_init();
-};
-
-typedef Messages::Message<CommandService, CommandService::Code>
-    CommandMessageBase;
-struct CommandMessage : public CommandMessageBase {
-    CommandMessage(const MessageData& msg, const std::string& str,
-                   Messages::EnumT code);
-
-    std::string line;
-    Messages::EnumT cmdCode;
 };
 }  // namespace Services
 

@@ -6,10 +6,10 @@ namespace Services {
 // CommandService
 void CommandService::service_init() {
     attachSubscription(Messages::GetMessageBus().subscribe(
-        [](const Messages::BaseMessage& msg) {
+        [](const Messages::Message<>& msg) {
             std::cerr << "\033[1;34m[Message]\033[0m "
-                      << Components::GetName(msg.data.type) << " "
-                      << msg.data.code << std::endl;
+                      << Components::GetName(msg.src) << " " << msg.code
+                      << std::endl;
         },
         id()));
 }
@@ -50,27 +50,16 @@ bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs,
                          ? ""
                          : msgStr.substr(ss.tellg());
             EnterCriticalSection(msgQueue);
-            msgs.push(std::make_unique<CommandMessage>(
-                CommandMessage::MessageData(Code::Command, {uuid}), msgStr,
-                code));
+            msgs.push(Message::New({msgStr, code}, Code::Command, {uuid}));
             LeaveCriticalSection(msgQueue);
-            //            Messages::GetMessageBus().queueMessage<CommandMessage>(
-            // Code::Command, {uuid}, msgStr, code);
             return true;
         }
     }
 
     EnterCriticalSection(msgQueue);
-    msgs.push(std::make_unique<Messages::BaseMessage>(
-        Messages::BaseMessageData(uuid, code)));
+    msgs.push(std::make_unique<Messages::Message<>>(uuid, code));
     LeaveCriticalSection(msgQueue);
 
     return true;
 }
-
-// CommandMessage
-CommandMessage::CommandMessage(const MessageData& msg, const std::string& str,
-                               Messages::EnumT code)
-    : CommandMessageBase(msg), line(str), cmdCode(code) {}
-
 }  // namespace Services

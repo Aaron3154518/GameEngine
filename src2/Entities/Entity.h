@@ -33,18 +33,10 @@ class Entity : public Messages::Messager {
 class EntityUnsubService : public Services::Service {
    public:
     enum Code : Messages::EnumT { Unsub = 0 };
+    typedef Messages::Message<EntityUnsubService, UUID> Message;
 
    private:
     void service_init();
-};
-
-typedef Messages::Message<EntityUnsubService, EntityUnsubService::Code>
-    EntityUnsubMessageBase;
-struct EntityUnsubMessage : public EntityUnsubMessageBase {
-   public:
-    EntityUnsubMessage(const MessageData& msg, UUID eid);
-
-    const UUID eId;
 };
 }  // namespace Entities
 

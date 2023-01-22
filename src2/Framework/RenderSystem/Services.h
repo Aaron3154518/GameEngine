@@ -12,6 +12,7 @@
 class RenderService : public Services::Service {
    public:
     enum Code : Messages::EnumT { Render = 0 };
+    typedef Messages::Message<RenderService> Message;
 
    private:
     void service_init();
@@ -20,8 +21,5 @@ class RenderService : public Services::Service {
 
     static void draw(const SpriteComponent& sprite, const Rect& rect);
 };
-
-typedef Messages::Message<RenderService, RenderService::Code>
-    RenderServiceMessage;
 
 #endif

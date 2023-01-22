@@ -12,17 +12,17 @@
 
 namespace Messages {
 constexpr EnumT NO_CODE = -1;
-constexpr MessageT NO_TYPE = {0};
+constexpr Entities::UUID NO_TYPE = {0};
 
 struct MessageHandle {
     const Entities::UUID eId;
     const uint32_t eNum;
-    const MessageT type;
+    const Entities::UUID type;
     const EnumT code;
 };
 
 class MessageBus {
-    typedef std::function<void(const BaseMessage*)> MessageFunc;
+    typedef std::function<void(const Message<>&)> MessageFunc;
 
     struct EntityCallback {
         Entities::UUID eId;
@@ -31,37 +31,24 @@ class MessageBus {
     };
 
    public:
-    template <class T, class... ArgTs>
-    void queueMessage(typename T::EnumType code, MessageOptions opts,
-                      ArgTs&&... args) {
-        queueMessage(
-            make_unique_msg<T>(code, opts, std::forward<ArgTs>(args)...));
-    }
-    template <class T>
-    void queueMessage(typename T::EnumType code) {
-        queueMessage(make_unique_msg<T>(code));
-    }
-    void queueMessage(MessagePtr msg);
-    void sendImmediateMessage(MessagePtr msg);
-
-    void sendMessages();
+    void sendMessage(const Message<>& msg);
 
     MessageHandle subscribe(
-        const std::function<void(const BaseMessage&)>& callback,
-        Entities::UUID eId, const MessageT& msgType = NO_TYPE,
+        const std::function<void(const Message<>&)>& callback,
+        Entities::UUID eId, const Entities::UUID& msgType = NO_TYPE,
         EnumT msgCode = NO_CODE);
 
     template <class MsgT>
     MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
                             Entities::UUID eId,
-                            const MessageT& msgType = NO_TYPE,
+                            const Entities::UUID& msgType = NO_TYPE,
                             EnumT msgCode = NO_CODE) {
-        static_assert(std::is_base_of<BaseMessage, MsgT>::value,
+        static_assert(std::is_base_of<Message<>, MsgT>::value,
                       "MessageBus::subscribe(): Message type must derive from "
-                      "BaseMessage");
+                      "Message<>");
         return subscribe(
-            [callback](const BaseMessage* m) {
-                const MsgT* msg = static_cast<const MsgT*>(m);
+            [callback](const Message<>& m) {
+                auto msg = static_cast<const MsgT*>(&m);
                 if (!msg) {
                     throw std::runtime_error(
                         "Error: Message could not be converted to type: " +
@@ -75,21 +62,15 @@ class MessageBus {
     void unsubscribe(MessageHandle handle);
 
    private:
-    MessageHandle subscribe(const MessageFunc& callback, Entities::UUID eId,
-                            const MessageT& msgType, EnumT msgCode);
-
     friend MessageBus& GetMessageBus();
     MessageBus() = default;
 
-    void sendMessage(const MessagePtr& msg);
-    void sendMessage(const MessagePtr& msg,
+    void sendMessage(const Message<>& msg,
                      const std::vector<EntityCallback>& targets);
-
-    std::queue<MessagePtr> messages;
 
     typedef std::unordered_map<EnumT, std::vector<EntityCallback>>
         MessageSubscribers;
-    std::unordered_map<MessageT, MessageSubscribers> subscribers;
+    std::unordered_map<Entities::UUID, MessageSubscribers> subscribers;
     std::unordered_map<Entities::UUID, uint32_t> entity_counts;
 };
 

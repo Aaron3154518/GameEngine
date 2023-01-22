@@ -2,55 +2,38 @@
 
 namespace Messages {
 // MessageBus
-void MessageBus::queueMessage(MessagePtr msg) { sendMessage(msg); }
-
-void MessageBus::sendImmediateMessage(MessagePtr msg) { sendMessage(msg); }
-
-void MessageBus::sendMessages() {
-    while (!messages.empty()) {
-        sendMessage(messages.front());
-        messages.pop();
-    }
-}
-
-void MessageBus::sendMessage(const MessagePtr& msg) {
-    if (msg->data.type != NO_TYPE) {
-        if (msg->data.code != NO_CODE) {
+void MessageBus::sendMessage(const Message<>& msg) {
+    if (msg.src != NO_TYPE) {
+        if (msg.code != NO_CODE) {
             // Subscribed to this message type and code
-            sendMessage(msg, subscribers[msg->data.type][msg->data.code]);
+            sendMessage(msg, subscribers[msg.src][msg.code]);
         }
         // Subscribed to all messages from this type
-        sendMessage(msg, subscribers[msg->data.type][NO_CODE]);
+        sendMessage(msg, subscribers[msg.src][NO_CODE]);
     }
     // Subscribed to all messages
     sendMessage(msg, subscribers[NO_TYPE][NO_CODE]);
 }
 
-void MessageBus::sendMessage(const MessagePtr& msg,
+void MessageBus::sendMessage(const Message<>& msg,
                              const std::vector<EntityCallback>& targets) {
-    auto& target = msg->data.opts.target;
+    auto& target = msg.opts.target;
     if (target == NO_TYPE) {
         for (auto& callback : targets) {
-            callback.func(msg.get());
+            callback.func(msg);
         }
     } else {
         for (auto& callback : targets) {
             if (callback.eId == target) {
-                callback.func(msg.get());
+                callback.func(msg);
             }
         }
     }
 }
 
-MessageHandle MessageBus::subscribe(
-    const std::function<void(const BaseMessage&)>& callback, Entities::UUID eId,
-    const MessageT& msgType, EnumT msgCode) {
-    return subscribe([callback](const BaseMessage* m) { callback(*m); }, eId,
-                     msgType, msgCode);
-}
-
 MessageHandle MessageBus::subscribe(const MessageFunc& callback,
-                                    Entities::UUID eId, const MessageT& msgType,
+                                    Entities::UUID eId,
+                                    const Entities::UUID& msgType,
                                     EnumT msgCode) {
     auto& cnt = entity_counts[eId];
     subscribers[msgType][msgCode].push_back({eId, cnt, callback});

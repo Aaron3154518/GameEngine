@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
         auto e = GameObjects::New<MyEntity>();
         id = e->id();
 
-        mb.queueMessage<MyMessage>(MyServiceMessage::Hello);
-        mb.queueMessage<MyMessage>(MyServiceMessage::World);
+        mb.sendMessage(MyService::Message(MyService::Code::Hello));
+        mb.sendMessage(MyService::Message(MyService::Code::World));
 
         e.reset();
     }
@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
     auto e = GameObjects::New<MyEntity>();
 
     // Test entity targetting
-    mb.queueMessage<MyMessage>(MyServiceMessage::Hello, {id});
-    mb.queueMessage<MyMessage>(MyServiceMessage::World, {e->id()});
+    mb.sendMessage(MyService::Message(MyService::Code::Hello, {id}));
+    mb.sendMessage(MyService::Message(MyService::Code::World, {e->id()}));
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {
@@ -68,10 +68,10 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        // mb.queueMessage<RenderServiceMessage>(RenderService::Code::Render);
+        // mb.sendMessage<RenderServiceMessage>(RenderService::Code::Render);
         EnterCriticalSection(&msgQueue);
         while (!data.msgs.empty()) {
-            mb.queueMessage(std::move(data.msgs.front()));
+            mb.sendMessage(*data.msgs.front());
             data.msgs.pop();
         }
         LeaveCriticalSection(&msgQueue);

@@ -10,33 +10,19 @@
 #include <Messages/Messager.h>
 #include <Services/CommandService.h>
 
-enum MyServiceMessage : Messages::EnumT {
-    Hello = 0,
-    World,
-    IncreaseCount,
-    PrintCount
-};
-
 class MyService : public Services::Service {
+   public:
+    enum Code : Messages::EnumT { Hello = 0, World, IncreaseCount, PrintCount };
+    typedef Messages::Message<MyService> Message;
+    typedef Messages::Message<MyService, int> CountMessage;
+
    private:
     void service_init();
 
-    void onCommandMessage(const Services::CommandMessage& m);
+    void onCommandMessage(const Services::CommandService::Message& m);
 
     int mCnt = 0;
 };
-
-using namespace Messages;
-typedef Message<MyService, MyServiceMessage> MyMessage;
-struct MyCountMessage : public MyMessage {
-    MyCountMessage(const MessageData& msg, int cnt)
-        : MyMessage(msg), count(cnt) {}
-
-    int count = 0;
-};
-
-typedef std::unique_ptr<MyMessage> MyMessagePtr;
-typedef std::unique_ptr<MyCountMessage> MyCountMessagePtr;
 
 class MyComponent : public Components::Component {
    public:
@@ -50,20 +36,22 @@ class MyComponent : public Components::Component {
 class MyComponentManager : public Components::ComponentManager<MyComponent> {
    private:
     void manager_init() {
-        attachSubscription(Messages::GetMessageBus().subscribe(
-            [this](const Messages::BaseMessage& m) { onMyServiceMessage(m); },
-            id(), GameObjects::Get<MyService>()));
-        attachSubscription(Messages::GetMessageBus().subscribe<MyCountMessage>(
-            [this](const MyCountMessage& m) { onMyServicePrintCount(m); }, id(),
-            GameObjects::Get<MyService>(), MyServiceMessage::PrintCount));
+        attachSubscription(
+            Messages::GetMessageBus().subscribe<MyService::Message>(
+                [this](const auto& m) { onMyServiceMessage(m); }, id(),
+                GameObjects::Get<MyService>()));
+        attachSubscription(
+            Messages::GetMessageBus().subscribe<MyService::CountMessage>(
+                [this](const auto& m) { onMyServicePrintCount(m); }, id(),
+                GameObjects::Get<MyService>(), MyService::Code::PrintCount));
     }
 
-    void onMyServiceMessage(const Messages::BaseMessage& m) {
-        switch (m.data.code) {
-            case MyServiceMessage::Hello:
+    void onMyServiceMessage(const MyService::Message& m) {
+        switch (m.code) {
+            case MyService::Code::Hello:
                 forEach([](MyComponent& c) { c.onHello(); });
                 break;
-            case MyServiceMessage::World:
+            case MyService::Code::World:
                 forEach(MyComponent::onWorld, 8008135);
                 break;
             default:
@@ -71,9 +59,9 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
         };
     }
 
-    void onMyServicePrintCount(const MyCountMessage& m) {
-        int cnt = m.count;
-        forEach(MyComponent::onCount, m.count);
+    void onMyServicePrintCount(const MyService::CountMessage& m) {
+        int cnt = m.data;
+        forEach(MyComponent::onCount, m.data);
         forEach(MyComponent::onCount, cnt);
     }
 };
@@ -84,12 +72,13 @@ class MyEntity : public Entities::Entity {
         setName("MyEntity");
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
-        attachSubscription(Messages::GetMessageBus().subscribe(
-            [](const Messages::BaseMessage& m) {
-                Messages::GetMessageBus().queueMessage<MyMessage>(
-                    MyServiceMessage::World);
-            },
-            id(), GameObjects::Get<MyService>(), MyServiceMessage::Hello));
+        attachSubscription(
+            Messages::GetMessageBus().subscribe<MyService::Message>(
+                [](const auto& m) {
+                    Messages::GetMessageBus().sendMessage(
+                        MyService::Message(MyService::Code::World));
+                },
+                id(), GameObjects::Get<MyService>(), MyService::Code::Hello));
 
         addComponent<ElevationComponentManager>(1);
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));

@@ -20,6 +20,10 @@ class Messager {
     friend class ::GameObjects;
 
    public:
+    // Descendants control the possible message codes by redefining Code
+    // (e.g. with an enum)
+    typedef int Code;
+
     Messager();
     virtual ~Messager();
 

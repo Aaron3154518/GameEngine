@@ -2,9 +2,8 @@
 
 void RenderService::service_init() {
     setName("RenderService");
-    attachSubscription(Messages::GetMessageBus().subscribe(
-        [this](const Messages::BaseMessage& m) { render(); }, id(), id(),
-        Code::Render));
+    attachSubscription(Messages::GetMessageBus().subscribe<Message>(
+        [this](const auto& m) { render(); }, id(), id(), Code::Render));
 }
 
 void RenderService::render() {
