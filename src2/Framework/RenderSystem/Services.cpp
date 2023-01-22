@@ -15,7 +15,7 @@ void RenderService::render() {
             return elevMan[id1].get() < elevMan[id2].get();
         });
 
-    RenderSystem::clearScreen(WHITE);
+    RenderSystem::clearScreen(Colors::White);
     auto& spriteMan = GameObjects::Get<SpriteComponentManager>();
     auto& posMan = GameObjects::Get<PositionComponentManager>();
     for (auto& eId : mEntities) {

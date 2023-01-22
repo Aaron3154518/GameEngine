@@ -5,6 +5,7 @@
 #include <Components/NameComponent.h>
 #include <Messages/MessageBus.h>
 #include <Services/Service.h>
+#include <Windows.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -25,7 +26,8 @@ class CommandService : public Service {
    public:
     enum Code : Messages::EnumT { Command = 0 };
 
-    bool checkInput(std::queue<Messages::MessagePtr>& msgs);
+    bool checkInput(std::queue<Messages::MessagePtr>& msgs,
+                    CRITICAL_SECTION* msgQueue);
 
    private:
     void service_init();

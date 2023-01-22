@@ -35,7 +35,7 @@ struct Options {
 void init(const Options &options);
 void clean();
 
-void clearScreen(SDL_Color bkgrnd = BLACK);
+void clearScreen(SDL_Color bkgrnd = Colors::Black);
 void presentScreen();
 
 void enforceFPS(uint32_t fps);

@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+CRITICAL_SECTION msgQueue;
+
 struct ThreadData {
     Services::CommandService* cs;
     std::queue<Messages::MessagePtr> msgs;
@@ -14,7 +16,7 @@ struct ThreadData {
 
 DWORD WINAPI runCommand(LPVOID param) {
     ThreadData* data = (ThreadData*)param;
-    while (data->cs->checkInput(data->msgs)) {
+    while (data->cs->checkInput(data->msgs, &msgQueue)) {
     }
     return 0;
 }
@@ -49,6 +51,11 @@ int main(int argc, char* argv[]) {
     mb.queueMessage<MyMessage>(MyServiceMessage::Hello, {id});
     mb.queueMessage<MyMessage>(MyServiceMessage::World, {e->id()});
 
+    // Create CLI thread
+    if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {
+        return 0;
+    }
+
     ThreadData data{&cs, {}};
 
     DWORD comThreadId;
@@ -62,15 +69,18 @@ int main(int argc, char* argv[]) {
         }
 
         // mb.queueMessage<RenderServiceMessage>(RenderService::Code::Render);
+        EnterCriticalSection(&msgQueue);
         while (!data.msgs.empty()) {
             mb.queueMessage(std::move(data.msgs.front()));
             data.msgs.pop();
         }
+        LeaveCriticalSection(&msgQueue);
 
         RenderSystem::enforceFPS(60);
     }
 
     CloseHandle(comThread);
+    DeleteCriticalSection(&msgQueue);
 
     RenderSystem::clean();
 

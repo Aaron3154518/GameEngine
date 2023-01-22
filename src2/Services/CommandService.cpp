@@ -14,7 +14,8 @@ void CommandService::service_init() {
         id()));
 }
 
-bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs) {
+bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs,
+                                CRITICAL_SECTION* msgQueue) {
     char* str = (char*)malloc(sizeof(char) * 255);
     std::cin.getline(str, 255);
     std::stringstream ss(str);
@@ -48,17 +49,21 @@ bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs) {
             msgStr = (long long unsigned int)ss.tellg() >= msgStr.size()
                          ? ""
                          : msgStr.substr(ss.tellg());
+            EnterCriticalSection(msgQueue);
             msgs.push(std::make_unique<CommandMessage>(
                 CommandMessage::MessageData(Code::Command, {uuid}), msgStr,
                 code));
+            LeaveCriticalSection(msgQueue);
             //            Messages::GetMessageBus().queueMessage<CommandMessage>(
             // Code::Command, {uuid}, msgStr, code);
             return true;
         }
     }
 
+    EnterCriticalSection(msgQueue);
     msgs.push(std::make_unique<Messages::BaseMessage>(
         Messages::BaseMessageData(uuid, code)));
+    LeaveCriticalSection(msgQueue);
 
     return true;
 }
