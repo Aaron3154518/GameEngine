@@ -16,13 +16,13 @@ void MyService::service_init() {
                                            MyService::Code::IncreaseCount});
     GameObjects::Get<Services::CommandService>().subscribe(id());
     attachSubscription(
-        Messages::GetMessageBus().subscribe<Services::CommandService::Message>(
+        Messages::GetMessageBus().subscribe<Services::CommandService::CommandMessage>(
             [this](const auto& m) { onCommandMessage(m); }, id(),
             GameObjects::Get<Services::CommandService>(),
             Services::CommandService::Command));
 }
 
-void MyService::onCommandMessage(const Services::CommandService::Message& m) {
+void MyService::onCommandMessage(const Services::CommandService::CommandMessage& m) {
     auto code = m.data.cmdCode;
     switch (code) {
         case MyService::Code::PrintCount:

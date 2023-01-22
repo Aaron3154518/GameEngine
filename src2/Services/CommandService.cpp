@@ -27,6 +27,9 @@ bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs,
     }
 
     if (service == "quit") {
+        EnterCriticalSection(msgQueue);
+        msgs.push(Message::New(Code::Quit));
+        LeaveCriticalSection(msgQueue);
         return false;
     }
 
@@ -50,7 +53,8 @@ bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs,
                          ? ""
                          : msgStr.substr(ss.tellg());
             EnterCriticalSection(msgQueue);
-            msgs.push(Message::New({msgStr, code}, Code::Command, {uuid}));
+            msgs.push(
+                CommandMessage::New({msgStr, code}, Code::Command, {uuid}));
             LeaveCriticalSection(msgQueue);
             return true;
         }

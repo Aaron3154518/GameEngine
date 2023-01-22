@@ -19,7 +19,7 @@ class MyService : public Services::Service {
    private:
     void service_init();
 
-    void onCommandMessage(const Services::CommandService::Message& m);
+    void onCommandMessage(const Services::CommandService::CommandMessage& m);
 
     int mCnt = 0;
 };

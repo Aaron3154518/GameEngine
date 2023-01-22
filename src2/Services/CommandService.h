@@ -24,12 +24,14 @@ typedef Components::ComponentManager<CommandComponent> CommandComponentManager;
 
 class CommandService : public Service {
    public:
-    enum Code : Messages::EnumT { Command = 0 };
     struct CommandData {
         std::string line;
         Messages::EnumT cmdCode;
     };
-    typedef Messages::Message<CommandService, CommandData> Message;
+
+    enum Code : Messages::EnumT { Command = 0, Quit };
+    typedef Messages::Message<CommandService> Message;
+    typedef Messages::Message<CommandService, CommandData> CommandMessage;
 
     bool checkInput(std::queue<Messages::MessagePtr>& msgs,
                     CRITICAL_SECTION* msgQueue);

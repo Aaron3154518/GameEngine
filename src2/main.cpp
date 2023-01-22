@@ -69,12 +69,21 @@ int main(int argc, char* argv[]) {
         }
 
         // mb.sendMessage<RenderServiceMessage>(RenderService::Code::Render);
+        bool quit = false;
         EnterCriticalSection(&msgQueue);
         while (!data.msgs.empty()) {
-            mb.sendMessage(*data.msgs.front());
+            auto& msg = *data.msgs.front();
+            if (msg.src == cs && msg.code == Services::CommandService::Quit) {
+                quit = true;
+                break;
+            }
+            mb.sendMessage(msg);
             data.msgs.pop();
         }
         LeaveCriticalSection(&msgQueue);
+        if (quit) {
+            break;
+        }
 
         RenderSystem::enforceFPS(60);
     }
