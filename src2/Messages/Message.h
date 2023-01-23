@@ -15,11 +15,11 @@ struct MessageOptions {
     Entities::UUID target = {0};
 };
 
-template <class...>
+template <class SrcT = void, class CodeT = void, class DataT = void>
 struct Message;
 
-template <>
-struct Message<> {
+template <class SrcT>
+struct Message<SrcT, void, void> {
     Entities::UUID src;
     EnumT code;
     MessageOptions opts;
@@ -29,23 +29,22 @@ struct Message<> {
     virtual ~Message() = default;
 };
 
-template <class SrcT>
-struct Message<SrcT> : public Message<> {
-    Message(typename SrcT::Code c, const MessageOptions& o = {})
+template <class SrcT, class CodeT>
+struct Message<SrcT, CodeT, void> : public Message<> {
+    Message(CodeT c, const MessageOptions& o = {})
         : Message<>(GameObjects::Get<SrcT>().id(), c, o) {}
 
-    static std::unique_ptr<Message> New(typename SrcT::Code c,
-                                        const MessageOptions& o = {}) {
+    static std::unique_ptr<Message> New(CodeT c, const MessageOptions& o = {}) {
         return std::make_unique<Message>(c, o);
     }
 };
 
-template <class SrcT, class DataT>
-struct Message<SrcT, DataT> : public Message<> {
-    Message(const DataT& d, typename SrcT::Code c, const MessageOptions& o = {})
+template <class SrcT, class CodeT, class DataT>
+struct Message {
+    Message(const DataT& d, CodeT c, const MessageOptions& o = {})
         : Message<>(GameObjects::Get<SrcT>().id(), c, o), data(d) {}
 
-    static std::unique_ptr<Message> New(const DataT& d, typename SrcT::Code c,
+    static std::unique_ptr<Message> New(const DataT& d, CodeT c,
                                         const MessageOptions& o = {}) {
         return std::make_unique<Message>(d, c, o);
     }
