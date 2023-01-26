@@ -1,11 +1,20 @@
 #include "UUID.h"
 
 namespace Entities {
+const UUID& NullId() {
+    static UUID ID = {0};
+    return ID;
+}
+
 UUID generateUUID() {
     std::random_device rd;
     std::mt19937_64 mt(rd());
     std::uniform_int_distribution<uint64_t> dist;
-    return UUID{dist(mt), dist(mt)};
+    UUID id{dist(mt), dist(mt)};
+    while (id == NullId()) {
+        id = UUID{dist(mt), dist(mt)};
+    }
+    return;
 }
 
 bool CompareUUID::operator()(const UUID& lhs, const UUID& rhs) {

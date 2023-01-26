@@ -12,14 +12,11 @@
 
 class MyService : public Services::Service {
    public:
-    enum Code : Messages::EnumT { Hello = 0, World, IncreaseCount, PrintCount };
-    typedef Messages::Message<MyService> Message;
-    typedef Messages::Message<MyService, int> CountMessage;
+    MESSAGE(Message, Hello, World);
+    MESSAGE_D(CountMessage, int, IncreaseCount, PrintCount);
 
    private:
     void service_init();
-
-    void onCommandMessage(const Services::CommandService::CommandMessage& m);
 
     int mCnt = 0;
 };

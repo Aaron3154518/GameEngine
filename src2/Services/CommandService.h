@@ -29,11 +29,7 @@ class CommandService : public Service {
         Messages::EnumT cmdCode;
     };
 
-    enum Msg_Code : Messages::EnumT { Quit = 0 };
-    enum Cmd_Code : Messages::EnumT { Command = 0 };
-    typedef Messages::Message<CommandService, Msg_Code> Message;
-    typedef Messages::Message<CommandService, Cmd_Code, CommandData>
-        CommandMessage;
+    MESSAGE(Message, Quit);
 
     bool checkInput(std::queue<Messages::MessagePtr>& msgs,
                     CRITICAL_SECTION* msgQueue);

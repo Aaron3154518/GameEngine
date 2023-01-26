@@ -22,8 +22,4 @@ void Messager::setName(const std::string& name) const {
     GameObjects::Get<Components::NameComponentManager>().newComponent(id(),
                                                                       name);
 }
-
-void Messager::attachSubscription(const MessageHandle& handle) {
-    mSubscriptions.push_back(handle);
-}
 }  // namespace Messages

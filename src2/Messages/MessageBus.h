@@ -12,7 +12,6 @@
 
 namespace Messages {
 constexpr EnumT NO_CODE = -1;
-constexpr Entities::UUID NO_TYPE = {0};
 
 struct MessageHandle {
     const Entities::UUID eId;
@@ -35,17 +34,31 @@ class MessageBus {
 
     void unsubscribe(MessageHandle handle);
 
+    template <class MsgT>
+    MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
+                            const Entities::UUID& eId, MsgT::CodeT msgCode) {
+        return subscribe(
+            [callback](const MsgT& m) { callback(convert<MsgT>(m)); }, eId,
+            MsgT::ID, msgCode);
+    }
+
+    template <class MsgT>
+    MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
+                            const Entities::UUID& eId) {
+        return subscribe(
+            [callback](const MsgT& m) { callback(convert<MsgT>(m)); }, eId,
+            MsgT::ID, NO_CODE);
+    }
+
    private:
-    template <class>
-    friend class Subscribe;
+    friend class Messager;
     friend MessageBus& GetMessageBus();
 
     MessageBus() = default;
 
     MessageHandle subscribe(
         const std::function<void(const Message<>&)>& callback,
-        Entities::UUID eId, const Entities::UUID& msgType = NO_TYPE,
-        EnumT msgCode = NO_CODE);
+        const Entities::UUID& eId, const Entities::UUID& mId, EnumT msgCode);
 
     void sendMessage(const Message<>& msg,
                      const std::vector<EntityCallback>& targets);
@@ -57,62 +70,6 @@ class MessageBus {
 };
 
 MessageBus& GetMessageBus();
-
-template <class MsgT = Message<>>
-class Subscribe;
-
-template <>
-class Subscribe<Message<>> {
-    typedef Message<> MsgT;
-
-    // Subscribe to all messages
-    static MessageHandle subscribe(
-        const Entities::UUID eId,
-        const std::function<void(const MsgT&)>& callback) {
-        return GetMessageBus().subscribe(callback, eId);
-    }
-};
-
-template <class SrcT, class CodeT, class DataT>
-class Subscribe<Message<SrcT, CodeT, DataT>> {
-   public:
-    typedef Message<SrcT, CodeT, DataT> MsgT;
-
-    // Subscribe to all messages from sender
-    static MessageHandle subscribe(
-        const Entities::UUID eId,
-        const std::function<void(const MsgT&)>& callback) {
-        return subscribe(eId, callback, NO_CODE);
-    }
-
-    // Subscribe to messages from send with given code
-    static MessageHandle subscribe(
-        const Entities::UUID eId,
-        const std::function<void(const MsgT&)>& callback, CodeT msgCode) {
-        return subscribe(eId, callback, msgCode);
-    }
-
-    static const Entities::UUID& senderId() {
-        return GameObjects::Get<SrcT>().id();
-    }
-
-   private:
-    static MessageHandle subscribe(
-        const Entities::UUID eId,
-        const std::function<void(const MsgT&)>& callback, EnumT msgCode) {
-        return GetMessageBus().subscribe(
-            [callback](const Message<>& m) {
-                auto msg = static_cast<const MsgT*>(&m);
-                if (!msg) {
-                    throw std::runtime_error(
-                        "Error: Message could not be converted to type: " +
-                        std::string(typeid(MsgT).name()));
-                }
-                callback(*msg);
-            },
-            eId, senderId(), msgCode);
-    }
-};
 }  // namespace Messages
 
 #endif

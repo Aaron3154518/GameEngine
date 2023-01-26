@@ -4,6 +4,7 @@
 #include <Entities/UUID.h>
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -37,7 +38,18 @@ class Messager {
     void setName(const std::string& name) const;
 
    protected:
-    void attachSubscription(const Messages::MessageHandle& handle);
+    template <class MsgT>
+    void subscribeTo(const std::function<void(const MsgT&)>& callback,
+                     MsgT::CodeT code) {
+        mSubscriptions.push_back(
+            GetMessageBus().subscribe<MsgT>(callback, id(), code));
+    }
+
+    template <class MsgT>
+    void subscribeTo(const std::function<void(const MsgT&)>& callback) {
+        mSubscriptions.push_back(
+            GetMessageBus().subscribe<MsgT>(callback, id()));
+    }
 
    private:
     virtual void init();

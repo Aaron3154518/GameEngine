@@ -3,22 +3,22 @@
 namespace Messages {
 // MessageBus
 void MessageBus::sendMessage(const Message<>& msg) {
-    if (msg.src != NO_TYPE) {
+    if (msg.id() != Entities::NullId()) {
         if (msg.code != NO_CODE) {
-            // Subscribed to this message type and code
-            sendMessage(msg, subscribers[msg.src][msg.code]);
+            // Subscribed to this sender and code
+            sendMessage(msg, subscribers[msg.id()][msg.code]);
         }
-        // Subscribed to all messages from this type
-        sendMessage(msg, subscribers[msg.src][NO_CODE]);
+        // Subscribed to this sender
+        sendMessage(msg, subscribers[msg.id()][NO_CODE]);
     }
     // Subscribed to all messages
-    sendMessage(msg, subscribers[NO_TYPE][NO_CODE]);
+    sendMessage(msg, subscribers[Entities::NullId()][NO_CODE]);
 }
 
 void MessageBus::sendMessage(const Message<>& msg,
                              const std::vector<EntityCallback>& targets) {
     auto& target = msg.opts.target;
-    if (target == NO_TYPE) {
+    if (target == GameObjects::Get<GameObjects::Void>().id()) {
         for (auto& callback : targets) {
             callback.func(msg);
         }
@@ -31,13 +31,12 @@ void MessageBus::sendMessage(const Message<>& msg,
     }
 }
 
-MessageHandle MessageBus::subscribe(const MessageFunc& callback,
-                                    Entities::UUID eId,
-                                    const Entities::UUID& msgType,
-                                    EnumT msgCode) {
+MessageHandle MessageBus::subscribe(
+    const std::function<void(const Message<>&)>& callback,
+    const Entities::UUID& eId, const Entities::UUID& mId, EnumT msgCode) {
     auto& cnt = entity_counts[eId];
-    subscribers[msgType][msgCode].push_back({eId, cnt, callback});
-    return MessageHandle{eId, cnt++, msgType, msgCode};
+    subscribers[mId][msgCode].push_back({eId, cnt, callback});
+    return MessageHandle{eId, cnt++, mId, msgCode};
 }
 
 void MessageBus::unsubscribe(MessageHandle handle) {
