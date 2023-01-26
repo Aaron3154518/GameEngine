@@ -11,8 +11,7 @@
 
 class RenderService : public Services::Service {
    public:
-    enum Code : Messages::EnumT { Render = 0 };
-    typedef Messages::Message<RenderService> Message;
+    MESSAGE(Message, Render);
 
    private:
     void service_init();

@@ -13,7 +13,7 @@
 class MyService : public Services::Service {
    public:
     MESSAGE(Message, Hello, World);
-    MESSAGE_D(CountMessage, int, IncreaseCount, PrintCount);
+    DATA_MESSAGE(CountMessage, int, IncreaseCount, PrintCount);
 
    private:
     void service_init();
@@ -33,22 +33,19 @@ class MyComponent : public Components::Component {
 class MyComponentManager : public Components::ComponentManager<MyComponent> {
    private:
     void manager_init() {
-        attachSubscription(
-            Messages::GetMessageBus().subscribe<MyService::Message>(
-                [this](const auto& m) { onMyServiceMessage(m); }, id(),
-                GameObjects::Get<MyService>()));
-        attachSubscription(
-            Messages::GetMessageBus().subscribe<MyService::CountMessage>(
-                [this](const auto& m) { onMyServicePrintCount(m); }, id(),
-                GameObjects::Get<MyService>(), MyService::Code::PrintCount));
+        subscribeTo<MyService::Message>(
+            [this](const auto& m) { onMyServiceMessage(m); });
+        subscribeTo<MyService::CountMessage>(
+            [this](const auto& m) { onMyServicePrintCount(m); },
+            MyService::PrintCount);
     }
 
     void onMyServiceMessage(const MyService::Message& m) {
         switch (m.code) {
-            case MyService::Code::Hello:
+            case MyService::Hello:
                 forEach([](MyComponent& c) { c.onHello(); });
                 break;
-            case MyService::Code::World:
+            case MyService::World:
                 forEach(MyComponent::onWorld, 8008135);
                 break;
             default:
@@ -69,14 +66,12 @@ class MyEntity : public Entities::Entity {
         setName("MyEntity");
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
-        attachSubscription(
-            Messages::GetMessageBus().subscribe<MyService::Message>(
-                [](const auto& m) {
-                    Messages::GetMessageBus().sendMessage(
-                        MyService::Message(MyService::Code::World));
-                },
-                id(), GameObjects::Get<MyService>(), MyService::Code::Hello));
-
+        subscribeTo<MyService::Message>(
+            [](const auto& m) {
+                Messages::GetMessageBus().sendMessage(
+                    MyService::Message(MyService::World));
+            },
+            MyService::Hello);
         addComponent<ElevationComponentManager>(1);
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
         addComponent<SpriteComponentManager>("res/wizards/wizard.png");

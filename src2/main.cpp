@@ -29,9 +29,9 @@ int main(int argc, char* argv[]) {
     RenderSystem::init(opts);
 
     auto& cs = GameObjects::Get<Services::CommandService>();
+    GameObjects::Get<MyService>();
 
     auto& mb = Messages::GetMessageBus();
-    auto& s = GameObjects::Get<MyService>();
     Entities::UUID id;
 
     // Test unsubscribe
@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
         auto e = GameObjects::New<MyEntity>();
         id = e->id();
 
-        mb.sendMessage(MyService::Message(MyService::Code::Hello));
-        mb.sendMessage(MyService::Message(MyService::Code::World));
+        mb.sendMessage(MyService::Message(MyService::Hello));
+        mb.sendMessage(MyService::Message(MyService::World));
 
         e.reset();
     }
@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
     auto e = GameObjects::New<MyEntity>();
 
     // Test entity targetting
-    mb.sendMessage(MyService::Message(MyService::Code::Hello, {id}));
-    mb.sendMessage(MyService::Message(MyService::Code::World, {e->id()}));
+    mb.sendMessage(MyService::Message(MyService::Hello, {id}));
+    mb.sendMessage(MyService::Message(MyService::World, {e->id()}));
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {
@@ -60,6 +60,8 @@ int main(int argc, char* argv[]) {
 
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &data, 0, &comThreadId);
+
+    auto csMsgId = Services::CommandService::Message::ID();
 
     while (true) {
         EventSystem::update();
@@ -73,7 +75,8 @@ int main(int argc, char* argv[]) {
         EnterCriticalSection(&msgQueue);
         while (!data.msgs.empty()) {
             auto& msg = *data.msgs.front();
-            if (msg.src == cs && msg.code == Services::CommandService::Quit) {
+            if (msg.id() == csMsgId &&
+                msg.code == Services::CommandService::Quit) {
                 quit = true;
                 break;
             }

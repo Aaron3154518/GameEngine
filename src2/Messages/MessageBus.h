@@ -36,18 +36,19 @@ class MessageBus {
 
     template <class MsgT>
     MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
-                            const Entities::UUID& eId, MsgT::CodeT msgCode) {
+                            const Entities::UUID& eId,
+                            typename MsgT::CodeT msgCode) {
         return subscribe(
-            [callback](const MsgT& m) { callback(convert<MsgT>(m)); }, eId,
-            MsgT::ID, msgCode);
+            [callback](const auto& m) { callback(convert<MsgT>(m)); }, eId,
+            MsgT::ID(), msgCode);
     }
 
     template <class MsgT>
     MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
                             const Entities::UUID& eId) {
         return subscribe(
-            [callback](const MsgT& m) { callback(convert<MsgT>(m)); }, eId,
-            MsgT::ID, NO_CODE);
+            [callback](const auto& m) { callback(convert<MsgT>(m)); }, eId,
+            MsgT::ID(), NO_CODE);
     }
 
    private:

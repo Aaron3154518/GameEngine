@@ -14,7 +14,7 @@ UUID generateUUID() {
     while (id == NullId()) {
         id = UUID{dist(mt), dist(mt)};
     }
-    return;
+    return id;
 }
 
 bool CompareUUID::operator()(const UUID& lhs, const UUID& rhs) {

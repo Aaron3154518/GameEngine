@@ -35,12 +35,6 @@ struct hash<Entities::UUID> {
         hash ^= hasher(id[1]) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
         return hash;
     }
-
-    namespace std {
-    std::string to_string(const std::array<uint64_t, 2>& arr) {
-        return std::to_string(arr[0]) + std::to_string(arr[1]);
-    }
-    }  // namespace std
 };
 
 std::string to_string(const Entities::UUID& id);

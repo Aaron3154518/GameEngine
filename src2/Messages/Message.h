@@ -2,26 +2,27 @@
 #define MESSAGE_H
 
 #include <Entities/UUID.h>
-#include <Messages/GameObjects.h>
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 // Macros to help expedite message declaring
-#define MESSAGE(name, code1, ...)                                \
-    enum name##Code : Messages::EnumT{##code1 = 0, __VA_ARGS__}; \
+#define MESSAGE(name, code1, ...)                              \
+    enum name##Code : Messages::EnumT{code1 = 0, __VA_ARGS__}; \
     typedef Messages::Message<name##Code> name
 
-#define MESSAGE_D(name, data, code1, ...)                        \
-    enum name##Code : Messages::EnumT{##code1 = 0, __VA_ARGS__}; \
+#define DATA_MESSAGE(name, data, code1, ...)                   \
+    enum name##Code : Messages::EnumT{code1 = 0, __VA_ARGS__}; \
     typedef Messages::Message<name##Code, data> name
 
 namespace Messages {
 typedef int EnumT;
 
 struct MessageOptions {
-    Entities::UUID target = {0};
+    Entities::UUID target = Entities::NullId();
 };
 
 template <class CodeT = void, class DataT = void>
@@ -29,7 +30,8 @@ struct Message;
 
 template <>
 struct Message<void, void> {
-    virtual const Entities::UUID& id() const { return Entities::NullId(); }
+    static const Entities::UUID& ID() { return Entities::NullId(); }
+    virtual const Entities::UUID& id() const { return ID(); }
 
     const EnumT code;
     const MessageOptions opts;
@@ -38,9 +40,9 @@ struct Message<void, void> {
     virtual ~Message() = default;
 };
 
-template <class CodeT>
-struct Message<CodeT, void> : public Message<> {
-    using CodeT = CodeT;
+template <class Code_T>
+struct Message<Code_T, void> : public Message<> {
+    using CodeT = Code_T;
 
     static const Entities::UUID& ID() {
         static const Entities::UUID ID = Entities::generateUUID();
@@ -56,14 +58,14 @@ struct Message<CodeT, void> : public Message<> {
     }
 
     static std::unique_ptr<Message> Parse(EnumT c, const std::string& line) {
-        return Message<Name, CodeT>::New(static_cast<CodeT>(c));
+        return Message<CodeT>::New(static_cast<CodeT>(c));
     }
 };
 
-template <class CodeT, class DataT>
+template <class Code_T, class Data_T>
 struct Message : public Message<> {
-    using CodeT = CodeT;
-    using DataT = DataT;
+    using CodeT = Code_T;
+    using DataT = Data_T;
 
     static const Entities::UUID& ID() {
         static const Entities::UUID ID = Entities::generateUUID();
@@ -83,7 +85,7 @@ struct Message : public Message<> {
     }
 
     static std::unique_ptr<Message> Parse(EnumT c, const std::string& line) {
-        return Message<Name, CodeT, DataT>::New(DataT(), static_cast<CodeT>(c));
+        return nullptr;
     }
 };
 
@@ -99,7 +101,7 @@ class MessageTypes {
         return GEN_MAP;
     }
 
-    static std::unordered_map<Entities::UUID, std::string> NameMap() {
+    static std::unordered_map<Entities::UUID, std::string>& NameMap() {
         static std::unordered_map<Entities::UUID, std::string> NAME_MAP;
         return NAME_MAP;
     }
@@ -114,7 +116,7 @@ class MessageTypes {
                          "name \""
                       << name << "\"" << std::endl;
         }
-        mgsName = name;
+        msgName = name;
         GenMap()[name] = [gen](EnumT code, const std::string& line) {
             return gen(code, line);
         };

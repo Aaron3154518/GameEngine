@@ -22,7 +22,7 @@ Entities::UUID Components::NameComponentManager::getUUID(
             return it.id();
         }
     }
-    return Messages::NO_TYPE;
+    return Entities::NullId();
 }
 
 // GetName

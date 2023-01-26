@@ -19,12 +19,9 @@ void Service::unsubscribe(const Entities::UUID& eId) {
 }
 
 void Service::init() {
-    attachSubscription(Messages::GetMessageBus()
-                           .subscribe<Entities::EntityUnsubService::Message>(
-                               [this](const auto& m) { unsubscribe(m.data); },
-                               id(),
-                               GameObjects::Get<Entities::EntityUnsubService>(),
-                               Entities::EntityUnsubService::Unsub));
+    subscribeTo<Entities::EntityUnsubService::Message>(
+        [this](const auto& m) { unsubscribe(m.data); },
+        Entities::EntityUnsubService::Unsub);
 
     service_init();
 }

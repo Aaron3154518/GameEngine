@@ -5,17 +5,14 @@
 namespace Components {
 // ComponentManagerBase
 void ComponentManagerBase::init() {
-    attachSubscription(Messages::GetMessageBus()
-                           .subscribe<Entities::EntityUnsubService::Message>(
-                               [this](const auto& m) {
-                                   auto it = mComponents.find(m.data);
-                                   if (it != mComponents.end()) {
-                                       mComponents.erase(it);
-                                   }
-                               },
-                               id(),
-                               GameObjects::Get<Entities::EntityUnsubService>(),
-                               Entities::EntityUnsubService::Unsub));
+    subscribeTo<Entities::EntityUnsubService::Message>(
+        [this](const auto& m) {
+            auto it = mComponents.find(m.data);
+            if (it != mComponents.end()) {
+                mComponents.erase(it);
+            }
+        },
+        Entities::EntityUnsubService::Unsub);
 
     manager_init();
 }

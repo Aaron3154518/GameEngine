@@ -18,7 +18,7 @@ void MessageBus::sendMessage(const Message<>& msg) {
 void MessageBus::sendMessage(const Message<>& msg,
                              const std::vector<EntityCallback>& targets) {
     auto& target = msg.opts.target;
-    if (target == GameObjects::Get<GameObjects::Void>().id()) {
+    if (target == Entities::NullId()) {
         for (auto& callback : targets) {
             callback.func(msg);
         }

@@ -8,5 +8,8 @@ Entity::~Entity() {
 }
 
 // EntitiyUnsubService
-void EntityUnsubService::service_init() { setName("EntityUnsubService"); }
+void EntityUnsubService::service_init() {
+    setName("EntityUnsubService");
+    Messages::MessageTypes::Register<Message>("EntityUnsubService");
+}
 }  // namespace Entities

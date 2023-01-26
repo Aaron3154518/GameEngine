@@ -32,8 +32,7 @@ class Entity : public Messages::Messager {
 
 class EntityUnsubService : public Services::Service {
    public:
-    enum Code : Messages::EnumT { Unsub = 0 };
-    typedef Messages::Message<EntityUnsubService, UUID> Message;
+    DATA_MESSAGE(Message, UUID, Unsub);
 
    private:
     void service_init();
