@@ -3,6 +3,7 @@
 
 #include <Components/Component.h>
 #include <Entities/Entity.h>
+#include <Framework/EventSystem/Services.h>
 #include <Framework/RenderSystem/Services.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
@@ -73,8 +74,11 @@ class MyEntity : public Entities::Entity {
             MyService::Hello);
         addComponent<ElevationComponentManager>(1);
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
+        addComponent<VelComponentManager>(SDL_FPoint{0, 0});
+        addComponent<AccelComponentManager>(SDL_FPoint{20, 20});
         addComponent<SpriteComponentManager>("res/wizards/wizard.png");
         GameObjects::Get<RenderService>().subscribe(id());
+        GameObjects::Get<PhysicsService>().subscribe(id());
     }
 };
 

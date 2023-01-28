@@ -1,5 +1,5 @@
-#ifndef R_SERVICE_H
-#define R_SERVICE_H
+#ifndef RENDER_SERVICES_H
+#define RENDER_SERVICES_H
 
 #include <Framework/FrameworkComponents.h>
 #include <Framework/RenderSystem/AssetManager.h>

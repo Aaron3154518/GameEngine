@@ -1,7 +1,9 @@
 #define SDL_MAIN_HANDLED
 
 #include <Framework/EventSystem/EventSystem.h>
+#include <Framework/EventSystem/Services.h>
 #include <Framework/RenderSystem/RenderSystem.h>
+#include <Framework/RenderSystem/Services.h>
 #include <Services/CommandService.h>
 #include <Test.h>
 #include <Windows.h>
@@ -88,6 +90,9 @@ int main(int argc, char* argv[]) {
         if (quit) {
             break;
         }
+
+        mb.sendMessage(UpdateService::Message(UpdateService::Update,
+                                              EventSystem::get().dt));
 
         mb.sendMessage(RenderService::Message(RenderService::Render));
 
