@@ -2,7 +2,7 @@
 #define COMMAND_SERVICE_H
 
 #include <Components/Component.h>
-#include <Components/NameComponent.h>
+#include <Components/ComponentManager.h>
 #include <Messages/MessageBus.h>
 #include <Services/Service.h>
 #include <Windows.h>

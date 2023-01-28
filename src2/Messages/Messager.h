@@ -36,8 +36,6 @@ class Messager {
     operator Entities::UUID() const;
     Entities::UUID id() const;
 
-    void setName(const std::string& name) const;
-
    protected:
     template <class MsgT>
     void subscribeTo(const std::function<void(const MsgT&)>& callback,

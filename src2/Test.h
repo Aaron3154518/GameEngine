@@ -2,7 +2,6 @@
 #define TEST_H
 
 #include <Components/Component.h>
-#include <Components/NameComponent.h>
 #include <Entities/Entity.h>
 #include <Framework/RenderSystem/Services.h>
 #include <Messages/GameObjects.h>
@@ -64,7 +63,6 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
 class MyEntity : public Entities::Entity {
    private:
     void init() {
-        setName("MyEntity");
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
         subscribeTo<MyService::Message>(

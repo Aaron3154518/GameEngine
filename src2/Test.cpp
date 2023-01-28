@@ -4,7 +4,6 @@ int MyService::count() const { return mCnt; }
 
 // MyService
 void MyService::service_init() {
-    setName("MyService");
     subscribeTo<CountMessage>([this](const auto& m) { mCnt += m.data; },
                               IncreaseCount);
 }

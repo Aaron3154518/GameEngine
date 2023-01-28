@@ -33,9 +33,6 @@ class Entity : public Messages::Messager {
 class EntityUnsubService : public Services::Service {
    public:
     DATA_MESSAGE(Message, UUID, Unsub);
-
-   private:
-    void service_init();
 };
 }  // namespace Entities
 

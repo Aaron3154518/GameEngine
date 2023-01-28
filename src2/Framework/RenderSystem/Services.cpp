@@ -3,7 +3,6 @@
 REGISTER(RenderService::Message, RenderMessage);
 
 void RenderService::service_init() {
-    setName("RenderService");
     subscribeTo<Message>([this](const auto& m) { render(); }, Render);
 }
 
