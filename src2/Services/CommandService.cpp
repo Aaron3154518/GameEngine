@@ -8,7 +8,8 @@ namespace Services {
 // CommandService
 void CommandService::service_init() {
     subscribeTo<Messages::Message<>>([](const auto& msg) {
-        std::cerr << "\033[1;34m[Message]\033[0m " << GetName(msg.id()) << " "
+        std::cerr << "\033[1;34m[Message]\033[0m "
+                  << Messages::MessageTypes::GetName(msg.id()) << " "
                   << msg.code << std::endl;
     });
 }
@@ -42,7 +43,7 @@ bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs,
                ? ""
                : line.substr(ss.tellg());
 
-    auto msg = Generate(service, code, line);
+    auto msg = Messages::MessageTypes::Generate(service, code, line);
     if (!msg) {
         return true;
     }
@@ -52,32 +53,5 @@ bool CommandService::checkInput(std::queue<Messages::MessagePtr>& msgs,
     LeaveCriticalSection(msgQueue);
 
     return true;
-}
-
-// Static methods
-Messages::MessagePtr CommandService::Generate(const std::string& name,
-                                              Messages::EnumT code,
-                                              const std::string& line) {
-    auto it = GenMap().find(name);
-    if (it == GenMap().end()) {
-        return nullptr;
-    }
-    return it->second(code, line);
-}
-
-std::string CommandService::GetName(const std::type_index& id) {
-    auto it = NameMap().find(id);
-    return it == NameMap().end() ? id.name() : it->second;
-}
-
-std::unordered_map<std::string, CommandService::MsgGenFunc<>>&
-CommandService::GenMap() {
-    static std::unordered_map<std::string, MsgGenFunc<>> GEN_MAP;
-    return GEN_MAP;
-}
-
-std::unordered_map<std::type_index, std::string>& CommandService::NameMap() {
-    static std::unordered_map<std::type_index, std::string> NAME_MAP;
-    return NAME_MAP;
 }
 }  // namespace Services

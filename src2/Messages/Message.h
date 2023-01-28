@@ -22,6 +22,23 @@
     MESSAGE_ENUM(name##Code, code1, __VA_ARGS__); \
     typedef Messages::Message<name##Code, data> name
 
+// Macros to help register message types with cli
+#define SELECT(_1, _2, _3, foo, ...) foo
+
+#define REGISTER_2(msg, name)            \
+    constexpr char name##Name[] = #name; \
+    template class Messages::MessageTypes::Register<msg, name##Name>
+
+#define REGISTER_1(msg, name, body)                           \
+    constexpr char name##Name[] = #name;                      \
+    template <>                                               \
+    std::unique_ptr<msg>                                      \
+    Messages::MessageTypes::Register<msg, name##Name>::parse( \
+        MsgCode code, const std::string& line)                \
+        body template class Messages::MessageTypes::Register<msg, name##Name>
+
+#define REGISTER(...) SELECT(__VA_ARGS__, REGISTER_1, REGISTER_2)(__VA_ARGS__)
+
 namespace Messages {
 typedef int EnumT;
 
@@ -30,6 +47,7 @@ std::type_index ID() {
     return std::type_index(typeid(T));
 }
 
+// Message classes
 struct MessageOptions {
     Entities::UUID target = Entities::NullId();
 };
@@ -74,6 +92,62 @@ struct Message : public Message<> {
 
 typedef std::unique_ptr<Message<>> MessagePtr;
 
+// Map message types to command line
+class MessageTypes {
+   private:
+    template <class MsgT = Messages::Message<>>
+    using MsgGenFunc = std::function<std::unique_ptr<MsgT>(typename MsgT::Code,
+                                                           const std::string&)>;
+
+    static std::unordered_map<std::string, MsgGenFunc<>>& GenMap();
+
+    static std::unordered_map<std::type_index, std::string>& NameMap();
+
+   public:
+    // Class to help register message types
+    template <class MsgT, const char* Name>
+    struct Register {
+       public:
+        static const bool _;
+
+        using Msg = MsgT;
+        using MsgPtr = std::unique_ptr<Msg>;
+        using MsgCode = typename Msg::Code;
+        using MsgData = typename Msg::Data;
+
+        static MsgPtr parse(MsgCode c, const std::string& line) {
+            return std::make_unique<Msg>(c);
+        }
+
+       private:
+        static bool add() {
+            auto& msgName = MessageTypes::NameMap()[Messages::ID<MsgT>()];
+            if (!msgName.empty()) {
+                std::cerr
+                    << "MessageTypes::Register(): Duplicate message name \""
+                    << Name << "\"" << std::endl;
+            }
+            msgName = Name;
+            MessageTypes::GenMap()[msgName] = [](Messages::EnumT code,
+                                                 const std::string& line) {
+                return parse(static_cast<typename MsgT::Code>(code), line);
+            };
+            return true;
+        }
+    };
+
+    static Messages::MessagePtr Generate(const std::string& name,
+                                         Messages::EnumT code,
+                                         const std::string& line);
+
+    static std::string GetName(const std::type_index& id);
+};
+
+template <class MsgT, const char* Name>
+const bool MessageTypes::Register<MsgT, Name>::_ =
+    MessageTypes::Register<MsgT, Name>::add();
+
+// Helper function
 template <class MsgT>
 typename std::enable_if<!std::is_same<Message<>, MsgT>::value,
                         const MsgT&>::type

@@ -2,6 +2,7 @@
 
 #include <Framework/EventSystem/EventSystem.h>
 #include <Framework/RenderSystem/RenderSystem.h>
+#include <Services/CommandService.h>
 #include <Test.h>
 #include <Windows.h>
 

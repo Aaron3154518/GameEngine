@@ -8,8 +8,6 @@
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
-#include <Services/CommandService.h>
-
 
 class MyService : public Services::Service {
    public:

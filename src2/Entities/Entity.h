@@ -6,7 +6,6 @@
 #include <Entities/UUID.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
-#include <Services/CommandService.h>
 #include <Services/Service.h>
 
 #include <array>
