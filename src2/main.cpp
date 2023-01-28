@@ -63,14 +63,15 @@ int main(int argc, char* argv[]) {
 
     auto csMsgId = Messages::ID<Services::CommandService::Message>();
 
+    uint32_t sum = 0, cnt = 0;
     while (true) {
+        auto t1 = SDL_GetTicks();
         EventSystem::update();
 
         if (EventSystem::get().quit) {
             break;
         }
 
-        // mb.sendMessage<RenderServiceMessage>(RenderService::Code::Render);
         bool quit = false;
         EnterCriticalSection(&msgQueue);
         while (!data.msgs.empty()) {
@@ -88,6 +89,11 @@ int main(int argc, char* argv[]) {
             break;
         }
 
+        mb.sendMessage(RenderService::Message(RenderService::Render));
+
+        sum += SDL_GetTicks() - t1;
+        ++cnt;
+
         RenderSystem::enforceFPS(60);
     }
 
@@ -95,6 +101,8 @@ int main(int argc, char* argv[]) {
     DeleteCriticalSection(&msgQueue);
 
     RenderSystem::clean();
+
+    std::cerr << "Average Frame: " << (sum / cnt) << "ms" << std::endl;
 
     return 0;
 }

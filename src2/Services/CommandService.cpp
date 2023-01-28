@@ -8,6 +8,7 @@ namespace Services {
 // CommandService
 void CommandService::service_init() {
     subscribeTo<Messages::Message<>>([](const auto& msg) {
+        return;
         std::cerr << "\033[1;34m[Message]\033[0m "
                   << Messages::MessageTypes::GetName(msg.id()) << " "
                   << msg.code << std::endl;
