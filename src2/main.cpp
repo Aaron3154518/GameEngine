@@ -29,7 +29,6 @@ int main(int argc, char* argv[]) {
     RenderSystem::init(opts);
 
     auto& cs = GameObjects::Get<Services::CommandService>();
-    GameObjects::Get<MyService>();
 
     auto& mb = Messages::GetMessageBus();
     Entities::UUID id;
@@ -61,7 +60,7 @@ int main(int argc, char* argv[]) {
     DWORD comThreadId;
     HANDLE comThread = CreateThread(0, 0, runCommand, &data, 0, &comThreadId);
 
-    auto csMsgId = Services::CommandService::Message::ID();
+    auto csMsgId = Messages::ID<Services::CommandService::Message>();
 
     while (true) {
         EventSystem::update();

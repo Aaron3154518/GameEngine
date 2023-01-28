@@ -41,7 +41,7 @@ class Messager {
    protected:
     template <class MsgT>
     void subscribeTo(const std::function<void(const MsgT&)>& callback,
-                     typename MsgT::CodeT code) {
+                     typename MsgT::Code code) {
         mSubscriptions.push_back(
             GetMessageBus().subscribe<MsgT>(callback, id(), code));
     }

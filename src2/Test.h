@@ -10,10 +10,13 @@
 #include <Messages/Messager.h>
 #include <Services/CommandService.h>
 
+
 class MyService : public Services::Service {
    public:
     MESSAGE(Message, Hello, World);
     DATA_MESSAGE(CountMessage, int, IncreaseCount, PrintCount);
+
+    int count() const;
 
    private:
     void service_init();

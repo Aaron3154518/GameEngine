@@ -16,7 +16,7 @@ constexpr EnumT NO_CODE = -1;
 struct MessageHandle {
     const Entities::UUID eId;
     const uint32_t eNum;
-    const Entities::UUID type;
+    const std::type_index mId;
     const EnumT code;
 };
 
@@ -37,10 +37,10 @@ class MessageBus {
     template <class MsgT>
     MessageHandle subscribe(const std::function<void(const MsgT&)>& callback,
                             const Entities::UUID& eId,
-                            typename MsgT::CodeT msgCode) {
+                            typename MsgT::Code msgCode) {
         return subscribe(
             [callback](const auto& m) { callback(convert<MsgT>(m)); }, eId,
-            MsgT::ID(), msgCode);
+            ID<MsgT>(), msgCode);
     }
 
     template <class MsgT>
@@ -48,7 +48,7 @@ class MessageBus {
                             const Entities::UUID& eId) {
         return subscribe(
             [callback](const auto& m) { callback(convert<MsgT>(m)); }, eId,
-            MsgT::ID(), NO_CODE);
+            ID<MsgT>(), NO_CODE);
     }
 
    private:
@@ -59,14 +59,14 @@ class MessageBus {
 
     MessageHandle subscribe(
         const std::function<void(const Message<>&)>& callback,
-        const Entities::UUID& eId, const Entities::UUID& mId, EnumT msgCode);
+        const Entities::UUID& eId, const std::type_index& mId, EnumT msgCode);
 
     void sendMessage(const Message<>& msg,
                      const std::vector<EntityCallback>& targets);
 
     typedef std::unordered_map<EnumT, std::vector<EntityCallback>>
         MessageSubscribers;
-    std::unordered_map<Entities::UUID, MessageSubscribers> subscribers;
+    std::unordered_map<std::type_index, MessageSubscribers> subscribers;
     std::unordered_map<Entities::UUID, uint32_t> entity_counts;
 };
 

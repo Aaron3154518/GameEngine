@@ -1,8 +1,9 @@
 #include "Services.h"
 
+REGISTER(RenderService::Message, RenderMessage);
+
 void RenderService::service_init() {
     setName("RenderService");
-    Messages::MessageTypes::Register<Message>("RenderMessage");
     subscribeTo<Message>([this](const auto& m) { render(); }, Render);
 }
 

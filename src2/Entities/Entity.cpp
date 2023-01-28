@@ -1,15 +1,15 @@
 #include "Entity.h"
 
+REGISTER(Entities::EntityUnsubService::Message, EntityUnsubMessage,
+         { return nullptr; });
+
 namespace Entities {
 // Entity
 Entity::~Entity() {
     Messages::GetMessageBus().sendMessage(
-        EntityUnsubService::Message(id(), EntityUnsubService::Unsub));
+        EntityUnsubService::Message(EntityUnsubService::Unsub, id()));
 }
 
 // EntitiyUnsubService
-void EntityUnsubService::service_init() {
-    setName("EntityUnsubService");
-    Messages::MessageTypes::Register<Message>("EntityUnsubService");
-}
+void EntityUnsubService::service_init() { setName("EntityUnsubService"); }
 }  // namespace Entities

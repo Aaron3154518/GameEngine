@@ -7,6 +7,7 @@
 #include <Framework/RenderSystem/Renderer.h>
 #include <Framework/RenderSystem/SpriteComponent.h>
 #include <Messages/MessageBus.h>
+#include <Services/CommandService.h>
 #include <Services/Service.h>
 
 class RenderService : public Services::Service {
