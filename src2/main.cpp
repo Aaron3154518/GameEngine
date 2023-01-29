@@ -68,12 +68,16 @@ int main(int argc, char* argv[]) {
     uint32_t sum = 0, cnt = 0;
     while (true) {
         auto t1 = SDL_GetTicks();
+
         EventSystem::update();
 
         if (EventSystem::get().quit) {
             break;
         }
 
+        mb.sendMessage(RenderService::Message(RenderService::Render));
+
+        // Handle events from cli thread
         bool quit = false;
         EnterCriticalSection(&msgQueue);
         while (!data.msgs.empty()) {
@@ -90,11 +94,6 @@ int main(int argc, char* argv[]) {
         if (quit) {
             break;
         }
-
-        mb.sendMessage(UpdateService::Message(UpdateService::Update,
-                                              EventSystem::get().dt));
-
-        mb.sendMessage(RenderService::Message(RenderService::Render));
 
         sum += SDL_GetTicks() - t1;
         ++cnt;

@@ -1,17 +1,9 @@
 #include "Services.h"
 
-// UpdateService
-REGISTER(UpdateService::Message, UpdateMessage, {
-    std::stringstream ss(line);
-    int cnt;
-    return std::make_unique<Msg>(code,
-                                 ss >> cnt ? std::max(0, cnt) : 1.0 / 60.0);
-});
-
 // PhysicsService
 void PhysicsService::service_init() {
-    subscribeTo<UpdateService::Message>(
-        [this](const auto& msg) { onUpdate(msg.data); }, UpdateService::Update);
+    subscribeTo<EventSystem::UpdateMessage>(
+        [this](const auto& msg) { onUpdate(msg.data); }, EventSystem::Update);
 }
 
 void PhysicsService::onUpdate(Time dt) {

@@ -49,9 +49,7 @@ class Event {
         uint8_t status = 0;
     };
 
-    void update();
-
-    uint32_t dt;
+    void update(uint32_t dt);
 
     bool quit = false;
     // Resize data

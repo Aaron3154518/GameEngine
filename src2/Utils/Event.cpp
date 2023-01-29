@@ -2,27 +2,27 @@
 
 // MouseButton
 bool Event::MouseButton::pressed() const {
-    return Math::bitsSet(status, Event::Status::PRESSED);
+    return Math::allBitsSet(status, Event::Status::PRESSED);
 }
 bool Event::MouseButton::released() const {
-    return Math::bitsSet(status, Event::Status::RELEASED);
+    return Math::allBitsSet(status, Event::Status::RELEASED);
 }
 bool Event::MouseButton::held() const {
-    return Math::bitsSet(status, Event::Status::HELD);
+    return Math::allBitsSet(status, Event::Status::HELD);
 }
 bool Event::MouseButton::clicked() const {
-    return Math::bitsSet(status, Event::Status::CLICKED);
+    return Math::allBitsSet(status, Event::Status::CLICKED);
 }
 
 // KeyButton
 bool Event::KeyButton::pressed() const {
-    return Math::bitsSet(status, Event::Status::PRESSED);
+    return Math::allBitsSet(status, Event::Status::PRESSED);
 }
 bool Event::KeyButton::released() const {
-    return Math::bitsSet(status, Event::Status::RELEASED);
+    return Math::allBitsSet(status, Event::Status::RELEASED);
 }
 bool Event::KeyButton::held() const {
-    return Math::bitsSet(status, Event::Status::HELD);
+    return Math::allBitsSet(status, Event::Status::HELD);
 }
 
 // Event
@@ -32,11 +32,7 @@ Event::Event() {
     }
 }
 
-void Event::update() {
-    static uint32_t time = 0;
-    // Reset/update variables
-    dt = time == 0 ? 0 : SDL_GetTicks() - time;
-    time = SDL_GetTicks();
+void Event::update(uint32_t dt) {
     // Reset event flags
     quit = resized = false;
     // Reset text editing
@@ -50,7 +46,7 @@ void Event::update() {
     scroll = 0;
     // Update mouse buttons
     for (auto &b : mMouseButtons) {
-        if (Math::bitsSet(b.status, Status::HELD)) {
+        if (b.held()) {
             b.duration += dt;
         }
         // Reset pressed/released
@@ -59,7 +55,7 @@ void Event::update() {
     // Update keys
     for (auto it = mKeyButtons.begin(); it != mKeyButtons.end(); ++it) {
         auto &b = it->second;
-        if (Math::bitsSet(b.status, Status::HELD)) {
+        if (b.held()) {
             b.duration += dt;
         }
         // Reset pressed/released
@@ -117,7 +113,7 @@ void Event::update(SDL_Event &e) {
         } break;
         case SDL_KEYDOWN: {
             KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
-            if (!Math::bitsSet(b.status, Status::HELD)) {
+            if (!b.held()) {
                 b.duration = 0;
             }
             b.status = Status::PRESSED | Status::HELD;
