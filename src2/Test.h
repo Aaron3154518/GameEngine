@@ -35,9 +35,11 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
    private:
     void manager_init() {
         subscribeTo<MyService::Message>(
-            [this](const auto& m) { onMyServiceMessage(m); });
+            [this](const MyService::Message& m) { onMyServiceMessage(m); });
         subscribeTo<MyService::CountMessage>(
-            [this](const auto& m) { onMyServicePrintCount(m); },
+            [this](const MyService::CountMessage& m) {
+                onMyServicePrintCount(m);
+            },
             MyService::PrintCount);
     }
 
@@ -67,7 +69,7 @@ class MyEntity : public Entities::Entity {
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
         subscribeTo<MyService::Message>(
-            [](const auto& m) {
+            [](const MyService::Message& m) {
                 Messages::GetMessageBus().sendMessage(
                     MyService::Message(MyService::World));
             },
@@ -80,11 +82,22 @@ class MyEntity : public Entities::Entity {
         GameObjects::Get<RenderService>().subscribe(id());
         GameObjects::Get<PhysicsService>().subscribe(id());
         subscribeTo<EventSystem::KeyboardMessage>(
-            [this](const auto& m) {
-                getComponent<PositionComponentManager>().get() =
-                    Rect(10, 10, 50, 50);
+            [this](const EventSystem::KeyboardMessage& m) {
+                if (m.data.key == SDLK_r) {
+                    getComponent<PositionComponentManager>().get() =
+                        Rect(10, 10, 50, 50);
+                }
             },
-            SDLK_r);
+            Event::PRESSED);
+        subscribeTo<EventSystem::MouseMessage>(
+            [this](const EventSystem::MouseMessage& m) {
+                if (m.data.mouse == Event::LEFT) {
+                    getComponent<PositionComponentManager>().get().setPos(
+                        m.data.clickPos.x, m.data.clickPos.y,
+                        Rect::Align::CENTER);
+                }
+            },
+            Event::CLICKED);
     }
 };
 

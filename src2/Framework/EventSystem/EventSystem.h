@@ -9,7 +9,8 @@
 class EventSystem {
    public:
     DATA_MESSAGE(UpdateMessage, Time, Update);
-    typedef Messages::Message<SDL_KeyCode, Event::KeyButton> KeyboardMessage;
+    typedef Messages::Message<Event::Status, Event::KeyButton> KeyboardMessage;
+    typedef Messages::Message<Event::Status, Event::MouseButton> MouseMessage;
 
     EventSystem() = delete;
 

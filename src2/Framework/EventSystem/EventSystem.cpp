@@ -9,16 +9,13 @@ REGISTER(EventSystem::UpdateMessage, UpdateMessage, {
 REGISTER(EventSystem::KeyboardMessage, KeyboardMessage, {
     std::stringstream ss(line);
     char key;
-    if (code < 0) {
-        if (!(ss >> key)) {
-            return nullptr;
-        }
-        code = static_cast<SDL_KeyCode>(key);
+    if (!(ss >> key)) {
+        return nullptr;
     }
-    uint8_t action;
-    action = ss >> action ? std::min(action, Event::KEY_ALL) : Event::KEY_ALL;
-    return std::make_unique<Msg>(code, Event::KeyButton{code, 0, action});
+    return std::make_unique<Msg>(
+        code, Event::KeyButton{static_cast<SDL_KeyCode>(key), 0, code});
 });
+REGISTER(EventSystem::MouseMessage, MouseMessage, { return nullptr; });
 
 // EventSystem
 Event EventSystem::mEvent;
@@ -36,9 +33,24 @@ void EventSystem::update() {
     // Dispatch messages
     auto& mb = Messages::GetMessageBus();
     mb.sendMessage(UpdateMessage(Update, dt, {Entities::NullId(), true}));
-    for (auto& kb : mEvent.keys([](const Event::KeyButton& kb) {
-             return Math::anyBitsSet(kb.status, Event::KEY_ALL);
-         })) {
-        mb.sendMessage(KeyboardMessage(kb.key, kb));
+
+    auto codes = {Event::HELD, Event::PRESSED, Event::RELEASED};
+    for (auto& pair : mEvent.getKeys()) {
+        auto& kb = pair.second;
+        for (auto code : codes) {
+            if (Math::allBitsSet(kb.status, code)) {
+                mb.sendMessage(KeyboardMessage(
+                    code, kb, {Entities::NullId(), code == Event::HELD}));
+            }
+        }
+    }
+    codes = {Event::HELD, Event::PRESSED, Event::RELEASED, Event::CLICKED};
+    for (auto& m : mEvent.getMice()) {
+        for (auto code : codes) {
+            if (Math::allBitsSet(m.status, code)) {
+                mb.sendMessage(MouseMessage(
+                    code, m, {Entities::NullId(), code == Event::HELD}));
+            }
+        }
     }
 }

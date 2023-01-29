@@ -174,9 +174,7 @@ bool Event::mouseMoved() const {
 }
 
 Event::KeyButton &Event::get(SDL_KeyCode key) {
-    KeyButton kb;
-    kb.key = key;
-    return mKeyButtons.emplace(key, kb).first->second;
+    return mKeyButtons.emplace(key, KeyButton{key}).first->second;
 }
 
 const Event::MouseButton &Event::operator[](Event::Mouse button) const {
@@ -190,6 +188,9 @@ const Event::KeyButton &Event::operator[](SDL_KeyCode key) const {
         return unusedKey();
     }
 }
+const std::array<Event::MouseButton, NUM_MICE> &Event::getMice() const {
+    return mMouseButtons;
+}
 std::vector<Event::KeyButton> Event::keys(
     std::function<bool(const KeyButton &)> filter) const {
     std::vector<KeyButton> res;
@@ -199,6 +200,10 @@ std::vector<Event::KeyButton> Event::keys(
         }
     }
     return res;
+}
+const std::unordered_map<SDL_KeyCode, Event::KeyButton> &Event::getKeys()
+    const {
+    return mKeyButtons;
 }
 const Event::KeyButton &Event::unusedKey() {
     static KeyButton UNUSED;

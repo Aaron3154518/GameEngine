@@ -32,16 +32,12 @@ class Event {
         Mouse mouse;
         SDL_Point clickPos{0, 0};
         uint32_t duration;
+        uint8_t status = 0;
 
         bool pressed() const;
         bool released() const;
         bool held() const;
         bool clicked() const;
-
-       private:
-        friend class Event;
-
-        uint8_t status = 0;
     };
     struct KeyButton {
         SDL_KeyCode key;
@@ -80,10 +76,12 @@ class Event {
     const MouseButton &operator[](Uint8 sdlButton) const;
     const MouseButton &operator[](Event::Mouse button) const;
     const KeyButton &operator[](SDL_KeyCode key) const;
+    const std::array<MouseButton, NUM_MICE> &getMice() const;
     std::vector<KeyButton> keys(std::function<bool(const KeyButton &)> filter =
                                     [](const KeyButton &k) {
                                         return true;
                                     }) const;
+    const std::unordered_map<SDL_KeyCode, KeyButton> &getKeys() const;
     static const KeyButton &unusedKey();
 
     static Mouse toMouse(Uint8 sdlButtonType);
