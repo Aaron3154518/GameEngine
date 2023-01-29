@@ -2,6 +2,7 @@
 #define EVENT_SYSTEM_H
 
 #include <Messages/MessageBus.h>
+#include <SDL.h>
 #include <Utils/Event.h>
 #include <Utils/Time.h>
 

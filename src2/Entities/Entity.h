@@ -25,8 +25,13 @@ class Entity : public Messages::Messager {
     void addComponent(ArgTs&&... args) {
         GameObjects::Get<CompManT>().newComponent(id(),
                                                   std::forward<ArgTs>(args)...);
-        std::cerr << "Added Component to: " << typeid(CompManT).name()
-                  << std::endl;
+        // std::cerr << "Added Component to: " << typeid(CompManT).name()
+        //          << std::endl;
+    }
+
+    template <class CompManT>
+    typename CompManT::ComponentType& getComponent() {
+        return GameObjects::Get<CompManT>()[id()];
     }
 };
 

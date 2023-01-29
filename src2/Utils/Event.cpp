@@ -26,6 +26,9 @@ bool Event::KeyButton::held() const {
 }
 
 // Event
+const uint8_t Event::KEY_ALL = Event::PRESSED | Event::RELEASED | Event::HELD;
+const uint8_t Event::MOUSE_ALL = Event::KEY_ALL | Event::CLICKED;
+
 Event::Event() {
     for (auto btn : {Mouse::LEFT, Mouse::RIGHT, Mouse::MIDDLE}) {
         mMouseButtons[btn].mouse = btn;

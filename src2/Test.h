@@ -79,6 +79,12 @@ class MyEntity : public Entities::Entity {
         addComponent<SpriteComponentManager>("res/wizards/wizard.png");
         GameObjects::Get<RenderService>().subscribe(id());
         GameObjects::Get<PhysicsService>().subscribe(id());
+        subscribeTo<EventSystem::KeyboardMessage>(
+            [this](const auto& m) {
+                getComponent<PositionComponentManager>().get() =
+                    Rect(10, 10, 50, 50);
+            },
+            SDLK_r);
     }
 };
 

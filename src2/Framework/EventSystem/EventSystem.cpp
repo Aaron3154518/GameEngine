@@ -3,9 +3,14 @@
 // Messages
 REGISTER(EventSystem::UpdateMessage, UpdateMessage, {
     std::stringstream ss(line);
-    int cnt;
-    return std::make_unique<Msg>(code,
-                                 ss >> cnt ? std::max(0, cnt) : 1.0 / 60.0);
+    int dt;
+    return std::make_unique<Msg>(code, ss >> dt ? std::max(0, dt) : 1.0 / 60.0);
+});
+REGISTER(EventSystem::KeyboardMessage, KeyboardMessage, {
+    std::stringstream ss(line);
+    uint8_t action;
+    action = ss >> action ? std::min(action, Event::KEY_ALL) : Event::KEY_ALL;
+    return std::make_unique<Msg>(code, Event::KeyButton{code, 0, action});
 });
 
 // EventSystem
@@ -24,4 +29,9 @@ void EventSystem::update() {
     // Dispatch messages
     auto& mb = Messages::GetMessageBus();
     mb.sendMessage(UpdateMessage(Update, dt));
+    for (auto& kb : mEvent.keys([](const Event::KeyButton& kb) {
+             return Math::anyBitsSet(kb.status, Event::KEY_ALL);
+         })) {
+        mb.sendMessage(KeyboardMessage(kb.key, kb));
+    }
 }

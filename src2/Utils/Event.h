@@ -20,6 +20,14 @@ class Event {
 
     enum Mouse : uint8_t { LEFT = 0, RIGHT, MIDDLE };
 
+    enum Status : uint8_t {
+        PRESSED = 0x01,
+        RELEASED = 0x02,
+        HELD = 0x04,
+        CLICKED = 0x08  // For mouse buttons
+    };
+    const static uint8_t KEY_ALL, MOUSE_ALL;
+
     struct MouseButton {
         Mouse mouse;
         SDL_Point clickPos{0, 0};
@@ -38,15 +46,11 @@ class Event {
     struct KeyButton {
         SDL_KeyCode key;
         uint32_t duration;
+        uint8_t status = 0;
 
         bool pressed() const;
         bool released() const;
         bool held() const;
-
-       private:
-        friend class Event;
-
-        uint8_t status = 0;
     };
 
     void update(uint32_t dt);
@@ -85,13 +89,6 @@ class Event {
     static Mouse toMouse(Uint8 sdlButtonType);
 
    private:
-    enum Status : uint8_t {
-        PRESSED = 0x01,
-        RELEASED = 0x02,
-        HELD = 0x04,
-        CLICKED = 0x08  // For mouse buttons
-    };
-
     static constexpr int MAX_CLICK_DIFF = 10;
 
     void update(SDL_Event &e);
