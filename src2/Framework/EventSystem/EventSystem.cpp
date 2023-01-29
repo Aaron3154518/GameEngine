@@ -8,6 +8,13 @@ REGISTER(EventSystem::UpdateMessage, UpdateMessage, {
 });
 REGISTER(EventSystem::KeyboardMessage, KeyboardMessage, {
     std::stringstream ss(line);
+    char key;
+    if (code < 0) {
+        if (!(ss >> key)) {
+            return nullptr;
+        }
+        code = static_cast<SDL_KeyCode>(key);
+    }
     uint8_t action;
     action = ss >> action ? std::min(action, Event::KEY_ALL) : Event::KEY_ALL;
     return std::make_unique<Msg>(code, Event::KeyButton{code, 0, action});
@@ -28,7 +35,7 @@ void EventSystem::update() {
 
     // Dispatch messages
     auto& mb = Messages::GetMessageBus();
-    mb.sendMessage(UpdateMessage(Update, dt));
+    mb.sendMessage(UpdateMessage(Update, dt, {Entities::NullId(), true}));
     for (auto& kb : mEvent.keys([](const Event::KeyButton& kb) {
              return Math::anyBitsSet(kb.status, Event::KEY_ALL);
          })) {
