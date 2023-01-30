@@ -74,13 +74,19 @@ class MyEntity : public Entities::Entity {
                     MyService::Message(MyService::World));
             },
             MyService::Hello);
-        addComponent<ElevationComponentManager>(1);
+
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-        addComponent<AccelComponentManager>(SDL_FPoint{20, 20});
-        addComponent<SpriteComponentManager>("res/wizards/wizard.png");
-        GameObjects::Get<RenderService>().subscribe(id());
+        addComponent<AccelComponentManager>(SDL_FPoint{10, 10});
         GameObjects::Get<PhysicsService>().subscribe(id());
+
+        addComponent<ElevationComponentManager>(1);
+        addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png");
+        GameObjects::Get<RenderService>().subscribe(id());
+
+        addComponent<AnimationComponentManager>(5, 150);
+        GameObjects::Get<AnimationService>().subscribe(id());
+
         subscribeTo<EventSystem::KeyboardMessage>(
             [this](const EventSystem::KeyboardMessage& m) {
                 if (m.data.key == SDLK_r) {

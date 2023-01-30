@@ -9,14 +9,20 @@ void Service::subscribe(const Entities::UUID& eId) {
     if (it == mEntities.end()) {
         mEntities.push_back(eId);
     }
+    onSubscribe(eId);
 }
+
+void Service::onSubscribe(const Entities::UUID& eId) {}
 
 void Service::unsubscribe(const Entities::UUID& eId) {
     auto it = std::find(mEntities.begin(), mEntities.end(), eId);
     if (it != mEntities.end()) {
         mEntities.erase(it);
     }
+    onUnsubscribe(eId);
 }
+
+void Service::onUnsubscribe(const Entities::UUID& eId) {}
 
 void Service::init() {
     subscribeTo<Entities::EntityUnsubService::Message>(
