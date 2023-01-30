@@ -11,18 +11,6 @@ class PositionComponent : public Components::DataComponent<Rect> {
 typedef Components::ComponentManager<PositionComponent>
     PositionComponentManager;
 
-class VelComponent : public Components::DataComponent<SDL_FPoint> {
-   public:
-    using Components::DataComponent<SDL_FPoint>::DataComponent;
-};
-typedef Components::ComponentManager<VelComponent> VelComponentManager;
-
-class AccelComponent : public Components::DataComponent<SDL_FPoint> {
-   public:
-    using Components::DataComponent<SDL_FPoint>::DataComponent;
-};
-typedef Components::ComponentManager<AccelComponent> AccelComponentManager;
-
 class ElevationComponent : public Components::DataComponent<int> {
    public:
     using Components::DataComponent<int>::DataComponent;

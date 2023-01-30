@@ -77,6 +77,7 @@ class MyEntity : public Entities::Entity {
 
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
+        addComponent<BoundaryComponentManager>(Rect(0, 0, 500, 500));
         // addComponent<AccelComponentManager>(SDL_FPoint{0, 25});
         GameObjects::Get<PhysicsService>().subscribe(id());
 

@@ -10,6 +10,7 @@ void PhysicsService::onUpdate(Time dt) {
     auto& posMan = GameObjects::Get<PositionComponentManager>();
     auto& velMan = GameObjects::Get<VelComponentManager>();
     auto& accelMan = GameObjects::Get<AccelComponentManager>();
+    auto& boundMan = GameObjects::Get<BoundaryComponentManager>();
     float s = dt.s();
     float c = .5f * s * s;
     for (auto& e : mEntities) {
@@ -23,6 +24,10 @@ void PhysicsService::onUpdate(Time dt) {
                 v.x += a.x * s;
                 v.y += a.y * s;
             }
+        }
+
+        if (boundMan.hasEntity(e)) {
+            pos.fitWithin(boundMan[e].get());
         }
     }
 }
