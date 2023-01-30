@@ -77,7 +77,7 @@ class MyEntity : public Entities::Entity {
 
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-        addComponent<AccelComponentManager>(SDL_FPoint{10, 10});
+        // addComponent<AccelComponentManager>(SDL_FPoint{0, 25});
         GameObjects::Get<PhysicsService>().subscribe(id());
 
         addComponent<ElevationComponentManager>(1);
@@ -87,12 +87,55 @@ class MyEntity : public Entities::Entity {
 
         subscribeTo<EventSystem::KeyboardMessage>(
             [this](const EventSystem::KeyboardMessage& m) {
-                if (m.data.key == SDLK_r) {
-                    getComponent<PositionComponentManager>().get() =
-                        Rect(10, 10, 50, 50);
+                auto& pos = getComponent<PositionComponentManager>().get();
+                switch (m.data.key) {
+                    case SDLK_r:
+                        pos = Rect(10, 10, 50, 50);
+                        break;
+                    default:
+                        break;
                 }
             },
             Event::PRESSED);
+        static int V = 100;
+        subscribeTo<EventSystem::KeyboardMessage>(
+            [this](const EventSystem::KeyboardMessage& m) {
+                auto& v = getComponent<VelComponentManager>().get();
+                switch (m.data.key) {
+                    case SDLK_a:
+                        v.x = -V;
+                        break;
+                    case SDLK_d:
+                        v.x = V;
+                        break;
+                    case SDLK_w:
+                        v.y = -V;
+                        break;
+                    case SDLK_s:
+                        v.y = V;
+                        break;
+                    default:
+                        break;
+                }
+            },
+            Event::HELD);
+        subscribeTo<EventSystem::KeyboardMessage>(
+            [this](const EventSystem::KeyboardMessage& m) {
+                auto& v = getComponent<VelComponentManager>().get();
+                switch (m.data.key) {
+                    case SDLK_a:
+                    case SDLK_d:
+                        v.x = 0;
+                        break;
+                    case SDLK_w:
+                    case SDLK_s:
+                        v.y = 0;
+                        break;
+                    default:
+                        break;
+                }
+            },
+            Event::RELEASED);
         subscribeTo<EventSystem::MouseMessage>(
             [this](const EventSystem::MouseMessage& m) {
                 if (m.data.mouse == Event::LEFT) {
