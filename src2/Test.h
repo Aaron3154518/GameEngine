@@ -81,11 +81,9 @@ class MyEntity : public Entities::Entity {
         GameObjects::Get<PhysicsService>().subscribe(id());
 
         addComponent<ElevationComponentManager>(1);
-        addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png");
+        addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png", 5,
+                                             150);
         GameObjects::Get<RenderService>().subscribe(id());
-
-        addComponent<AnimationComponentManager>(5, 150);
-        GameObjects::Get<AnimationService>().subscribe(id());
 
         subscribeTo<EventSystem::KeyboardMessage>(
             [this](const EventSystem::KeyboardMessage& m) {

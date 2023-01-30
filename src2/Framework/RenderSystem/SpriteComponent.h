@@ -15,34 +15,24 @@
 struct SpriteComponent : public Components::Component {
     SpriteComponent();
     SpriteComponent(SharedTexture tex);
-    SpriteComponent(const std::string& file);
+    SpriteComponent(const std::string& file, uint8_t frames = 1,
+                    uint32_t delayMs = 100);
 
+    Dimensions getTextureDim() const;
+
+    uint8_t mFrameCnt = 1, mFrame = 0;
+    uint32_t mDelayMs = 0;
+    float mTimer = 0;
     SharedTexture mTex;
     Rect mBounds, mArea = Rect(0, 0, 1, 1);
 };
 
-typedef Components::ComponentManager<SpriteComponent> SpriteComponentManager;
-
-struct AnimationComponent : public Components::Component {
-    AnimationComponent(uint8_t frames, uint32_t delayMs);
-
-    uint8_t mFrameCnt = 1;
-    uint32_t mDelayMs = 0;
-};
-
-typedef Components::ComponentManager<AnimationComponent>
-    AnimationComponentManager;
-
-class AnimationService : public Services::Service {
+class SpriteComponentManager
+    : public Components::ComponentManager<SpriteComponent> {
    private:
-    void onSubscribe(const Entities::UUID& eId);
-    void onUnsubscribe(const Entities::UUID& eId);
+    void manager_init();
 
     void onUpdate(Time dt);
-
-    void service_init();
-
-    std::unordered_map<Entities::UUID, float> mTimers;
 };
 
 #endif

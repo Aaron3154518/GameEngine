@@ -32,12 +32,13 @@ void RenderService::draw(const SpriteComponent& sprite,
         return;
     }
 
-    Dimensions texDim = AssetManager::getTextureSize(sprite.mTex.get());
+    Dimensions texDim = sprite.getTextureDim();
 
     // Rect dest = getDest();
 
-    Rect area(sprite.mArea.x() * texDim.w, sprite.mArea.y() * texDim.h,
-              sprite.mArea.w() * texDim.w, sprite.mArea.h() * texDim.h);
+    Rect area((sprite.mArea.x() + sprite.mFrame) * texDim.w,
+              sprite.mArea.y() * texDim.h, sprite.mArea.w() * texDim.w,
+              sprite.mArea.h() * texDim.h);
 
     // Make sure we are actually drawing something
     if (rect.empty() || area.empty()) {
