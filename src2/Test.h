@@ -4,10 +4,14 @@
 #include <Components/Component.h>
 #include <Entities/Entity.h>
 #include <Framework/EventSystem/Services.h>
+#include <Framework/PhysicsSystem/Collision.h>
 #include <Framework/RenderSystem/Services.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
+
+#include <cmath>
+#include <random>
 
 class MyService : public Services::Service {
    public:
@@ -63,7 +67,14 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
     }
 };
 
+extern Entities::UUID P;
+extern Entities::UUID E;
+extern Entities::UUID P_E;
+
 class MyEntity : public Entities::Entity {
+   public:
+    enum { Player = 0 };
+
    private:
     void init() {
         addComponent<Components::ComponentManager<Components::Component>>();
@@ -85,6 +96,15 @@ class MyEntity : public Entities::Entity {
         addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png", 5,
                                              150);
         GameObjects::Get<RenderService>().subscribe(id());
+
+        addComponent<CollisionComponentManager>(P);
+        GameObjects::Get<CollisionService>().subscribe(id());
+        subscribeTo<CollisionService::Message>(
+            [this](const CollisionService::Message& m) {
+                getComponent<PositionComponentManager>().get() =
+                    Rect(10, 10, 50, 50);
+            },
+            CollisionService::Collided);
 
         subscribeTo<EventSystem::KeyboardMessage>(
             [this](const EventSystem::KeyboardMessage& m) {
@@ -149,6 +169,44 @@ class MyEntity : public Entities::Entity {
     }
 };
 
-typedef std::unique_ptr<MyEntity> MyEntityPtr;
+class Enemy : public Entities::Entity {
+   private:
+    void init() {
+        std::mt19937 gen = std::mt19937(rand());
+        std::uniform_real_distribution<float> rDist;
+
+        addComponent<PositionComponentManager>(
+            Rect(rDist(gen) * 450, rDist(gen) * 450, 50, 50));
+        addComponent<VelComponentManager>(SDL_FPoint{0, 0});
+        addComponent<BoundaryComponentManager>(Rect(0, 0, 500, 500));
+        GameObjects::Get<PhysicsService>().subscribe(id());
+
+        addComponent<ElevationComponentManager>(0);
+        addComponent<SpriteComponentManager>("res/wizards/crystal.png");
+        GameObjects::Get<RenderService>().subscribe(id());
+
+        addComponent<CollisionComponentManager>(E);
+        GameObjects::Get<CollisionService>().subscribe(id());
+
+        const float V = rDist(gen) * 50;
+        subscribeTo<EventSystem::UpdateMessage>(
+            [this, V](const auto& m) {
+                auto& v = getComponent<VelComponentManager>().get();
+                auto& pos = getComponent<PositionComponentManager>().get();
+                auto& player =
+                    GameObjects::Get<PositionComponentManager>()
+                        [GameObjects::Get<MyEntity, MyEntity::Player>()]
+                            .get();
+                v.x = player.cX() - pos.cX();
+                v.y = player.cY() - pos.cY();
+                float mag = sqrtf(v.x * v.x + v.y * v.y);
+                if (mag > 0) {
+                    v.x *= V / mag;
+                    v.y *= V / mag;
+                }
+            },
+            EventSystem::Update);
+    }
+};
 
 #endif

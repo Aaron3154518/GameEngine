@@ -1,5 +1,9 @@
 #include "Test.h"
 
+Entities::UUID P = Entities::generateUUID();
+Entities::UUID E = Entities::generateUUID();
+Entities::UUID P_E = CollisionService::NewType(P, E);
+
 int MyService::count() const { return mCnt; }
 
 // MyService

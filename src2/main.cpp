@@ -47,11 +47,17 @@ int main(int argc, char* argv[]) {
         e.reset();
     }
 
-    auto e = GameObjects::New<MyEntity>();
+    auto& e = GameObjects::Get<MyEntity, MyEntity::Player>();
+
+    const int N = 5;
+    std::vector<std::unique_ptr<Enemy>> enemies(N);
+    for (int i = 0; i < N; i++) {
+        enemies[i] = GameObjects::New<Enemy>();
+    }
 
     // Test entity targetting
     mb.sendMessage(MyService::Message(MyService::Hello, {id}));
-    mb.sendMessage(MyService::Message(MyService::World, {e->id()}));
+    mb.sendMessage(MyService::Message(MyService::World, {e.id()}));
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {

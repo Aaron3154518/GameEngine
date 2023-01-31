@@ -40,7 +40,8 @@ void EventSystem::update() {
         for (auto code : codes) {
             if (Math::allBitsSet(kb.status, code)) {
                 mb.sendMessage(KeyboardMessage(
-                    code, kb, {Entities::NullId(), code == Event::HELD}));
+                    code, kb,
+                    {Entities::NullId(), /*code == Event::HELD*/ true}));
             }
         }
     }
@@ -49,7 +50,8 @@ void EventSystem::update() {
         for (auto code : codes) {
             if (Math::allBitsSet(m.status, code)) {
                 mb.sendMessage(MouseMessage(
-                    code, m, {Entities::NullId(), code == Event::HELD}));
+                    code, m,
+                    {Entities::NullId(), /*code == Event::HELD*/ true}));
             }
         }
     }
