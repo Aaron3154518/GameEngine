@@ -25,16 +25,12 @@ class CollisionComponentManager
 
 class CollisionService : public Services::Service {
    public:
-    struct CollisionType {
-        Entities::UUID idA, idB, cId;
-    };
+    typedef std::unordered_map<Entities::UUID, std::vector<Entities::UUID>>
+        CollisionMap;
 
-    typedef std::unordered_multiset<CollisionType> CollisionMap;
+    DATA_MESSAGE(Message, Entities::UUID, Collided);
 
-    DATA_MESSAGE(Message, CollisionType, Collided);
-
-    static Entities::UUID NewType(const Entities::UUID& idA,
-                                  const Entities::UUID& idB);
+    static bool NewType(const Entities::UUID& idA, const Entities::UUID& idB);
 
    private:
     void service_init();
@@ -43,17 +39,5 @@ class CollisionService : public Services::Service {
 
     static CollisionMap& GetCollisionMap();
 };
-
-bool operator==(const CollisionService::CollisionType& lhs,
-                const CollisionService::CollisionType& rhs);
-
-namespace std {
-template <>
-struct hash<CollisionService::CollisionType> {
-    size_t operator()(const CollisionService::CollisionType& c) const {
-        return hash<Entities::UUID>()(c.idA);
-    }
-};
-}  // namespace std
 
 #endif

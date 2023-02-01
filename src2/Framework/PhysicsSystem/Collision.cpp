@@ -15,22 +15,15 @@ std::vector<Entities::UUID> CollisionComponentManager::getEntities(
     return vec;
 }
 
-// CollisionService::CollisionType
-bool operator==(const CollisionService::CollisionType& lhs,
-                const CollisionService::CollisionType& rhs) {
-    return lhs.idA == rhs.idA && lhs.idB == rhs.idB && lhs.cId == rhs.cId;
-}
-
 // CollisionService
-Entities::UUID CollisionService::NewType(const Entities::UUID& idA,
-                                         const Entities::UUID& idB) {
-    auto cId = Entities::generateUUID();
+bool CollisionService::NewType(const Entities::UUID& idA,
+                               const Entities::UUID& idB) {
     auto& cmap = GetCollisionMap();
-    cmap.insert({idA, idB, cId});
+    cmap[idA].push_back(idB);
     if (idA != idB) {
-        cmap.insert({idB, idA, cId});
+        cmap[idB].push_back(idA);
     }
-    return cId;
+    return true;
 }
 
 void CollisionService::service_init() {
@@ -46,14 +39,13 @@ void CollisionService::onUpdate() {
     auto& colMan = GameObjects::Get<CollisionComponentManager>();
     for (auto& id : mEntities) {
         Rect pos = posMan[id].get();
-        auto colId = colMan[id].mId;
-        auto b = cmap.bucket({colId});
-        for (auto it = cmap.begin(b), end = cmap.end(b); it != end; ++it) {
-            for (auto eId : colMan.getEntities(it->idB)) {
+        auto idA = colMan[id].mId;
+        for (auto idB : cmap[idA]) {
+            for (auto eId : colMan.getEntities(idB)) {
                 SDL_Rect r;
                 if (SDL_IntersectRect(pos, posMan[eId].get(), &r)) {
-                    mb.sendMessage(Message(Collided, *it, {id}));
-                    mb.sendMessage(Message(Collided, *it, {eId}));
+                    mb.sendMessage(Message(Collided, idB, {id}));
+                    mb.sendMessage(Message(Collided, idA, {eId}));
                 }
             }
         }

@@ -69,7 +69,6 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
 
 extern Entities::UUID P;
 extern Entities::UUID E;
-extern Entities::UUID P_E;
 
 class MyEntity : public Entities::Entity {
    public:
