@@ -75,6 +75,10 @@ class MyEntity : public Entities::Entity {
     enum { Player = 0 };
 
    private:
+    bool immune = false;
+    int timer = 0;
+    int hp = 5;
+
     void init() {
         addComponent<Components::ComponentManager<Components::Component>>();
         addComponent<MyComponentManager>();
@@ -88,7 +92,6 @@ class MyEntity : public Entities::Entity {
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
         addComponent<BoundaryComponentManager>(Rect(0, 0, 500, 500));
-        // addComponent<AccelComponentManager>(SDL_FPoint{0, 25});
         GameObjects::Get<PhysicsService>().subscribe(id());
 
         addComponent<ElevationComponentManager>(1);
@@ -100,10 +103,27 @@ class MyEntity : public Entities::Entity {
         GameObjects::Get<CollisionService>().subscribe(id());
         subscribeTo<CollisionService::Message>(
             [this](const CollisionService::Message& m) {
-                getComponent<PositionComponentManager>().get() =
-                    Rect(10, 10, 50, 50);
+                if (!immune) {
+                    hp--;
+                    if (hp <= 0) {
+                        hp = 5;
+                        getComponent<PositionComponentManager>().get() =
+                            Rect(10, 10, 50, 50);
+                    }
+                    immune = true;
+                    timer = 2000;
+                }
             },
             CollisionService::Collided);
+
+        subscribeTo<EventSystem::UpdateMessage>(
+            [this](const EventSystem::UpdateMessage& m) {
+                if (immune) {
+                    timer -= m.data.ms();
+                    immune = timer > 0;
+                }
+            },
+            EventSystem::Update);
 
         subscribeTo<EventSystem::KeyboardMessage>(
             [this](const EventSystem::KeyboardMessage& m) {
@@ -168,8 +188,27 @@ class MyEntity : public Entities::Entity {
     }
 };
 
+class EnemyProj : public Entities::Entity {
+   private:
+    void init() {
+        addComponent<PositionComponentManager>(Rect(0, 0, 20, 20));
+        addComponent<VelComponentManager>(SDL_FPoint{0, 0});
+        GameObjects::Get<PhysicsService>().subscribe(id());
+
+        addComponent<ElevationComponentManager>(2);
+        addComponent<SpriteComponentManager>("res/wizards/catalyst.png");
+        GameObjects::Get<RenderService>().subscribe(id());
+
+        addComponent<CollisionComponentManager>(E);
+        GameObjects::Get<CollisionService>().subscribe(id());
+    }
+};
+
 class Enemy : public Entities::Entity {
    private:
+    int timer = 1500;
+    std::vector<std::unique_ptr<EnemyProj>> mProjs;
+
     void init() {
         std::mt19937 gen = std::mt19937(rand());
         std::uniform_real_distribution<float> rDist;
@@ -202,6 +241,36 @@ class Enemy : public Entities::Entity {
                 if (mag > 0) {
                     v.x *= V / mag;
                     v.y *= V / mag;
+                }
+            },
+            EventSystem::Update);
+
+        subscribeTo<EventSystem::UpdateMessage>(
+            [this](const EventSystem::UpdateMessage& m) {
+                timer -= m.data.ms();
+                if (timer <= 0) {
+                    timer += 1500;
+                    mProjs.push_back(GameObjects::New<EnemyProj>());
+
+                    auto c =
+                        getComponent<PositionComponentManager>().get().getPos(
+                            Rect::Align::CENTER);
+                    auto t =
+                        GameObjects::Get<PositionComponentManager>()
+                            [GameObjects::Get<MyEntity, MyEntity::Player>()]
+                                .get()
+                                .getPos(Rect::Align::CENTER);
+                    SDL_FPoint v{t.x - c.x, t.y - c.y};
+                    float mag = sqrtf(v.x * v.x + v.y * v.y) / 150;
+                    if (mag == 0) {
+                        mag = 1;
+                    }
+                    GameObjects::Get<
+                        PositionComponentManager>()[mProjs.back()->id()]
+                        .get()
+                        .setPos(c.x, c.y, Rect::Align::CENTER);
+                    GameObjects::Get<VelComponentManager>()[mProjs.back()->id()]
+                        .set({v.x / mag, v.y / mag});
                 }
             },
             EventSystem::Update);

@@ -6,7 +6,7 @@ REGISTER(Entities::EntityUnsubService::Message, EntityUnsubMessage,
 namespace Entities {
 // Entity
 Entity::~Entity() {
-    Messages::GetMessageBus().sendMessage(
-        EntityUnsubService::Message(EntityUnsubService::Unsub, id()));
+    Messages::GetMessageBus().sendMessage(EntityUnsubService::Message(
+        EntityUnsubService::Unsub, id(), {NullId(), true}));
 }
 }  // namespace Entities
