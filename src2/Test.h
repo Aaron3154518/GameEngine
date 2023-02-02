@@ -3,6 +3,7 @@
 
 #include <Components/Component.h>
 #include <Entities/Entity.h>
+#include <Entities/EntityContainer.h>
 #include <Framework/EventSystem/Services.h>
 #include <Framework/PhysicsSystem/Collision.h>
 #include <Framework/RenderSystem/Services.h>
@@ -70,6 +71,8 @@ class MyComponentManager : public Components::ComponentManager<MyComponent> {
 extern Entities::UUID P;
 extern Entities::UUID E;
 
+extern Rect BOUND;
+
 class MyEntity : public Entities::Entity {
    public:
     enum { Player = 0 };
@@ -91,7 +94,7 @@ class MyEntity : public Entities::Entity {
 
         addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-        addComponent<BoundaryComponentManager>(Rect(0, 0, 500, 500));
+        addComponent<BoundaryComponentManager>(BOUND);
         GameObjects::Get<PhysicsService>().subscribe(id());
 
         addComponent<ElevationComponentManager>(1);
@@ -189,6 +192,9 @@ class MyEntity : public Entities::Entity {
 };
 
 class EnemyProj : public Entities::Entity {
+   public:
+    bool alive = true;
+
    private:
     void init() {
         addComponent<PositionComponentManager>(Rect(0, 0, 20, 20));
@@ -201,22 +207,46 @@ class EnemyProj : public Entities::Entity {
 
         addComponent<CollisionComponentManager>(E);
         GameObjects::Get<CollisionService>().subscribe(id());
+        subscribeTo<CollisionService::Message>(
+            [this](const auto& m) { alive = false; },
+            CollisionService::Collided);
+    }
+};
+
+class EnemyProjCont : public Entities::EntityContainer<EnemyProj> {
+   public:
+    bool remove(const EnemyProj& e) {
+        if (!e.alive) {
+            return true;
+        }
+
+        auto& pos = GameObjects::Get<PositionComponentManager>()[e].get();
+        SDL_Rect _;
+        return !SDL_IntersectRect(pos, BOUND, &_);
+    }
+
+   private:
+    void init() {
+        subscribeTo<EventSystem::UpdateMessage>(
+            [this](auto& e, const auto& m) { prune(); }, EventSystem::Update);
     }
 };
 
 class Enemy : public Entities::Entity {
    private:
     int timer = 1500;
-    std::vector<std::unique_ptr<EnemyProj>> mProjs;
+    std::unique_ptr<EnemyProjCont> mProjs;
 
     void init() {
+        mProjs = GameObjects::New<EnemyProjCont>();
+
         std::mt19937 gen = std::mt19937(rand());
         std::uniform_real_distribution<float> rDist;
 
         addComponent<PositionComponentManager>(
             Rect(rDist(gen) * 450, rDist(gen) * 450, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-        addComponent<BoundaryComponentManager>(Rect(0, 0, 500, 500));
+        addComponent<BoundaryComponentManager>(BOUND);
         GameObjects::Get<PhysicsService>().subscribe(id());
 
         addComponent<ElevationComponentManager>(0);
@@ -250,7 +280,7 @@ class Enemy : public Entities::Entity {
                 timer -= m.data.ms();
                 if (timer <= 0) {
                     timer += 1500;
-                    mProjs.push_back(GameObjects::New<EnemyProj>());
+                    mProjs->add();
 
                     auto c =
                         getComponent<PositionComponentManager>().get().getPos(
@@ -266,10 +296,11 @@ class Enemy : public Entities::Entity {
                         mag = 1;
                     }
                     GameObjects::Get<
-                        PositionComponentManager>()[mProjs.back()->id()]
+                        PositionComponentManager>()[mProjs->back()->id()]
                         .get()
                         .setPos(c.x, c.y, Rect::Align::CENTER);
-                    GameObjects::Get<VelComponentManager>()[mProjs.back()->id()]
+                    GameObjects::Get<
+                        VelComponentManager>()[mProjs->back()->id()]
                         .set({v.x / mag, v.y / mag});
                 }
             },

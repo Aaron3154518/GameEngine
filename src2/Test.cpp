@@ -2,6 +2,7 @@
 
 Entities::UUID P = Entities::generateUUID();
 Entities::UUID E = Entities::generateUUID();
+Rect BOUND(0, 0, 500, 500);
 bool _ = CollisionService::NewType(P, E);
 
 int MyService::count() const { return mCnt; }
