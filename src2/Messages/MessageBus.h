@@ -29,6 +29,11 @@ class MessageBus {
         MessageFunc func;
     };
 
+    struct CallbackVector {
+        std::vector<EntityCallback> vec;
+        std::vector<int> idxs;
+    };
+
    public:
     void sendMessage(const Message<>& msg);
 
@@ -61,11 +66,9 @@ class MessageBus {
         const std::function<void(const Message<>&)>& callback,
         const Entities::UUID& eId, const std::type_index& mId, EnumT msgCode);
 
-    void sendMessage(const Message<>& msg,
-                     const std::vector<EntityCallback>& targets);
+    void sendMessage(const Message<>& msg, CallbackVector& targets);
 
-    typedef std::unordered_map<EnumT, std::vector<EntityCallback>>
-        MessageSubscribers;
+    typedef std::unordered_map<EnumT, CallbackVector> MessageSubscribers;
     std::unordered_map<std::type_index, MessageSubscribers> subscribers;
     std::unordered_map<Entities::UUID, uint32_t> entity_counts;
 };

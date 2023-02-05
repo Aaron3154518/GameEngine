@@ -11,38 +11,43 @@ void MessageBus::sendMessage(const Message<>& msg) {
     sendMessage(msg, subscribers[ID<Message<>>()][NO_CODE]);
 }
 
-void MessageBus::sendMessage(const Message<>& msg,
-                             const std::vector<EntityCallback>& targets) {
+void MessageBus::sendMessage(const Message<>& msg, CallbackVector& targets) {
     auto& target = msg.opts.target;
-    if (target == Entities::NullId()) {
-        for (auto& callback : targets) {
-            callback.func(msg);
+    bool ignoreTarget = target == Entities::NullId();
+    targets.idxs.push_back(0);
+    int& idx = targets.idxs.back();
+    while (idx < (int)targets.vec.size()) {
+        if (ignoreTarget || targets.vec.at(idx).eId == target) {
+            targets.vec.at(idx).func(msg);
         }
-    } else {
-        for (auto& callback : targets) {
-            if (callback.eId == target) {
-                callback.func(msg);
-            }
-        }
+        idx++;
     }
+    targets.idxs.pop_back();
 }
 
 MessageHandle MessageBus::subscribe(
     const std::function<void(const Message<>&)>& callback,
     const Entities::UUID& eId, const std::type_index& mId, EnumT msgCode) {
     auto& cnt = entity_counts[eId];
-    subscribers[mId][msgCode].push_back({eId, cnt, callback});
+    subscribers[mId][msgCode].vec.push_back({eId, cnt, callback});
     return MessageHandle{eId, cnt++, mId, msgCode};
 }
 
 void MessageBus::unsubscribe(MessageHandle handle) {
-    auto& callbackList = subscribers[handle.mId][handle.code];
-    callbackList.erase(std::remove_if(callbackList.begin(), callbackList.end(),
-                                      [handle](const EntityCallback& ecb) {
-                                          return ecb.eId == handle.eId &&
-                                                 ecb.eNum == handle.eNum;
-                                      }),
-                       callbackList.end());
+    auto& list = subscribers[handle.mId][handle.code];
+    for (auto it = list.vec.begin(); it != list.vec.end();) {
+        if (it->eId == handle.eId && it->eNum == handle.eNum) {
+            int pos = it - list.vec.begin();
+            for (auto& idx : list.idxs) {
+                if (pos <= idx && idx != 0) {
+                    idx--;
+                }
+            }
+            it = list.vec.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 MessageBus& GetMessageBus() {

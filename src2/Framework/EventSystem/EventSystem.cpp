@@ -56,3 +56,19 @@ void EventSystem::update() {
         }
     }
 }
+
+void EventSystem::runNextFrame(const Func& func) {
+    GetQueued().push_back(std::move(func));
+}
+
+void EventSystem::runQueued() {
+    for (auto& func : GetQueued()) {
+        func();
+    }
+    GetQueued().clear();
+}
+
+std::vector<EventSystem::Func>& EventSystem::GetQueued() {
+    static std::vector<Func> QUEUED;
+    return QUEUED;
+}

@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
     while (true) {
         auto t1 = SDL_GetTicks();
 
+        EventSystem::runQueued();
         EventSystem::update();
 
         if (EventSystem::get().quit) {

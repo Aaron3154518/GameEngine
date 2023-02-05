@@ -2,6 +2,7 @@
 #define ENTITIY_CONTAINER_H
 
 #include <Entities/Entity.h>
+#include <Framework/EventSystem/EventSystem.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 
@@ -12,6 +13,11 @@ namespace Entities {
 template <class EntityT>
 class EntityContainer : public Entity {
    public:
+    enum MessageCode : Messages::EnumT { Remove = 0 };
+    class Message : public Messages::Message<MessageCode, Entities::UUID> {
+        using Messages::Message<MessageCode, Entities::UUID>::Message;
+    };
+
     typedef std::unique_ptr<EntityT> EntityPtr;
 
     virtual ~EntityContainer() = default;
@@ -22,19 +28,6 @@ class EntityContainer : public Entity {
 
     bool empty() const { return mEntities.empty(); }
     size_t size() const { return mEntities.size(); }
-
-    virtual bool remove(const EntityT& e) { return false; }
-
-    void prune() {
-        auto it = mEntities.begin();
-        while (it != mEntities.end()) {
-            if (remove(**it)) {
-                it = mEntities.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
 
     template <class F, class... ArgTs>
     typename std::enable_if<std::is_member_function_pointer<F>::value>::type
@@ -52,7 +45,6 @@ class EntityContainer : public Entity {
         static_assert(std::is_invocable<F, EntityT&, ArgTs...>::value,
                       "ComponentManager::forEach(): Function must accept a "
                       "Component reference and the provided arguments");
-        prune();
         for (auto& ptr : mEntities) {
             func(*ptr, std::forward<ArgTs>(args)...);
         }
@@ -71,6 +63,22 @@ class EntityContainer : public Entity {
     }
 
    private:
+    void init() {
+        Entity::subscribeTo<Message>(
+            [this](const Message& m) {
+                auto& id = m.data;
+                auto it = std::find_if(
+                    mEntities.begin(), mEntities.end(),
+                    [id](const EntityPtr& eptr) { return eptr->id() == id; });
+                if (it != mEntities.end()) {
+                    EventSystem::runNextFrame(
+                        [ptr = it->release()]() { delete ptr; });
+                    mEntities.erase(it);
+                }
+            },
+            Remove);
+    }
+
     std::vector<EntityPtr> mEntities;
 };
 }  // namespace Entities
