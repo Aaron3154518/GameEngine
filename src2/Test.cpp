@@ -49,16 +49,18 @@ void MyEntity::init() {
     addComponent<CollisionService>();
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
-            if (!immune) {
-                hp--;
-                if (hp <= 0) {
-                    hp = 5;
-                    getComponent<PositionComponentManager>().get() =
-                        Rect(10, 10, 50, 50);
-                }
-                immune = true;
-                startTimer(2000, [this]() { immune = false; });
+            hp--;
+            if (hp <= 0) {
+                hp = 5;
+                getComponent<PositionComponentManager>().get() =
+                    Rect(10, 10, 50, 50);
             }
+            getComponent<CollisionComponentManager>().setActive(false);
+            getComponent<CollisionService>().setActive(false);
+            startTimer(2000, [this]() {
+                getComponent<CollisionComponentManager>().setActive(true);
+                getComponent<CollisionService>().setActive(true);
+            });
         },
         CollisionService::Collided);
 

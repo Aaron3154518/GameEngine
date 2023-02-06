@@ -78,7 +78,6 @@ class MyEntity : public Entities::Entity {
     enum { Player = 0 };
 
    private:
-    bool immune = false;
     int hp = 5;
 
     void init();

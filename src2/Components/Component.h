@@ -7,6 +7,12 @@ namespace Components {
 class Component {
    public:
     virtual ~Component() = default;
+
+    void setActive(bool active);
+    bool isActive() const;
+
+   private:
+    bool mActive = true;
 };
 
 typedef std::unique_ptr<Component> ComponentPtr;

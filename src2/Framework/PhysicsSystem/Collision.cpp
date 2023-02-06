@@ -8,7 +8,7 @@ std::vector<Entities::UUID> CollisionComponentManager::getEntities(
     const Entities::UUID& colId) {
     std::vector<Entities::UUID> vec;
     for (auto it = begin(), e = end(); it != e; ++it) {
-        if (colId == it->mId) {
+        if (it->isActive() && colId == it->mId) {
             vec.push_back(it.id());
         }
     }
@@ -38,6 +38,9 @@ void CollisionService::onUpdate() {
     auto& posMan = GameObjects::Get<PositionComponentManager>();
     auto& colMan = GameObjects::Get<CollisionComponentManager>();
     for (auto it = begin(); it != end(); ++it) {
+        if (!it->isActive()) {
+            continue;
+        }
         auto& id = it.id();
         Rect pos = posMan[id].get();
         auto idA = colMan[id].mId;
