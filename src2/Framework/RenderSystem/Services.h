@@ -9,12 +9,12 @@
 #include <Messages/MessageBus.h>
 #include <Services/Service.h>
 
-class RenderService : public Services::Service {
+class RenderService : public Services::Service<> {
    public:
     MESSAGE(Message, Render);
 
    private:
-    void service_init();
+    void manager_init();
 
     void render();
 

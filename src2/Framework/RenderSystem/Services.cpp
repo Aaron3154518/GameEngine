@@ -2,23 +2,30 @@
 
 REGISTER(RenderService::Message, RenderMessage);
 
-void RenderService::service_init() {
+void RenderService::manager_init() {
     subscribeTo<Message>([this](const auto& m) { render(); }, Render);
 }
 
+typedef std::pair<const Entities::UUID, Components::ComponentPtr> Pair;
 void RenderService::render() {
     auto& elevMan = GameObjects::Get<ElevationComponentManager>();
-    std::stable_sort(
-        mEntities.begin(), mEntities.end(),
-        [&elevMan](const Entities::UUID id1, const Entities::UUID id2) {
-            return elevMan[id1].get() < elevMan[id2].get();
-        });
+
+    std::vector<Pair*> entities;
+    for (auto& pair : mComponents) {
+        entities.push_back(&pair);
+    }
+    std::sort(entities.begin(), entities.end(),
+              [&elevMan](Pair* const& lhs, Pair* const& rhs) {
+                  int e1 = elevMan[lhs->first].get();
+                  int e2 = elevMan[rhs->first].get();
+                  return (e1 < e2) || (e1 == e2 && lhs->first < rhs->first);
+              });
 
     RenderSystem::clearScreen(Colors::White);
     auto& spriteMan = GameObjects::Get<SpriteComponentManager>();
     auto& posMan = GameObjects::Get<PositionComponentManager>();
-    for (auto& eId : mEntities) {
-        draw(spriteMan[eId], posMan[eId].get());
+    for (auto pair : entities) {
+        draw(spriteMan[pair->first], posMan[pair->first].get());
     }
     RenderSystem::presentScreen();
 }

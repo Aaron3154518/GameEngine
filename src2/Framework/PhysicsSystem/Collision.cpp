@@ -26,7 +26,7 @@ bool CollisionService::NewType(const Entities::UUID& idA,
     return true;
 }
 
-void CollisionService::service_init() {
+void CollisionService::manager_init() {
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const auto& m) { onUpdate(); }, EventSystem::Update);
 }
@@ -37,7 +37,8 @@ void CollisionService::onUpdate() {
     auto& mb = Messages::GetMessageBus();
     auto& posMan = GameObjects::Get<PositionComponentManager>();
     auto& colMan = GameObjects::Get<CollisionComponentManager>();
-    for (auto& id : mEntities) {
+    for (auto it = begin(); it != end(); ++it) {
+        auto& id = it.id();
         Rect pos = posMan[id].get();
         auto idA = colMan[id].mId;
         for (auto idB : cmap[idA]) {

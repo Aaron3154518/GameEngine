@@ -23,7 +23,7 @@ class CollisionComponentManager
     std::vector<Entities::UUID> getEntities(const Entities::UUID& colId);
 };
 
-class CollisionService : public Services::Service {
+class CollisionService : public Services::Service<> {
    public:
     typedef std::unordered_map<Entities::UUID, std::vector<Entities::UUID>>
         CollisionMap;
@@ -33,7 +33,7 @@ class CollisionService : public Services::Service {
     static bool NewType(const Entities::UUID& idA, const Entities::UUID& idB);
 
    private:
-    void service_init();
+    void manager_init();
 
     void onUpdate();
 

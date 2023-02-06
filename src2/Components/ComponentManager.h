@@ -80,7 +80,7 @@ class ComponentManager : public ComponentManagerBase {
                   "ComponentManager<>: Type must derive from Component");
 
    public:
-    typedef CompT ComponentType;
+    typedef CompT Component;
 
     virtual ~ComponentManager() = default;
 
@@ -126,7 +126,7 @@ class ComponentManager : public ComponentManagerBase {
 };
 
 template <class CompManT>
-typename CompManT::ComponentType& Get(Entities::UUID eId) {
+typename CompManT::Component& Get(Entities::UUID eId) {
     static_assert(std::is_base_of<ComponentManagerBase, CompManT>::value,
                   "Components::Get(): ComponentManager type must derive "
                   "from ComponentManagerBase");

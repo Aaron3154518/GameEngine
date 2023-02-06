@@ -26,7 +26,7 @@ class CommandComponent
 };
 typedef Components::ComponentManager<CommandComponent> CommandComponentManager;
 
-class CommandService : public Service {
+class CommandService : public Service<> {
    public:
     struct CommandData {
         std::string line;
@@ -39,7 +39,7 @@ class CommandService : public Service {
                     CRITICAL_SECTION* msgQueue);
 
    private:
-    void service_init();
+    void manager_init();
 };
 }  // namespace Services
 

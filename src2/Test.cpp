@@ -8,7 +8,7 @@ bool _ = CollisionService::NewType(P, E);
 int MyService::count() const { return mCnt; }
 
 // MyService
-void MyService::service_init() {
+void MyService::manager_init() {
     subscribeTo<CountMessage>([this](const CountMessage& m) { mCnt += m.data; },
                               IncreaseCount);
 }
@@ -29,14 +29,14 @@ REGISTER(MyService::CountMessage, MyCountMessage, {
 void EnemyProj::init() {
     addComponent<PositionComponentManager>(Rect(0, 0, 20, 20));
     addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-    GameObjects::Get<PhysicsService>().subscribe(id());
+    addComponent<PhysicsService>();
 
     addComponent<ElevationComponentManager>(2);
     addComponent<SpriteComponentManager>("res/wizards/catalyst.png");
-    GameObjects::Get<RenderService>().subscribe(id());
+    addComponent<RenderService>();
 
     addComponent<CollisionComponentManager>(E);
-    GameObjects::Get<CollisionService>().subscribe(id());
+    addComponent<CollisionService>();
     subscribeTo<CollisionService::Message>(
         [this](const auto& m) {
             Messages::GetMessageBus().sendMessage(
@@ -69,14 +69,14 @@ void MyEntity::init() {
     addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
     addComponent<VelComponentManager>(SDL_FPoint{0, 0});
     addComponent<BoundaryComponentManager>(BOUND);
-    GameObjects::Get<PhysicsService>().subscribe(id());
+    addComponent<PhysicsService>();
 
     addComponent<ElevationComponentManager>(1);
     addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png", 5, 150);
-    GameObjects::Get<RenderService>().subscribe(id());
+    addComponent<RenderService>();
 
     addComponent<CollisionComponentManager>(P);
-    GameObjects::Get<CollisionService>().subscribe(id());
+    addComponent<CollisionService>();
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
             if (!immune) {

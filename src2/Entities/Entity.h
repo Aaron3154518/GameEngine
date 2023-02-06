@@ -30,12 +30,12 @@ class Entity : public Messages::Messager {
     }
 
     template <class CompManT>
-    typename CompManT::ComponentType& getComponent() {
+    typename CompManT::Component& getComponent() {
         return GameObjects::Get<CompManT>()[id()];
     }
 };
 
-class EntityUnsubService : public Services::Service {
+class EntityUnsubService : public Services::Service<> {
    public:
     DATA_MESSAGE(Message, UUID, Unsub);
 };

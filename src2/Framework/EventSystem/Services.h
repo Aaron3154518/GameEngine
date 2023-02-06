@@ -26,10 +26,10 @@ class BoundaryComponent : public Components::DataComponent<Rect> {
 typedef Components::ComponentManager<BoundaryComponent>
     BoundaryComponentManager;
 
-class PhysicsService : public Services::Service {
+class PhysicsService : public Services::Service<> {
    public:
    private:
-    void service_init();
+    void manager_init();
 
     void onUpdate(Time dt);
 };

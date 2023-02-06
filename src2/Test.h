@@ -14,7 +14,7 @@
 #include <cmath>
 #include <random>
 
-class MyService : public Services::Service {
+class MyService : public Services::Service<> {
    public:
     MESSAGE(Message, Hello, World);
     DATA_MESSAGE(CountMessage, int, IncreaseCount, PrintCount);
@@ -22,7 +22,7 @@ class MyService : public Services::Service {
     int count() const;
 
    private:
-    void service_init();
+    void manager_init();
 
     int mCnt = 0;
 };
@@ -107,14 +107,14 @@ class Enemy : public Entities::Entity {
             Rect(rDist(gen) * 450, rDist(gen) * 450, 50, 50));
         addComponent<VelComponentManager>(SDL_FPoint{0, 0});
         addComponent<BoundaryComponentManager>(BOUND);
-        GameObjects::Get<PhysicsService>().subscribe(id());
+        addComponent<PhysicsService>();
 
         addComponent<ElevationComponentManager>(0);
         addComponent<SpriteComponentManager>("res/wizards/crystal.png");
-        GameObjects::Get<RenderService>().subscribe(id());
+        addComponent<RenderService>();
 
         addComponent<CollisionComponentManager>(E);
-        GameObjects::Get<CollisionService>().subscribe(id());
+        addComponent<CollisionService>();
 
         const float V = rDist(gen) * 50;
         subscribeTo<EventSystem::UpdateMessage>(

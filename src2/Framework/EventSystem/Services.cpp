@@ -1,7 +1,7 @@
 #include "Services.h"
 
 // PhysicsService
-void PhysicsService::service_init() {
+void PhysicsService::manager_init() {
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const auto& msg) { onUpdate(msg.data); }, EventSystem::Update);
 }
@@ -13,7 +13,8 @@ void PhysicsService::onUpdate(Time dt) {
     auto& boundMan = GameObjects::Get<BoundaryComponentManager>();
     float s = dt.s();
     float c = .5f * s * s;
-    for (auto& e : mEntities) {
+    for (auto it = begin(); it != end(); ++it) {
+        auto& e = it.id();
         Rect& pos = posMan[e].get();
         if (velMan.hasEntity(e)) {
             SDL_FPoint& v = velMan[e].get();
