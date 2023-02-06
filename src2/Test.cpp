@@ -25,36 +25,6 @@ REGISTER(MyService::CountMessage, MyCountMessage, {
                                                 : cnt);
 });
 
-// EntityProj
-void EnemyProj::init() {
-    addComponent<PositionComponentManager>(Rect(0, 0, 20, 20));
-    addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-    addComponent<PhysicsService>();
-
-    addComponent<ElevationComponentManager>(2);
-    addComponent<SpriteComponentManager>("res/wizards/catalyst.png");
-    addComponent<RenderService>();
-
-    addComponent<CollisionComponentManager>(E);
-    addComponent<CollisionService>();
-    subscribeTo<CollisionService::Message>(
-        [this](const auto& m) {
-            Messages::GetMessageBus().sendMessage(
-                EnemyProjCont::Message(EnemyProjCont::Remove, id()));
-        },
-        CollisionService::Collided);
-    subscribeTo<EventSystem::UpdateMessage>(
-        [this](const auto& m) {
-            auto& pos = getComponent<PositionComponentManager>().get();
-            SDL_Rect _;
-            if (!SDL_IntersectRect(pos, BOUND, &_)) {
-                Messages::GetMessageBus().sendMessage(EnemyProjCont::Message(
-                    EnemyProjCont::Remove, id(), {Entities::NullId(), true}));
-            }
-        },
-        EventSystem::Update);
-}
-
 // MyEntity
 void MyEntity::init() {
     addComponent<Components::ComponentManager<Components::Component>>();
@@ -87,19 +57,10 @@ void MyEntity::init() {
                         Rect(10, 10, 50, 50);
                 }
                 immune = true;
-                timer = 2000;
+                startTimer(2000, [this]() { immune = false; });
             }
         },
         CollisionService::Collided);
-
-    subscribeTo<EventSystem::UpdateMessage>(
-        [this](const EventSystem::UpdateMessage& m) {
-            if (immune) {
-                timer -= m.data.ms();
-                immune = timer > 0;
-            }
-        },
-        EventSystem::Update);
 
     subscribeTo<EventSystem::KeyboardMessage>(
         [this](const EventSystem::KeyboardMessage& m) {
@@ -160,4 +121,34 @@ void MyEntity::init() {
             }
         },
         Event::CLICKED);
+}
+
+// EntityProj
+void EnemyProj::init() {
+    addComponent<PositionComponentManager>(Rect(0, 0, 20, 20));
+    addComponent<VelComponentManager>(SDL_FPoint{0, 0});
+    addComponent<PhysicsService>();
+
+    addComponent<ElevationComponentManager>(2);
+    addComponent<SpriteComponentManager>("res/wizards/catalyst.png");
+    addComponent<RenderService>();
+
+    addComponent<CollisionComponentManager>(E);
+    addComponent<CollisionService>();
+    subscribeTo<CollisionService::Message>(
+        [this](const auto& m) {
+            Messages::GetMessageBus().sendMessage(
+                EnemyProjCont::Message(EnemyProjCont::Remove, id()));
+        },
+        CollisionService::Collided);
+    subscribeTo<EventSystem::UpdateMessage>(
+        [this](const auto& m) {
+            auto& pos = getComponent<PositionComponentManager>().get();
+            SDL_Rect _;
+            if (!SDL_IntersectRect(pos, BOUND, &_)) {
+                Messages::GetMessageBus().sendMessage(EnemyProjCont::Message(
+                    EnemyProjCont::Remove, id(), {Entities::NullId(), true}));
+            }
+        },
+        EventSystem::Update);
 }

@@ -50,6 +50,8 @@ class Messager {
             GetMessageBus().subscribe<MsgT>(callback, id()));
     }
 
+    void startTimer(int len_ms, const std::function<void()>& callback);
+
    private:
     virtual void init();
 

@@ -4,8 +4,8 @@
 #include <Components/Component.h>
 #include <Entities/Entity.h>
 #include <Entities/EntityContainer.h>
-#include <Framework/EventSystem/Services.h>
 #include <Framework/PhysicsSystem/Collision.h>
+#include <Framework/PhysicsSystem/Services.h>
 #include <Framework/RenderSystem/Services.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
@@ -79,7 +79,6 @@ class MyEntity : public Entities::Entity {
 
    private:
     bool immune = false;
-    int timer = 0;
     int hp = 5;
 
     void init();
