@@ -4,18 +4,10 @@
 #include <Components/ComponentManager.h>
 #include <Utils/Rect.h>
 
-class PositionComponent : public Components::DataComponent<Rect> {
-   public:
-    using Components::DataComponent<Rect>::DataComponent;
-};
-typedef Components::ComponentManager<PositionComponent>
-    PositionComponentManager;
+class PositionComponent
+    : public Components::ComponentManager<Components::DataComponent<Rect>> {};
 
-class ElevationComponent : public Components::DataComponent<int> {
-   public:
-    using Components::DataComponent<int>::DataComponent;
-};
-typedef Components::ComponentManager<ElevationComponent>
-    ElevationComponentManager;
+class ElevationComponent
+    : public Components::ComponentManager<Components::DataComponent<int>> {};
 
 #endif

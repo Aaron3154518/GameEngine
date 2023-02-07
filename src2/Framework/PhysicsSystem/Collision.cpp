@@ -1,14 +1,11 @@
 #include "Collision.h"
 
-// CollisionComponent
-CollisionComponent::CollisionComponent(const Entities::UUID& id) : mId(id) {}
-
 // CollisionComponentMqnager
-std::vector<Entities::UUID> CollisionComponentManager::getEntities(
+std::vector<Entities::UUID> CollisionComponent::getEntities(
     const Entities::UUID& colId) {
     std::vector<Entities::UUID> vec;
     for (auto it = begin(), e = end(); it != e; ++it) {
-        if (it->isActive() && colId == it->mId) {
+        if (it->isActive() && colId == it->get()) {
             vec.push_back(it.id());
         }
     }
@@ -35,15 +32,15 @@ void CollisionService::manager_init() {
 void CollisionService::onUpdate() {
     auto& cmap = GetCollisionMap();
     auto& mb = Messages::GetMessageBus();
-    auto& posMan = GameObjects::Get<PositionComponentManager>();
-    auto& colMan = GameObjects::Get<CollisionComponentManager>();
+    auto& posMan = GameObjects::Get<PositionComponent>();
+    auto& colMan = GameObjects::Get<CollisionComponent>();
     for (auto it = begin(); it != end(); ++it) {
         if (!it->isActive()) {
             continue;
         }
         auto& id = it.id();
         Rect pos = posMan[id].get();
-        auto idA = colMan[id].mId;
+        auto& idA = colMan[id].get();
         for (auto idB : cmap[idA]) {
             for (auto eId : colMan.getEntities(idB)) {
                 SDL_Rect r;

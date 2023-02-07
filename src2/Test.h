@@ -101,26 +101,27 @@ class Enemy : public Entities::Entity {
         std::mt19937 gen = std::mt19937(rand());
         std::uniform_real_distribution<float> rDist;
 
-        addComponent<PositionComponentManager>(
+        addComponent<PositionComponent>(
             Rect(rDist(gen) * 450, rDist(gen) * 450, 50, 50));
-        addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-        addComponent<BoundaryComponentManager>(BOUND);
+        addComponent<VelocityComponent>(SDL_FPoint{0, 0});
+        addComponent<AccelerationComponent>(SDL_FPoint{0, 0});
+        addComponent<BoundaryComponent>(BOUND);
         addComponent<PhysicsService>();
 
-        addComponent<ElevationComponentManager>(0);
+        addComponent<ElevationComponent>(0);
         addComponent<SpriteComponentManager>("res/wizards/crystal.png");
         addComponent<RenderService>();
 
-        addComponent<CollisionComponentManager>(E);
+        addComponent<CollisionComponent>(E);
         addComponent<CollisionService>();
 
         const float V = rDist(gen) * 50;
         subscribeTo<EventSystem::UpdateMessage>(
             [this, V](const auto& m) {
-                auto& v = getComponent<VelComponentManager>().get();
-                auto& pos = getComponent<PositionComponentManager>().get();
+                auto& v = getComponent<VelocityComponent>().get();
+                auto& pos = getComponent<PositionComponent>().get();
                 auto& player =
-                    GameObjects::Get<PositionComponentManager>()
+                    GameObjects::Get<PositionComponent>()
                         [GameObjects::Get<MyEntity, MyEntity::Player>()]
                             .get();
                 v.x = player.cX() - pos.cX();
@@ -140,11 +141,10 @@ class Enemy : public Entities::Entity {
                     timer += 1500;
                     mProjs->add();
 
-                    auto c =
-                        getComponent<PositionComponentManager>().get().getPos(
-                            Rect::Align::CENTER);
+                    auto c = getComponent<PositionComponent>().get().getPos(
+                        Rect::Align::CENTER);
                     auto t =
-                        GameObjects::Get<PositionComponentManager>()
+                        GameObjects::Get<PositionComponent>()
                             [GameObjects::Get<MyEntity, MyEntity::Player>()]
                                 .get()
                                 .getPos(Rect::Align::CENTER);
@@ -153,12 +153,10 @@ class Enemy : public Entities::Entity {
                     if (mag == 0) {
                         mag = 1;
                     }
-                    GameObjects::Get<
-                        PositionComponentManager>()[mProjs->back()->id()]
+                    GameObjects::Get<PositionComponent>()[mProjs->back()->id()]
                         .get()
                         .setPos(c.x, c.y, Rect::Align::CENTER);
-                    GameObjects::Get<
-                        VelComponentManager>()[mProjs->back()->id()]
+                    GameObjects::Get<VelocityComponent>()[mProjs->back()->id()]
                         .set({v.x / mag, v.y / mag});
                 }
             },

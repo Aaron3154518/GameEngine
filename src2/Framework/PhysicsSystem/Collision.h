@@ -10,15 +10,9 @@
 
 #include <unordered_set>
 
-class CollisionComponent : public Components::Component {
-   public:
-    CollisionComponent(const Entities::UUID& id);
-
-    Entities::UUID mId;
-};
-
-class CollisionComponentManager
-    : public Components::ComponentManager<CollisionComponent> {
+// Stores a collision id
+class CollisionComponent : public Components::ComponentManager<
+                               Components::DataComponent<Entities::UUID>> {
    public:
     std::vector<Entities::UUID> getEntities(const Entities::UUID& colId);
 };

@@ -7,27 +7,17 @@
 #include <Services/Service.h>
 #include <Utils/Time.h>
 
-class VelComponent : public Components::DataComponent<SDL_FPoint> {
-   public:
-    using Components::DataComponent<SDL_FPoint>::DataComponent;
-};
-typedef Components::ComponentManager<VelComponent> VelComponentManager;
+class VelocityComponent : public Components::ComponentManager<
+                              Components::DataComponent<SDL_FPoint>> {};
 
-class AccelComponent : public Components::DataComponent<SDL_FPoint> {
-   public:
-    using Components::DataComponent<SDL_FPoint>::DataComponent;
-};
-typedef Components::ComponentManager<AccelComponent> AccelComponentManager;
+class AccelerationComponent : public Components::ComponentManager<
+                                  Components::DataComponent<SDL_FPoint>> {};
 
-class BoundaryComponent : public Components::DataComponent<Rect> {
-   public:
-    using Components::DataComponent<Rect>::DataComponent;
-};
-typedef Components::ComponentManager<BoundaryComponent>
-    BoundaryComponentManager;
+class BoundaryComponent
+    : public Components::ComponentManager<Components::DataComponent<Rect>> {};
 
-class PhysicsService : public Services::Service<> {
-   public:
+SERVICE(PhysicsService, PositionComponent, pos, VelocityComponent, v,
+        AccelerationComponent, a, BoundaryComponent, bounds) {
    private:
     void manager_init();
 

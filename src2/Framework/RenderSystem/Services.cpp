@@ -8,7 +8,7 @@ void RenderService::manager_init() {
 
 typedef std::pair<const Entities::UUID, Components::ComponentPtr> Pair;
 void RenderService::render() {
-    auto& elevMan = GameObjects::Get<ElevationComponentManager>();
+    auto& elevMan = GameObjects::Get<ElevationComponent>();
 
     std::vector<Pair*> entities;
     for (auto& pair : mComponents) {
@@ -23,7 +23,7 @@ void RenderService::render() {
 
     RenderSystem::clearScreen(Colors::White);
     auto& spriteMan = GameObjects::Get<SpriteComponentManager>();
-    auto& posMan = GameObjects::Get<PositionComponentManager>();
+    auto& posMan = GameObjects::Get<PositionComponent>();
     for (auto pair : entities) {
         draw(spriteMan[pair->first], posMan[pair->first].get());
     }

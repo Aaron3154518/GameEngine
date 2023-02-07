@@ -36,29 +36,29 @@ void MyEntity::init() {
         },
         MyService::Hello);
 
-    addComponent<PositionComponentManager>(Rect(10, 10, 50, 50));
-    addComponent<VelComponentManager>(SDL_FPoint{0, 0});
-    addComponent<BoundaryComponentManager>(BOUND);
+    addComponent<PositionComponent>(Rect(10, 10, 50, 50));
+    addComponent<VelocityComponent>(SDL_FPoint{0, 0});
+    addComponent<AccelerationComponent>(SDL_FPoint{0, 0});
+    addComponent<BoundaryComponent>(BOUND);
     addComponent<PhysicsService>();
 
-    addComponent<ElevationComponentManager>(1);
+    addComponent<ElevationComponent>(1);
     addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
 
-    addComponent<CollisionComponentManager>(P);
+    addComponent<CollisionComponent>(P);
     addComponent<CollisionService>();
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
             hp--;
             if (hp <= 0) {
                 hp = 5;
-                getComponent<PositionComponentManager>().get() =
-                    Rect(10, 10, 50, 50);
+                getComponent<PositionComponent>().get() = Rect(10, 10, 50, 50);
             }
-            getComponent<CollisionComponentManager>().setActive(false);
+            getComponent<CollisionComponent>().setActive(false);
             getComponent<CollisionService>().setActive(false);
             startTimer(2000, [this]() {
-                getComponent<CollisionComponentManager>().setActive(true);
+                getComponent<CollisionComponent>().setActive(true);
                 getComponent<CollisionService>().setActive(true);
             });
         },
@@ -66,7 +66,7 @@ void MyEntity::init() {
 
     subscribeTo<EventSystem::KeyboardMessage>(
         [this](const EventSystem::KeyboardMessage& m) {
-            auto& pos = getComponent<PositionComponentManager>().get();
+            auto& pos = getComponent<PositionComponent>().get();
             switch (m.data.key) {
                 case SDLK_r:
                     pos = Rect(10, 10, 50, 50);
@@ -79,7 +79,7 @@ void MyEntity::init() {
     static int V = 100;
     subscribeTo<EventSystem::KeyboardMessage>(
         [this](const EventSystem::KeyboardMessage& m) {
-            auto& v = getComponent<VelComponentManager>().get();
+            auto& v = getComponent<VelocityComponent>().get();
             switch (m.data.key) {
                 case SDLK_a:
                     v.x = -V;
@@ -100,7 +100,7 @@ void MyEntity::init() {
         Event::HELD);
     subscribeTo<EventSystem::KeyboardMessage>(
         [this](const EventSystem::KeyboardMessage& m) {
-            auto& v = getComponent<VelComponentManager>().get();
+            auto& v = getComponent<VelocityComponent>().get();
             switch (m.data.key) {
                 case SDLK_a:
                 case SDLK_d:
@@ -118,7 +118,7 @@ void MyEntity::init() {
     subscribeTo<EventSystem::MouseMessage>(
         [this](const EventSystem::MouseMessage& m) {
             if (m.data.mouse == Event::LEFT) {
-                getComponent<PositionComponentManager>().get().setPos(
+                getComponent<PositionComponent>().get().setPos(
                     m.data.clickPos.x, m.data.clickPos.y, Rect::Align::CENTER);
             }
         },
@@ -127,15 +127,17 @@ void MyEntity::init() {
 
 // EntityProj
 void EnemyProj::init() {
-    addComponent<PositionComponentManager>(Rect(0, 0, 20, 20));
-    addComponent<VelComponentManager>(SDL_FPoint{0, 0});
+    addComponent<PositionComponent>(Rect(0, 0, 20, 20));
+    addComponent<VelocityComponent>(SDL_FPoint{0, 0});
+    addComponent<AccelerationComponent>(SDL_FPoint{0, 0});
+    addComponent<BoundaryComponent>(Rect());
     addComponent<PhysicsService>();
 
-    addComponent<ElevationComponentManager>(2);
+    addComponent<ElevationComponent>(2);
     addComponent<SpriteComponentManager>("res/wizards/catalyst.png");
     addComponent<RenderService>();
 
-    addComponent<CollisionComponentManager>(E);
+    addComponent<CollisionComponent>(E);
     addComponent<CollisionService>();
     subscribeTo<CollisionService::Message>(
         [this](const auto& m) {
@@ -145,7 +147,7 @@ void EnemyProj::init() {
         CollisionService::Collided);
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const auto& m) {
-            auto& pos = getComponent<PositionComponentManager>().get();
+            auto& pos = getComponent<PositionComponent>().get();
             SDL_Rect _;
             if (!SDL_IntersectRect(pos, BOUND, &_)) {
                 Messages::GetMessageBus().sendMessage(EnemyProjCont::Message(
