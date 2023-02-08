@@ -131,7 +131,7 @@ void EnemyProj::init() {
     addComponent<VelocityComponent>(SDL_FPoint{0, 0});
     addComponent<AccelerationComponent>(SDL_FPoint{0, 0});
     addComponent<BoundaryComponent>(Rect());
-    addComponent<PhysicsService>();
+    addComponent<PhysicsService2>();
 
     addComponent<ElevationComponent>(2);
     addComponent<SpriteComponentManager>("res/wizards/catalyst.png");

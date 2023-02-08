@@ -34,6 +34,23 @@
         name(const Entities::UUID& id) : FE(INIT, __VA_ARGS__) eId(id) {} \
     }
 
+#define _FE1(what, arg) what(arg)
+#define _FE2(what, arg, ...) what(arg) _FE1(what, __VA_ARGS__)
+#define _FE3(what, arg, ...) what(arg) _FE2(what, __VA_ARGS__)
+#define _FE4(what, arg, ...) what(arg) _FE3(what, __VA_ARGS__)
+#define _FE5(what, arg, ...) what(arg) _FE4(what, __VA_ARGS__)
+#define _FE6(what, arg, ...) what(arg) _FE5(what, __VA_ARGS__)
+#define _FE7(what, arg, ...) what(arg) _FE6(what, __VA_ARGS__)
+#define _FE8(what, arg, ...) what(arg) _FE7(what, __VA_ARGS__)
+
+#define _FE_NARG(...) _FE_NARG_(__VA_ARGS__, _FE_RSEQ_N())
+#define _FE_NARG_(...) _FE_ARG_N(__VA_ARGS__)
+#define _FE_ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
+#define _FE_RSEQ_N() 8, 7, 6, 5, 4, 3, 2, 1, 0
+
+#define _FE_(N, what, x, ...) CONCATENATE(_FE, N)(what, x, __VA_ARGS__)
+#define _FE(what, x, ...) _FE_(_FE_NARG(x, __VA_ARGS__), what, x, __VA_ARGS__)
+
 struct Empty {
     Empty(const Entities::UUID& id) {}
 };
@@ -57,5 +74,17 @@ class Service : public Components::ComponentManager<Components::Component> {
 #define SERVICE(name, ...)                   \
     SERVICE_STRUCT(name##Data, __VA_ARGS__); \
     class name : public Services::Service<name##Data>
+
+#define PASS(t) GameObjects::Get<t>()[pair.first],
+#define SERVICE2(name, ...)                     \
+    class name : public Services::Service<> {   \
+       protected:                               \
+        template <class F>                      \
+        void forEach(const F& func) {           \
+            for (auto& pair : mComponents) {    \
+                func(_FE(PASS, __VA_ARGS__) 0); \
+            }                                   \
+        }                                       \
+    }
 
 #endif

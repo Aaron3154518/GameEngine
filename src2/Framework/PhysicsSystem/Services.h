@@ -24,4 +24,12 @@ SERVICE(PhysicsService, PositionComponent, pos, VelocityComponent, v,
     void onUpdate(Time dt);
 };
 
+SERVICE2(PhysicsService3, PositionComponent, VelocityComponent,
+         AccelerationComponent, BoundaryComponent);
+class PhysicsService2 : public PhysicsService3 {
+   public:
+   private:
+    void manager_init();
+};
+
 #endif
