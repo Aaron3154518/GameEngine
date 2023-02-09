@@ -12,11 +12,11 @@
 #include <cmath>
 #include <unordered_map>
 
-struct SpriteComponent : public Components::Component {
-    SpriteComponent();
-    SpriteComponent(SharedTexture tex);
-    SpriteComponent(const std::string& file, uint8_t frames = 1,
-                    uint32_t delayMs = 100);
+struct SpriteData : public Components::Component {
+    SpriteData();
+    SpriteData(SharedTexture tex);
+    SpriteData(const std::string& file, uint8_t frames = 1,
+               uint32_t delayMs = 100);
 
     Dimensions getTextureDim() const;
 
@@ -27,8 +27,7 @@ struct SpriteComponent : public Components::Component {
     Rect mBounds, mArea = Rect(0, 0, 1, 1);
 };
 
-class SpriteComponentManager
-    : public Components::ComponentManager<SpriteComponent> {
+class SpriteComponent : public Components::ComponentManager<SpriteData> {
    private:
     void manager_init();
 

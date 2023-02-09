@@ -22,7 +22,7 @@ void RenderService::render() {
               });
 
     RenderSystem::clearScreen(Colors::White);
-    auto& spriteMan = GameObjects::Get<SpriteComponentManager>();
+    auto& spriteMan = GameObjects::Get<SpriteComponent>();
     auto& posMan = GameObjects::Get<PositionComponent>();
     for (auto pair : entities) {
         draw(spriteMan[pair->first], posMan[pair->first].get());
@@ -30,7 +30,7 @@ void RenderService::render() {
     RenderSystem::presentScreen();
 }
 
-void RenderService::draw(const SpriteComponent& sprite,
+void RenderService::draw(const SpriteData& sprite,
                          const Rect& rect) {  // Check the texture to draw
     if (!sprite.mTex) {
 #ifdef RENDER_DEBUG

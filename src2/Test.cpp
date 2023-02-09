@@ -43,7 +43,7 @@ void MyEntity::init() {
     addComponent<PhysicsService>();
 
     addComponent<ElevationComponent>(1);
-    addComponent<SpriteComponentManager>("res/wizards/wizard_ss.png", 5, 150);
+    addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
 
     addComponent<CollisionComponent>(P);
@@ -131,10 +131,10 @@ void EnemyProj::init() {
     addComponent<VelocityComponent>(SDL_FPoint{0, 0});
     addComponent<AccelerationComponent>(SDL_FPoint{0, 0});
     addComponent<BoundaryComponent>(Rect());
-    addComponent<PhysicsService2>();
+    addComponent<PhysicsService>();
 
     addComponent<ElevationComponent>(2);
-    addComponent<SpriteComponentManager>("res/wizards/catalyst.png");
+    addComponent<SpriteComponent>("res/wizards/catalyst.png");
     addComponent<RenderService>();
 
     addComponent<CollisionComponent>(E);

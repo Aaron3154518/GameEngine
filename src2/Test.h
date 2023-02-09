@@ -14,7 +14,7 @@
 #include <cmath>
 #include <random>
 
-class MyService : public Services::Service<> {
+class MyService : public Services::Service {
    public:
     MESSAGE(Message, Hello, World);
     DATA_MESSAGE(CountMessage, int, IncreaseCount, PrintCount);
@@ -109,7 +109,7 @@ class Enemy : public Entities::Entity {
         addComponent<PhysicsService>();
 
         addComponent<ElevationComponent>(0);
-        addComponent<SpriteComponentManager>("res/wizards/crystal.png");
+        addComponent<SpriteComponent>("res/wizards/crystal.png");
         addComponent<RenderService>();
 
         addComponent<CollisionComponent>(E);

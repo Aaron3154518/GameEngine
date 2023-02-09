@@ -17,9 +17,16 @@ class Component {
 
 typedef std::unique_ptr<Component> ComponentPtr;
 
-template <class T>
-class DataComponent : public Component {
+class DataComponentBase {
    public:
+    ~DataComponentBase() = default;
+};
+
+template <class T>
+class DataComponent : public Component, public DataComponentBase {
+   public:
+    using Data = T;
+
     DataComponent(const T& t) : mT(t) {}
     virtual ~DataComponent() = default;
 

@@ -30,7 +30,7 @@ class ComponentManagerBase : public Messages::Messager {
    protected:
     std::unordered_map<Entities::UUID, ComponentPtr> mComponents;
 
-   private:
+   public:
     class iterator_base {
         typedef std::unordered_map<Entities::UUID, ComponentPtr>::iterator
             map_iterator;
@@ -54,6 +54,7 @@ class ComponentManagerBase : public Messages::Messager {
         map_iterator mIt;
     };
 
+   private:
     void init() final;
     virtual void manager_init();
 
@@ -132,6 +133,37 @@ typename CompManT::Component& Get(Entities::UUID eId) {
                   "from ComponentManagerBase");
     return GameObjects::Get<CompManT>()[eId];
 }
+
+class EntityComponents {
+   public:
+    EntityComponents(const Entities::UUID& id);
+
+    template <class CompManT>
+    bool has() {
+        return GameObjects::Get<CompManT>().hasEntity(mId);
+    }
+
+    template <class CompManT>
+    typename CompManT::Component& get() {
+        return Components::Get<CompManT>(mId);
+    }
+
+    template <class CompManT>
+    typename CompManT::Component::Data& getData() {
+        return get<CompManT>().get();
+    }
+
+    template <class CompManT>
+    typename CompManT::Component::Data* getDataOpt() {
+        if (has<CompManT>()) {
+            return &get<CompManT>().get();
+        }
+        return nullptr;
+    }
+
+   private:
+    Entities::UUID mId;
+};
 }  // namespace Components
 
 #endif

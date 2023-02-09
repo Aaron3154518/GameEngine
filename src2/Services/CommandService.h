@@ -26,7 +26,7 @@ class CommandComponent
 };
 typedef Components::ComponentManager<CommandComponent> CommandComponentManager;
 
-class CommandService : public Service<> {
+class CommandService : public Service {
    public:
     struct CommandData {
         std::string line;

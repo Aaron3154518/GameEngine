@@ -31,11 +31,11 @@ class Entity : public Messages::Messager {
 
     template <class CompManT>
     typename CompManT::Component& getComponent() {
-        return GameObjects::Get<CompManT>()[id()];
+        return Components::Get<CompManT>(id());
     }
 };
 
-class EntityUnsubService : public Services::Service<> {
+class EntityUnsubService : public Services::Service {
    public:
     DATA_MESSAGE(Message, UUID, Unsub);
 };

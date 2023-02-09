@@ -9,7 +9,7 @@
 #include <Messages/MessageBus.h>
 #include <Services/Service.h>
 
-class RenderService : public Services::Service<> {
+class RenderService : public Services::Service {
    public:
     MESSAGE(Message, Render);
 
@@ -18,7 +18,7 @@ class RenderService : public Services::Service<> {
 
     void render();
 
-    static void draw(const SpriteComponent& sprite, const Rect& rect);
+    static void draw(const SpriteData& sprite, const Rect& rect);
 };
 
 #endif

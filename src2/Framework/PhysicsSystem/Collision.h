@@ -17,7 +17,7 @@ class CollisionComponent : public Components::ComponentManager<
     std::vector<Entities::UUID> getEntities(const Entities::UUID& colId);
 };
 
-class CollisionService : public Services::Service<> {
+class CollisionService : public Services::Service {
    public:
     typedef std::unordered_map<Entities::UUID, std::vector<Entities::UUID>>
         CollisionMap;

@@ -65,4 +65,7 @@ ComponentManagerBase::iterator_base::operator++() {
 const Entities::UUID& ComponentManagerBase::iterator_base::id() const {
     return mIt->first;
 }
+
+// EntityComponents
+EntityComponents::EntityComponents(const Entities::UUID& id) : mId(id) {}
 }  // namespace Components
