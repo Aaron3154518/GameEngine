@@ -226,17 +226,34 @@ void Enemy::init() {
 // TODO: ComponentGroup w/ (1) connected active, (2) handle init
 // HealthData
 HealthData::HealthData(int hp, Rect rect)
-    : Components::DataComponent<int>(hp), mRect(rect) {
+    : Components::DataComponent<int>(hp),
+      mRect(rect),
+      mImgs{"res/projectiles/fireball2.png"} {
     init();
 }
 
-void HealthData::operator++() { ++mT; }
-void HealthData::operator--() { --mT; }
-void HealthData::operator=(int hp) { mT = hp; }
+void HealthData::operator++() {
+    ++mT;
+    update();
+}
+void HealthData::operator--() {
+    --mT;
+    update();
+}
+void HealthData::operator=(int hp) {
+    mT = hp;
+    update();
+}
 
 void HealthData::init() {
     addComponent<PositionComponent>(mRect);
-    addComponent<ElevationComponent>(10);
+    addComponent<ElevationComponent>(4);
     addComponent<SpriteComponent>("res/projectiles/fireball.png");
     addComponent<RenderService>();
+
+    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs);
+}
+
+void HealthData::update() {
+    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs);
 }

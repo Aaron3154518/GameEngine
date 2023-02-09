@@ -7,6 +7,7 @@
 #include <Framework/PhysicsSystem/Collision.h>
 #include <Framework/PhysicsSystem/Services.h>
 #include <Framework/RenderSystem/Services.h>
+#include <Framework/RenderSystem/TextComponent.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
@@ -85,7 +86,10 @@ class HealthData : public Entities::Entity,
    private:
     void init();
 
+    void update();
+
     const Rect mRect;
+    const std::vector<std::string> mImgs;
 };
 
 class HealthComponent : public Components::ComponentManager<HealthData> {};
