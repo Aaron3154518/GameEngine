@@ -12,17 +12,14 @@ void PhysicsService::onUpdate(Time dt) {
     for (auto e : require<PositionComponent>()) {
         auto& pos = e.getData<PositionComponent>();
         if (auto v = e.getDataOpt<VelocityComponent>()) {
-            // auto& v = e.getData<VelocityComponent>();
             pos.move(v->x * s, v->y * s);
             if (auto a = e.getDataOpt<AccelerationComponent>()) {
-                // auto& a = e.getData<AccelerationComponent>();
                 pos.move(a->x * c, a->y * c);
                 v->x += a->x * s;
                 v->y += a->y * s;
             }
         }
 
-        // auto& bounds = e.getData<BoundaryComponent>();
         if (auto bounds = e.getDataOpt<BoundaryComponent>()) {
             pos.fitWithin(*bounds);
         }

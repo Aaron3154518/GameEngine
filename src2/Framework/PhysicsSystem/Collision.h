@@ -12,10 +12,7 @@
 
 // Stores a collision id
 class CollisionComponent : public Components::ComponentManager<
-                               Components::DataComponent<Entities::UUID>> {
-   public:
-    std::vector<Entities::UUID> getEntities(const Entities::UUID& colId);
-};
+                               Components::DataComponent<Entities::UUID>> {};
 
 class CollisionService : public Services::Service {
    public:

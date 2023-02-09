@@ -138,6 +138,8 @@ class EntityComponents {
    public:
     EntityComponents(const Entities::UUID& id);
 
+    const Entities::UUID& id() const { return mId; }
+
     template <class CompManT>
     bool has() {
         return GameObjects::Get<CompManT>().hasEntity(mId);

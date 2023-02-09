@@ -13,31 +13,15 @@ class Service : public Components::ComponentManager<Components::Component> {
         class iterator {
            public:
             iterator(const iterator_base& it, const iterator_base& end,
-                     const CheckFunc& func)
-                : mIt(it), mEnd(end), mCheck(func) {
-                while (mIt != mEnd && !mCheck(mIt.id())) {
-                    ++mIt;
-                }
-            }
+                     const CheckFunc& func);
 
-            bool operator==(const iterator& rhs) const {
-                return mIt == rhs.mIt;
-            }
-            bool operator!=(const iterator& rhs) const {
-                return !(*this == rhs);
-            }
+            bool operator==(const iterator& rhs) const;
+            bool operator!=(const iterator& rhs) const;
 
-            Components::EntityComponents operator*() {
-                return Components::EntityComponents(mIt.id());
-            }
+            Components::EntityComponents operator*();
 
             // Prefix ++
-            iterator& operator++() {
-                do {
-                    ++mIt;
-                } while (mIt != mEnd && !mCheck(mIt.id()));
-                return *this;
-            }
+            iterator& operator++();
 
            private:
             iterator_base mIt, mEnd;
@@ -45,11 +29,10 @@ class Service : public Components::ComponentManager<Components::Component> {
         };
 
         iterable(const iterator_base& bIt, const iterator_base& eIt,
-                 const CheckFunc& check)
-            : mBegin(bIt, eIt, check), mEnd(eIt, eIt, check) {}
+                 const CheckFunc& check);
 
-        iterator begin() { return mBegin; }
-        iterator end() { return mEnd; }
+        iterator begin();
+        iterator end();
 
        private:
         iterator mBegin, mEnd;
