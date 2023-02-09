@@ -34,7 +34,7 @@ class DataComponent : public Component, public DataComponentBase {
     T& get() { return mT; }
     const T& get() const { return mT; }
 
-   private:
+   protected:
     T mT;
 };
 }  // namespace Components

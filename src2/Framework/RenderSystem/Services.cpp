@@ -9,7 +9,7 @@ void RenderService::manager_init() {
 void RenderService::render() {
     std::vector<Components::EntityComponents> entities;
     for (auto e :
-         require<ElevationComponent, PositionComponent, SpriteComponent>()) {
+         active<ElevationComponent, PositionComponent, SpriteComponent>()) {
         entities.push_back(e);
     }
 

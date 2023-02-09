@@ -46,12 +46,14 @@ void MyEntity::init() {
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
 
+    addComponent<HealthComponent>(5, Rect(450, 450, 50, 50));
     addComponent<CollisionComponent>(P);
     addComponent<CollisionService>();
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
-            hp--;
-            if (hp <= 0) {
+            auto& hp = getComponent<HealthComponent>();
+            --hp;
+            if (hp.get() <= 0) {
                 hp = 5;
                 getComponent<PositionComponent>().get() = Rect(10, 10, 50, 50);
             }
@@ -219,4 +221,22 @@ void Enemy::init() {
             }
         },
         EventSystem::Update);
+}
+
+// TODO: ComponentGroup w/ (1) connected active, (2) handle init
+// HealthData
+HealthData::HealthData(int hp, Rect rect)
+    : Components::DataComponent<int>(hp), mRect(rect) {
+    init();
+}
+
+void HealthData::operator++() { ++mT; }
+void HealthData::operator--() { --mT; }
+void HealthData::operator=(int hp) { mT = hp; }
+
+void HealthData::init() {
+    addComponent<PositionComponent>(mRect);
+    addComponent<ElevationComponent>(10);
+    addComponent<SpriteComponent>("res/projectiles/fireball.png");
+    addComponent<RenderService>();
 }

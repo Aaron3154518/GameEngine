@@ -51,7 +51,7 @@ class Service : public Components::ComponentManager<Components::Component> {
     }
 
     template <class... CompManTs>
-    iterable require() {
+    iterable active() {
         return iterable(iterator_base(mComponents.begin()),
                         iterator_base(mComponents.end()),
                         [this](const Entities::UUID& eId) {

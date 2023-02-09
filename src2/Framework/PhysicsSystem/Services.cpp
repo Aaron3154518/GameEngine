@@ -9,7 +9,7 @@ void PhysicsService::manager_init() {
 void PhysicsService::onUpdate(Time dt) {
     float s = dt.s();
     float c = .5f * s * s;
-    for (auto e : require<PositionComponent>()) {
+    for (auto e : active<PositionComponent>()) {
         auto& pos = e.getData<PositionComponent>();
         if (auto v = e.getDataOpt<VelocityComponent>()) {
             pos.move(v->x * s, v->y * s);

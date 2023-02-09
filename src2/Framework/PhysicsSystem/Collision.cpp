@@ -20,7 +20,7 @@ void CollisionService::manager_init() {
 void CollisionService::onUpdate() {
     auto& cmap = GetCollisionMap();
     auto& mb = Messages::GetMessageBus();
-    auto iter = require<PositionComponent, CollisionComponent>();
+    auto iter = active<PositionComponent, CollisionComponent>();
     for (auto e1 : iter) {
         auto& idA = e1.getData<CollisionComponent>();
         auto& ids = cmap[idA];

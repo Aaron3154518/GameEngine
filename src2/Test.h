@@ -73,13 +73,28 @@ extern Entities::UUID E;
 
 extern Rect BOUND;
 
+class HealthData : public Entities::Entity,
+                   public Components::DataComponent<int> {
+   public:
+    HealthData(int hp, Rect rect);
+
+    void operator++();
+    void operator--();
+    void operator=(int hp);
+
+   private:
+    void init();
+
+    const Rect mRect;
+};
+
+class HealthComponent : public Components::ComponentManager<HealthData> {};
+
 class MyEntity : public Entities::Entity {
    public:
     enum { Player = 0 };
 
    private:
-    int hp = 5;
-
     void init();
 };
 
