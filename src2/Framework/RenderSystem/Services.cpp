@@ -6,26 +6,24 @@ void RenderService::manager_init() {
     subscribeTo<Message>([this](const auto& m) { render(); }, Render);
 }
 
-typedef std::pair<const Entities::UUID, Components::ComponentPtr> Pair;
 void RenderService::render() {
-    auto& elevMan = GameObjects::Get<ElevationComponent>();
-
-    std::vector<Pair*> entities;
-    for (auto& pair : mComponents) {
-        entities.push_back(&pair);
+    std::vector<Components::EntityComponents> entities;
+    for (auto e :
+         require<ElevationComponent, PositionComponent, SpriteComponent>()) {
+        entities.push_back(e);
     }
+
     std::sort(entities.begin(), entities.end(),
-              [&elevMan](Pair* const& lhs, Pair* const& rhs) {
-                  int e1 = elevMan[lhs->first].get();
-                  int e2 = elevMan[rhs->first].get();
-                  return (e1 < e2) || (e1 == e2 && lhs->first < rhs->first);
+              [](const Components::EntityComponents& lhs,
+                 const Components::EntityComponents& rhs) {
+                  int e1 = lhs.getData<ElevationComponent>();
+                  int e2 = rhs.getData<ElevationComponent>();
+                  return (e1 < e2) || (e1 == e2 && lhs.id() < rhs.id());
               });
 
     RenderSystem::clearScreen(Colors::White);
-    auto& spriteMan = GameObjects::Get<SpriteComponent>();
-    auto& posMan = GameObjects::Get<PositionComponent>();
-    for (auto pair : entities) {
-        draw(spriteMan[pair->first], posMan[pair->first].get());
+    for (auto& e : entities) {
+        draw(e.get<SpriteComponent>(), e.getData<PositionComponent>());
     }
     RenderSystem::presentScreen();
 }

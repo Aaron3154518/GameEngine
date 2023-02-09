@@ -141,22 +141,22 @@ class EntityComponents {
     const Entities::UUID& id() const { return mId; }
 
     template <class CompManT>
-    bool has() {
+    bool has() const {
         return GameObjects::Get<CompManT>().hasEntity(mId);
     }
 
     template <class CompManT>
-    typename CompManT::Component& get() {
+    typename CompManT::Component& get() const {
         return Components::Get<CompManT>(mId);
     }
 
     template <class CompManT>
-    typename CompManT::Component::Data& getData() {
+    typename CompManT::Component::Data& getData() const {
         return get<CompManT>().get();
     }
 
     template <class CompManT>
-    typename CompManT::Component::Data* getDataOpt() {
+    typename CompManT::Component::Data* getDataOpt() const {
         if (has<CompManT>()) {
             return &getData<CompManT>();
         }
