@@ -11,15 +11,20 @@ void PhysicsService::onUpdate(Time dt) {
     float c = .5f * s * s;
     for (auto e : require<PositionComponent>()) {
         auto& pos = e.getData<PositionComponent>();
-        auto& v = e.getData<VelocityComponent>();
-        auto& a = e.getData<AccelerationComponent>();
-        pos.move(v.x * s + a.x * c, v.y * s + a.y * c);
-        v.x += a.x * s;
-        v.y += a.y * s;
+        if (auto v = e.getDataOpt<VelocityComponent>()) {
+            // auto& v = e.getData<VelocityComponent>();
+            pos.move(v->x * s, v->y * s);
+            if (auto a = e.getDataOpt<AccelerationComponent>()) {
+                // auto& a = e.getData<AccelerationComponent>();
+                pos.move(a->x * c, a->y * c);
+                v->x += a->x * s;
+                v->y += a->y * s;
+            }
+        }
 
-        auto& bounds = e.getData<BoundaryComponent>();
-        if (!bounds.empty()) {
-            pos.fitWithin(bounds);
+        // auto& bounds = e.getData<BoundaryComponent>();
+        if (auto bounds = e.getDataOpt<BoundaryComponent>()) {
+            pos.fitWithin(*bounds);
         }
     }
 }

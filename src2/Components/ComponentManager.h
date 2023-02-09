@@ -156,7 +156,7 @@ class EntityComponents {
     template <class CompManT>
     typename CompManT::Component::Data* getDataOpt() {
         if (has<CompManT>()) {
-            return &get<CompManT>().get();
+            return &getData<CompManT>();
         }
         return nullptr;
     }

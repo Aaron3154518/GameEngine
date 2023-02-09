@@ -129,8 +129,6 @@ void MyEntity::init() {
 void EnemyProj::init() {
     addComponent<PositionComponent>(Rect(0, 0, 20, 20));
     addComponent<VelocityComponent>(SDL_FPoint{0, 0});
-    addComponent<AccelerationComponent>(SDL_FPoint{0, 0});
-    addComponent<BoundaryComponent>(Rect());
     addComponent<PhysicsService>();
 
     addComponent<ElevationComponent>(2);
@@ -152,6 +150,72 @@ void EnemyProj::init() {
             if (!SDL_IntersectRect(pos, BOUND, &_)) {
                 Messages::GetMessageBus().sendMessage(EnemyProjCont::Message(
                     EnemyProjCont::Remove, id(), {Entities::NullId(), true}));
+            }
+        },
+        EventSystem::Update);
+}
+
+// Enemy
+void Enemy::init() {
+    mProjs = GameObjects::New<EnemyProjCont>();
+
+    std::mt19937 gen = std::mt19937(rand());
+    std::uniform_real_distribution<float> rDist;
+
+    addComponent<PositionComponent>(
+        Rect(rDist(gen) * 450, rDist(gen) * 450, 50, 50));
+    addComponent<VelocityComponent>(SDL_FPoint{0, 0});
+    addComponent<BoundaryComponent>(BOUND);
+    addComponent<PhysicsService>();
+
+    addComponent<ElevationComponent>(0);
+    addComponent<SpriteComponent>("res/wizards/crystal.png");
+    addComponent<RenderService>();
+
+    addComponent<CollisionComponent>(E);
+    addComponent<CollisionService>();
+
+    const float V = rDist(gen) * 50;
+    subscribeTo<EventSystem::UpdateMessage>(
+        [this, V](const auto& m) {
+            auto& v = getComponent<VelocityComponent>().get();
+            auto& pos = getComponent<PositionComponent>().get();
+            auto& player = GameObjects::Get<PositionComponent>()
+                               [GameObjects::Get<MyEntity, MyEntity::Player>()]
+                                   .get();
+            v.x = player.cX() - pos.cX();
+            v.y = player.cY() - pos.cY();
+            float mag = sqrtf(v.x * v.x + v.y * v.y);
+            if (mag > 0) {
+                v.x *= V / mag;
+                v.y *= V / mag;
+            }
+        },
+        EventSystem::Update);
+
+    subscribeTo<EventSystem::UpdateMessage>(
+        [this](const EventSystem::UpdateMessage& m) {
+            timer -= m.data.ms();
+            if (timer <= 0) {
+                timer += 1500;
+                mProjs->add();
+
+                auto c = getComponent<PositionComponent>().get().getPos(
+                    Rect::Align::CENTER);
+                auto t = GameObjects::Get<PositionComponent>()
+                             [GameObjects::Get<MyEntity, MyEntity::Player>()]
+                                 .get()
+                                 .getPos(Rect::Align::CENTER);
+                SDL_FPoint v{t.x - c.x, t.y - c.y};
+                float mag = sqrtf(v.x * v.x + v.y * v.y) / 150;
+                if (mag == 0) {
+                    mag = 1;
+                }
+                GameObjects::Get<PositionComponent>()[mProjs->back()->id()]
+                    .get()
+                    .setPos(c.x, c.y, Rect::Align::CENTER);
+                GameObjects::Get<VelocityComponent>()[mProjs->back()->id()].set(
+                    {v.x / mag, v.y / mag});
             }
         },
         EventSystem::Update);

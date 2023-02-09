@@ -28,9 +28,9 @@ size_t ComponentManagerBase::size() const { return mComponents.size(); }
 Component& ComponentManagerBase::operator[](Entities::UUID eId) const {
     auto it = mComponents.find(eId);
     if (it == mComponents.end()) {
-        throw std::runtime_error("ComponentManager[]: Entity " +
-                                 std::to_string(eId) +
-                                 " Does not have component");
+        throw std::runtime_error(
+            std::string("ComponentManager[]: Entity does not have ") +
+            typeid(*this).name());
     }
     return *it->second;
 }
