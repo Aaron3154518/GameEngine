@@ -17,8 +17,6 @@ class RenderService : public Services::Service {
     void manager_init();
 
     void render();
-
-    static void draw(const SpriteData& sprite, const Rect& rect);
 };
 
 #endif
