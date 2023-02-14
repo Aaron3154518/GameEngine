@@ -90,6 +90,7 @@ class HealthData : public Entities::Entity,
 
     const Rect mRect;
     const std::vector<std::string> mImgs;
+    int a = 0;
 };
 
 class HealthComponent : public Components::ComponentManager<HealthData> {};

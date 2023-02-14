@@ -35,6 +35,7 @@ void CollisionService::onUpdate() {
                                   e2.getData<PositionComponent>(), &r)) {
                 mb.sendMessage(Message(Collided, idB, {e1.id()}));
                 mb.sendMessage(Message(Collided, idA, {e2.id()}));
+                break;
             }
         }
     }

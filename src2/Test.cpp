@@ -58,10 +58,8 @@ void MyEntity::init() {
                 getComponent<PositionComponent>().get() = Rect(10, 10, 50, 50);
             }
             getComponent<CollisionComponent>().setActive(false);
-            getComponent<CollisionService>().setActive(false);
             startTimer(2000, [this]() {
                 getComponent<CollisionComponent>().setActive(true);
-                getComponent<CollisionService>().setActive(true);
             });
         },
         CollisionService::Collided);
@@ -238,6 +236,7 @@ void HealthData::operator++() {
 }
 void HealthData::operator--() {
     --mT;
+    a = (a + 1) % 9;
     update();
 }
 void HealthData::operator=(int hp) {
@@ -251,9 +250,19 @@ void HealthData::init() {
     addComponent<SpriteComponent>("res/projectiles/fireball.png");
     addComponent<RenderService>();
 
-    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs);
+    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs,
+                                Rect::Align::TOP_LEFT, Rect::Align::TOP_LEFT);
 }
 
 void HealthData::update() {
-    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs);
+    int aX = a % 3, aY = (int)(a / 3);
+    Rect::Align alignX, alignY;
+    alignX = aX == 0   ? Rect::Align::TOP_LEFT
+             : aX == 1 ? Rect::Align::CENTER
+                       : Rect::Align::BOT_RIGHT;
+    alignY = aY == 0   ? Rect::Align::TOP_LEFT
+             : aY == 1 ? Rect::Align::CENTER
+                       : Rect::Align::BOT_RIGHT;
+    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs,
+                                alignX, alignY);
 }

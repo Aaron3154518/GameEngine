@@ -15,12 +15,13 @@ void MessageBus::sendMessage(const Message<>& msg, CallbackVector& targets) {
     auto& target = msg.opts.target;
     bool ignoreTarget = target == Entities::NullId();
     targets.idxs.push_back(0);
-    int& idx = targets.idxs.back();
-    while (idx < (int)targets.vec.size()) {
-        if (ignoreTarget || targets.vec.at(idx).eId == target) {
-            targets.vec.at(idx).func(msg);
+    size_t idx = targets.idxs.size() - 1;
+    while (targets.idxs.at(idx) < (int)targets.vec.size()) {
+        auto& sub = targets.vec.at(targets.idxs.at(idx));
+        if (ignoreTarget || sub.eId == target) {
+            sub.func(msg);
         }
-        idx++;
+        targets.idxs.at(idx)++;
     }
     targets.idxs.pop_back();
 }

@@ -65,14 +65,15 @@ void Line::addElement(ImagePtr img) {
 size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
                   const SharedFont& font, std::string& text,
                   const std::vector<std::string>& imgs, size_t startPos,
-                  Rect::Align align) {
+                  Rect::Align alignX, Rect::Align alignY) {
     if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
                   << " images but received " << (imgs.size() - startPos)
                   << std::endl;
         return startPos;
     }
-    float x = rect.cX() - mW / 2;
+    rect.setWidth(mW, alignX);
+    float x = rect.x();
     auto textIt = mText.begin();
     auto imgIt = mImgs.begin();
     for (auto type : mTypes) {
@@ -216,22 +217,25 @@ std::list<Line> splitText(std::string& text, SharedFont font, int maxW) {
 
 // TextData
 TextData::TextData(const Rect& rect, const std::string& text,
-                   const std::vector<std::string>& imgs, Rect::Align align)
-    : mImgs(imgs), mText(text), mRect(rect), mAlign(align) {
+                   const std::vector<std::string>& imgs, Rect::Align alignX,
+                   Rect::Align alignY)
+    : mImgs(imgs), mText(text), mRect(rect), mAlignX(alignX), mAlignY(alignY) {
     SharedFont font = AssetManager::getFont({-1, 25, "|"});
     mLines = splitText(mText, font, mRect.W());
 
-    TextureBuilder tex(mRect.W(), mRect.H());
-    Rect lineR(0, 0, mRect.w(), TTF_FontHeight(font.get()));
+    int lineH = TTF_FontHeight(font.get());
+    TextureBuilder tex(mRect.W(), lineH * mLines.size());
+    Rect r = Rect::getMinRect(tex.getTexture().get(), mRect.w(), mRect.h());
+    r.setPos(mRect, alignX, alignY);
+    mRect = r;
+
+    Rect lineR(0, 0, mRect.w(), lineH);
     size_t p = 0;
     for (auto& line : mLines) {
-        p = line.draw(tex, lineR, mRect.getPos(), font, mText, mImgs, p, align);
+        p = line.draw(tex, lineR, mRect.getPos(), font, mText, mImgs, p, alignX,
+                      alignY);
         lineR.move(0, lineR.h());
     }
-
-    Rect r = Rect::getMinRect(tex.getTexture().get(), mRect.w(), mRect.h());
-    r.setPos(mRect, Rect::Align::CENTER);
-    mRect = r;
 
     addComponent<PositionComponent>(mRect);
     addComponent<ElevationComponent>(10);

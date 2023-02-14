@@ -58,7 +58,7 @@ struct Line {
     size_t draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
                 const SharedFont& font, std::string& text,
                 const std::vector<std::string>& imgs, size_t startPos,
-                Rect::Align align);
+                Rect::Align alignX, Rect::Align alignY);
 
    private:
     int mW = 0;
@@ -75,13 +75,14 @@ struct TextData : public Components::Component, public Entities::Entity {
    public:
     TextData(const Rect& rect, const std::string& text,
              const std::vector<std::string>& imgs,
-             Rect::Align align = Rect::Align::CENTER);
+             Rect::Align alignX = Rect::Align::CENTER,
+             Rect::Align alignY = Rect::Align::CENTER);
 
    private:
     std::vector<std::string> mImgs;
     std::string mText;
     Rect mRect;
-    Rect::Align mAlign;
+    Rect::Align mAlignX, mAlignY;
     std::list<Line> mLines;
 };
 
