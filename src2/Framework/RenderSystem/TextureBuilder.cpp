@@ -14,11 +14,11 @@ TextureBuilder::TextureBuilder(const std::string &src)
     : TextureBuilder(AssetManager::getTexture(src), true) {}
 TextureBuilder::TextureBuilder(SharedTexture src, bool copy) {
     if (copy) {
-        SDL_Point dim = getTextureSize(src.get());
-        reset(dim.x, dim.y);
+        Dimensions dim = getTextureSize(src.get());
+        reset(dim.w, dim.h);
 
         RenderData rd(src);
-        rd.mRect = Rect(0, 0, dim.x, dim.y);
+        rd.mRect = Rect(0, 0, dim.w, dim.h);
         draw(rd);
     } else {
         mTex = src;
@@ -30,10 +30,9 @@ SharedTexture TextureBuilder::getTexture() { return mTex; }
 
 // Start new texture
 void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
-    SDL_Texture *tex =
-        SDL_CreateTexture(Renderer::get(), SDL_PIXELFORMAT_RGBA8888,
-                          SDL_TEXTUREACCESS_TARGET, w, h);
-    mTex = makeSharedTexture(tex);
+    mTex = makeSharedTexture(SDL_CreateTexture(Renderer::get(),
+                                               SDL_PIXELFORMAT_RGBA8888,
+                                               SDL_TEXTUREACCESS_TARGET, w, h));
     SDL_SetTextureBlendMode(mTex.get(), SDL_BLENDMODE_BLEND);
     Shapes::Rectangle r;
     r.setColor(bkgrnd);
@@ -45,6 +44,7 @@ void TextureBuilder::reset(int w, int h, SDL_Color bkgrnd) {
 void TextureBuilder::draw(Drawable &drawable) {
     Renderer::setRenderTarget(mTex.get());
     drawable.draw(*this);
+    Renderer::setRenderTarget(nullptr);
 }
 
 // Brighten texture
@@ -55,17 +55,17 @@ void TextureBuilder::brighten(Uint8 strength) {
     draw(r);
 }
 
-SDL_Point TextureBuilder::getTextureSize() {
+Dimensions TextureBuilder::getTextureSize() {
     return getTextureSize(mTex.get());
 }
-SDL_Point TextureBuilder::getTextureSize(SDL_Texture *tex) {
-    SDL_Point p;
-    if (SDL_QueryTexture(tex, NULL, NULL, &p.x, &p.y) != 0) {
+Dimensions TextureBuilder::getTextureSize(SDL_Texture *tex) {
+    Dimensions d;
+    if (SDL_QueryTexture(tex, NULL, NULL, &d.w, &d.h) != 0) {
 #ifdef RENDER_DEBUG
         std::cerr << "getTextureSize(): "
                   << "could not query source texture" << std::endl;
 #endif
-        p.x = p.y = 0;
+        d.w = d.h = 0;
     }
-    return p;
+    return d;
 }

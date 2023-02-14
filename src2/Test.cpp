@@ -251,9 +251,9 @@ void HealthData::init() {
     addComponent<SpriteComponent>("res/projectiles/fireball.png");
     addComponent<RenderService>();
 
-    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs);
+    addComponent<TextComponent>(mRect, std::to_string(mT) + "weee{i}", mImgs);
 }
 
 void HealthData::update() {
-    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs);
+    addComponent<TextComponent>(mRect, std::to_string(mT) + "weee{i}", mImgs);
 }

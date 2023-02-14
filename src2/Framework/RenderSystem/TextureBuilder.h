@@ -43,8 +43,8 @@ class TextureBuilder {
     // Brighten texture
     void brighten(Uint8 strength);
 
-    SDL_Point getTextureSize();
-    static SDL_Point getTextureSize(SDL_Texture *tex);
+    Dimensions getTextureSize();
+    static Dimensions getTextureSize(SDL_Texture *tex);
 
    private:
     SharedTexture mTex = makeSharedTexture();

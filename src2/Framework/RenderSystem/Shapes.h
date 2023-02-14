@@ -29,7 +29,7 @@ struct ShapeColor {
     void setColor(SDL_Color c);
 
    protected:
-    SDL_Color color;
+    SDL_Color color = Colors::Black;
 };
 
 struct ShapeBlendmode {
@@ -39,7 +39,7 @@ struct ShapeBlendmode {
     void setBlendMode(SDL_BlendMode b);
 
    protected:
-    SDL_BlendMode blend;
+    SDL_BlendMode blend = SDL_BLENDMODE_NONE;
 };
 
 struct ShapeBoundary {

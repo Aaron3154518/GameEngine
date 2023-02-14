@@ -2,16 +2,12 @@
 
 // Text
 Text::Text(int startPos, int len, int w)
-    : mStartPos(startPos), mLen(len), mW(w) {
-    addComponent<PositionComponent>(Rect());
-    addComponent<ElevationComponent>(5);
-    addComponent<SpriteComponent>("");
-    addComponent<RenderService>();
-}
+    : mStartPos(startPos), mLen(len), mW(w) {}
 
 int Text::w() const { return mW; }
 
-void Text::draw(Rect rect, const SharedFont& font, std::string& text) {
+void Text::draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
+                std::string& text) {
     Surface textSurf = makeSurface();
     size_t endPos = mStartPos + mLen;
     if (endPos != text.size()) {
@@ -25,21 +21,19 @@ void Text::draw(Rect rect, const SharedFont& font, std::string& text) {
             font.get(), text.c_str() + mStartPos, Colors::Black));
     }
 
-    SharedTexture textTex = makeSharedTexture(
-        SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get()));
-
-    // rd.setFit(RenderData::FitMode::Texture);
+    RenderData rd(makeSharedTexture(
+        SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get())));
+    rd.mRect = rd.getMinRect(rect);
     // rd.setFitAlign(tData.mAlign, Rect::Align::CENTER);
-
-    getComponent<PositionComponent>().set(rect);
-    addComponent<SpriteComponent>(textTex);
+    rd.mRect.setPos(rect, Rect::Align::CENTER);
+    tex.draw(rd);
 }
 
 // Image
 Image::Image(int lineH) : mW(lineH) {
     addComponent<PositionComponent>(Rect());
-    addComponent<ElevationComponent>(5);
-    addComponent<SpriteComponent>("");
+    addComponent<ElevationComponent>(6);
+    addComponent<SpriteComponent>(makeSharedTexture());
     addComponent<RenderService>();
 }
 
@@ -68,7 +62,8 @@ void Line::addElement(ImagePtr img) {
     mTypes.push_back(Type::IMAGE);
 }
 
-void Line::drawText(Rect rect, const SharedFont& font, std::string& text) {
+void Line::drawText(TextureBuilder& tex, Rect rect, const SharedFont& font,
+                    std::string& text) {
     Rect lineRect(0, 0, mW, rect.h());
     // LEFT: td mAlign
     lineRect.setPos(rect, Rect::Align::TOP_LEFT, Rect::Align::CENTER);
@@ -80,7 +75,7 @@ void Line::drawText(Rect rect, const SharedFont& font, std::string& text) {
                 TextPtr& t = *(textIt++);
                 lineRect.setDim(t->w(), rect.h(), Rect::Align::TOP_LEFT,
                                 Rect::Align::CENTER);
-                t->draw(lineRect, font, text);
+                t->draw(tex, lineRect, font, text);
                 lineRect.move(t->w(), 0);
             } break;
             case Type::IMAGE:
@@ -248,12 +243,24 @@ TextData::TextData(const Rect& rect, const std::string& text,
     : mImgs(imgs), mText(text), mRect(rect) {
     SharedFont font = AssetManager::getFont({-1, 10, "|"});
     mLines = splitText(mText, font, mRect.W());
-    Rect lineR = mRect;
-    lineR.setHeight(lineR.h() / mLines.size());
+
+    TextureBuilder tex(mRect.W(), mRect.H());
+    Rect lineR(0, 0, mRect.w(), TTF_FontHeight(font.get()));
     size_t p = 0;
     for (auto& line : mLines) {
-        line.drawText(lineR, font, mText);
-        p = line.drawImages(lineR, mImgs, p);
+        line.drawText(tex, lineR, font, mText);
+        p = line.drawImages(
+            Rect(mRect.x(), mRect.y() + lineR.y(), lineR.w(), lineR.h()), mImgs,
+            p);
         lineR.move(0, lineR.h());
     }
+
+    Rect r = Rect::getMinRect(tex.getTexture().get(), mRect.w(), mRect.h());
+    r.setPos(mRect, Rect::Align::CENTER);
+    mRect = r;
+
+    addComponent<PositionComponent>(mRect);
+    addComponent<ElevationComponent>(10);
+    addComponent<SpriteComponent>(tex.getTexture());
+    addComponent<RenderService>();
 }

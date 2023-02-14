@@ -62,3 +62,7 @@ void RenderData::draw(TextureBuilder& tex) {
                      0,  // mRotation,
                      NULL, SDL_FLIP_NONE);
 }
+
+Rect RenderData::getMinRect(const Rect& r) {
+    return Rect::getMinRect(mTex.get(), r.w(), r.h());
+}

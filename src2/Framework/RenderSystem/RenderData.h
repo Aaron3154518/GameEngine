@@ -13,6 +13,7 @@ struct RenderData : public Drawable, public Shapes::ShapeBoundary {
     Rect mRect, mArea = Rect(0, 0, 1, 1);
 
     void draw(TextureBuilder& tex);
+    Rect getMinRect(const Rect& r);
 };
 
 #endif

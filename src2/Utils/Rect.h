@@ -14,11 +14,13 @@ struct Dimensions {
     int w = 0;
     int h = 0;
 };
+std::ostream &operator<<(std::ostream &os, const Dimensions &d);
 
 struct DimensionsF {
     float w = 0;
     float h = 0;
 };
+std::ostream &operator<<(std::ostream &os, const DimensionsF &d);
 
 class Rect : private SDL_Rect {
    private:

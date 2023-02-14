@@ -12,13 +12,14 @@
 // Forward Declaration
 struct TextData;
 
-struct Text : public Entities::Entity {
+struct Text {
    public:
     Text(int startPos, int len, int w);
 
     int w() const;
 
-    void draw(Rect rect, const SharedFont& font, std::string& text);
+    void draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
+              std::string& text);
 
    private:
     int mStartPos, mLen, mW;
@@ -54,7 +55,8 @@ struct Line {
     void addElement(TextPtr text);
     void addElement(ImagePtr img);
 
-    void drawText(Rect rect, const SharedFont& font, std::string& text);
+    void drawText(TextureBuilder& tex, Rect rect, const SharedFont& font,
+                  std::string& text);
     size_t drawImages(Rect rect, const std::vector<std::string>& imgs,
                       size_t startPos);
 
@@ -69,7 +71,7 @@ typedef std::unique_ptr<Line> LinePtr;
 
 std::list<Line> splitText(std::string& text, SharedFont font, int maxW);
 
-struct TextData : public Components::Component {
+struct TextData : public Components::Component, public Entities::Entity {
    public:
     TextData(const Rect& rect, const std::string& text,
              const std::vector<std::string>& imgs);

@@ -2,6 +2,16 @@
 
 bool eq(float v1, float v2, float err) { return std::abs(v1 - v2) <= err; }
 
+std::ostream &operator<<(std::ostream &os, const Dimensions &d) {
+    os << d.w << "x" << d.h;
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const DimensionsF &d) {
+    os << d.w << "x" << d.h;
+    return os;
+}
+
 // Constructors
 Rect::Rect() : Rect(0, 0, 0, 0) {}
 Rect::Rect(float x, float y, float w, float h) : _x(x), _y(y), _w(w), _h(h) {
