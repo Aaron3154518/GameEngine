@@ -23,6 +23,8 @@ class Service : public Components::ComponentManager<Components::Component> {
             // Prefix ++
             iterator& operator++();
 
+            operator bool() const;
+
            private:
             iterator_base mIt, mEnd;
             CheckFunc mCheck;

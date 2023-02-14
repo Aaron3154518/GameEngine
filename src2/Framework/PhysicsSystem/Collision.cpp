@@ -21,13 +21,15 @@ void CollisionService::onUpdate() {
     auto& cmap = GetCollisionMap();
     auto& mb = Messages::GetMessageBus();
     auto iter = active<PositionComponent, CollisionComponent>();
-    for (auto e1 : iter) {
+    for (auto e1It = iter.begin(); e1It != iter.end(); ++e1It) {
+        auto e1 = *e1It;
         auto& idA = e1.getData<CollisionComponent>();
         auto& ids = cmap[idA];
-        for (auto e2 : iter) {
+        auto e2It = e1It;
+        for (++e2It; e2It != iter.end() && e1It; ++e2It) {
+            auto e2 = *e2It;
             auto& idB = e2.getData<CollisionComponent>();
-            if (e2.id() == e1.id() ||
-                std::find(ids.begin(), ids.end(), idB) == ids.end()) {
+            if (std::find(ids.begin(), ids.end(), idB) == ids.end()) {
                 continue;
             }
             SDL_Rect r;
@@ -35,7 +37,6 @@ void CollisionService::onUpdate() {
                                   e2.getData<PositionComponent>(), &r)) {
                 mb.sendMessage(Message(Collided, idB, {e1.id()}));
                 mb.sendMessage(Message(Collided, idA, {e2.id()}));
-                break;
             }
         }
     }

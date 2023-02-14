@@ -29,6 +29,10 @@ Service::iterable::iterator& Service::iterable::iterator::operator++() {
     return *this;
 }
 
+Service::iterable::iterator::operator bool() const {
+    return mIt != mEnd && mCheck(mIt.id());
+}
+
 // Service::iterable
 Service::iterable::iterable(const iterator_base& bIt, const iterator_base& eIt,
                             const CheckFunc& check)
