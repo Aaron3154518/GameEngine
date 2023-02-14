@@ -45,6 +45,19 @@ void MyEntity::init() {
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
+    Rect tr(175, 10, 100, 50);
+    std::cerr << "Start" << std::endl;
+    addComponent<TextComponent>(
+        tr, "HelloWorld\n{i}",
+        std::vector<std::string>{"res/wizards/wizard.png"}, Rect::Align::CENTER,
+        Rect::Align::TOP_LEFT);
+    std::cerr << "End" << std::endl;
+    TextureBuilder tex(tr.W(), tr.H());
+    Shapes::Rectangle r;
+    r.set(Rect(0, 0, tr.W(), tr.H()), -3, false);
+    tex.draw(r);
+    addComponent<SpriteComponent>(tex.getTexture());
+    addComponent<PositionComponent>(tr);
 
     addComponent<HealthComponent>(5, Rect(450, 450, 50, 50));
     addComponent<CollisionComponent>(P);

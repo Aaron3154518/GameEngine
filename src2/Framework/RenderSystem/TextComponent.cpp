@@ -7,19 +7,11 @@ Text::Text(int startPos, int len, int w)
 int Text::w() const { return mW; }
 
 void Text::draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
-                std::string& text) {
+                const std::string& text) {
     Surface textSurf = makeSurface();
-    size_t endPos = mStartPos + mLen;
-    if (endPos != text.size()) {
-        char tmp = text.at(endPos);
-        text.replace(endPos, 1, 1, '\0');
-        textSurf = makeSurface(TTF_RenderText_Blended(
-            font.get(), text.c_str() + mStartPos, Colors::Black));
-        text.replace(endPos, 1, 1, tmp);
-    } else {
-        textSurf = makeSurface(TTF_RenderText_Blended(
-            font.get(), text.c_str() + mStartPos, Colors::Black));
-    }
+    std::string str = text.substr(mStartPos, mLen);
+    textSurf = makeSurface(
+        TTF_RenderText_Blended(font.get(), str.c_str(), Colors::Black));
 
     RenderData rd(makeSharedTexture(
         SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get())));
@@ -63,9 +55,9 @@ void Line::addElement(ImagePtr img) {
 }
 
 size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
-                  const SharedFont& font, std::string& text,
-                  const std::vector<std::string>& imgs, size_t startPos,
-                  Rect::Align alignX, Rect::Align alignY) {
+                  DimensionsF scale, const SharedFont& font,
+                  const std::string& text, const std::vector<std::string>& imgs,
+                  size_t startPos, Rect::Align alignX, Rect::Align alignY) {
     if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
                   << " images but received " << (imgs.size() - startPos)
@@ -85,7 +77,8 @@ size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
             } break;
             case Type::IMAGE: {
                 ImagePtr& i = *(imgIt++);
-                i->draw(Rect(x + off.x, rect.y() + off.y, i->w(), rect.h()),
+                i->draw(Rect(x * scale.w + off.x, rect.y() * scale.h + off.y,
+                             i->w() * scale.h, rect.h() * scale.h),
                         imgs.at(startPos++));
                 x += i->w();
             } break;
@@ -95,7 +88,7 @@ size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
 }
 
 // splitText
-std::list<Line> splitText(std::string& text, SharedFont font, int maxW) {
+std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
     std::list<Line> lines;
     lines.push_back(Line());
     if (!font) {
@@ -114,60 +107,37 @@ std::list<Line> splitText(std::string& text, SharedFont font, int maxW) {
             return;
         }
 
-        const char* str = text.c_str() + pos1;
         size_t len = pos2 - pos1;
-
+        std::string str = text.substr(pos1, len);
         int count = 0, width = 0;
-        if (pos2 != text.size()) {
-            char tmp = text.at(pos2);
-            text.replace(pos2, 1, 1, '\0');
-            TTF_MeasureUTF8(font.get(), str, lines.back().getSpace(maxW),
-                            &width, &count);
-            text.replace(pos2, 1, 1, tmp);
-        } else {
-            TTF_MeasureUTF8(font.get(), str, lines.back().getSpace(maxW),
-                            &width, &count);
-        }
+        TTF_MeasureUTF8(font.get(), str.c_str(), lines.back().getSpace(maxW),
+                        &width, &count);
 
         if (count == len) {  // Fit entire text onto line
             lines.back().addElement(std::make_unique<Text>(pos1, len, width));
         } else {  // Break up text
-            int idx;
             // Find last space, if any
-            for (idx = count - 1; idx >= 0; idx--) {
-                if (*(str + idx) == ' ') {
-                    break;
-                }
-            }
-            if (idx != -1) {  // Break into words
+            size_t lastSpace = str.find_last_of(' ');
+            if (lastSpace != std::string::npos) {  // Break into words
                 int textW;
-
-                text.replace(pos1 + idx, 1, 1, '\0');
-                TTF_SizeText(font.get(), str, &textW, nullptr);
-                text.replace(pos1 + idx, 1, 1, ' ');
+                TTF_SizeText(font.get(), str.substr(0, lastSpace).c_str(),
+                             &textW, nullptr);
 
                 lines.back().addElement(
-                    std::make_unique<Text>(pos1, idx, textW));
+                    std::make_unique<Text>(pos1, pos1 + lastSpace, textW));
                 lines.push_back(Line());
-                addText(pos1 + idx + 1, pos2);
+                addText(pos1 + lastSpace + 1, pos2);
             } else {  // Won't fit on this line
                 // Get the length until the next break
                 int wordW = 0;
-                auto spaceIt =
-                    std::find(text.begin() + pos1, text.begin() + pos2, ' ');
-                if (spaceIt == text.end()) {
-                    TTF_SizeUTF8(font.get(), str, &wordW, nullptr);
-                } else {
-                    char tmp = *spaceIt;
-                    *spaceIt = '\0';
-                    TTF_SizeUTF8(font.get(), str, &wordW, nullptr);
-                    *spaceIt = tmp;
-                }
+                size_t space = str.find(' ');
+                TTF_SizeUTF8(font.get(), str.substr(0, space).c_str(), &wordW,
+                             nullptr);
                 if (wordW <= maxW) {  // It will fit on the next line
                     lines.push_back(Line());
                     addText(pos1, pos2);
-                } else {  // It is bigger than one line, split accross
-                          // multiple lines
+                } else {  // It is bigger than one line, split across
+                    // multiple lines
                     lines.back().addElement(
                         std::make_unique<Text>(pos1, count, width));
                     lines.push_back(Line());
@@ -218,26 +188,26 @@ std::list<Line> splitText(std::string& text, SharedFont font, int maxW) {
 // TextData
 TextData::TextData(const Rect& rect, const std::string& text,
                    const std::vector<std::string>& imgs, Rect::Align alignX,
-                   Rect::Align alignY)
-    : mImgs(imgs), mText(text), mRect(rect), mAlignX(alignX), mAlignY(alignY) {
+                   Rect::Align alignY) {
     SharedFont font = AssetManager::getFont({-1, 25, "|"});
-    mLines = splitText(mText, font, mRect.W());
+    mLines = splitText(text, font, rect.W());
 
     int lineH = TTF_FontHeight(font.get());
-    TextureBuilder tex(mRect.W(), lineH * mLines.size());
-    Rect r = Rect::getMinRect(tex.getTexture().get(), mRect.w(), mRect.h());
-    r.setPos(mRect, alignX, alignY);
-    mRect = r;
+    TextureBuilder tex(rect.W(), lineH * mLines.size());
 
-    Rect lineR(0, 0, mRect.w(), lineH);
+    Rect r = Rect::getMinRect(tex.getTexture().get(), rect.w(), rect.h());
+    DimensionsF scale{r.w() / rect.w(), r.h() / lineH / mLines.size()};
+    r.setPos(rect, alignX, alignY);
+
+    Rect lineR(0, 0, rect.W(), lineH);
     size_t p = 0;
     for (auto& line : mLines) {
-        p = line.draw(tex, lineR, mRect.getPos(), font, mText, mImgs, p, alignX,
-                      alignY);
+        p = line.draw(tex, lineR, {r.x(), r.y()}, scale, font, text, imgs, p,
+                      alignX, alignY);
         lineR.move(0, lineR.h());
     }
 
-    addComponent<PositionComponent>(mRect);
+    addComponent<PositionComponent>(r);
     addComponent<ElevationComponent>(10);
     addComponent<SpriteComponent>(tex.getTexture());
     addComponent<RenderService>();

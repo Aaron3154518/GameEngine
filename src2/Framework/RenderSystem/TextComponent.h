@@ -19,7 +19,7 @@ struct Text {
     int w() const;
 
     void draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
-              std::string& text);
+              const std::string& text);
 
    private:
     int mStartPos, mLen, mW;
@@ -56,9 +56,9 @@ struct Line {
     void addElement(ImagePtr img);
 
     size_t draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
-                const SharedFont& font, std::string& text,
-                const std::vector<std::string>& imgs, size_t startPos,
-                Rect::Align alignX, Rect::Align alignY);
+                DimensionsF scale, const SharedFont& font,
+                const std::string& text, const std::vector<std::string>& imgs,
+                size_t startPos, Rect::Align alignX, Rect::Align alignY);
 
    private:
     int mW = 0;
@@ -69,7 +69,7 @@ struct Line {
 
 typedef std::unique_ptr<Line> LinePtr;
 
-std::list<Line> splitText(std::string& text, SharedFont font, int maxW);
+std::list<Line> splitText(const std::string& text, SharedFont font, int maxW);
 
 struct TextData : public Components::Component, public Entities::Entity {
    public:
@@ -79,10 +79,6 @@ struct TextData : public Components::Component, public Entities::Entity {
              Rect::Align alignY = Rect::Align::CENTER);
 
    private:
-    std::vector<std::string> mImgs;
-    std::string mText;
-    Rect mRect;
-    Rect::Align mAlignX, mAlignY;
     std::list<Line> mLines;
 };
 
