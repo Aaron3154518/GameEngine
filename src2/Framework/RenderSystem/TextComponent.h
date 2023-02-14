@@ -55,10 +55,10 @@ struct Line {
     void addElement(TextPtr text);
     void addElement(ImagePtr img);
 
-    void drawText(TextureBuilder& tex, Rect rect, const SharedFont& font,
-                  std::string& text);
-    size_t drawImages(Rect rect, const std::vector<std::string>& imgs,
-                      size_t startPos);
+    size_t draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
+                const SharedFont& font, std::string& text,
+                const std::vector<std::string>& imgs, size_t startPos,
+                Rect::Align align);
 
    private:
     int mW = 0;
@@ -74,12 +74,14 @@ std::list<Line> splitText(std::string& text, SharedFont font, int maxW);
 struct TextData : public Components::Component, public Entities::Entity {
    public:
     TextData(const Rect& rect, const std::string& text,
-             const std::vector<std::string>& imgs);
+             const std::vector<std::string>& imgs,
+             Rect::Align align = Rect::Align::CENTER);
 
    private:
     std::vector<std::string> mImgs;
     std::string mText;
     Rect mRect;
+    Rect::Align mAlign;
     std::list<Line> mLines;
 };
 

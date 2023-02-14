@@ -62,54 +62,31 @@ void Line::addElement(ImagePtr img) {
     mTypes.push_back(Type::IMAGE);
 }
 
-void Line::drawText(TextureBuilder& tex, Rect rect, const SharedFont& font,
-                    std::string& text) {
-    Rect lineRect(0, 0, mW, rect.h());
-    // LEFT: td mAlign
-    lineRect.setPos(rect, Rect::Align::TOP_LEFT, Rect::Align::CENTER);
-    auto textIt = mText.begin();
-    auto imgIt = mImgs.begin();
-    for (auto type : mTypes) {
-        switch (type) {
-            case Type::TEXT: {
-                TextPtr& t = *(textIt++);
-                lineRect.setDim(t->w(), rect.h(), Rect::Align::TOP_LEFT,
-                                Rect::Align::CENTER);
-                t->draw(tex, lineRect, font, text);
-                lineRect.move(t->w(), 0);
-            } break;
-            case Type::IMAGE:
-                lineRect.move((*(imgIt++))->w(), 0);
-                break;
-        };
-    }
-}
-size_t Line::drawImages(Rect rect, const std::vector<std::string>& imgs,
-                        size_t startPos) {
+size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
+                  const SharedFont& font, std::string& text,
+                  const std::vector<std::string>& imgs, size_t startPos,
+                  Rect::Align align) {
     if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
                   << " images but received " << (imgs.size() - startPos)
                   << std::endl;
         return startPos;
     }
-    Rect lineRect(0, 0, mW, rect.h());
-    // LEFT should be text data align
-    lineRect.setPos(rect, Rect::Align::TOP_LEFT, Rect::Align::CENTER);
+    float x = rect.cX() - mW / 2;
     auto textIt = mText.begin();
     auto imgIt = mImgs.begin();
     for (auto type : mTypes) {
         switch (type) {
-            case Type::TEXT:
-                lineRect.move((*(textIt++))->w(), 0);
-                break;
+            case Type::TEXT: {
+                TextPtr& t = *(textIt++);
+                t->draw(tex, Rect(x, rect.y(), t->w(), rect.h()), font, text);
+                x += t->w();
+            } break;
             case Type::IMAGE: {
                 ImagePtr& i = *(imgIt++);
-                lineRect.setDim(i->w(), rect.h(), Rect::Align::TOP_LEFT,
-                                Rect::Align::CENTER);
-                // auto rectShape = RectShape(td.data().mBkgrnd).set(lineRect);
-                // tex.draw(rectShape);
-                i->draw(lineRect, imgs.at(startPos++));
-                lineRect.move(i->w(), 0);
+                i->draw(Rect(x + off.x, rect.y() + off.y, i->w(), rect.h()),
+                        imgs.at(startPos++));
+                x += i->w();
             } break;
         };
     }
@@ -239,19 +216,16 @@ std::list<Line> splitText(std::string& text, SharedFont font, int maxW) {
 
 // TextData
 TextData::TextData(const Rect& rect, const std::string& text,
-                   const std::vector<std::string>& imgs)
-    : mImgs(imgs), mText(text), mRect(rect) {
-    SharedFont font = AssetManager::getFont({-1, 10, "|"});
+                   const std::vector<std::string>& imgs, Rect::Align align)
+    : mImgs(imgs), mText(text), mRect(rect), mAlign(align) {
+    SharedFont font = AssetManager::getFont({-1, 25, "|"});
     mLines = splitText(mText, font, mRect.W());
 
     TextureBuilder tex(mRect.W(), mRect.H());
     Rect lineR(0, 0, mRect.w(), TTF_FontHeight(font.get()));
     size_t p = 0;
     for (auto& line : mLines) {
-        line.drawText(tex, lineR, font, mText);
-        p = line.drawImages(
-            Rect(mRect.x(), mRect.y() + lineR.y(), lineR.w(), lineR.h()), mImgs,
-            p);
+        p = line.draw(tex, lineR, mRect.getPos(), font, mText, mImgs, p, align);
         lineR.move(0, lineR.h());
     }
 
