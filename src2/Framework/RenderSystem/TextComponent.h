@@ -58,7 +58,7 @@ struct Line {
     size_t draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
                 DimensionsF scale, const SharedFont& font,
                 const std::string& text, const std::vector<std::string>& imgs,
-                size_t startPos, Rect::Align alignX, Rect::Align alignY);
+                size_t startPos);
 
    private:
     int mW = 0;
@@ -73,8 +73,8 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW);
 
 struct TextData : public Components::Component, public Entities::Entity {
    public:
-    TextData(const Rect& rect, const std::string& text,
-             const std::vector<std::string>& imgs,
+    TextData(const std::string& text, const std::vector<std::string>& imgs,
+             const Rect& rect, bool fitToRect,
              Rect::Align alignX = Rect::Align::CENTER,
              Rect::Align alignY = Rect::Align::CENTER);
 

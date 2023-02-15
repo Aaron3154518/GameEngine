@@ -48,9 +48,8 @@ void MyEntity::init() {
     Rect tr(175, 10, 100, 50);
     std::cerr << "Start" << std::endl;
     addComponent<TextComponent>(
-        tr, "HelloWorld\n{i}",
-        std::vector<std::string>{"res/wizards/wizard.png"}, Rect::Align::CENTER,
-        Rect::Align::TOP_LEFT);
+        "HelloWorld\n{i}", std::vector<std::string>{"res/wizards/wizard.png"},
+        tr, true, Rect::Align::CENTER, Rect::Align::TOP_LEFT);
     std::cerr << "End" << std::endl;
     TextureBuilder tex(tr.W(), tr.H());
     Shapes::Rectangle r;
@@ -263,8 +262,7 @@ void HealthData::init() {
     addComponent<SpriteComponent>("res/projectiles/fireball.png");
     addComponent<RenderService>();
 
-    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs,
-                                Rect::Align::TOP_LEFT, Rect::Align::TOP_LEFT);
+    update();
 }
 
 void HealthData::update() {
@@ -276,6 +274,6 @@ void HealthData::update() {
     alignY = aY == 0   ? Rect::Align::TOP_LEFT
              : aY == 1 ? Rect::Align::CENTER
                        : Rect::Align::BOT_RIGHT;
-    addComponent<TextComponent>(mRect, std::to_string(mT) + "{i}", mImgs,
+    addComponent<TextComponent>(std::to_string(mT) + "{i}", mImgs, mRect, true,
                                 alignX, alignY);
 }

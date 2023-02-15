@@ -16,7 +16,6 @@ void Text::draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
     RenderData rd(makeSharedTexture(
         SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get())));
     rd.mRect = rd.getMinRect(rect);
-    // rd.setFitAlign(tData.mAlign, Rect::Align::CENTER);
     rd.mRect.setPos(rect, Rect::Align::CENTER);
     tex.draw(rd);
 }
@@ -57,14 +56,13 @@ void Line::addElement(ImagePtr img) {
 size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
                   DimensionsF scale, const SharedFont& font,
                   const std::string& text, const std::vector<std::string>& imgs,
-                  size_t startPos, Rect::Align alignX, Rect::Align alignY) {
+                  size_t startPos) {
     if (mImgs.size() > imgs.size() - startPos) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
                   << " images but received " << (imgs.size() - startPos)
                   << std::endl;
         return startPos;
     }
-    rect.setWidth(mW, alignX);
     float x = rect.x();
     auto textIt = mText.begin();
     auto imgIt = mImgs.begin();
@@ -186,24 +184,27 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
 }
 
 // TextData
-TextData::TextData(const Rect& rect, const std::string& text,
-                   const std::vector<std::string>& imgs, Rect::Align alignX,
-                   Rect::Align alignY) {
-    SharedFont font = AssetManager::getFont({-1, 25, "|"});
+TextData::TextData(const std::string& text,
+                   const std::vector<std::string>& imgs, const Rect& rect,
+                   bool fitToRect, Rect::Align alignX, Rect::Align alignY) {
+    SharedFont font = AssetManager::getFont({-1, 50, "|"});
     mLines = splitText(text, font, rect.W());
 
     int lineH = TTF_FontHeight(font.get());
     TextureBuilder tex(rect.W(), lineH * mLines.size());
 
-    Rect r = Rect::getMinRect(tex.getTexture().get(), rect.w(), rect.h());
+    Rect r = fitToRect ? Rect::getMinRect(rect.W(), lineH * mLines.size(),
+                                          rect.w(), rect.h())
+                       : Rect(0, 0, rect.W(), lineH * mLines.size());
     DimensionsF scale{r.w() / rect.w(), r.h() / lineH / mLines.size()};
     r.setPos(rect, alignX, alignY);
 
     Rect lineR(0, 0, rect.W(), lineH);
     size_t p = 0;
     for (auto& line : mLines) {
-        p = line.draw(tex, lineR, {r.x(), r.y()}, scale, font, text, imgs, p,
-                      alignX, alignY);
+        Rect lr = lineR;
+        lr.setWidth(line.w(), alignX);
+        p = line.draw(tex, lr, {r.x(), r.y()}, scale, font, text, imgs, p);
         lineR.move(0, lineR.h());
     }
 
