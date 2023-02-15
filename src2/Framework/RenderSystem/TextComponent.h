@@ -74,7 +74,7 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW);
 struct TextData : public Components::Component, public Entities::Entity {
    public:
     TextData(const std::string& text, const std::vector<std::string>& imgs,
-             const Rect& rect, bool fitToRect,
+             const Rect& rect, SharedFont font,
              Rect::Align alignX = Rect::Align::CENTER,
              Rect::Align alignY = Rect::Align::CENTER);
 

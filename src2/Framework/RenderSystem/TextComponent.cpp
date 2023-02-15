@@ -186,16 +186,12 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
 // TextData
 TextData::TextData(const std::string& text,
                    const std::vector<std::string>& imgs, const Rect& rect,
-                   bool fitToRect, Rect::Align alignX, Rect::Align alignY) {
-    SharedFont font = AssetManager::getFont({-1, 50, "|"});
-    mLines = splitText(text, font, rect.W());
-
+                   SharedFont font, Rect::Align alignX, Rect::Align alignY) {
     int lineH = TTF_FontHeight(font.get());
+    mLines = splitText(text, font, rect.W());
     TextureBuilder tex(rect.W(), lineH * mLines.size());
 
-    Rect r = fitToRect ? Rect::getMinRect(rect.W(), lineH * mLines.size(),
-                                          rect.w(), rect.h())
-                       : Rect(0, 0, rect.W(), lineH * mLines.size());
+    Rect r = Rect(0, 0, rect.W(), lineH * mLines.size());
     DimensionsF scale{r.w() / rect.w(), r.h() / lineH / mLines.size()};
     r.setPos(rect, alignX, alignY);
 

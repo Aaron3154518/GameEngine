@@ -45,12 +45,11 @@ void MyEntity::init() {
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
-    Rect tr(175, 10, 100, 50);
-    std::cerr << "Start" << std::endl;
+    Rect tr(165, 10, 120, 50);
     addComponent<TextComponent>(
-        "HelloWorld\n{i}", std::vector<std::string>{"res/wizards/wizard.png"},
-        tr, true, Rect::Align::CENTER, Rect::Align::TOP_LEFT);
-    std::cerr << "End" << std::endl;
+        "Hello World\n{i}", std::vector<std::string>{"res/wizards/wizard.png"},
+        tr, AssetManager::getFont({-1, 25, "|"}), Rect::Align::CENTER,
+        Rect::Align::TOP_LEFT);
     TextureBuilder tex(tr.W(), tr.H());
     Shapes::Rectangle r;
     r.set(Rect(0, 0, tr.W(), tr.H()), -3, false);
@@ -274,6 +273,7 @@ void HealthData::update() {
     alignY = aY == 0   ? Rect::Align::TOP_LEFT
              : aY == 1 ? Rect::Align::CENTER
                        : Rect::Align::BOT_RIGHT;
-    addComponent<TextComponent>(std::to_string(mT) + "{i}", mImgs, mRect, true,
-                                alignX, alignY);
+    addComponent<TextComponent>(
+        std::to_string(mT) + "{i}", mImgs, mRect,
+        AssetManager::getFont({-1, (int)(mRect.h() / 2), "|"}), alignX, alignY);
 }
