@@ -93,39 +93,43 @@ void MyEntity::init() {
             auto& v = getComponent<VelocityComponent>().get();
             switch (m.data.key) {
                 case SDLK_a:
-                    v.x = -V;
+                    v.x -= V;
                     break;
                 case SDLK_d:
-                    v.x = V;
+                    v.x += V;
                     break;
                 case SDLK_w:
-                    v.y = -V;
+                    v.y -= V;
                     break;
                 case SDLK_s:
-                    v.y = V;
+                    v.y += V;
                     break;
                 default:
                     break;
             }
         },
-        Event::HELD);
+        Event::DOWN);
     subscribeTo<EventSystem::KeyboardMessage>(
         [this](const EventSystem::KeyboardMessage& m) {
             auto& v = getComponent<VelocityComponent>().get();
             switch (m.data.key) {
                 case SDLK_a:
+                    v.x += V;
+                    break;
                 case SDLK_d:
-                    v.x = 0;
+                    v.x -= V;
                     break;
                 case SDLK_w:
+                    v.y += V;
+                    break;
                 case SDLK_s:
-                    v.y = 0;
+                    v.y -= V;
                     break;
                 default:
                     break;
             }
         },
-        Event::RELEASED);
+        Event::UP);
     subscribeTo<EventSystem::MouseMessage>(
         [this](const EventSystem::MouseMessage& m) {
             if (m.data.mouse == Event::LEFT) {

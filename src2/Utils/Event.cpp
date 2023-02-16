@@ -1,11 +1,11 @@
 #include "Event.h"
 
 // MouseButton
-bool Event::MouseButton::pressed() const {
-    return Math::allBitsSet(status, Event::Status::PRESSED);
+bool Event::MouseButton::down() const {
+    return Math::allBitsSet(status, Event::Status::DOWN);
 }
-bool Event::MouseButton::released() const {
-    return Math::allBitsSet(status, Event::Status::RELEASED);
+bool Event::MouseButton::up() const {
+    return Math::allBitsSet(status, Event::Status::UP);
 }
 bool Event::MouseButton::held() const {
     return Math::allBitsSet(status, Event::Status::HELD);
@@ -15,20 +15,20 @@ bool Event::MouseButton::clicked() const {
 }
 
 // KeyButton
-bool Event::KeyButton::pressed() const {
-    return Math::allBitsSet(status, Event::Status::PRESSED);
+bool Event::KeyButton::down() const {
+    return Math::allBitsSet(status, Event::Status::DOWN);
 }
-bool Event::KeyButton::released() const {
-    return Math::allBitsSet(status, Event::Status::RELEASED);
+bool Event::KeyButton::up() const {
+    return Math::allBitsSet(status, Event::Status::UP);
 }
 bool Event::KeyButton::held() const {
     return Math::allBitsSet(status, Event::Status::HELD);
 }
+bool Event::KeyButton::pressed() const {
+    return Math::allBitsSet(status, Event::Status::PRESSED);
+}
 
 // Event
-const uint8_t Event::KEY_ALL = Event::PRESSED | Event::RELEASED | Event::HELD;
-const uint8_t Event::MOUSE_ALL = Event::KEY_ALL | Event::CLICKED;
-
 Event::Event() {
     for (auto btn : {Mouse::LEFT, Mouse::RIGHT, Mouse::MIDDLE}) {
         mMouseButtons[btn].mouse = btn;
@@ -96,16 +96,15 @@ void Event::update(SDL_Event &e) {
         }
         case SDL_MOUSEBUTTONDOWN: {
             MouseButton &b = mMouseButtons[toMouse(e.button.button)];
-            b.status = Status::PRESSED | Status::HELD;
+            b.status = Status::DOWN | Status::HELD;
             b.duration = 0;
             b.clickPos = mouse;
         } break;
         case SDL_MOUSEBUTTONUP: {
             MouseButton &b = mMouseButtons[toMouse(e.button.button)];
             b.status = (Math::distance(b.clickPos, mouse) < MAX_CLICK_DIFF
-                            ? Status::CLICKED
-                            : 0) |
-                       Status::RELEASED;
+                            ? Status::CLICKED | Status::UP
+                            : Status::UP);
             b.duration = 0;
         } break;
         case SDL_MOUSEMOTION: {
@@ -116,17 +115,19 @@ void Event::update(SDL_Event &e) {
         } break;
         case SDL_KEYDOWN: {
             KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
-            if (!b.held()) {
+            bool held = b.held();
+            b.status = Status::PRESSED | Status::HELD;
+            if (!held) {
+                b.status |= Status::DOWN;
                 b.duration = 0;
             }
-            b.status = Status::PRESSED | Status::HELD;
             if (SDL_IsTextInputActive()) {
                 processTextInputKey(b);
             }
         } break;
         case SDL_KEYUP: {
             KeyButton &b = get((SDL_KeyCode)e.key.keysym.sym);
-            b.status = Status::RELEASED;
+            b.status = Status::UP;
         } break;
         case SDL_TEXTEDITING:
             break;

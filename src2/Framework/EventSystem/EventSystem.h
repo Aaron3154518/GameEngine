@@ -14,6 +14,10 @@ class EventSystem {
     DATA_MESSAGE(UpdateMessage, Time, Update);
     typedef Messages::Message<Event::Status, Event::KeyButton> KeyboardMessage;
     typedef Messages::Message<Event::Status, Event::MouseButton> MouseMessage;
+    struct DragData {
+        float x, y, dx, dy;
+    };
+    DATA_MESSAGE(DragMessage, DragData, DragStart, DragEnd, Dragging);
 
     typedef std::function<void()> Func;
 

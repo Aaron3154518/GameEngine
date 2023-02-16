@@ -34,7 +34,7 @@ void EventSystem::update() {
     auto& mb = Messages::GetMessageBus();
     mb.sendMessage(UpdateMessage(Update, dt, {Entities::NullId(), true}));
 
-    auto codes = {Event::HELD, Event::PRESSED, Event::RELEASED};
+    auto codes = {Event::DOWN, Event::PRESSED, Event::UP, Event::HELD};
     for (auto& pair : mEvent.getKeys()) {
         auto& kb = pair.second;
         for (auto code : codes) {
@@ -45,7 +45,6 @@ void EventSystem::update() {
             }
         }
     }
-    codes = {Event::HELD, Event::PRESSED, Event::RELEASED, Event::CLICKED};
     for (auto& m : mEvent.getMice()) {
         for (auto code : codes) {
             if (Math::allBitsSet(m.status, code)) {
