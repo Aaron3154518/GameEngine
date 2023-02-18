@@ -72,10 +72,10 @@ void enforceFPS(uint32_t fps) {
     time = SDL_GetTicks();
 }
 
-SDL_Point getWindowSize() {
-    SDL_Point p;
-    SDL_GetRendererOutputSize(Renderer::get(), &p.x, &p.y);
-    return p;
+Dimensions getWindowSize() {
+    Dimensions d;
+    SDL_GetRendererOutputSize(Renderer::get(), &d.w, &d.h);
+    return d;
 }
 
 }  // namespace RenderSystem

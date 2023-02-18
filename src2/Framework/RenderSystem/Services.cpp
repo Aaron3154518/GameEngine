@@ -24,7 +24,8 @@ void RenderService::render() {
     RenderSystem::clearScreen(Colors::White);
     TextureBuilder tex;
     for (auto& e : entities) {
-        e.get<SpriteComponent>().draw(tex, e.getData<PositionComponent>());
+        e.get<SpriteComponent>().draw(
+            tex, Camera::GetRelativeRect(e.getData<PositionComponent>()));
     }
     RenderSystem::presentScreen();
 }

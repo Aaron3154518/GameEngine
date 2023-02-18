@@ -35,7 +35,7 @@ Event::Event() {
     }
 }
 
-void Event::update(uint32_t dt) {
+void Event::update(uint32_t dt, const Rect &camera, Dimensions screen) {
     // Reset event flags
     quit = resized = false;
     // Reset text editing
@@ -43,7 +43,9 @@ void Event::update(uint32_t dt) {
     inputBackspace = inputDelete = inputMove = 0;
     inputSeek = InputSeek::NONE;
     // Update mouse
-    SDL_GetMouseState(&mouse.x, &mouse.y);
+    SDL_GetMouseState(&absMouse.x, &absMouse.y);
+    mouse = {absMouse.x * camera.w() / screen.w + camera.x(),
+             absMouse.y * camera.h() / screen.h + camera.y()};
     // Reset mouse movement
     mouseDelta = {0, 0};
     scroll = 0;

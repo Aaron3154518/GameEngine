@@ -45,7 +45,7 @@ void MyEntity::init() {
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
-    Rect tr(165, 10, 120, 50);
+    Rect tr(190, 10, 120, 50);
     addComponent<TextComponent>(
         "Hello World\n{i}", std::vector<std::string>{"res/wizards/wizard.png"},
         tr, AssetManager::getFont({-1, 25, "|"}), Rect::Align::CENTER,
@@ -81,6 +81,12 @@ void MyEntity::init() {
             switch (m.data.key) {
                 case SDLK_r:
                     pos = Rect(10, 10, 50, 50);
+                    break;
+                case SDLK_MINUS:
+                    Camera::GetRect().resize(1 / 0.9, Rect::Align::CENTER);
+                    break;
+                case SDLK_EQUALS:
+                    Camera::GetRect().resize(0.9, Rect::Align::CENTER);
                     break;
                 default:
                     break;

@@ -7,6 +7,7 @@
 #include <SDL_ttf.h>
 #include <Utils/Colors.h>
 #include <Utils/Pointers.h>
+#include <Utils/Rect.h>
 
 #include <exception>
 #include <iostream>
@@ -40,7 +41,7 @@ void presentScreen();
 
 void enforceFPS(uint32_t fps);
 
-SDL_Point getWindowSize();
+Dimensions getWindowSize();
 
 }  // namespace RenderSystem
 

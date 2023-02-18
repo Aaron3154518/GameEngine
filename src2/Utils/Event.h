@@ -50,7 +50,7 @@ class Event {
         bool pressed() const;
     };
 
-    void update(uint32_t dt);
+    void update(uint32_t dt, const Rect &camera, Dimensions screen);
 
     bool quit = false;
     // Resize data
@@ -58,8 +58,7 @@ class Event {
     Dimensions oldDim, newDim;
 
     // Mouse position and movement
-    SDL_Point mouse;
-    SDL_Point mouseDelta;
+    SDL_Point mouse, absMouse, mouseDelta;
     bool mouseMoved() const;
     // < 0 = down, > 0 = up
     int scroll = 0;
