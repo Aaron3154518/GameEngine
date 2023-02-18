@@ -134,7 +134,8 @@ void MyEntity::init() {
     addComponent<MouseService>(MouseOptions(true));
     subscribeTo<MouseService::MouseMessage>(
         [this](const MouseService::MouseMessage& m) {
-            if (m.data.mouse == Event::LEFT) {
+            if (m.data.mouse == Event::LEFT &&
+                m.opts.target == Entities::NullId()) {
                 getComponent<PositionComponent>().get().setPos(
                     m.data.clickPos.x, m.data.clickPos.y, Rect::Align::CENTER);
             }
