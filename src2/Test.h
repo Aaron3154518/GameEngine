@@ -4,6 +4,7 @@
 #include <Components/Component.h>
 #include <Entities/Entity.h>
 #include <Entities/EntityContainer.h>
+#include <Framework/EventSystem/DragService.h>
 #include <Framework/PhysicsSystem/Collision.h>
 #include <Framework/PhysicsSystem/Services.h>
 #include <Framework/RenderSystem/Services.h>
@@ -15,7 +16,7 @@
 #include <cmath>
 #include <random>
 
-class MyService : public Services::Service {
+class MyService : public Services::Service<> {
    public:
     MESSAGE(Message, Hello, World);
     DATA_MESSAGE(CountMessage, int, IncreaseCount, PrintCount);

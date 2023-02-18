@@ -15,7 +15,6 @@ REGISTER(EventSystem::KeyboardMessage, KeyboardMessage, {
     return std::make_unique<Msg>(
         code, Event::KeyButton{static_cast<SDL_KeyCode>(key), 0, code});
 });
-REGISTER(EventSystem::MouseMessage, MouseMessage, { return nullptr; });
 
 // EventSystem
 Event EventSystem::mEvent;
@@ -33,27 +32,9 @@ void EventSystem::update() {
     // Dispatch messages
     auto& mb = Messages::GetMessageBus();
     mb.sendMessage(UpdateMessage(Update, dt, {Entities::NullId(), true}));
+    mb.sendMessage(EventMessage(OnEvent, mEvent, {Entities::NullId(), true}));
 
-    auto codes = {Event::DOWN, Event::PRESSED, Event::UP, Event::HELD};
-    for (auto& pair : mEvent.getKeys()) {
-        auto& kb = pair.second;
-        for (auto code : codes) {
-            if (Math::allBitsSet(kb.status, code)) {
-                mb.sendMessage(KeyboardMessage(
-                    code, kb,
-                    {Entities::NullId(), /*code == Event::HELD*/ true}));
-            }
-        }
-    }
-    for (auto& m : mEvent.getMice()) {
-        for (auto code : codes) {
-            if (Math::allBitsSet(m.status, code)) {
-                mb.sendMessage(MouseMessage(
-                    code, m,
-                    {Entities::NullId(), /*code == Event::HELD*/ true}));
-            }
-        }
-    }
+    sendKeyMessages();
 }
 
 void EventSystem::runNextFrame(const Func& func) {
@@ -66,6 +47,26 @@ void EventSystem::runQueued() {
     }
     GetQueued().clear();
 }
+
+void EventSystem::sendKeyMessages() {
+    auto& mb = Messages::GetMessageBus();
+    static const auto codes = {Event::DOWN, Event::PRESSED, Event::UP,
+                               Event::HELD};
+    for (auto code : codes) {
+        for (auto& pair : mEvent.getKeys()) {
+            auto& kb = pair.second;
+            if (Math::allBitsSet(kb.status, code)) {
+                mb.sendMessage(KeyboardMessage(
+                    code, kb,
+                    {Entities::NullId(), /*code == Event::HELD*/ true}));
+            }
+        }
+    }
+}
+
+bool EventSystem::sendDragMessages() { return false; }
+
+void EventSystem::sendHoverMessages() {}
 
 std::vector<EventSystem::Func>& EventSystem::GetQueued() {
     static std::vector<Func> QUEUED;

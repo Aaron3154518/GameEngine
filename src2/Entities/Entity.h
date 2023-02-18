@@ -33,7 +33,7 @@ class Entity : public Messages::Messager {
     }
 };
 
-class EntityUnsubService : public Services::Service {
+class EntityUnsubService : public Services::Service<> {
    public:
     DATA_MESSAGE(Message, UUID, Unsub);
 };

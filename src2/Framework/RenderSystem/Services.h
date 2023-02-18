@@ -9,7 +9,7 @@
 #include <Messages/MessageBus.h>
 #include <Services/Service.h>
 
-class RenderService : public Services::Service {
+class RenderService : public Services::Service<> {
    public:
     MESSAGE(Message, Render);
 

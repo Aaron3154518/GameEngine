@@ -4,41 +4,45 @@
 #include <Components/ComponentManager.h>
 
 namespace Services {
-class Service : public Components::ComponentManager<Components::Component> {
-   protected:
-    struct iterable {
+struct iterable {
+   public:
+    typedef std::function<bool(const Entities::UUID&)> CheckFunc;
+    typedef Components::ComponentManagerBase::iterator_base iterator_base;
+
+    class iterator {
        public:
-        typedef std::function<bool(const Entities::UUID&)> CheckFunc;
-
-        class iterator {
-           public:
-            iterator(const iterator_base& it, const iterator_base& end,
-                     const CheckFunc& func);
-
-            bool operator==(const iterator& rhs) const;
-            bool operator!=(const iterator& rhs) const;
-
-            Components::EntityComponents operator*();
-
-            // Prefix ++
-            iterator& operator++();
-
-            operator bool() const;
-
-           private:
-            iterator_base mIt, mEnd;
-            CheckFunc mCheck;
-        };
-
-        iterable(const iterator_base& bIt, const iterator_base& eIt,
+        iterator(const iterator_base& it, const iterator_base& end,
                  const CheckFunc& check);
 
-        iterator begin();
-        iterator end();
+        bool operator==(const iterator& rhs) const;
+        bool operator!=(const iterator& rhs) const;
+
+        Components::EntityComponents operator*();
+
+        // Prefix ++
+        iterator& operator++();
+
+        operator bool() const;
 
        private:
-        iterator mBegin, mEnd;
+        iterator_base mIt, mEnd;
+        CheckFunc mCheck;
     };
+
+    iterable(const iterator_base& bIt, const iterator_base& eIt,
+             const CheckFunc& check);
+
+    iterator begin();
+    iterator end();
+
+   private:
+    iterator mBegin, mEnd;
+};
+
+template <class Comp = Components::Component>
+class Service : public Components::ComponentManager<Comp> {
+   protected:
+    typedef Components::ComponentManagerBase::iterator_base iterator_base;
 
     template <class... Ts>
     typename std::enable_if<sizeof...(Ts) == 0, bool>::type check(
@@ -54,11 +58,14 @@ class Service : public Components::ComponentManager<Components::Component> {
 
     template <class... CompManTs>
     iterable active() {
-        return iterable(iterator_base(mComponents.begin()),
-                        iterator_base(mComponents.end()),
-                        [this](const Entities::UUID& eId) {
-                            return check<CompManTs...>(eId);
-                        });
+        return iterable(
+            iterator_base(
+                Components::ComponentManager<Comp>::mComponents.begin()),
+            iterator_base(
+                Components::ComponentManager<Comp>::mComponents.end()),
+            [this](const Entities::UUID& eId) {
+                return check<CompManTs...>(eId);
+            });
     }
 };
 }  // namespace Services

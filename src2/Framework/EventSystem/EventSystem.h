@@ -12,12 +12,8 @@
 class EventSystem {
    public:
     DATA_MESSAGE(UpdateMessage, Time, Update);
+    DATA_MESSAGE(EventMessage, Event, OnEvent);
     typedef Messages::Message<Event::Status, Event::KeyButton> KeyboardMessage;
-    typedef Messages::Message<Event::Status, Event::MouseButton> MouseMessage;
-    struct DragData {
-        float x, y, dx, dy;
-    };
-    DATA_MESSAGE(DragMessage, DragData, DragStart, DragEnd, Dragging);
 
     typedef std::function<void()> Func;
 
@@ -32,6 +28,11 @@ class EventSystem {
 
    private:
     static Event mEvent;
+
+    static void sendKeyMessages();
+    static void sendMouseMessages();
+    static bool sendDragMessages();
+    static void sendHoverMessages();
 
     static std::vector<Func>& GetQueued();
 };

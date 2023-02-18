@@ -17,7 +17,7 @@ class AccelerationComponent : public Components::ComponentManager<
 class BoundaryComponent
     : public Components::ComponentManager<Components::DataComponent<Rect>> {};
 
-class PhysicsService : public Services::Service {
+class PhysicsService : public Services::Service<> {
    private:
     void manager_init();
 

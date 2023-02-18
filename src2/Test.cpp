@@ -130,14 +130,22 @@ void MyEntity::init() {
             }
         },
         Event::UP);
-    subscribeTo<EventSystem::MouseMessage>(
-        [this](const EventSystem::MouseMessage& m) {
+
+    addComponent<MouseService>(MouseOptions(true));
+    subscribeTo<MouseService::MouseMessage>(
+        [this](const MouseService::MouseMessage& m) {
             if (m.data.mouse == Event::LEFT) {
                 getComponent<PositionComponent>().get().setPos(
                     m.data.clickPos.x, m.data.clickPos.y, Rect::Align::CENTER);
             }
         },
         Event::CLICKED);
+    subscribeTo<MouseService::DragMessage>(
+        [this](const MouseService::DragMessage& m) {
+            auto& r = getComponent<PositionComponent>().get();
+            r.setPos(m.data.x, m.data.y, Rect::Align::CENTER);
+        },
+        MouseService::Dragging);
 }
 
 // EntityProj

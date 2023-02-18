@@ -83,8 +83,6 @@ class ComponentManager : public ComponentManagerBase {
    public:
     typedef CompT Component;
 
-    virtual ~ComponentManager() = default;
-
     template <class... ArgTs>
     CompT& newComponent(Entities::UUID eId, ArgTs&&... args) {
         static_assert(std::is_constructible<CompT, ArgTs...>::value,

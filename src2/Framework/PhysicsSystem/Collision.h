@@ -14,7 +14,7 @@
 class CollisionComponent : public Components::ComponentManager<
                                Components::DataComponent<Entities::UUID>> {};
 
-class CollisionService : public Services::Service {
+class CollisionService : public Services::Service<> {
    public:
     typedef std::unordered_map<Entities::UUID, std::vector<Entities::UUID>>
         CollisionMap;
