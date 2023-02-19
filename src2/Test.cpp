@@ -42,6 +42,8 @@ void MyEntity::init() {
     addComponent<BoundaryComponent>(BOUND);
     addComponent<PhysicsService>();
 
+    Camera::Get().track(id(), 75);
+
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<RenderService>();
@@ -78,15 +80,16 @@ void MyEntity::init() {
     subscribeTo<EventSystem::KeyboardMessage>(
         [this](const EventSystem::KeyboardMessage& m) {
             auto& pos = getComponent<PositionComponent>().get();
+            auto& camera = Camera::Get();
             switch (m.data.key) {
                 case SDLK_r:
                     pos = Rect(10, 10, 50, 50);
                     break;
                 case SDLK_MINUS:
-                    Camera::GetRect().resize(1 / 0.9, Rect::Align::CENTER);
+                    camera.getRect().resize(1 / 0.9, Rect::Align::CENTER);
                     break;
                 case SDLK_EQUALS:
-                    Camera::GetRect().resize(0.9, Rect::Align::CENTER);
+                    camera.getRect().resize(0.9, Rect::Align::CENTER);
                     break;
                 default:
                     break;

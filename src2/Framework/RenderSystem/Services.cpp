@@ -25,7 +25,7 @@ void RenderService::render() {
     TextureBuilder tex;
     for (auto& e : entities) {
         e.get<SpriteComponent>().draw(
-            tex, Camera::GetRelativeRect(e.getData<PositionComponent>()));
+            tex, Camera::Get().getRelativeRect(e.getData<PositionComponent>()));
     }
     RenderSystem::presentScreen();
 }

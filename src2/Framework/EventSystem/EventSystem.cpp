@@ -27,7 +27,7 @@ void EventSystem::update() {
     uint32_t dt = time == 0 ? 0 : SDL_GetTicks() - time;
     time = SDL_GetTicks();
     // Parse SDL events
-    mEvent.update(dt, Camera::GetRect(), RenderSystem::getWindowSize());
+    mEvent.update(dt, Camera::Get().getRect(), RenderSystem::getWindowSize());
 
     // Dispatch messages
     auto& mb = Messages::GetMessageBus();

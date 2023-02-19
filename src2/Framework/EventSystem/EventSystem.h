@@ -1,7 +1,7 @@
 #ifndef EVENT_SYSTEM_H
 #define EVENT_SYSTEM_H
 
-#include <Framework/RenderSystem/Camera.h>
+#include <Entities/Camera.h>
 #include <Messages/MessageBus.h>
 #include <SDL.h>
 #include <Utils/Event.h>
