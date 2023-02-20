@@ -37,17 +37,6 @@ int main(int argc, char* argv[]) {
     auto& mb = Messages::GetMessageBus();
     Entities::UUID id;
 
-    // Test unsubscribe
-    {
-        auto e = GameObjects::New<MyEntity>();
-        id = e->id();
-
-        mb.sendMessage(MyService::Message(MyService::Hello));
-        mb.sendMessage(MyService::Message(MyService::World));
-
-        e.reset();
-    }
-
     auto& e = GameObjects::Get<MyEntity, MyEntity::Player>();
 
     const int N = 5;

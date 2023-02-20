@@ -101,7 +101,8 @@ class MyEntity : public Entities::Entity {
    public:
     enum RootVals : Observables::EnumT { A = 0 };
     enum StemVals : Observables::EnumT { B = 0, C };
-    typedef Observables::Access<int, RootVals, StemVals> Access;
+    typedef Observables::RootNode<int, RootVals> MyRoots;
+    typedef Observables::StemNode<std::string, StemVals> MyStems;
 
     enum { Player = 0 };
 

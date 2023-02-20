@@ -27,15 +27,16 @@ REGISTER(MyService::CountMessage, MyCountMessage, {
 
 // MyEntity
 void MyEntity::init() {
-    Access access;
+    MyRoots a(RootVals::A);
+    MyStems b(StemVals::B);
     Observables::subscribe<>(
         this,
-        [access]() {
-            std::cerr << "A = " << access.get(RootVals::A)
-                      << ", B = " << access.get(StemVals::B) << std::endl;
+        [a, b]() {
+            std::cerr << "A = " << a() << ", B = " << b() << std::endl;
         },
-        access[RootVals::A], access[StemVals::B]);
-    access.set(RootVals::A, 5);
+        b);
+    b.subscribeTo([a]() { return "Hello: " + std::to_string(a()); }, a);
+    a.set(5);
 
     addComponent<Components::ComponentManager<Components::Component>>();
     addComponent<MyComponentManager>();

@@ -18,69 +18,81 @@ namespace Observables {
 Messages::MessageBus& GetMessageBus();
 typedef int EnumT;
 
+enum Empty : EnumT {};
+
 template <class T>
 class DAG {
-    template <class _T, class _RootT, class _StemT>
-    friend struct Access;
-
-   public:
-    static DAG& Get() {
-        static DAG dag;
-        return dag;
-    }
+    template <class _T, class _CodeT>
+    friend struct Node;
 
    private:
-    T& get(const Entities::UUID& eId, EnumT code) { return mNodes[eId][code]; }
+    static T& get(const Entities::UUID& eId, EnumT mCode) {
+        static DAG dag;
+        return dag.mNodes[eId][mCode];
+    }
 
     std::unordered_map<Entities::UUID, std::unordered_map<EnumT, T>> mNodes;
 };
+
+template <class RetT>
+using Func = std::function<RetT()>;
+
+template <class... Tail>
+void subscribe(Messages::Messager* m, const Func<void>& func) {
+    func();
+}
+
+template <class NodeT, class... Tail>
+void subscribe(Messages::Messager* m, const Func<void>& func, NodeT node,
+               Tail... args) {
+    m->subscribeTo<typename NodeT::Message>([func](const auto& m) { func(); },
+                                            node.code());
+    subscribe<Tail...>(m, func, args...);
+}
 
 template <class T, class CodeT>
 struct Node {
     typedef Messages::Message<CodeT, const T&> Message;
 
-    CodeT code;
-};
+    Node(CodeT code) : mCode(code) {}
+    ~Node() = default;
 
-// Each variables has Owner (eid), Type (T), Name (EnumT)
-template <class T, class RootT, class StemT>
-struct Access {
-    typedef typename Node<T, RootT>::Message RootMessage;
-    typedef typename Node<T, StemT>::Message StemMessage;
+    T& operator()() const { return DAG<T>::get(messager(), mCode); }
+    CodeT code() const { return mCode; }
 
-    static const Entities::UUID& id() {
-        static const Entities::UUID& ID = Entities::generateUUID();
-        return ID;
+   protected:
+    CodeT mCode;
+
+    static Messages::Messager& messager() {
+        static Messages::Messager MESSAGER;
+        return MESSAGER;
     }
 
-    Node<T, RootT> operator[](RootT code) const { return {code}; }
-    Node<T, StemT> operator[](StemT code) const { return {code}; }
-
-    T& get(RootT code) const { return DAG<T>::Get().get(id(), code); }
-    T& get(StemT code) const { return DAG<T>::Get().get(id(), code); }
-
-    void set(RootT code, const T& t) const {
-        auto& val = get(code);
+    void set(const T& t) const {
+        auto& val = operator()();
         val = t;
-        Messages::GetMessageBus().sendMessage(RootMessage(code, val));
+        Messages::GetMessageBus().sendMessage(Message(mCode, val));
     }
 };
 
-typedef std::function<void()> SubFunc;
+template <class T, class CodeT>
+struct RootNode : public Node<T, CodeT> {
+    using Node<T, CodeT>::Node;
+    using Node<T, CodeT>::set;
+};
 
-template <class... Tail>
-typename std::enable_if<sizeof...(Tail) == 0>::type subscribe(
-    Messages::Messager* m, const SubFunc& func) {
-    func();
-}
+template <class T, class CodeT>
+struct StemNode : public Node<T, CodeT> {
+    using Node<T, CodeT>::Node;
 
-template <class NodeT, class... Tail>
-typename std::enable_if<sizeof(NodeT) + sizeof...(Tail) != 0>::type subscribe(
-    Messages::Messager* m, const SubFunc& func, NodeT node, Tail... args) {
-    m->subscribeTo<typename NodeT::Message>([func](const auto& m) { func(); },
-                                            node.code);
-    subscribe<Tail...>(m, func, args...);
-}
+    template <class... NodeTs>
+    void subscribeTo(const Func<T>& func, NodeTs... args) const {
+        StemNode sn = *this;
+        subscribe<NodeTs...>(
+            &Node<T, CodeT>::messager(), [func, sn]() { sn.set(func()); },
+            args...);
+    }
+};
 }  // namespace Observables
 
 #endif
