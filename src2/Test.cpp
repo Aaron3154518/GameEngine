@@ -35,8 +35,10 @@ void MyEntity::init() {
             std::cerr << "A = " << a() << ", B = " << b() << std::endl;
         },
         b);
-    b.subscribeTo([a]() { return "Hello: " + std::to_string(a()); }, a);
-    a.set(5);
+    Observables::subscribe<>(
+        this, [](int a) { std::cerr << "A^2 = " << a * a << std::endl; }, a);
+    b.subscribeTo([](int a) { return "Hello: " + std::to_string(a); }, a);
+    a(5);
 
     addComponent<Components::ComponentManager<Components::Component>>();
     addComponent<MyComponentManager>();

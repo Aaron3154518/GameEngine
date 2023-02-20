@@ -7,17 +7,12 @@
 #include <functional>
 #include <initializer_list>
 #include <memory>
+#include <type_traits>
 #include <typeindex>
 #include <unordered_map>
 
 namespace Observables {
-// Use normal message bus for external subscriptions
-// Use specialized message bus for internal subscriptions
-// (use the fact that all nodes have the same lifecycle)
-// (make it a messager)
-Messages::MessageBus& GetMessageBus();
 typedef int EnumT;
-
 enum Empty : EnumT {};
 
 template <class T>
@@ -27,19 +22,38 @@ class DAG {
 
    private:
     static T& get(const Entities::UUID& eId, EnumT mCode) {
-        static DAG dag;
-        return dag.mNodes[eId][mCode];
+        static std::unordered_map<Entities::UUID, std::unordered_map<EnumT, T>>
+            nodes;
+        return nodes[eId][mCode];
     }
-
-    std::unordered_map<Entities::UUID, std::unordered_map<EnumT, T>> mNodes;
 };
 
 template <class RetT>
 using Func = std::function<RetT()>;
 
+template <class...>
+struct MatchSignature;
+
+template <class F, class RetT, class... ArgTs>
+struct MatchSignature<F, RetT(ArgTs...)> {
+    enum {
+        value = std::is_convertible<F, std::function<RetT(ArgTs...)>>::value
+    };
+};
+
 template <class... Tail>
 void subscribe(Messages::Messager* m, const Func<void>& func) {
     func();
+}
+
+template <class NodeT, class F>
+typename std::enable_if<
+    MatchSignature<F, void(typename NodeT::Type)>::value>::type
+subscribe(Messages::Messager* m, const F& func, NodeT node) {
+    m->subscribeTo<typename NodeT::Message>(
+        [func](const typename NodeT::Message& m) { func(m.data); },
+        node.code());
+    func(node());
 }
 
 template <class NodeT, class... Tail>
@@ -52,12 +66,13 @@ void subscribe(Messages::Messager* m, const Func<void>& func, NodeT node,
 
 template <class T, class CodeT>
 struct Node {
+    typedef T Type;
     typedef Messages::Message<CodeT, const T&> Message;
 
     Node(CodeT code) : mCode(code) {}
     ~Node() = default;
 
-    T& operator()() const { return DAG<T>::get(messager(), mCode); }
+    const T& operator()() const { return DAG<T>::get(messager(), mCode); }
     CodeT code() const { return mCode; }
 
    protected:
@@ -68,8 +83,8 @@ struct Node {
         return MESSAGER;
     }
 
-    void set(const T& t) const {
-        auto& val = operator()();
+    void operator()(const T& t) const {
+        auto& val = DAG<T>::get(messager(), mCode);
         val = t;
         Messages::GetMessageBus().sendMessage(Message(mCode, val));
     }
@@ -78,19 +93,28 @@ struct Node {
 template <class T, class CodeT>
 struct RootNode : public Node<T, CodeT> {
     using Node<T, CodeT>::Node;
-    using Node<T, CodeT>::set;
+    using Node<T, CodeT>::operator();
 };
 
 template <class T, class CodeT>
 struct StemNode : public Node<T, CodeT> {
     using Node<T, CodeT>::Node;
 
+    template <class F, class NodeT>
+    typename std::enable_if<
+        MatchSignature<F, T(typename NodeT::Type)>::value>::type
+    subscribeTo(const F& func, NodeT node) {
+        StemNode sn = *this;
+        subscribe<NodeT>(
+            &Node<T, CodeT>::messager(),
+            [func, sn, node]() { sn(func(node())); }, node);
+    }
+
     template <class... NodeTs>
     void subscribeTo(const Func<T>& func, NodeTs... args) const {
         StemNode sn = *this;
         subscribe<NodeTs...>(
-            &Node<T, CodeT>::messager(), [func, sn]() { sn.set(func()); },
-            args...);
+            &Node<T, CodeT>::messager(), [func, sn]() { sn(func()); }, args...);
     }
 };
 }  // namespace Observables
