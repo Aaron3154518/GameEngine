@@ -57,11 +57,6 @@ class MessageBus {
     }
 
    private:
-    friend class Messager;
-    friend MessageBus& GetMessageBus();
-
-    MessageBus() = default;
-
     MessageHandle subscribe(
         const std::function<void(const Message<>&)>& callback,
         const Entities::UUID& eId, const std::type_index& mId, EnumT msgCode);

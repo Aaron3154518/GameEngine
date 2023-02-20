@@ -36,7 +36,6 @@ class Messager {
     operator Entities::UUID() const;
     Entities::UUID id() const;
 
-   protected:
     template <class MsgT>
     void subscribeTo(const std::function<void(const MsgT&)>& callback,
                      typename MsgT::Code code) {
@@ -50,6 +49,7 @@ class Messager {
             GetMessageBus().subscribe<MsgT>(callback, id()));
     }
 
+   protected:
     void startTimer(int len_ms, const std::function<void()>& callback);
 
    private:

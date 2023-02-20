@@ -12,6 +12,7 @@
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
 #include <Messages/Messager.h>
+#include <Observables/Observables.h>
 
 #include <cmath>
 #include <random>
@@ -98,6 +99,10 @@ class HealthComponent : public Components::ComponentManager<HealthData> {};
 
 class MyEntity : public Entities::Entity {
    public:
+    enum RootVals : Observables::EnumT { A = 0 };
+    enum StemVals : Observables::EnumT { B = 0, C };
+    typedef Observables::Access<int, RootVals, StemVals> Access;
+
     enum { Player = 0 };
 
    private:

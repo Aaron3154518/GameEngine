@@ -27,6 +27,16 @@ REGISTER(MyService::CountMessage, MyCountMessage, {
 
 // MyEntity
 void MyEntity::init() {
+    Access access;
+    Observables::subscribe<>(
+        this,
+        [access]() {
+            std::cerr << "A = " << access.get(RootVals::A)
+                      << ", B = " << access.get(StemVals::B) << std::endl;
+        },
+        access[RootVals::A], access[StemVals::B]);
+    access.set(RootVals::A, 5);
+
     addComponent<Components::ComponentManager<Components::Component>>();
     addComponent<MyComponentManager>();
     subscribeTo<MyService::Message>(
