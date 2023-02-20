@@ -22,7 +22,11 @@ class EntityContainer : public Entity {
 
     virtual ~EntityContainer() = default;
 
-    void add() { mEntities.push_back(GameObjects::New<EntityT>()); }
+    template <class... ArgTs>
+    void add(ArgTs&&... args) {
+        mEntities.push_back(
+            GameObjects::New<EntityT>(std::forward<ArgTs>(args)...));
+    }
 
     const EntityPtr& back() const { return mEntities.back(); }
 

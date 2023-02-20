@@ -7,7 +7,7 @@
 #include <Utils/Event.h>
 
 struct MouseOptions : public Components::Component {
-    MouseOptions(bool drag);
+    MouseOptions(bool drag = false);
 
     bool canDrag = false;
 };

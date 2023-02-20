@@ -86,7 +86,8 @@ struct Node {
     void operator()(const T& t) const {
         auto& val = DAG<T>::get(messager(), mCode);
         val = t;
-        Messages::GetMessageBus().sendMessage(Message(mCode, val));
+        Messages::GetMessageBus().sendMessage(
+            Message(mCode, val, {Entities::NullId(), true}));
     }
 };
 

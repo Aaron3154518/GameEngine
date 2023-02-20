@@ -5,8 +5,8 @@
 #include <Framework/PhysicsSystem/Services.h>
 #include <Framework/RenderSystem/RenderSystem.h>
 #include <Framework/RenderSystem/Services.h>
+#include <Incremental.h>
 #include <Services/CommandService.h>
-#include <Test.h>
 #include <Windows.h>
 
 #include <iostream>
@@ -35,19 +35,16 @@ int main(int argc, char* argv[]) {
     auto& cs = GameObjects::Get<Services::CommandService>();
 
     auto& mb = Messages::GetMessageBus();
-    Entities::UUID id;
 
-    auto& e = GameObjects::Get<MyEntity, MyEntity::Player>();
+    // auto& e = GameObjects::Get<MyEntity, MyEntity::Player>();
 
-    const int N = 5;
-    std::vector<std::unique_ptr<Enemy>> enemies(N);
-    for (int i = 0; i < N; i++) {
-        enemies[i] = GameObjects::New<Enemy>();
-    }
+    // const int N = 5;
+    // std::vector<std::unique_ptr<Enemy>> enemies(N);
+    // for (int i = 0; i < N; i++) {
+    //     enemies[i] = GameObjects::New<Enemy>();
+    // }
 
-    // Test entity targetting
-    mb.sendMessage(MyService::Message(MyService::Hello, {id}));
-    mb.sendMessage(MyService::Message(MyService::World, {e.id()}));
+    auto tierList = GameObjects::New<TierList>();
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {
