@@ -13,16 +13,11 @@
 struct TextData;
 
 struct Text {
-   public:
-    Text(int startPos, int len, int w);
-
-    int w() const;
-
     void draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
               const std::string& text);
 
-   private:
-    int mStartPos, mLen, mW;
+    size_t start, len;
+    int w;
 };
 
 class ImageEntity : public Entities::Entity {
@@ -36,18 +31,6 @@ class ImageEntity : public Entities::Entity {
 
 typedef std::unique_ptr<ImageEntity> ImageEntityPtr;
 
-struct Image {
-   public:
-    Image(int lineH);
-
-    int w() const;
-
-    ImageEntityPtr draw(Rect rect, const SpriteData& text);
-
-   private:
-    int mW;
-};
-
 struct Line {
    public:
     friend class TextData;
@@ -59,21 +42,15 @@ struct Line {
     bool empty() const;
     int w() const;
     int getSpace(int maxW) const;
-    int numImgs() const;
+    size_t numImgs() const;
 
-    void addElement(const Text& text);
-    void addElement(const Image& img);
-
-    void draw(TextureBuilder& tex, Rect rect, SDL_FPoint off, DimensionsF scale,
-              const SharedFont& font, const std::string& text,
-              const SpriteVector& imgs,
-              std::vector<ImageEntityPtr>& imgEntities);
+    void addText(const Text& text);
+    void addImage(int lineH);
 
    private:
-    int mW = 0;
+    int mW = 0, mImgCnt = 0;
     std::vector<Type> mTypes;
     std::vector<Text> mText;
-    std::vector<Image> mImgs;
 };
 
 std::vector<Line> splitText(const std::string& text, SharedFont font, int maxW);
@@ -90,7 +67,7 @@ struct TextData : public Components::Component, public Entities::Entity {
     void setAlign(Rect::Align aX, Rect::Align aY);
 
    private:
-    void init();
+    friend class TextComponent;
 
     void draw();
 
@@ -104,6 +81,10 @@ struct TextData : public Components::Component, public Entities::Entity {
     std::vector<ImageEntityPtr> mImgEntities;
 };
 
-class TextComponent : public Components::ComponentManager<TextData> {};
+class TextComponent : public Components::ComponentManager<TextData> {
+   public:
+   private:
+    void manager_init();
+};
 
 #endif
