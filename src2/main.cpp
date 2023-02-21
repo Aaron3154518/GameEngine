@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
     //     enemies[i] = GameObjects::New<Enemy>();
     // }
 
+    auto currency = GameObjects::New<Currency>();
     auto tierList = GameObjects::New<TierList>();
 
     // Create CLI thread
