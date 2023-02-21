@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
             break;
         }
 
+        mb.sendMessage(RenderService::Message(RenderService::PreRender));
         mb.sendMessage(RenderService::Message(RenderService::Render));
 
         // Handle events from cli thread

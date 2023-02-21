@@ -12,7 +12,7 @@
 
 class RenderService : public Services::Service<> {
    public:
-    MESSAGE(Message, Render);
+    MESSAGE(Message, PreRender, Render);
 
    private:
     void manager_init();

@@ -55,6 +55,8 @@ int Line::w() const { return mW; }
 
 int Line::getSpace(int maxW) const { return maxW - mW; }
 
+int Line::numImgs() const { return mImgs.size(); }
+
 void Line::addElement(const Text& text) {
     mW += text.w();
     mText.push_back(text);
@@ -196,48 +198,111 @@ std::vector<Line> splitText(const std::string& text, SharedFont font,
 }
 
 // TextData
-TextData::TextData(const std::string& text, const SpriteVector& imgs,
-                   const Rect& rect, SharedFont font, Rect::Align alignX,
-                   Rect::Align alignY) {
-    int lineH = TTF_FontHeight(font.get());
-    auto lines = splitText(text, font, rect.W());
-    TextureBuilder tex(rect.W(), lineH * lines.size());
+TextData::TextData() { init(); }
 
-    Rect r = Rect(0, 0, rect.W(), lineH * lines.size());
-    DimensionsF scale{r.w() / rect.w(), r.h() / lineH / lines.size()};
-    r.setPos(rect, alignX, alignY);
+void TextData::setText(const std::string& text) {
+    mText = text;
+    updateText = true;
+}
 
-    mImgs.clear();
-    mImgs.reserve(imgs.size());
+void TextData::setImages(const SpriteVector& imgs) {
+    mImgs = imgs;
+    updateImgs = true;
+}
 
-    Rect lineR(0, 0, rect.W(), lineH);
-    for (auto& line : lines) {
-        Rect lr = lineR;
-        lr.setWidth(line.w(), alignX);
-        line.draw(tex, lr, {r.x(), r.y()}, scale, font, text, imgs, mImgs);
-        lineR.move(0, lineR.h());
-    }
+void TextData::setRect(const Rect& rect) {
+    mRect = rect;
+    updateText = true;
+}
 
-    addComponent<PositionComponent>(r);
+void TextData::setFont(SharedFont font) {
+    mFont = font;
+    updateText = true;
+}
+
+void TextData::setAlign(Rect::Align a) { setAlign(a, a); }
+
+void TextData::setAlign(Rect::Align aX, Rect::Align aY) {
+    mAlignX = aX;
+    mAlignY = aY;
+    updateText = true;
+}
+
+void TextData::init() {
+    subscribeTo<RenderService::Message>(
+        [this](const RenderService::Message& m) { draw(); },
+        RenderService::PreRender);
+
+    addComponent<PositionComponent>(Rect());
     addComponent<ElevationComponent>(10);
-    addComponent<SpriteComponent>(tex.getTexture());
+    addComponent<SpriteComponent>();
     addComponent<RenderService>();
 }
 
-void TextData::setText(const std::string& text) {}
+void TextData::draw() {
+    if (updateText) {
+        int lineH = TTF_FontHeight(mFont.get());
+        mLines = splitText(mText, mFont, mRect.W());
+        TextureBuilder tex(mRect.W(), lineH * mLines.size());
 
-void TextData::setImages(const SpriteVector& imgs) {
-    if (imgs.size() != mImgs.size()) {
-        throw std::runtime_error(
-            "TextData::setImages(): Expected " + std::to_string(mImgs.size()) +
-            " images but received " + std::to_string(imgs.size()));
+        Rect r = Rect(0, 0, mRect.W(), lineH * mLines.size());
+        DimensionsF scale{r.w() / mRect.w(), r.h() / lineH / mLines.size()};
+        r.setPos(mRect, mAlignX, mAlignY);
+
+        int numImgs = 0;
+        for (auto& line : mLines) {
+            numImgs += line.numImgs();
+        }
+        size_t currSize = mImgEntities.size();
+        mImgEntities.resize(numImgs);
+        for (size_t i = currSize; i < mImgEntities.size(); i++) {
+            mImgEntities.at(i) = GameObjects::New<ImageEntity>();
+        }
+        auto imgEntIt = mImgEntities.begin();
+
+        Rect lineR(0, 0, mRect.W(), lineH);
+        for (auto& line : mLines) {
+            lineR.setWidth(line.w(), mAlignX);
+            float x = lineR.x();
+            auto textIt = line.mText.begin();
+            auto imgIt = line.mImgs.begin();
+            for (auto type : line.mTypes) {
+                switch (type) {
+                    case Line::Type::TEXT: {
+                        Text& t = *(textIt++);
+                        t.draw(tex, Rect(x, lineR.y(), t.w(), lineR.h()), mFont,
+                               mText);
+                        x += t.w();
+                    } break;
+                    case Line::Type::IMAGE: {
+                        Image& i = *(imgIt++);
+                        (*(imgEntIt++))
+                            ->setRect(Rect(x * scale.w + r.x(),
+                                           lineR.y() * scale.h + r.y(),
+                                           i.w() * scale.h,
+                                           lineR.h() * scale.h));
+                        x += i.w();
+                    } break;
+                };
+            }
+            lineR.move(0, lineR.h());
+        }
+
+        getComponent<PositionComponent>().set(r);
+        getComponent<SpriteComponent>().setTexture(tex.getTexture());
+
+        updateText = false;
     }
+    if (updateImgs) {
+        auto imgIt = mImgs.begin();
+        for (auto it = mImgEntities.begin(); it != mImgEntities.end(); ++it) {
+            if (imgIt != mImgs.end()) {
+                (*it)->setImg(*imgIt);
+            } else {
+                (*it)->setImg(SpriteData());
+            }
+        }
 
-    for (size_t i = 0; i < mImgs.size(); i++) {
-        mImgs.at(i)->setImg(imgs.at(i));
+        updateImgs = false;
     }
 }
-
-void TextData::setRect(const Rect& rect) {}
-
-void TextData::setFont(SharedFont font) {}

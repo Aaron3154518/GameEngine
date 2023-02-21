@@ -17,7 +17,15 @@ void Tier::init() {
 
     addComponent<ElevationComponent>(1);
     addComponent<PositionComponent>(r);
-    addComponent<TextComponent>("", SpriteVector(), r, font);
+    addComponent<TextComponent>();
+    auto& text = getComponent<TextComponent>();
+    text.setText("{i}");
+    text.setImages({mTier % 2 == 0
+                        ? SpriteData("res/projectiles/fireball.png")
+                        : SpriteData("res/wizards/wizard_ss.png", 5, 150)});
+    text.setRect(r);
+    text.setFont(font);
+
     addComponent<MouseService>();
     subscribeTo<MouseService::MouseMessage>(
         [this](const MouseService::MouseMessage& m) {
@@ -31,13 +39,8 @@ void Tier::init() {
     Observables::subscribe(
         this,
         [r, this](float val) {
-            addComponent<TextComponent>(
-                "{i}" + std::to_string(val),
-                SpriteVector{
-                    mTier % 2 == 0
-                        ? SpriteData("res/projectiles/fireball.png")
-                        : SpriteData("res/wizards/wizard_ss.png", 5, 150)},
-                r, font);
+            auto& text = getComponent<TextComponent>();
+            text.setText("{i}" + std::to_string(val));
         },
         TierVals(mTier));
 }

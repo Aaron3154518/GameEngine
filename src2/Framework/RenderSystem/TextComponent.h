@@ -50,6 +50,7 @@ struct Image {
 
 struct Line {
    public:
+    friend class TextData;
     enum Type : uint8_t {
         TEXT = 0,
         IMAGE,
@@ -58,6 +59,7 @@ struct Line {
     bool empty() const;
     int w() const;
     int getSpace(int maxW) const;
+    int numImgs() const;
 
     void addElement(const Text& text);
     void addElement(const Image& img);
@@ -69,27 +71,37 @@ struct Line {
 
    private:
     int mW = 0;
-    std::list<Type> mTypes;
-    std::list<Text> mText;
-    std::list<Image> mImgs;
+    std::vector<Type> mTypes;
+    std::vector<Text> mText;
+    std::vector<Image> mImgs;
 };
 
 std::vector<Line> splitText(const std::string& text, SharedFont font, int maxW);
 
 struct TextData : public Components::Component, public Entities::Entity {
    public:
-    TextData(const std::string& text, const SpriteVector& imgs,
-             const Rect& rect, SharedFont font,
-             Rect::Align alignX = Rect::Align::CENTER,
-             Rect::Align alignY = Rect::Align::CENTER);
+    TextData();
 
     void setText(const std::string& text);
     void setImages(const SpriteVector& imgs);
     void setRect(const Rect& rect);
     void setFont(SharedFont font);
+    void setAlign(Rect::Align a);
+    void setAlign(Rect::Align aX, Rect::Align aY);
 
    private:
-    std::vector<ImageEntityPtr> mImgs;
+    void init();
+
+    void draw();
+
+    bool updateText = true, updateImgs = true;
+    SharedFont mFont;
+    std::string mText;
+    Rect::Align mAlignX = Rect::Align::CENTER, mAlignY = Rect::Align::CENTER;
+    Rect mRect;
+    std::vector<Line> mLines;
+    SpriteVector mImgs;
+    std::vector<ImageEntityPtr> mImgEntities;
 };
 
 class TextComponent : public Components::ComponentManager<TextData> {};
