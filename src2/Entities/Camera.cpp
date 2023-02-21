@@ -23,7 +23,7 @@ void Camera::track(const Entities::UUID& eId, float maxSpeed) {
 
 void Camera::init() {
     Dimensions d = RenderSystem::getWindowSize();
-    addComponent<PositionComponent>(Rect(100, 0, d.w, d.h));
+    addComponent<PositionComponent>(Rect(0, 0, d.w, d.h));
 
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const EventSystem::UpdateMessage& m) {

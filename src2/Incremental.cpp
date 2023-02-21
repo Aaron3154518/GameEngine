@@ -19,6 +19,7 @@ void Tier::init() {
     addComponent<PositionComponent>(r);
     addComponent<TextComponent>();
     auto& text = getComponent<TextComponent>();
+    text.setElevation(1);
     text.setText("{i}");
     text.setImages({mTier % 2 == 0
                         ? SpriteData("res/projectiles/fireball.png")

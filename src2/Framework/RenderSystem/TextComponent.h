@@ -14,6 +14,7 @@ struct TextData;
 
 class ImageEntity : public Entities::Entity {
    public:
+    void setElevation(int e);
     void setRect(const Rect& r);
     void setImg(const SpriteData& sprite);
 
@@ -59,6 +60,7 @@ struct TextData : public Components::Component, public Entities::Entity {
    public:
     TextData();
 
+    void setElevation(int e);
     void setText(const std::string& text);
     void setImages(const SpriteVector& imgs);
     void setRect(const Rect& rect);

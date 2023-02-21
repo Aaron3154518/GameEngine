@@ -3,9 +3,13 @@
 // ImageEntity
 void ImageEntity::init() {
     addComponent<PositionComponent>(Rect());
-    addComponent<ElevationComponent>(6);
+    addComponent<ElevationComponent>(0);
     addComponent<SpriteComponent>(makeSharedTexture());
     addComponent<RenderService>();
+}
+
+void ImageEntity::setElevation(int e) {
+    getComponent<ElevationComponent>().set(e);
 }
 
 void ImageEntity::setRect(const Rect& r) {
@@ -150,9 +154,16 @@ std::vector<Line> splitText(const std::string& text, SharedFont font,
 // TextData
 TextData::TextData() {
     addComponent<PositionComponent>(Rect());
-    addComponent<ElevationComponent>(10);
+    addComponent<ElevationComponent>(0);
     addComponent<SpriteComponent>();
     addComponent<RenderService>();
+}
+
+void TextData::setElevation(int e) {
+    getComponent<ElevationComponent>().set(e);
+    for (auto& ptr : mImgEntities) {
+        ptr->setElevation(e);
+    }
 }
 
 void TextData::setText(const std::string& text) {
@@ -201,6 +212,8 @@ void TextData::draw() {
         mImgEntities.resize(numImgs);
         for (size_t i = currSize; i < mImgEntities.size(); i++) {
             mImgEntities.at(i) = GameObjects::New<ImageEntity>();
+            mImgEntities.at(i)->setElevation(
+                getComponent<ElevationComponent>().get());
         }
         auto imgEntIt = mImgEntities.begin();
 
