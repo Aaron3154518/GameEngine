@@ -20,19 +20,24 @@ void Text::draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
     tex.draw(rd);
 }
 
-// Image
-Image::Image(int lineH) : mW(lineH) {
+// ImageEntity
+void ImageEntity::init() {
     addComponent<PositionComponent>(Rect());
     addComponent<ElevationComponent>(6);
     addComponent<SpriteComponent>(makeSharedTexture());
     addComponent<RenderService>();
 }
 
+// Image
+Image::Image(int lineH) : mW(lineH) {}
+
 int Image::w() const { return mW; }
 
-void Image::draw(Rect rect, const std::string& img) {
-    getComponent<PositionComponent>().set(rect);
-    addComponent<SpriteComponent>(img);
+ImageEntityPtr Image::draw(Rect rect, const std::string& img) {
+    ImageEntityPtr ptr = GameObjects::New<ImageEntity>();
+    GameObjects::Get<PositionComponent>()[ptr->id()].set(rect);
+    GameObjects::Get<SpriteComponent>().newComponent(ptr->id(), img);
+    return ptr;
 }
 
 // Line
@@ -42,26 +47,26 @@ int Line::w() const { return mW; }
 
 int Line::getSpace(int maxW) const { return maxW - mW; }
 
-void Line::addElement(TextPtr text) {
-    mW += text->w();
-    mText.push_back(std::move(text));
+void Line::addElement(const Text& text) {
+    mW += text.w();
+    mText.push_back(text);
     mTypes.push_back(Type::TEXT);
 }
-void Line::addElement(ImagePtr img) {
-    mW += img->w();
-    mImgs.push_back(std::move(img));
+void Line::addElement(const Image& img) {
+    mW += img.w();
+    mImgs.push_back(img);
     mTypes.push_back(Type::IMAGE);
 }
 
-size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
-                  DimensionsF scale, const SharedFont& font,
-                  const std::string& text, const std::vector<std::string>& imgs,
-                  size_t startPos) {
-    if (mImgs.size() > imgs.size() - startPos) {
+void Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
+                DimensionsF scale, const SharedFont& font,
+                const std::string& text, const std::vector<std::string>& imgs,
+                std::vector<ImageEntityPtr>& imgEntities) {
+    if (mImgs.size() > imgs.size() - imgEntities.size()) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
-                  << " images but received " << (imgs.size() - startPos)
-                  << std::endl;
-        return startPos;
+                  << " images but received "
+                  << (imgs.size() - imgEntities.size()) << std::endl;
+        return;
     }
     float x = rect.x();
     auto textIt = mText.begin();
@@ -69,25 +74,26 @@ size_t Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
     for (auto type : mTypes) {
         switch (type) {
             case Type::TEXT: {
-                TextPtr& t = *(textIt++);
-                t->draw(tex, Rect(x, rect.y(), t->w(), rect.h()), font, text);
-                x += t->w();
+                Text& t = *(textIt++);
+                t.draw(tex, Rect(x, rect.y(), t.w(), rect.h()), font, text);
+                x += t.w();
             } break;
             case Type::IMAGE: {
-                ImagePtr& i = *(imgIt++);
-                i->draw(Rect(x * scale.w + off.x, rect.y() * scale.h + off.y,
-                             i->w() * scale.h, rect.h() * scale.h),
-                        imgs.at(startPos++));
-                x += i->w();
+                Image& i = *(imgIt++);
+                imgEntities.push_back(
+                    i.draw(Rect(x * scale.w + off.x, rect.y() * scale.h + off.y,
+                                i.w() * scale.h, rect.h() * scale.h),
+                           imgs.at(imgEntities.size())));
+                x += i.w();
             } break;
         };
     }
-    return startPos;
 }
 
 // splitText
-std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
-    std::list<Line> lines;
+std::vector<Line> splitText(const std::string& text, SharedFont font,
+                            int maxW) {
+    std::vector<Line> lines;
     lines.push_back(Line());
     if (!font) {
         return lines;
@@ -112,7 +118,7 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
                         &width, &count);
 
         if (count == len) {  // Fit entire text onto line
-            lines.back().addElement(std::make_unique<Text>(pos1, len, width));
+            lines.back().addElement(Text(pos1, len, width));
         } else {  // Break up text
             // Find last space, if any
             size_t lastSpace = str.find_last_of(' ');
@@ -121,8 +127,7 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
                 TTF_SizeText(font.get(), str.substr(0, lastSpace).c_str(),
                              &textW, nullptr);
 
-                lines.back().addElement(
-                    std::make_unique<Text>(pos1, pos1 + lastSpace, textW));
+                lines.back().addElement(Text(pos1, pos1 + lastSpace, textW));
                 lines.push_back(Line());
                 addText(pos1 + lastSpace + 1, pos2);
             } else {  // Won't fit on this line
@@ -136,8 +141,7 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
                     addText(pos1, pos2);
                 } else {  // It is bigger than one line, split across
                     // multiple lines
-                    lines.back().addElement(
-                        std::make_unique<Text>(pos1, count, width));
+                    lines.back().addElement(Text(pos1, count, width));
                     lines.push_back(Line());
                     addText(pos1 + count, pos2);
                 }
@@ -170,7 +174,7 @@ std::list<Line> splitText(const std::string& text, SharedFont font, int maxW) {
                         if (lineH > lines.back().getSpace(maxW)) {
                             lines.push_back(Line());
                         }
-                        lines.back().addElement(std::make_unique<Image>(lineH));
+                        lines.back().addElement(Image(lineH));
                         break;
                 };
                 break;
@@ -188,19 +192,21 @@ TextData::TextData(const std::string& text,
                    const std::vector<std::string>& imgs, const Rect& rect,
                    SharedFont font, Rect::Align alignX, Rect::Align alignY) {
     int lineH = TTF_FontHeight(font.get());
-    mLines = splitText(text, font, rect.W());
-    TextureBuilder tex(rect.W(), lineH * mLines.size());
+    auto lines = splitText(text, font, rect.W());
+    TextureBuilder tex(rect.W(), lineH * lines.size());
 
-    Rect r = Rect(0, 0, rect.W(), lineH * mLines.size());
-    DimensionsF scale{r.w() / rect.w(), r.h() / lineH / mLines.size()};
+    Rect r = Rect(0, 0, rect.W(), lineH * lines.size());
+    DimensionsF scale{r.w() / rect.w(), r.h() / lineH / lines.size()};
     r.setPos(rect, alignX, alignY);
 
+    mImgs.clear();
+    mImgs.reserve(imgs.size());
+
     Rect lineR(0, 0, rect.W(), lineH);
-    size_t p = 0;
-    for (auto& line : mLines) {
+    for (auto& line : lines) {
         Rect lr = lineR;
         lr.setWidth(line.w(), alignX);
-        p = line.draw(tex, lr, {r.x(), r.y()}, scale, font, text, imgs, p);
+        line.draw(tex, lr, {r.x(), r.y()}, scale, font, text, imgs, mImgs);
         lineR.move(0, lineR.h());
     }
 

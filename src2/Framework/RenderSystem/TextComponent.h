@@ -25,21 +25,25 @@ struct Text {
     int mStartPos, mLen, mW;
 };
 
-typedef std::unique_ptr<Text> TextPtr;
+class ImageEntity : public Entities::Entity {
+   private:
+    void init();
+    void draw(Rect rect, const std::string& text);
+};
 
-struct Image : public Entities::Entity {
+typedef std::unique_ptr<ImageEntity> ImageEntityPtr;
+
+struct Image {
    public:
     Image(int lineH);
 
     int w() const;
 
-    void draw(Rect rect, const std::string& text);
+    ImageEntityPtr draw(Rect rect, const std::string& text);
 
    private:
     int mW;
 };
-
-typedef std::unique_ptr<Image> ImagePtr;
 
 struct Line {
    public:
@@ -52,24 +56,22 @@ struct Line {
     int w() const;
     int getSpace(int maxW) const;
 
-    void addElement(TextPtr text);
-    void addElement(ImagePtr img);
+    void addElement(const Text& text);
+    void addElement(const Image& img);
 
-    size_t draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
-                DimensionsF scale, const SharedFont& font,
-                const std::string& text, const std::vector<std::string>& imgs,
-                size_t startPos);
+    void draw(TextureBuilder& tex, Rect rect, SDL_FPoint off, DimensionsF scale,
+              const SharedFont& font, const std::string& text,
+              const std::vector<std::string>& imgs,
+              std::vector<ImageEntityPtr>& imgEntities);
 
    private:
     int mW = 0;
     std::list<Type> mTypes;
-    std::list<TextPtr> mText;
-    std::list<ImagePtr> mImgs;
+    std::list<Text> mText;
+    std::list<Image> mImgs;
 };
 
-typedef std::unique_ptr<Line> LinePtr;
-
-std::list<Line> splitText(const std::string& text, SharedFont font, int maxW);
+std::vector<Line> splitText(const std::string& text, SharedFont font, int maxW);
 
 struct TextData : public Components::Component, public Entities::Entity {
    public:
@@ -78,8 +80,12 @@ struct TextData : public Components::Component, public Entities::Entity {
              Rect::Align alignX = Rect::Align::CENTER,
              Rect::Align alignY = Rect::Align::CENTER);
 
+    void setText(const std::string& text);
+    void setImages(const std::vector<std::string>& imgs);
+    void setRect(const Rect& rect);
+
    private:
-    std::list<Line> mLines;
+    std::vector<ImageEntityPtr> mImgs;
 };
 
 class TextComponent : public Components::ComponentManager<TextData> {};
