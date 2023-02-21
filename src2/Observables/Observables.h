@@ -3,6 +3,7 @@
 
 #include <Entities/UUID.h>
 #include <Messages/Messager.h>
+#include <Utils/Templates.h>
 
 #include <functional>
 #include <initializer_list>
@@ -30,16 +31,6 @@ class DAG {
 
 template <class RetT>
 using Func = std::function<RetT()>;
-
-template <class...>
-struct MatchSignature;
-
-template <class F, class RetT, class... ArgTs>
-struct MatchSignature<F, RetT(ArgTs...)> {
-    enum {
-        value = std::is_convertible<F, std::function<RetT(ArgTs...)>>::value
-    };
-};
 
 template <class... Tail>
 void subscribe(Messages::Messager* m, const Func<void>& func) {

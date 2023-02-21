@@ -43,7 +43,7 @@ void TierList::init() {
         add(t);
     }
 
-    Entity::subscribeTo<EventSystem::UpdateMessage>(
+    subscribeTo<EventSystem::UpdateMessage>(
         [this](const EventSystem::UpdateMessage& m) {
             for (size_t i = 0; i < TIERS.size() - 1; i++) {
                 TierVals v1(TIERS.at(i)), v2(TIERS.at((i + 1) % TIERS.size()));

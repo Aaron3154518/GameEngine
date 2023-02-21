@@ -5,6 +5,7 @@
 #include <Framework/EventSystem/EventSystem.h>
 #include <Messages/GameObjects.h>
 #include <Messages/MessageBus.h>
+#include <Utils/Templates.h>
 
 #include <memory>
 #include <vector>
@@ -52,18 +53,6 @@ class EntityContainer : public Entity {
         for (auto& ptr : mEntities) {
             func(*ptr, std::forward<ArgTs>(args)...);
         }
-    }
-
-    template <class MsgT, class F>
-    void subscribeTo(const F& callback, typename MsgT::Code code) {
-        Entity::subscribeTo<MsgT>(
-            [this, callback](const MsgT& m) { forEach(callback, m); }, code);
-    }
-
-    template <class MsgT, class F>
-    void subscribeTo(const F& callback) {
-        Entity::subscribeTo<MsgT>(
-            [this, callback](const MsgT& m) { forEach(callback, m); });
     }
 
    private:
