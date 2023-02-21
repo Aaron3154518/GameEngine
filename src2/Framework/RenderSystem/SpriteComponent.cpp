@@ -2,13 +2,29 @@
 
 // SpriteData
 SpriteData::SpriteData() {}
-SpriteData::SpriteData(SharedTexture tex) : mTex(tex) {}
+SpriteData::SpriteData(SharedTexture tex, uint8_t frames, uint32_t delayMs) {
+    setTexture(tex);
+    setAnimation(frames, delayMs);
+}
 SpriteData::SpriteData(const std::string& file, uint8_t frames,
                        uint32_t delayMs)
-    : SpriteData(AssetManager::getTexture(file)) {
+    : SpriteData(AssetManager::getTexture(file), frames, delayMs) {}
+
+void SpriteData::setTexture(SharedTexture tex) { mTex = tex; }
+
+void SpriteData::setTexture(const std::string& file) {
+    setTexture(AssetManager::getTexture(file));
+}
+
+void SpriteData::setAnimation(uint8_t frames, uint32_t delayMs) {
+    seekFrame(0);
+    uint8_t prevFrameCnt = mFrameCnt;
     mFrameCnt = frames < 1 ? 1 : frames;
     mDelayMs = delayMs < 1 ? 1 : delayMs;
-    mTex.mArea = Rect(0, 0, 1.0f / mFrameCnt, 1);
+
+    float frac = (float)prevFrameCnt / mFrameCnt;
+    mTex.mArea = Rect(mTex.mArea.x() * frac, mTex.mArea.y() * frac,
+                      mTex.mArea.w() * frac, mTex.mArea.h());
 }
 
 void SpriteData::seekFrame(uint8_t frame) {

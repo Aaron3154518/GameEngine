@@ -28,15 +28,23 @@ void ImageEntity::init() {
     addComponent<RenderService>();
 }
 
+void ImageEntity::setRect(const Rect& r) {
+    getComponent<PositionComponent>().set(r);
+}
+
+void ImageEntity::setImg(const SpriteData& sprite) {
+    addComponent<SpriteComponent>(sprite);
+}
+
 // Image
 Image::Image(int lineH) : mW(lineH) {}
 
 int Image::w() const { return mW; }
 
-ImageEntityPtr Image::draw(Rect rect, const std::string& img) {
+ImageEntityPtr Image::draw(Rect rect, const SpriteData& img) {
     ImageEntityPtr ptr = GameObjects::New<ImageEntity>();
-    GameObjects::Get<PositionComponent>()[ptr->id()].set(rect);
-    GameObjects::Get<SpriteComponent>().newComponent(ptr->id(), img);
+    ptr->setRect(rect);
+    ptr->setImg(img);
     return ptr;
 }
 
@@ -60,7 +68,7 @@ void Line::addElement(const Image& img) {
 
 void Line::draw(TextureBuilder& tex, Rect rect, SDL_FPoint off,
                 DimensionsF scale, const SharedFont& font,
-                const std::string& text, const std::vector<std::string>& imgs,
+                const std::string& text, const SpriteVector& imgs,
                 std::vector<ImageEntityPtr>& imgEntities) {
     if (mImgs.size() > imgs.size() - imgEntities.size()) {
         std::cerr << "Line::drawImages(): Expected " << mImgs.size()
@@ -188,9 +196,9 @@ std::vector<Line> splitText(const std::string& text, SharedFont font,
 }
 
 // TextData
-TextData::TextData(const std::string& text,
-                   const std::vector<std::string>& imgs, const Rect& rect,
-                   SharedFont font, Rect::Align alignX, Rect::Align alignY) {
+TextData::TextData(const std::string& text, const SpriteVector& imgs,
+                   const Rect& rect, SharedFont font, Rect::Align alignX,
+                   Rect::Align alignY) {
     int lineH = TTF_FontHeight(font.get());
     auto lines = splitText(text, font, rect.W());
     TextureBuilder tex(rect.W(), lineH * lines.size());
@@ -215,3 +223,21 @@ TextData::TextData(const std::string& text,
     addComponent<SpriteComponent>(tex.getTexture());
     addComponent<RenderService>();
 }
+
+void TextData::setText(const std::string& text) {}
+
+void TextData::setImages(const SpriteVector& imgs) {
+    if (imgs.size() != mImgs.size()) {
+        throw std::runtime_error(
+            "TextData::setImages(): Expected " + std::to_string(mImgs.size()) +
+            " images but received " + std::to_string(imgs.size()));
+    }
+
+    for (size_t i = 0; i < mImgs.size(); i++) {
+        mImgs.at(i)->setImg(imgs.at(i));
+    }
+}
+
+void TextData::setRect(const Rect& rect) {}
+
+void TextData::setFont(SharedFont font) {}

@@ -82,6 +82,7 @@ class ComponentManager : public ComponentManagerBase {
 
    public:
     typedef CompT Component;
+    typedef std::unique_ptr<CompT> ComponentPtr;
 
     template <class... ArgTs>
     CompT& newComponent(Entities::UUID eId, ArgTs&&... args) {
@@ -90,6 +91,12 @@ class ComponentManager : public ComponentManagerBase {
                       "component with the given arguments");
         auto& comp = mComponents[eId];
         comp = std::make_unique<CompT>(std::forward<ArgTs>(args)...);
+        return *static_cast<CompT*>(comp.get());
+    }
+
+    CompT& setComponent(Entities::UUID eId, ComponentPtr ptr) {
+        auto& comp = mComponents[eId];
+        comp = std::move(ptr);
         return *static_cast<CompT*>(comp.get());
     }
 

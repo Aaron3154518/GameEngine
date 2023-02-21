@@ -18,9 +18,13 @@ struct SpriteData : public Components::Component {
 
    public:
     SpriteData();
-    SpriteData(SharedTexture tex);
+    SpriteData(SharedTexture tex, uint8_t frames = 1, uint32_t delayMs = 100);
     SpriteData(const std::string& file, uint8_t frames = 1,
                uint32_t delayMs = 100);
+
+    void setTexture(SharedTexture tex);
+    void setTexture(const std::string& file);
+    void setAnimation(uint8_t frames = 1, uint32_t delayMs = 100);
 
     void seekFrame(uint8_t frame);
     uint8_t frame() const;
@@ -41,5 +45,8 @@ class SpriteComponent : public Components::ComponentManager<SpriteData> {
 
     void onUpdate(Time dt);
 };
+
+typedef SpriteComponent::ComponentPtr SpritePtr;
+typedef std::vector<SpriteData> SpriteVector;
 
 #endif

@@ -26,9 +26,12 @@ struct Text {
 };
 
 class ImageEntity : public Entities::Entity {
+   public:
+    void setRect(const Rect& r);
+    void setImg(const SpriteData& sprite);
+
    private:
     void init();
-    void draw(Rect rect, const std::string& text);
 };
 
 typedef std::unique_ptr<ImageEntity> ImageEntityPtr;
@@ -39,7 +42,7 @@ struct Image {
 
     int w() const;
 
-    ImageEntityPtr draw(Rect rect, const std::string& text);
+    ImageEntityPtr draw(Rect rect, const SpriteData& text);
 
    private:
     int mW;
@@ -61,7 +64,7 @@ struct Line {
 
     void draw(TextureBuilder& tex, Rect rect, SDL_FPoint off, DimensionsF scale,
               const SharedFont& font, const std::string& text,
-              const std::vector<std::string>& imgs,
+              const SpriteVector& imgs,
               std::vector<ImageEntityPtr>& imgEntities);
 
    private:
@@ -75,14 +78,15 @@ std::vector<Line> splitText(const std::string& text, SharedFont font, int maxW);
 
 struct TextData : public Components::Component, public Entities::Entity {
    public:
-    TextData(const std::string& text, const std::vector<std::string>& imgs,
+    TextData(const std::string& text, const SpriteVector& imgs,
              const Rect& rect, SharedFont font,
              Rect::Align alignX = Rect::Align::CENTER,
              Rect::Align alignY = Rect::Align::CENTER);
 
     void setText(const std::string& text);
-    void setImages(const std::vector<std::string>& imgs);
+    void setImages(const SpriteVector& imgs);
     void setRect(const Rect& rect);
+    void setFont(SharedFont font);
 
    private:
     std::vector<ImageEntityPtr> mImgs;

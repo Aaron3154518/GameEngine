@@ -28,6 +28,11 @@ class Entity : public Messages::Messager {
     }
 
     template <class CompManT>
+    void setComponent(typename CompManT::ComponentPtr ptr) {
+        GameObjects::Get<CompManT>().setComponent(id(), std::move(ptr));
+    }
+
+    template <class CompManT>
     typename CompManT::Component& getComponent() {
         return Components::Get<CompManT>(id());
     }
