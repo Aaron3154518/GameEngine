@@ -69,8 +69,7 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        mb.sendMessage(RenderService::Message(RenderService::Render,
-                                              {Entities::NullId(), true}));
+        mb.sendMessage(RenderService::Message(RenderService::Render));
 
         // Handle events from cli thread
         bool quit = false;

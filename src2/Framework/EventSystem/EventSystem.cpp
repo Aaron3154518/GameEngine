@@ -31,8 +31,8 @@ void EventSystem::update() {
 
     // Dispatch messages
     auto& mb = Messages::GetMessageBus();
-    mb.sendMessage(UpdateMessage(Update, dt, {Entities::NullId(), true}));
-    mb.sendMessage(EventMessage(OnEvent, mEvent, {Entities::NullId(), true}));
+    mb.sendMessage(UpdateMessage(Update, dt));
+    mb.sendMessage(EventMessage(OnEvent, mEvent));
 
     sendKeyMessages();
 }
@@ -56,9 +56,7 @@ void EventSystem::sendKeyMessages() {
         for (auto& pair : mEvent.getKeys()) {
             auto& kb = pair.second;
             if (Math::allBitsSet(kb.status, code)) {
-                mb.sendMessage(KeyboardMessage(
-                    code, kb,
-                    {Entities::NullId(), /*code == Event::HELD*/ true}));
+                mb.sendMessage(KeyboardMessage(code, kb, {Entities::NullId()}));
             }
         }
     }

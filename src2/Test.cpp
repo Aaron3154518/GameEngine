@@ -194,8 +194,8 @@ void EnemyProj::init() {
             auto& pos = getComponent<PositionComponent>().get();
             SDL_Rect _;
             if (!SDL_IntersectRect(pos, BOUND, &_)) {
-                Messages::GetMessageBus().sendMessage(EnemyProjCont::Message(
-                    EnemyProjCont::Remove, id(), {Entities::NullId(), true}));
+                Messages::GetMessageBus().sendMessage(
+                    EnemyProjCont::Message(EnemyProjCont::Remove, id()));
             }
         },
         EventSystem::Update);

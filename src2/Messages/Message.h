@@ -50,7 +50,7 @@ std::type_index ID() {
 // Message classes
 struct MessageOptions {
     Entities::UUID target = Entities::NullId();
-    bool quiet = false;
+    bool quiet = true;
 };
 
 template <class CodeT = void, class DataT = void>

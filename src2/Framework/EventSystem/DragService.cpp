@@ -24,12 +24,12 @@ void MouseService::onEvent(const Event& e) {
         // Drag
         mb.sendMessage(DragMessage(
             Dragging, {e.mouse.x, e.mouse.y, e.mouseDelta.x, e.mouseDelta.y},
-            {mDragId, true}));
+            {mDragId}));
 
         // Stopped dragging
         for (auto& m : mice) {
             if (m.up()) {
-                mb.sendMessage(DragMessage(DragEnd, {}, {mDragId, true}));
+                mb.sendMessage(DragMessage(DragEnd, {}, {mDragId}));
                 mDragId = Entities::NullId();
                 break;
             }
@@ -64,8 +64,7 @@ void MouseService::onEvent(const Event& e) {
                 for (auto& m : mice) {
                     if (m.down()) {
                         mDragId = en.id();
-                        mb.sendMessage(
-                            DragMessage(DragStart, {}, {mDragId, true}));
+                        mb.sendMessage(DragMessage(DragStart, {}, {mDragId}));
                         break;
                     }
                 }
@@ -77,7 +76,7 @@ void MouseService::onEvent(const Event& e) {
             for (auto code : codes) {
                 for (auto& m : mice) {
                     if (Math::allBitsSet(m.status, code)) {
-                        mb.sendMessage(MouseMessage(code, m, {en.id(), true}));
+                        mb.sendMessage(MouseMessage(code, m, {en.id()}));
                     }
                 }
             }
@@ -89,8 +88,7 @@ void MouseService::onEvent(const Event& e) {
         for (auto code : codes) {
             for (auto& m : mice) {
                 if (Math::allBitsSet(m.status, code)) {
-                    mb.sendMessage(
-                        MouseMessage(code, m, {Entities::NullId(), true}));
+                    mb.sendMessage(MouseMessage(code, m));
                 }
             }
         }
