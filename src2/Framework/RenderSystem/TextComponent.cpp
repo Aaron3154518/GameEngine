@@ -1,20 +1,5 @@
 #include "TextComponent.h"
 
-// Text
-void Text::draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
-                const std::string& text) {
-    Surface textSurf = makeSurface();
-    std::string str = text.substr(start, len);
-    textSurf = makeSurface(
-        TTF_RenderText_Blended(font.get(), str.c_str(), Colors::Black));
-
-    RenderData rd(makeSharedTexture(
-        SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get())));
-    rd.mRect = rd.getMinRect(rect);
-    rd.mRect.setPos(rect, Rect::Align::CENTER);
-    tex.draw(rd);
-}
-
 // ImageEntity
 void ImageEntity::init() {
     addComponent<PositionComponent>(Rect());
@@ -29,6 +14,21 @@ void ImageEntity::setRect(const Rect& r) {
 
 void ImageEntity::setImg(const SpriteData& sprite) {
     addComponent<SpriteComponent>(sprite);
+}
+
+// Text
+void Text::draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
+                const std::string& text) {
+    Surface textSurf = makeSurface();
+    std::string str = text.substr(start, len);
+    textSurf = makeSurface(
+        TTF_RenderText_Blended(font.get(), str.c_str(), Colors::Black));
+
+    RenderData rd(makeSharedTexture(
+        SDL_CreateTextureFromSurface(Renderer::get(), textSurf.get())));
+    rd.mRect = rd.getMinRect(rect);
+    rd.mRect.setPos(rect, Rect::Align::CENTER);
+    tex.draw(rd);
 }
 
 // Line

@@ -12,14 +12,6 @@
 // Forward Declaration
 struct TextData;
 
-struct Text {
-    void draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
-              const std::string& text);
-
-    size_t start, len;
-    int w;
-};
-
 class ImageEntity : public Entities::Entity {
    public:
     void setRect(const Rect& r);
@@ -30,6 +22,14 @@ class ImageEntity : public Entities::Entity {
 };
 
 typedef std::unique_ptr<ImageEntity> ImageEntityPtr;
+
+struct Text {
+    void draw(TextureBuilder& tex, Rect rect, const SharedFont& font,
+              const std::string& text);
+
+    size_t start, len;
+    int w;
+};
 
 struct Line {
    public:
