@@ -10,7 +10,7 @@
 #include <Observables/Observables.h>
 
 enum CurrencyE : Messages::EnumT { Money = 0 };
-typedef Observables::RootNode<float, CurrencyE> CurrencyVals;
+ROOT_NODE(CurrencyVals, float, CurrencyE);
 
 class Currency : public Entities::Entity {
    public:
@@ -20,9 +20,9 @@ class Currency : public Entities::Entity {
 
 enum Tiers : Messages::EnumT { A = 0, B, C, D, E, F, G, H, I };
 extern const std::vector<Tiers> TIERS;
-typedef Observables::RootNode<float, Tiers> TierVals;
-typedef Observables::RootNode<int, Tiers> CostVals;
-typedef Observables::RootNode<uint32_t, Tiers> MultiVals;
+ROOT_NODE(TierVals, float, Tiers);
+ROOT_NODE(CostVals, float, Tiers);
+ROOT_NODE(MultiVals, float, Tiers);
 
 class UpButton : public Entities::Entity {
    public:

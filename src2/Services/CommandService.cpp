@@ -1,7 +1,5 @@
 #include "CommandService.h"
 
-#include <Test.h>
-
 REGISTER(Services::CommandService::Message, CommandMessage);
 
 namespace Services {

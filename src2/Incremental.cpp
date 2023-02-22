@@ -6,6 +6,9 @@
 
 // Currency
 void Currency::init() {
+    CurrencyVals c(CurrencyE::Money);
+    c(1);
+
     Rect r(200, 0, 100, 50);
     static SharedFont font =
         AssetManager::getFont({r.W(), r.H(), "99999999999"});
@@ -24,7 +27,7 @@ void Currency::init() {
             auto& text = getComponent<TextComponent>();
             text.setText("{i}" + std::to_string(val));
         },
-        CurrencyVals(CurrencyE::Money));
+        c);
 }
 
 const std::vector<Tiers> TIERS{Tiers::A, Tiers::B, Tiers::C, Tiers::D, Tiers::E,
@@ -63,9 +66,6 @@ void Tier::init() {
 
 // TierList
 void TierList::init() {
-    CurrencyVals c(CurrencyE::Money);
-    c(1);
-
     for (Tiers t : TIERS) {
         add(t);
     }
@@ -118,11 +118,11 @@ void UpButton::init() {
 
     Observables::subscribe(
         this,
-        [this](int cost) {
+        [this](float cost) {
             auto& text = getComponent<TextComponent>();
             text.setText(std::to_string(cost));
         },
-        CostVals(mTier));
+        c);
 
     addComponent<MouseService>();
     subscribeTo<MouseService::MouseMessage>(
