@@ -12,16 +12,12 @@
 #include <typeindex>
 #include <unordered_map>
 
-#define ROOT_NODE(name, type, enum_t)                                       \
-    struct name##RootId {};                                                 \
-    class name : public Observables::RootNode<type, enum_t, name##RootId> { \
-        using Observables::RootNode<type, enum_t, name##RootId>::RootNode;  \
-    };
-#define STEM_NODE(name, type, enum_t)                                       \
-    struct name##StemId {};                                                 \
-    class name : public Observables::StemNode<type, enum_t, name##StemId> { \
-        using Observables::StemNode<type, enum_t, name##StemId>::StemNode;  \
-    };
+#define ROOT_NODE(name, type, enum_t) \
+    struct name##RootId {};           \
+    typedef Observables::RootNode<type, enum_t, name##RootId> name;
+#define STEM_NODE(name, type, enum_t) \
+    struct name##StemId {};           \
+    typedef Observables::StemNode<type, enum_t, name##StemId> name;
 #define INIT(body)                   \
     namespace {                      \
     bool _ = []() {                  \
