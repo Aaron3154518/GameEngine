@@ -22,6 +22,14 @@
     class name : public Observables::StemNode<type, enum_t, name##StemId> { \
         using Observables::StemNode<type, enum_t, name##StemId>::StemNode;  \
     };
+#define INIT(body)                   \
+    namespace {                      \
+    bool _ = []() {                  \
+        using namespace Observables; \
+        body;                        \
+        return true;                 \
+    }();                             \
+    }
 
 namespace Observables {
 typedef int EnumT;
@@ -86,6 +94,7 @@ void subscribe(Messages::Messager* m, const Func<void>& func, NodeT node,
 
 template <class T, class CodeT, class IdT>
 struct Node {
+    typedef CodeT Code;
     typedef T Type;
     struct Message : public Messages::Message<CodeT, const T&> {
         using Messages::Message<CodeT, const T&>::Message;
@@ -142,6 +151,19 @@ struct StemNode : public Node<T, CodeT, IdT> {
             args...);
     }
 };
+
+template <class NodeT>
+void init(typename NodeT::Code c, const typename NodeT::Type& t) {
+    NodeT n(c);
+    n(t);
+}
+template <class NodeT>
+void init(const std::vector<typename NodeT::Code>& cs,
+          const typename NodeT::Type& t) {
+    for (auto c : cs) {
+        init<NodeT>(c, t);
+    }
+}
 }  // namespace Observables
 
 #endif

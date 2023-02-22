@@ -30,19 +30,14 @@ void Currency::init() {
 const std::vector<Tiers> TIERS{Tiers::A, Tiers::B, Tiers::C, Tiers::D, Tiers::E,
                                Tiers::F, Tiers::G, Tiers::H, Tiers::I};
 
-bool _ = []() {
-    CurrencyVals c(CurrencyE::Money);
-    c(1);
+INIT({
+    init<CurrencyVals>(CurrencyE::Money, 1);
+    init<TierVals>(TIERS, 0);
+    init<MultiVals>(TIERS, 1);
     for (auto tier : TIERS) {
-        TierVals t(tier);
-        t(0);
-        CostVals c(tier);
-        c(std::pow(13, (int)tier));
-        MultiVals m(tier);
-        m(1);
+        init<CostVals>(tier, std::pow(13, (int)tier));
     }
-    return true;
-}();
+});
 
 // Tier
 Tier::Tier(Tiers tier) : mTier(tier) {}
