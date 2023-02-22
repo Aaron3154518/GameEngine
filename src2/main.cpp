@@ -5,9 +5,11 @@
 #include <Framework/PhysicsSystem/Services.h>
 #include <Framework/RenderSystem/RenderSystem.h>
 #include <Framework/RenderSystem/Services.h>
-#include <Incremental.h>
+// #include <Incremental.h>
+// #include <Test.h>
 #include <Services/CommandService.h>
 #include <Windows.h>
+#include <Wizards.h>
 
 #include <iostream>
 
@@ -44,8 +46,12 @@ int main(int argc, char* argv[]) {
     //     enemies[i] = GameObjects::New<Enemy>();
     // }
 
-    auto currency = GameObjects::New<Currency>();
-    auto tierList = GameObjects::New<TierList>();
+    // auto currency = GameObjects::New<Currency>();
+    // auto tierList = GameObjects::New<TierList>();
+
+    GameObjects::Get<Wizard>();
+    GameObjects::Get<Crystal>();
+    auto b = GameObjects::New<Boundary>();
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {

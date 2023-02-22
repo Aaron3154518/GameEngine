@@ -15,6 +15,7 @@ class Camera : public Entities::Entity {
 
     void track(const Entities::UUID& eId = Entities::NullId(),
                float maxSpeed = 0);
+    const Entities::UUID& getTracking() const;
 
    private:
     void init();

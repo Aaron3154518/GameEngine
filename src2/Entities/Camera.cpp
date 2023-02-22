@@ -21,6 +21,8 @@ void Camera::track(const Entities::UUID& eId, float maxSpeed) {
     mSpeed = maxSpeed;
 }
 
+const Entities::UUID& Camera::getTracking() const { return mTrackId; }
+
 void Camera::init() {
     Dimensions d = RenderSystem::getWindowSize();
     addComponent<PositionComponent>(Rect(0, 0, d.w, d.h));
