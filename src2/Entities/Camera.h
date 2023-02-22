@@ -5,23 +5,55 @@
 #include <Framework/EventSystem/EventSystem.h>
 #include <Framework/FrameworkComponents.h>
 #include <Framework/RenderSystem/RenderSystem.h>
+#include <Utils/Time.h>
+
+#include <memory>
 
 class Camera : public Entities::Entity {
    public:
+    class Tracker {
+       public:
+        virtual ~Tracker() = default;
+
+        virtual Rect operator()(Rect pos, const Rect& target, Time dt);
+    };
+
+    typedef std::unique_ptr<Tracker> TrackerPtr;
+
+    class ConstantTracker : public Tracker {
+       public:
+        ConstantTracker(float spd);
+
+        Rect operator()(Rect pos, const Rect& target, Time dt);
+
+       private:
+        float mMaxSpeed;
+    };
+
+    class ScaleTracker : public Tracker {
+       public:
+        ScaleTracker(float a);
+
+        Rect operator()(Rect pos, const Rect& target, Time dt);
+
+       private:
+        float mA;
+    };
+
     static Camera& Get();
 
     Rect& getRect();
     Rect getRelativeRect(Rect r);
 
     void track(const Entities::UUID& eId = Entities::NullId(),
-               float maxSpeed = 0);
+               TrackerPtr tracker = nullptr);
     const Entities::UUID& getTracking() const;
 
    private:
     void init();
 
-    float mSpeed = 0;
     Entities::UUID mTrackId = Entities::NullId();
+    TrackerPtr mTracker;
 };
 
 #endif

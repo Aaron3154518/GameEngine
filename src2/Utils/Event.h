@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <Utils/Math.h>
 #include <Utils/Rect.h>
+#include <Utils/Time.h>
 
 #include <array>
 #include <cmath>
@@ -50,7 +51,9 @@ class Event {
         bool pressed() const;
     };
 
-    void update(uint32_t dt, const Rect &camera, Dimensions screen);
+    void update(uint32_t ts, const Rect &camera, Dimensions screen);
+
+    Time dt;
 
     bool quit = false;
     // Resize data

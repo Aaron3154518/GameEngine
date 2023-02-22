@@ -1,5 +1,41 @@
 #include "Camera.h"
 
+#include <Framework/RenderSystem/Services.h>
+
+// Camera::Tracker
+Rect Camera::Tracker::operator()(Rect pos, const Rect& target, Time dt) {
+    return pos;
+}
+
+// Camera::ConstantTracker
+Camera::ConstantTracker::ConstantTracker(float spd) : mMaxSpeed(spd) {}
+
+Rect Camera::ConstantTracker::operator()(Rect pos, const Rect& target,
+                                         Time dt) {
+    float dx = target.cX() - pos.cX(), dy = target.cY() - pos.cY();
+    float mag = sqrtf(dx * dx + dy * dy);
+    if (mag == 0) {
+        return pos;
+    }
+    float spd = std::min(mag, mMaxSpeed * dt.s());
+    pos.move(dx * spd / mag, dy * spd / mag);
+    return pos;
+}
+
+// Camera::ScaleTracker
+Camera::ScaleTracker::ScaleTracker(float a) : mA(a) {}
+
+Rect Camera::ScaleTracker::operator()(Rect pos, const Rect& target, Time dt) {
+    float dx = target.cX() - pos.cX(), dy = target.cY() - pos.cY();
+    float mag = sqrtf(dx * dx + dy * dy);
+    if (mag == 0) {
+        return pos;
+    }
+    float spd = std::max(std::min(1.0f, mag), mag * mA * dt.s());
+    pos.move(dx * spd / mag, dy * spd / mag);
+    return pos;
+}
+
 // Camera
 Camera& Camera::Get() { return GameObjects::Get<Camera>(); }
 
@@ -16,9 +52,9 @@ Rect Camera::getRelativeRect(Rect r) {
     return r;
 }
 
-void Camera::track(const Entities::UUID& eId, float maxSpeed) {
+void Camera::track(const Entities::UUID& eId, TrackerPtr tracker) {
     mTrackId = eId;
-    mSpeed = maxSpeed;
+    mTracker = std::move(tracker);
 }
 
 const Entities::UUID& Camera::getTracking() const { return mTrackId; }
@@ -27,21 +63,14 @@ void Camera::init() {
     Dimensions d = RenderSystem::getWindowSize();
     addComponent<PositionComponent>(Rect(0, 0, d.w, d.h));
 
-    subscribeTo<EventSystem::UpdateMessage>(
-        [this](const EventSystem::UpdateMessage& m) {
-            if (mTrackId != Entities::NullId()) {
-                SDL_FPoint tPos =
-                    GameObjects::Get<PositionComponent>()[mTrackId]
-                        .get()
-                        .getPos(Rect::Align::CENTER);
+    subscribeTo<RenderService::Message>(
+        [this](const RenderService::Message& m) {
+            if (mTrackId != Entities::NullId() && mTracker) {
+                Rect& tPos =
+                    GameObjects::Get<PositionComponent>()[mTrackId].get();
                 Rect& pos = getComponent<PositionComponent>().get();
-                float dx = tPos.x - pos.cX(), dy = tPos.y - pos.cY();
-                float mag = sqrtf(dx * dx + dy * dy);
-                if (mag == 0) {
-                    return;
-                }
-                float spd = std::min(mag, mSpeed * m.data.s());
-                pos.move(dx * spd / mag, dy * spd / mag);
+                pos = (*mTracker)(pos, tPos, EventSystem::get().dt);
             }
-        });
+        },
+        RenderService::PreRender);
 }

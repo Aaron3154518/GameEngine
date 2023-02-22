@@ -83,9 +83,10 @@ void Crystal::init() {
             auto wiz = GameObjects::Get<Wizard>().id();
             auto crys = GameObjects::Get<Crystal>().id();
             if ((id != crys && id != wiz) || (id == wiz && mag <= 245)) {
-                camera.track(crys, 250);
+                camera.track(crys,
+                             std::make_unique<Camera::ConstantTracker>(250));
             } else if (id == crys && mag > 255) {
-                camera.track(wiz, 200);
+                camera.track(wiz, std::make_unique<Camera::ScaleTracker>(2));
             }
         },
         pos, wizPos);
