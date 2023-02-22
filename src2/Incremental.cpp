@@ -6,9 +6,6 @@
 
 // Currency
 void Currency::init() {
-    CurrencyVals c(CurrencyE::Money);
-    c(1);
-
     Rect r(200, 0, 100, 50);
     static SharedFont font =
         AssetManager::getFont({r.W(), r.H(), "99999999999"});
@@ -27,11 +24,25 @@ void Currency::init() {
             auto& text = getComponent<TextComponent>();
             text.setText("{i}" + std::to_string(val));
         },
-        c);
+        CurrencyVals(CurrencyE::Money));
 }
 
 const std::vector<Tiers> TIERS{Tiers::A, Tiers::B, Tiers::C, Tiers::D, Tiers::E,
                                Tiers::F, Tiers::G, Tiers::H, Tiers::I};
+
+bool _ = []() {
+    CurrencyVals c(CurrencyE::Money);
+    c(1);
+    for (auto tier : TIERS) {
+        TierVals t(tier);
+        t(0);
+        CostVals c(tier);
+        c(std::pow(13, (int)tier));
+        MultiVals m(tier);
+        m(1);
+    }
+    return true;
+}();
 
 // Tier
 Tier::Tier(Tiers tier) : mTier(tier) {}
@@ -88,14 +99,6 @@ void TierList::init() {
 UpButton::UpButton(Tiers tier) : mTier(tier) {}
 
 void UpButton::init() {
-    TierVals t(mTier);
-
-    CostVals c(mTier);
-    c(std::pow(13, (int)mTier));
-
-    MultiVals m(mTier);
-    m(1);
-
     Rect r(300, (mTier + 1) * 50, 50, 50);
     static SharedFont font =
         AssetManager::getFont({r.W(), r.H(), "99999999999"});
@@ -122,21 +125,24 @@ void UpButton::init() {
             auto& text = getComponent<TextComponent>();
             text.setText(std::to_string(cost));
         },
-        c);
+        CostVals(mTier));
 
     addComponent<MouseService>();
     subscribeTo<MouseService::MouseMessage>(
-        [this, t, m, c](const MouseService::MouseMessage& msg) {
+        [this](const MouseService::MouseMessage& msg) {
             if (msg.data.mouse == Event::LEFT && msg.opts.target == id()) {
                 CurrencyVals curr(CurrencyE::Money);
+                CostVals c(mTier);
                 if (curr() < c()) {
                     return;
                 }
                 curr(curr() - c());
 
+                TierVals t(mTier);
                 if (t() == 0) {
                     t(1);
                 } else {
+                    MultiVals m(mTier);
                     m(m() * 2);
                 }
                 c(c() * 10);
