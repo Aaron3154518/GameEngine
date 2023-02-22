@@ -8,7 +8,7 @@
 void Currency::init() {
     Rect r(200, 0, 100, 50);
     static SharedFont font =
-        AssetManager::getFont({r.W(), r.H(), "99999999999"});
+        AssetManager::getFont({r.W(), r.H() / 2, "9999999"});
 
     addComponent<TextComponent>();
     auto& text = getComponent<TextComponent>();
@@ -20,9 +20,9 @@ void Currency::init() {
 
     Observables::subscribe(
         this,
-        [this](float val) {
+        [this](const Number& val) {
             auto& text = getComponent<TextComponent>();
-            text.setText("{i}" + std::to_string(val));
+            text.setText("{i}" + val.toString());
         },
         CurrencyVals(CurrencyE::Money));
 }
@@ -45,7 +45,7 @@ Tier::Tier(Tiers tier) : mTier(tier) {}
 void Tier::init() {
     Rect r(200, (mTier + 1) * 50, 100, 50);
     static SharedFont font =
-        AssetManager::getFont({r.W(), r.H(), "99999999999"});
+        AssetManager::getFont({r.W(), r.H() / 2, "9999999"});
 
     addComponent<ElevationComponent>(1);
     addComponent<PositionComponent>(r);
@@ -61,9 +61,9 @@ void Tier::init() {
 
     Observables::subscribe(
         this,
-        [r, this](float val) {
+        [r, this](const Number& val) {
             auto& text = getComponent<TextComponent>();
-            text.setText("{i}" + std::to_string(val));
+            text.setText("{i}" + val.toString());
         },
         TierVals(mTier));
 
@@ -96,10 +96,10 @@ UpButton::UpButton(Tiers tier) : mTier(tier) {}
 void UpButton::init() {
     Rect r(300, (mTier + 1) * 50, 50, 50);
     static SharedFont font =
-        AssetManager::getFont({r.W(), r.H(), "99999999999"});
+        AssetManager::getFont({r.W(), r.H() / 2, "9999999"});
 
     addComponent<PositionComponent>(r);
-    addComponent<ElevationComponent>(2);
+    addComponent<ElevationComponent>(3);
 
     addComponent<TextComponent>();
     auto& text = getComponent<TextComponent>();
@@ -107,18 +107,18 @@ void UpButton::init() {
     text.setFont(font);
     text.setRect(r);
 
-    TextureBuilder tex;
+    TextureBuilder tex(r.W(), r.H());
     Shapes::Rectangle texRect;
-    texRect.set(r, -3);
+    texRect.set(Rect(0, 0, r.w(), r.h()), -3);
     tex.draw(texRect);
     addComponent<SpriteComponent>(tex.getTexture());
     addComponent<RenderService>();
 
     Observables::subscribe(
         this,
-        [this](float cost) {
+        [this](const Number& cost) {
             auto& text = getComponent<TextComponent>();
-            text.setText(std::to_string(cost));
+            text.setText(cost.toString());
         },
         CostVals(mTier));
 
