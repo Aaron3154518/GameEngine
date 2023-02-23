@@ -88,22 +88,17 @@ void subscribe(Messages::Messager* m, const Func<void>& func, NodeT node,
     subscribe<Tail...>(m, func, args...);
 }
 
-template <class T, class CodeT, class IdT>
-struct Node {
-    typedef CodeT Code;
+template <class T>
+class Node {
+   public:
     typedef T Type;
-    struct Message : public Messages::Message<CodeT, const T&> {
-        using Messages::Message<CodeT, const T&>::Message;
-    };
 
-    Node(CodeT code) : mCode(code) {}
     virtual ~Node() = default;
 
     const T& operator()() const { return DAG<T>::get(id(), mCode); }
-    CodeT code() const { return mCode; }
 
    protected:
-    CodeT mCode;
+    Node(EnumT code) : mCode(code) {}
 
     std::type_index id() const { return std::type_index(typeid(*this)); };
 
@@ -111,17 +106,41 @@ struct Node {
         Messages::GetMessageBus().sendMessage(
             Message(mCode, DAG<T>::set(id(), mCode, t)));
     }
+
+    EnumT mCode;
+};
+
+template <class T>
+using NodePtr = std::unique_ptr<Node<T>>;
+
+template <class T, class CodeT, class IdT>
+class RootNode : public Node<T> {
+   public:
+    typedef CodeT Code;
+
+    struct Message : public Messages::Message<CodeT, const T&> {
+        using Messages::Message<CodeT, const T&>::Message;
+    };
+
+    RootNode(CodeT code) : Node<T>(code) {}
+
+    CodeT code() const { return static_cast<CodeT>(mCode); }
+
+    using Node<T>::operator();
 };
 
 template <class T, class CodeT, class IdT>
-struct RootNode : public Node<T, CodeT, IdT> {
-    using Node<T, CodeT, IdT>::Node;
-    using Node<T, CodeT, IdT>::operator();
-};
+class StemNode : public Node<T> {
+   public:
+    typedef CodeT Code;
 
-template <class T, class CodeT, class IdT>
-struct StemNode : public Node<T, CodeT, IdT> {
-    using Node<T, CodeT, IdT>::Node;
+    struct Message : public Messages::Message<CodeT, const T&> {
+        using Messages::Message<CodeT, const T&>::Message;
+    };
+
+    StemNode(CodeT code) : Node<T>(code) {}
+
+    CodeT code() const { return static_cast<CodeT>(mCode); }
 
     template <class F, class NodeT>
     typename std::enable_if<

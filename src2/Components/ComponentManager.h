@@ -156,12 +156,17 @@ class EntityComponents {
     }
 
     template <class CompManT>
-    typename CompManT::Component::Data& getData() const {
+    const typename CompManT::Component::Data& getData() const {
         return get<CompManT>().get();
     }
 
+    template <Class CompManT>
+    void setData(const typename CompManT::Component::Data& t) const {
+        get<CompManT>().set(t);
+    }
+
     template <class CompManT>
-    typename CompManT::Component::Data* getDataOpt() const {
+    typename CompManT::Component::Data const* getDataOpt() const {
         if (has<CompManT>()) {
             return &getData<CompManT>();
         }

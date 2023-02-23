@@ -11,11 +11,9 @@ void Wizard::init() {
     addComponent<PhysicsService>();
 
     WizPos pos(Wizards::Wizard);
-    Observables::subscribe(
-        this,
-        [this](const Rect& pos) { getComponent<PositionComponent>().set(pos); },
-        pos);
     pos(Rect(25, -25, 50, 50));
+    getComponent<PositionComponent>().setSource(pos);
+
     subscribeTo<EventSystem::UpdateMessage>(
         [this, pos](const auto& m) {
             pos(getComponent<PositionComponent>().get());
@@ -62,11 +60,12 @@ void Crystal::init() {
     addComponent<RenderService>();
 
     WizPos pos(Wizards::Crystal);
-    Observables::subscribe(
-        this,
-        [this](const Rect& pos) { getComponent<PositionComponent>().set(pos); },
-        pos);
+    // Observables::subscribe(
+    //     this,
+    //     [this](const Rect& pos) { getComponent<PositionComponent>().set(pos);
+    //     }, pos);
     pos(Rect(-25, -25, 50, 50));
+    getComponent<PositionComponent>().setSource(pos);
 
     WizPos wizPos(Wizards::Wizard);
     Observables::subscribe(
@@ -110,8 +109,10 @@ void Boundary::init() {
     Observables::subscribe(
         this,
         [this](const Rect& pos) {
-            getComponent<PositionComponent>().get().setPos(pos,
-                                                           Rect::Align::CENTER);
+            auto& posComp = getComponent<PositionComponent>();
+            auto rect = posComp.get();
+            rect.setPos(pos, Rect::Align::CENTER);
+            posComp.set(rect);
         },
         pos);
 }
