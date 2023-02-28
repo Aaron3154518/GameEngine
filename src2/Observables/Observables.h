@@ -33,7 +33,7 @@ enum Empty : EnumT {};
 
 class Messager {
    private:
-    template <class _T, class _CodeT, class _IdT>
+    template <class _T>
     friend struct Node;
 
     static Messages::Messager* get() {
@@ -44,7 +44,7 @@ class Messager {
 
 template <class T>
 class DAG {
-    template <class _T, class _CodeT, class _IdT>
+    template <class _T>
     friend struct Node;
 
    private:
@@ -55,7 +55,6 @@ class DAG {
     }
 
     static T& set(const std::type_index& id, EnumT code, const T& val) {
-        // std::cerr << id.name() << " " << code << std::endl;
         T& v = get(id, code);
         v = val;
         return v;
@@ -74,81 +73,81 @@ template <class NodeT, class F>
 typename std::enable_if<
     MatchSignature<F, void(typename NodeT::Type)>::value>::type
 subscribe(Messages::Messager* m, const F& func, NodeT node) {
-    m->subscribeTo<typename NodeT::Message>(
-        [func](const typename NodeT::Message& m) { func(m.data); },
-        node.code());
+    m->subscribeTo<NodeT>([node, func](const auto& m) { func(node()); },
+                          node.code);
     func(node());
 }
 
 template <class NodeT, class... Tail>
 void subscribe(Messages::Messager* m, const Func<void>& func, NodeT node,
                Tail... args) {
-    m->subscribeTo<typename NodeT::Message>([func](const auto& m) { func(); },
-                                            node.code());
+    m->subscribeTo<NodeT>([func](const auto& m) { func(); }, node.code);
     subscribe<Tail...>(m, func, args...);
 }
 
 template <class T>
-class Node {
+class Node : public Messages::Message<EnumT> {
    public:
     typedef T Type;
+    typedef std::function<const T&()> GetFunc;
+    typedef std::function<void(const T&)> SetFunc;
 
     virtual ~Node() = default;
 
-    const T& operator()() const { return DAG<T>::get(id(), mCode); }
+    const T& operator()() const { return DAG<T>::get(id(), code); }
 
-   protected:
-    Node(EnumT code) : mCode(code) {}
-
-    std::type_index id() const { return std::type_index(typeid(*this)); };
-
-    void operator()(const T& t) const {
-        Messages::GetMessageBus().sendMessage(
-            Message(mCode, DAG<T>::set(id(), mCode, t)));
+    GetFunc getter() const {
+        return [id = this->id(), code = this->code]() -> const T& {
+            return DAG<T>::get(id, code);
+        };
     }
 
-    EnumT mCode;
+   protected:
+    using Messages::Message<EnumT>::Message;
+
+    void operator()(const T& t) const {
+        DAG<T>::set(id(), code, t);
+        Messages::GetMessageBus().sendMessage(*this);
+    }
+
+    SetFunc setter() const {
+        return [id = this->id(), code = this->code](const T& t) {
+            DAG<T>::set(id, code, t);
+            Node(id, code)(t);
+        };
+    }
 };
 
 template <class T>
-using NodePtr = std::unique_ptr<Node<T>>;
-
-template <class T, class CodeT, class IdT>
-class RootNode : public Node<T> {
+class RootNodeBase : public Node<T> {
    public:
-    typedef CodeT Code;
-
-    struct Message : public Messages::Message<CodeT, const T&> {
-        using Messages::Message<CodeT, const T&>::Message;
-    };
-
-    RootNode(CodeT code) : Node<T>(code) {}
-
-    CodeT code() const { return static_cast<CodeT>(mCode); }
-
     using Node<T>::operator();
+    using Node<T>::setter;
+
+   protected:
+    using Node<T>::Node;
 };
 
 template <class T, class CodeT, class IdT>
-class StemNode : public Node<T> {
+class RootNode : public RootNodeBase<T> {
    public:
-    typedef CodeT Code;
+    typedef CodeT NodeCode;
 
-    struct Message : public Messages::Message<CodeT, const T&> {
-        using Messages::Message<CodeT, const T&>::Message;
-    };
+    RootNode(CodeT code) : RootNodeBase<T>(code) {}
 
-    StemNode(CodeT code) : Node<T>(code) {}
+    CodeT getCode() const { return static_cast<CodeT>(Node<T>::code); }
+};
 
-    CodeT code() const { return static_cast<CodeT>(mCode); }
-
+template <class T>
+class StemNodeBase : public Node<T> {
+   public:
     template <class F, class NodeT>
     typename std::enable_if<
         MatchSignature<F, T(typename NodeT::Type)>::value>::type
-    subscribeTo(const F& func, NodeT node) {
+    subscribeTo(const F& func, NodeT node) const {
         subscribe<NodeT>(
             Messager::get(),
-            [func, node, id = this->id(), code = this->mCode]() {
+            [func, node, id = this->id(), code = this->code]() {
                 Messages::GetMessageBus().sendMessage(
                     Message(code, DAG<T>::set(id, code, func(node()))));
             },
@@ -159,21 +158,41 @@ class StemNode : public Node<T> {
     void subscribeTo(const Func<T>& func, NodeTs... args) const {
         subscribe<NodeTs...>(
             Messager::get(),
-            [func, id = this->id(), code = this->mCode]() {
+            [func, id = this->id(), code = this->code]() {
                 Messages::GetMessageBus().sendMessage(
                     Message(code, DAG<T>::set(id, code, func())));
             },
             args...);
     }
+
+   protected:
+    using Node<T>::Node;
+};
+
+template <class T, class CodeT, class IdT>
+class StemNode : public StemNodeBase<T> {
+   public:
+    typedef CodeT NodeCode;
+
+    StemNode(CodeT code) : StemNodeBase<T>(code) {}
+
+    CodeT getCode() const { return static_cast<CodeT>(Node<T>::code); }
+};
+
+template <class T>
+struct NodeWrapper {
+   public:
+   private:
+    std::unique_ptr<Node<T>> mNode;
 };
 
 template <class NodeT>
-void init(typename NodeT::Code c, const typename NodeT::Type& t) {
+void init(typename NodeT::NodeCode c, const typename NodeT::Type& t) {
     NodeT n(c);
     n(t);
 }
 template <class NodeT>
-void init(const std::vector<typename NodeT::Code>& cs,
+void init(const std::vector<typename NodeT::NodeCode>& cs,
           const typename NodeT::Type& t) {
     for (auto c : cs) {
         init<NodeT>(c, t);

@@ -1,11 +1,61 @@
 #include "Wizards.h"
 
+// Fireball
+const Entities::UUID Fireball::CID = Entities::generateUUID();
+
+void Fireball::update(Time dt) {
+    auto& t = WizPos(Wizards::Crystal)();
+    auto& pos = getComponent<PositionComponent>().get();
+    float dx = t.cX() - pos.cX(), dy = t.cY() - pos.cY();
+    float mag = sqrtf(dx * dx + dy * dy);
+    auto& aComp = getComponent<AccelerationComponent>();
+    auto a = aComp.get();
+    if (mag == 0) {
+        a.x = 0;
+        a.y = 0;
+    } else {
+        a.x = dx * 100 / mag;
+        a.y = dy * 100 / mag;
+    }
+    aComp.set(a);
+}
+
+void Fireball::init() {
+    addComponent<PositionComponent>(Rect(0, 0, 50, 50));
+    addComponent<VelocityComponent>(SDL_FPoint{});
+    addComponent<AccelerationComponent>(SDL_FPoint{});
+    addComponent<ElevationComponent>(1);
+    addComponent<SpriteComponent>("res/projectiles/fireball.png");
+    addComponent<CollisionComponent>(CID);
+
+    addComponent<RenderService>();
+    addComponent<PhysicsService>();
+    addComponent<CollisionService>();
+
+    subscribeTo<CollisionService::Message>(
+        [this](const CollisionService::Message& m) {
+            Messages::GetMessageBus().sendMessage(
+                FireballList::Message(FireballList::Remove, id()));
+        },
+        CollisionService::Collided);
+}
+
+// FireballList
+void FireballList::init() {
+    subscribeTo<EventSystem::UpdateMessage>(
+        [this](const EventSystem::UpdateMessage& m) {
+            forEach(Fireball::update, m.data);
+        },
+        EventSystem::Update);
+}
+
 // Wizard
 void Wizard::init() {
     addComponent<PositionComponent>(Rect());
     addComponent<VelocityComponent>(SDL_FPoint{});
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
+    addComponent<FireballListComponent>(GameObjects::New<FireballList>());
 
     addComponent<RenderService>();
     addComponent<PhysicsService>();
@@ -32,7 +82,7 @@ void Wizard::init() {
                 return;
             }
 
-            auto& v = getComponent<VelocityComponent>().get();
+            auto v = getComponent<VelocityComponent>().get();
             switch (k.data.key) {
                 case SDLK_a:
                     v.x -= maxV;
@@ -49,21 +99,26 @@ void Wizard::init() {
                 default:
                     break;
             };
+            getComponent<VelocityComponent>().set(v);
         });
+
+    startTimer(2000,
+               [this]() { getComponent<FireballListComponent>().get().add(); });
 }
 
 // Crystal
+const Entities::UUID Crystal::CID = Entities::generateUUID();
+
 void Crystal::init() {
     addComponent<PositionComponent>(Rect());
     addComponent<ElevationComponent>(0);
     addComponent<SpriteComponent>("res/wizards/crystal.png");
+    addComponent<CollisionComponent>(Crystal::CID);
+
     addComponent<RenderService>();
+    addComponent<CollisionService>();
 
     WizPos pos(Wizards::Crystal);
-    // Observables::subscribe(
-    //     this,
-    //     [this](const Rect& pos) { getComponent<PositionComponent>().set(pos);
-    //     }, pos);
     pos(Rect(-25, -25, 50, 50));
     getComponent<PositionComponent>().setSource(pos);
 
@@ -89,6 +144,12 @@ void Crystal::init() {
             }
         },
         pos, wizPos);
+
+    subscribeTo<CollisionService::Message>(
+        [this](const CollisionService::Message& m) {
+            std::cerr << "Hit" << std::endl;
+        },
+        CollisionService::Collided);
 }
 
 // Boundary
@@ -115,4 +176,8 @@ void Boundary::init() {
             posComp.set(rect);
         },
         pos);
+}
+
+namespace {
+const bool _ = CollisionService::NewType(Crystal::CID, Fireball::CID);
 }

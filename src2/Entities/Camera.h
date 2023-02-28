@@ -42,7 +42,8 @@ class Camera : public Entities::Entity {
 
     static Camera& Get();
 
-    Rect& getRect();
+    const Rect& getRect();
+    void setRect(const Rect& r);
     Rect getRelativeRect(Rect r);
 
     void track(const Entities::UUID& eId = Entities::NullId(),

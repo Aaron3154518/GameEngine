@@ -25,16 +25,23 @@ class DataComponent : public Component {
     using Data = T;
 
     DataComponent(const T& t) { setSource(t); }
-    virtual ~DataComponent() = default;
+    DataComponent(const Observables::RootNodeBase<T>& node) { setSource(node); }
+    DataComponent(const Observables::StemNodeBase<T>& node) { setSource(node); }
 
-    template <class CodeT, class IdT>
-    void setSource(Observables::Node<T, CodeT, IdT> node) {
-        mGet = [=]() { return node(); };
-        mSet = [=](const T& t) { node(t); };
+    void setSource(const Observables::RootNodeBase<T>& node) {
+        mGet = node.getter();
+        mSet = node.setter();
+    }
+    void setSource(const Observables::StemNodeBase<T>& node) {
+        mGet = node.getter();
+        mSet = [](const T& t) {
+            throw std::runtime_error(
+                "DataComponent::setSource(): Cannot set value for stem node");
+        };
     }
     void setSource(const T& t) {
-        mGet = [=]() { return t; };
-        mSet = [this](const T& t) { mGet = [=]() { return t; } }
+        mGet = [=]() -> const T& { return t; };
+        mSet = [this](const T& t) { mGet = [=]() -> const T& { return t; }; };
     }
 
     void set(const T& t) { mSet(t); }
@@ -43,6 +50,28 @@ class DataComponent : public Component {
    protected:
     std::function<const T&()> mGet;
     std::function<void(const T&)> mSet;
+};
+
+template <class T>
+class DataPtrComponent : public Component {
+   public:
+    using Data = T;
+    using DataPtr = std::unique_ptr<T>;
+
+    DataPtrComponent() = default;
+    DataPtrComponent(DataPtr tPtr) { set(std::move(tPtr)); }
+
+    void set(DataPtr tPtr) { mTPtr = std::move(tPtr); }
+    T& get() {
+        if (!mTPtr) {
+            throw std::runtime_error(
+                "DataPtrComponent::get(): Pointer is null");
+        }
+        return *mTPtr;
+    }
+
+   protected:
+    DataPtr mTPtr;
 };
 }  // namespace Components
 

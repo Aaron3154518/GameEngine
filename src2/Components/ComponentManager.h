@@ -160,7 +160,7 @@ class EntityComponents {
         return get<CompManT>().get();
     }
 
-    template <Class CompManT>
+    template <class CompManT>
     void setData(const typename CompManT::Component::Data& t) const {
         get<CompManT>().set(t);
     }

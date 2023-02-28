@@ -39,10 +39,16 @@ Rect Camera::ScaleTracker::operator()(Rect pos, const Rect& target, Time dt) {
 // Camera
 Camera& Camera::Get() { return GameObjects::Get<Camera>(); }
 
-Rect& Camera::getRect() { return getComponent<PositionComponent>().get(); }
+const Rect& Camera::getRect() {
+    return getComponent<PositionComponent>().get();
+}
+
+void Camera::setRect(const Rect& r) {
+    getComponent<PositionComponent>().set(r);
+}
 
 Rect Camera::getRelativeRect(Rect r) {
-    Rect& camera = getRect();
+    const Rect& camera = getRect();
     Dimensions screenDim = RenderSystem::getWindowSize();
     float wFrac = screenDim.w / camera.w(), hFrac = screenDim.h / camera.h();
     SDL_FPoint c = r.getPos(Rect::Align::CENTER);
@@ -66,10 +72,11 @@ void Camera::init() {
     subscribeTo<RenderService::Message>(
         [this](const RenderService::Message& m) {
             if (mTrackId != Entities::NullId() && mTracker) {
-                Rect& tPos =
+                const Rect& tPos =
                     GameObjects::Get<PositionComponent>()[mTrackId].get();
-                Rect& pos = getComponent<PositionComponent>().get();
-                pos = (*mTracker)(pos, tPos, EventSystem::get().dt);
+                const Rect& pos = getComponent<PositionComponent>().get();
+                getComponent<PositionComponent>().set(
+                    (*mTracker)(pos, tPos, EventSystem::get().dt));
             }
         },
         RenderService::PreRender);

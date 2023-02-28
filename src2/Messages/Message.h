@@ -66,7 +66,9 @@ struct Message<void, void> {
 
     virtual ~Message() = default;
 
-    std::type_index id() const { return std::type_index(typeid(*this)); }
+    virtual std::type_index id() const {
+        return std::type_index(typeid(*this));
+    }
 
    protected:
     Message(EnumT c, const MessageOptions& o = {}) : code(c), opts(o) {}
@@ -78,6 +80,15 @@ struct Message<CodeT, void> : public Message<> {
     using Data = void;
 
     Message(Code c, const MessageOptions& o = {}) : Message<>(c, o) {}
+    Message(std::type_index id, Code c, const MessageOptions& o = {})
+        : Message<>(c, o), mId(id) {}
+
+    std::type_index id() const {
+        return mId == std::type_index(typeid(Message<>)) ? Message<>::id()
+                                                         : mId;
+    }
+
+    std::type_index mId = std::type_index(typeid(Message<>));
 };
 
 template <class CodeT, class DataT>
