@@ -56,7 +56,7 @@ class EntityContainer : public Entity {
     }
 
    private:
-    void init() {
+    void init() final {
         Entity::subscribeTo<Message>(
             [this](const Message& m) {
                 auto& id = m.data;
@@ -70,7 +70,11 @@ class EntityContainer : public Entity {
                 }
             },
             Remove);
+
+        container_init();
     }
+
+    virtual void container_init() {}
 
     std::vector<EntityPtr> mEntities;
 };

@@ -41,7 +41,7 @@ void Fireball::init() {
 }
 
 // FireballList
-void FireballList::init() {
+void FireballList::container_init() {
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const EventSystem::UpdateMessage& m) {
             forEach(Fireball::update, m.data);

@@ -28,7 +28,7 @@ class Fireball : public Entities::Entity {
 class FireballList : public Entities::EntityContainer<Fireball> {
    public:
    private:
-    void init();
+    void container_init();
 };
 
 class FireballListComponent : public Components::ComponentManager<
