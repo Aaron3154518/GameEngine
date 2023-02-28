@@ -39,6 +39,8 @@ class Wizard : public Entities::Entity {
    public:
    private:
     void init();
+
+    void shootFireball();
 };
 
 class Crystal : public Entities::Entity {

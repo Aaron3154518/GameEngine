@@ -102,8 +102,12 @@ void Wizard::init() {
             getComponent<VelocityComponent>().set(v);
         });
 
-    startTimer(2000,
-               [this]() { getComponent<FireballListComponent>().get().add(); });
+    startTimer(2000, [this]() { shootFireball(); });
+}
+
+void Wizard::shootFireball() {
+    getComponent<FireballListComponent>().get().add();
+    startTimer(2000, [this]() { shootFireball(); });
 }
 
 // Crystal
@@ -146,9 +150,7 @@ void Crystal::init() {
         pos, wizPos);
 
     subscribeTo<CollisionService::Message>(
-        [this](const CollisionService::Message& m) {
-            std::cerr << "Hit" << std::endl;
-        },
+        [this](const CollisionService::Message& m) {},
         CollisionService::Collided);
 }
 

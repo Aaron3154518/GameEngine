@@ -25,19 +25,11 @@ class DataComponent : public Component {
     using Data = T;
 
     DataComponent(const T& t) { setSource(t); }
-    DataComponent(const Observables::RootNodeBase<T>& node) { setSource(node); }
-    DataComponent(const Observables::StemNodeBase<T>& node) { setSource(node); }
+    DataComponent(const Observables::Node<T>& node) { setSource(node); }
 
-    void setSource(const Observables::RootNodeBase<T>& node) {
+    void setSource(const Observables::Node<T>& node) {
         mGet = node.getter();
         mSet = node.setter();
-    }
-    void setSource(const Observables::StemNodeBase<T>& node) {
-        mGet = node.getter();
-        mSet = [](const T& t) {
-            throw std::runtime_error(
-                "DataComponent::setSource(): Cannot set value for stem node");
-        };
     }
     void setSource(const T& t) {
         mGet = [=]() -> const T& { return t; };

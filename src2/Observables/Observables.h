@@ -13,11 +13,9 @@
 #include <unordered_map>
 
 #define ROOT_NODE(name, type, enum_t) \
-    struct name##RootId {};           \
-    typedef Observables::RootNode<type, enum_t, name##RootId> name;
+    typedef Observables::RootNode<type, enum_t> name;
 #define STEM_NODE(name, type, enum_t) \
-    struct name##StemId {};           \
-    typedef Observables::StemNode<type, enum_t, name##StemId> name;
+    typedef Observables::StemNode<type, enum_t> name;
 #define INIT(body)                   \
     namespace {                      \
     bool _ = []() {                  \
@@ -34,7 +32,7 @@ enum Empty : EnumT {};
 class Messager {
    private:
     template <class _T>
-    friend struct Node;
+    friend class Node;
 
     static Messages::Messager* get() {
         static Messages::Messager MESSAGER;
@@ -44,8 +42,10 @@ class Messager {
 
 template <class T>
 class DAG {
-    template <class _T>
-    friend struct Node;
+    template <class>
+    friend class Node;
+    template <class>
+    friend class RootNodeBase;
 
    private:
     static T& get(const std::type_index& id, EnumT code) {
@@ -101,6 +101,9 @@ class Node : public Messages::Message<EnumT> {
             return DAG<T>::get(id, code);
         };
     }
+    virtual SetFunc setter() const {
+        return [](const T& t) {};
+    }
 
    protected:
     using Messages::Message<EnumT>::Message;
@@ -109,38 +112,42 @@ class Node : public Messages::Message<EnumT> {
         DAG<T>::set(id(), code, t);
         Messages::GetMessageBus().sendMessage(*this);
     }
-
-    SetFunc setter() const {
-        return [id = this->id(), code = this->code](const T& t) {
-            DAG<T>::set(id, code, t);
-            Node(id, code)(t);
-        };
-    }
 };
 
 template <class T>
 class RootNodeBase : public Node<T> {
    public:
     using Node<T>::operator();
-    using Node<T>::setter;
+
+    typename Node<T>::SetFunc setter() const {
+        return [id = this->id(), code = this->code](const T& t) {
+            DAG<T>::set(id, code, t);
+            RootNodeBase(id, code)(t);
+        };
+    }
 
    protected:
     using Node<T>::Node;
 };
 
-template <class T, class CodeT, class IdT>
+template <class T, class CodeT>
 class RootNode : public RootNodeBase<T> {
    public:
     typedef CodeT NodeCode;
 
     RootNode(CodeT code) : RootNodeBase<T>(code) {}
-
-    CodeT getCode() const { return static_cast<CodeT>(Node<T>::code); }
 };
 
 template <class T>
 class StemNodeBase : public Node<T> {
    public:
+    typename Node<T>::SetFunc setter() const {
+        return [](const T& t) {
+            std::cerr << "StemNode::setter(): Cannot call setter on Stem Node"
+                      << std::endl;
+        };
+    }
+
     template <class F, class NodeT>
     typename std::enable_if<
         MatchSignature<F, T(typename NodeT::Type)>::value>::type
@@ -169,14 +176,12 @@ class StemNodeBase : public Node<T> {
     using Node<T>::Node;
 };
 
-template <class T, class CodeT, class IdT>
+template <class T, class CodeT>
 class StemNode : public StemNodeBase<T> {
    public:
     typedef CodeT NodeCode;
 
     StemNode(CodeT code) : StemNodeBase<T>(code) {}
-
-    CodeT getCode() const { return static_cast<CodeT>(Node<T>::code); }
 };
 
 template <class T>
