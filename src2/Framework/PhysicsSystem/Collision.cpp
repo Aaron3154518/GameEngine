@@ -20,15 +20,15 @@ void CollisionService::manager_init() {
 void CollisionService::onUpdate() {
     auto& cmap = GetCollisionMap();
     auto& mb = Messages::GetMessageBus();
-    auto iter = active<PositionComponent, CollisionComponent>();
+    auto iter = active<PositionComponent>();
     for (auto e1It = iter.begin(); e1It != iter.end(); ++e1It) {
         auto e1 = *e1It;
-        auto& idA = e1.getData<CollisionComponent>();
+        auto& idA = e1.getData<CollisionService>();
         auto& ids = cmap[idA];
         auto e2It = e1It;
         for (++e2It; e2It != iter.end() && e1It; ++e2It) {
             auto e2 = *e2It;
-            auto& idB = e2.getData<CollisionComponent>();
+            auto& idB = e2.getData<CollisionService>();
             if (std::find(ids.begin(), ids.end(), idB) == ids.end()) {
                 continue;
             }

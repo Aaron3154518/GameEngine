@@ -26,11 +26,10 @@ void Fireball::init() {
     addComponent<AccelerationComponent>(SDL_FPoint{});
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/projectiles/fireball.png");
-    addComponent<CollisionComponent>(CID);
 
     addComponent<RenderService>();
     addComponent<PhysicsService>();
-    addComponent<CollisionService>();
+    addComponent<CollisionService>(Fireball::CID);
 
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
@@ -51,7 +50,10 @@ void FireballList::container_init() {
 
 // Wizard
 void Wizard::init() {
-    addComponent<PositionComponent>(Rect());
+    WizPos pos(Wizards::Wizard);
+    pos(Rect(25, -25, 50, 50));
+
+    addComponent<PositionComponent>(pos);
     addComponent<VelocityComponent>(SDL_FPoint{});
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
@@ -59,10 +61,6 @@ void Wizard::init() {
 
     addComponent<RenderService>();
     addComponent<PhysicsService>();
-
-    WizPos pos(Wizards::Wizard);
-    pos(Rect(25, -25, 50, 50));
-    getComponent<PositionComponent>().setSource(pos);
 
     subscribeTo<EventSystem::UpdateMessage>(
         [this, pos](const auto& m) {
@@ -114,17 +112,15 @@ void Wizard::shootFireball() {
 const Entities::UUID Crystal::CID = Entities::generateUUID();
 
 void Crystal::init() {
-    addComponent<PositionComponent>(Rect());
-    addComponent<ElevationComponent>(0);
-    addComponent<SpriteComponent>("res/wizards/crystal.png");
-    addComponent<CollisionComponent>(Crystal::CID);
-
-    addComponent<RenderService>();
-    addComponent<CollisionService>();
-
     WizPos pos(Wizards::Crystal);
     pos(Rect(-25, -25, 50, 50));
-    getComponent<PositionComponent>().setSource(pos);
+
+    addComponent<PositionComponent>(pos);
+    addComponent<ElevationComponent>(0);
+    addComponent<SpriteComponent>("res/wizards/crystal.png");
+
+    addComponent<RenderService>();
+    addComponent<CollisionService>(Crystal::CID);
 
     WizPos wizPos(Wizards::Wizard);
     Observables::subscribe(
@@ -166,6 +162,7 @@ void Boundary::init() {
     c.setDashed(25);
     tex.draw(c);
     addComponent<SpriteComponent>(tex.getTexture());
+
     addComponent<RenderService>();
 
     WizPos pos(Wizards::Crystal);

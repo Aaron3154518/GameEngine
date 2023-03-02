@@ -47,7 +47,7 @@ class Service : public Components::ComponentManager<Comp> {
     template <class... Ts>
     typename std::enable_if<sizeof...(Ts) == 0, bool>::type check(
         const Entities::UUID& eId) {
-        return true;
+        return this->template operator[](eId).isActive();
     }
 
     template <class T, class... Ts>

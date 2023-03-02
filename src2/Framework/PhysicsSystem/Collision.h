@@ -11,10 +11,8 @@
 #include <unordered_set>
 
 // Stores a collision id
-class CollisionComponent : public Components::ComponentManager<
-                               Components::DataComponent<Entities::UUID>> {};
-
-class CollisionService : public Services::Service<> {
+class CollisionService
+    : public Services::Service<Components::DataComponent<Entities::UUID>> {
    public:
     typedef std::unordered_map<Entities::UUID, std::vector<Entities::UUID>>
         CollisionMap;
