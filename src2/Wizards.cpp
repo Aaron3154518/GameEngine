@@ -143,6 +143,12 @@ void Crystal::init() {
     addComponent<PositionComponent>(pos);
     addComponent<ElevationComponent>(0);
     addComponent<SpriteComponent>("res/wizards/crystal.png");
+    addComponent<TextComponent>();
+
+    auto& text = getComponent<TextComponent>();
+    text.setElevation(0);
+    text.setAlign(Rect::Align::CENTER, Rect::Align::TOP_LEFT);
+    text.setFont(AssetManager::getFont({-1, 25, "|"}));
 
     addComponent<RenderService>();
     addComponent<CollisionService>(Crystal::CID);
@@ -170,8 +176,27 @@ void Crystal::init() {
         },
         pos, wizPos);
 
+    Observables::subscribe(
+        this,
+        [this](const Rect& pos) {
+            Rect tPos(pos.x(), pos.y(), pos.w(), pos.halfH());
+            tPos.setPosY(pos.x(), Rect::Align::BOT_RIGHT);
+            getComponent<TextComponent>().setRect(tPos);
+        },
+        WizPos(Wizards::Crystal));
+
+    Observables::subscribe(
+        this,
+        [this](const Number& val) {
+            getComponent<TextComponent>().setText(val.toString());
+        },
+        CrystalNumbers(Wizards::Magic));
+
     subscribeTo<CollisionService::Message>(
-        [this](const CollisionService::Message& m) {},
+        [this](const CollisionService::Message& m) {
+            CrystalNumbers magic(Wizards::Magic);
+            magic(magic() + 1);
+        },
         CollisionService::Collided);
 }
 

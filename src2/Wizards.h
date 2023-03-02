@@ -7,13 +7,17 @@
 #include <Framework/PhysicsSystem/Services.h>
 #include <Framework/RenderSystem/Services.h>
 #include <Framework/RenderSystem/SpriteComponent.h>
+#include <Framework/RenderSystem/TextComponent.h>
 #include <Observables/Observables.h>
+#include <Utils/Number.h>
 #include <Utils/Rect.h>
 
 namespace Wizards {
-enum _ : Observables::EnumT { Wizard = 0, Crystal };
-}
-ROOT_NODE(WizPos, Rect, Wizards::_);
+enum _1 : Observables::EnumT { Wizard = 0, Crystal };
+enum _2 : Observables::EnumT { Magic };
+}  // namespace Wizards
+ROOT_NODE(WizPos, Rect, Wizards::_1);
+ROOT_NODE(CrystalNumbers, Number, Wizards::_2);
 
 class TargetComponent
     : public Components::ComponentManager<Components::DataComponent<Rect>> {};
