@@ -8,16 +8,15 @@
 #include <Services/Service.h>
 #include <Utils/Time.h>
 
-class VelocityComponent : public Components::ComponentManager<
-                              Components::DataComponent<SDL_FPoint>> {};
-
-class AccelerationComponent : public Components::ComponentManager<
-                                  Components::DataComponent<SDL_FPoint>> {};
+struct PhysicsData : public Components::Component {
+    SDL_FPoint v, a;
+    float maxV = -1;
+};
 
 class BoundaryComponent
     : public Components::ComponentManager<Components::DataComponent<Rect>> {};
 
-class PhysicsService : public Services::Service<> {
+class PhysicsService : public Services::Service<PhysicsData> {
    private:
     void manager_init();
 

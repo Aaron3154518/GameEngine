@@ -4,31 +4,54 @@
 const Entities::UUID Fireball::CID = Entities::generateUUID();
 
 void Fireball::update(Time dt) {
-    auto& t = WizPos(Wizards::Crystal)();
+    auto& t = getComponent<TargetComponent>().get();
     auto& pos = getComponent<PositionComponent>().get();
+    auto& p = getComponent<PhysicsService>();
+
     float dx = t.cX() - pos.cX(), dy = t.cY() - pos.cY();
-    float mag = sqrtf(dx * dx + dy * dy);
-    auto& aComp = getComponent<AccelerationComponent>();
-    auto a = aComp.get();
-    if (mag == 0) {
-        a.x = 0;
-        a.y = 0;
-    } else {
-        a.x = dx * 100 / mag;
-        a.y = dy * 100 / mag;
+    float r = fminf(sqrtf(dx * dx + dy * dy) / 2, p.maxV);
+
+    if (fabsf(r) < 1e-5) {
+        p.a = {0, 0};
+        return;
     }
-    aComp.set(a);
+
+    float frac =
+        fmaxf(p.v.x * p.v.x + p.v.y * p.v.y, p.maxV * p.maxV / 4) / r / r;
+    p.a.x = dx * frac;
+    p.a.y = dy * frac;
+}
+
+void Fireball::launch(SDL_FPoint from, float v,
+                      const Observables::Node<Rect>& to) {
+    auto& posComp = getComponent<PositionComponent>();
+    Rect r = posComp.get();
+    r.setPos(from.x, from.y, Rect::Align::CENTER);
+    posComp.set(r);
+    const Rect& t = to();
+    float dx = t.cX() - from.x, dy = t.cY() - from.y;
+    float theta = atan2f(dy, dx);
+
+    static std::random_device rd;
+    static std::mt19937_64 mt(rd());
+    static std::uniform_real_distribution<float> dist(0, 1);
+
+    theta += (dist(mt) - 0.5f) * M_PI * 3 / 2;
+
+    auto& p = getComponent<PhysicsService>();
+    p.v = {v * cosf(theta), v * sinf(theta)};
+    p.maxV = v;
+    getComponent<TargetComponent>().setSource(to);
 }
 
 void Fireball::init() {
-    addComponent<PositionComponent>(Rect(0, 0, 50, 50));
-    addComponent<VelocityComponent>(SDL_FPoint{});
-    addComponent<AccelerationComponent>(SDL_FPoint{});
+    addComponent<PositionComponent>(Rect(0, 0, 25, 25));
+    addComponent<TargetComponent>(Rect());
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/projectiles/fireball.png");
 
     addComponent<RenderService>();
-    addComponent<PhysicsService>();
+    addComponent<PhysicsService>(PhysicsData{});
     addComponent<CollisionService>(Fireball::CID);
 
     subscribeTo<CollisionService::Message>(
@@ -54,13 +77,12 @@ void Wizard::init() {
     pos(Rect(25, -25, 50, 50));
 
     addComponent<PositionComponent>(pos);
-    addComponent<VelocityComponent>(SDL_FPoint{});
     addComponent<ElevationComponent>(1);
     addComponent<SpriteComponent>("res/wizards/wizard_ss.png", 5, 150);
     addComponent<FireballListComponent>(GameObjects::New<FireballList>());
 
     addComponent<RenderService>();
-    addComponent<PhysicsService>();
+    addComponent<PhysicsService>(PhysicsData{});
 
     subscribeTo<EventSystem::UpdateMessage>(
         [this, pos](const auto& m) {
@@ -80,31 +102,34 @@ void Wizard::init() {
                 return;
             }
 
-            auto v = getComponent<VelocityComponent>().get();
+            auto& p = getComponent<PhysicsService>();
             switch (k.data.key) {
                 case SDLK_a:
-                    v.x -= maxV;
+                    p.v.x -= maxV;
                     break;
                 case SDLK_d:
-                    v.x += maxV;
+                    p.v.x += maxV;
                     break;
                 case SDLK_w:
-                    v.y -= maxV;
+                    p.v.y -= maxV;
                     break;
                 case SDLK_s:
-                    v.y += maxV;
+                    p.v.y += maxV;
                     break;
                 default:
                     break;
             };
-            getComponent<VelocityComponent>().set(v);
         });
 
     startTimer(2000, [this]() { shootFireball(); });
 }
 
 void Wizard::shootFireball() {
-    getComponent<FireballListComponent>().get().add();
+    auto& fList = getComponent<FireballListComponent>().get();
+    fList.add();
+    fList.back()->launch(
+        getComponent<PositionComponent>().get().getPos(Rect::Align::CENTER),
+        250, WizPos(Wizards::Crystal));
     startTimer(2000, [this]() { shootFireball(); });
 }
 

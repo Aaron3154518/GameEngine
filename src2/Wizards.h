@@ -15,11 +15,16 @@ enum _ : Observables::EnumT { Wizard = 0, Crystal };
 }
 ROOT_NODE(WizPos, Rect, Wizards::_);
 
+class TargetComponent
+    : public Components::ComponentManager<Components::DataComponent<Rect>> {};
+
 class Fireball : public Entities::Entity {
    public:
     static const Entities::UUID CID;
 
     void update(Time dt);
+
+    void launch(SDL_FPoint from, float v, const Observables::Node<Rect>& to);
 
    private:
     void init();

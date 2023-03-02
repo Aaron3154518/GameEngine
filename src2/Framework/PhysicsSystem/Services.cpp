@@ -11,12 +11,15 @@ void PhysicsService::onUpdate(Time dt) {
     float c = .5f * s * s;
     for (auto e : active<PositionComponent>()) {
         auto pos = e.getData<PositionComponent>();
-        if (auto v = e.getDataOpt<VelocityComponent>()) {
-            pos.move(v->x * s, v->y * s);
-            if (auto a = e.getDataOpt<AccelerationComponent>()) {
-                pos.move(a->x * c, a->y * c);
-                e.setData<VelocityComponent>(
-                    {v->x + a->x * s, v->y + a->y * s});
+        auto& data = e.get<PhysicsService>();
+        pos.move(data.v.x * s + data.a.x * c, data.v.y * s + data.a.y * c);
+        data.v.x += data.a.x * s;
+        data.v.y += data.a.y * s;
+        if (data.maxV >= 0) {
+            float vMag = sqrtf(data.v.x * data.v.x + data.v.y * data.v.y);
+            if (vMag > 0) {
+                data.v.x *= data.maxV / vMag;
+                data.v.y *= data.maxV / vMag;
             }
         }
 

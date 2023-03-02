@@ -7,9 +7,9 @@ const UUID& NullId() {
 }
 
 UUID generateUUID() {
-    std::random_device rd;
-    std::mt19937_64 mt(rd());
-    std::uniform_int_distribution<uint64_t> dist;
+    static std::random_device rd;
+    static std::mt19937_64 mt(rd());
+    static std::uniform_int_distribution<uint64_t> dist;
     UUID id{dist(mt), dist(mt)};
     while (id == NullId()) {
         id = UUID{dist(mt), dist(mt)};
