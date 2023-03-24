@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
     GameObjects::Get<Wizard>();
     GameObjects::Get<Crystal>();
     auto b = GameObjects::New<Boundary>();
+    GameObjects::Get<EnemyHandler>();
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {

@@ -14,10 +14,12 @@
 
 namespace Wizards {
 enum _1 : Observables::EnumT { Wizard = 0, Crystal };
-enum _2 : Observables::EnumT { Magic };
+enum _2 : Observables::EnumT { Magic = 0 };
+enum _3 : Observables::EnumT { InCircle = 0 };
 }  // namespace Wizards
 ROOT_NODE(WizPos, Rect, Wizards::_1);
 ROOT_NODE(CrystalNumbers, Number, Wizards::_2);
+ROOT_NODE(WizState, bool, Wizards::_3);
 
 class TargetComponent
     : public Components::ComponentManager<Components::DataComponent<Rect>> {};
@@ -58,6 +60,22 @@ class Crystal : public Entities::Entity {
 
    private:
     void init();
+};
+
+class Enemy : public Entities::Entity {
+    friend class EnemyHandler;
+
+   public:
+   private:
+    void init();
+};
+
+class EnemyHandler : public Entities::EntityContainer<Enemy> {
+   public:
+   private:
+    void container_init();
+
+    void spawnEnemy();
 };
 
 class Boundary : public Entities::Entity {

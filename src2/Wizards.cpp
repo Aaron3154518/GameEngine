@@ -125,11 +125,13 @@ void Wizard::init() {
 }
 
 void Wizard::shootFireball() {
-    auto& fList = getComponent<FireballListComponent>().get();
-    fList.add();
-    fList.back()->launch(
-        getComponent<PositionComponent>().get().getPos(Rect::Align::CENTER),
-        250, WizPos(Wizards::Crystal));
+    if (WizState(Wizards::InCircle)()) {
+        auto& fList = getComponent<FireballListComponent>().get();
+        fList.add();
+        fList.back()->launch(
+            getComponent<PositionComponent>().get().getPos(Rect::Align::CENTER),
+            250, WizPos(Wizards::Crystal));
+    }
     startTimer(2000, [this]() { shootFireball(); });
 }
 
@@ -170,8 +172,10 @@ void Crystal::init() {
             if ((id != crys && id != wiz) || (id == wiz && mag <= 245)) {
                 camera.track(crys,
                              std::make_unique<Camera::ConstantTracker>(250));
+                WizState(Wizards::InCircle)(true);
             } else if (id == crys && mag > 255) {
                 camera.track(wiz, std::make_unique<Camera::ScaleTracker>(2));
+                WizState(Wizards::InCircle)(false);
             }
         },
         pos, wizPos);
@@ -198,6 +202,66 @@ void Crystal::init() {
             magic(magic() + 1);
         },
         CollisionService::Collided);
+}
+
+// Enemy
+void Enemy::init() {
+    addComponent<ElevationComponent>(0);
+    addComponent<PositionComponent>(Rect(0, 0, 40, 40));
+    addComponent<SpriteComponent>("res/wizards/power_wizard_ss.png", 8, 150);
+
+    addComponent<RenderService>();
+    addComponent<PhysicsService>(PhysicsData{});
+}
+
+// EnemyHandler
+void EnemyHandler::container_init() {
+    Observables::subscribe(
+        this,
+        [this](bool in) {
+            if (in) {
+                forEach([](Enemy& e) {
+                    e.getComponent<PhysicsService>().v = {0, 0};
+                });
+            }
+        },
+        WizState(Wizards::InCircle));
+
+    subscribeTo<EventSystem::UpdateMessage>(
+        [this](const EventSystem::UpdateMessage& m) {
+            if (!WizState(Wizards::InCircle)()) {
+                forEach([](Enemy& e) {
+                    auto& data = e.getComponent<PhysicsService>();
+                    auto& r = e.getComponent<PositionComponent>().get();
+                    auto& t = WizPos(Wizards::Wizard)();
+                    float dx = t.cX() - r.cX(), dy = t.cY() - r.cY();
+                    float mag = sqrtf(dx * dx + dy * dy);
+                    // TODO: Not in circle
+                    if (mag > 0) {
+                        mag = 40 / mag;
+                    }
+                    data.v = {dx * mag, dy * mag};
+                });
+            }
+        });
+
+    startTimer(250, [this]() { spawnEnemy(); });
+}
+
+void EnemyHandler::spawnEnemy() {
+    if (!WizState(Wizards::InCircle)() && rand() % 10 == 0) {
+        add();
+        SDL_FPoint tPos = WizPos(Wizards::Wizard)().getPos(Rect::Align::CENTER);
+        auto& posComp = back()->getComponent<PositionComponent>();
+        Rect r = posComp.get();
+        // TODO: Not in circle
+        // TODO: Random sign
+        r.setPos(tPos.x + (rand() % 200 + 50) * (rand() % 2 * 2 - 1),
+                 tPos.y + (rand() % 200 - 50) * (rand() % 2 * 2 - 1),
+                 Rect::Align::CENTER);
+        posComp.set(r);
+    }
+    startTimer(250, [this]() { spawnEnemy(); });
 }
 
 // Boundary
