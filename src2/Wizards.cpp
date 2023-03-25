@@ -96,6 +96,7 @@ void Wizard::init() {
         [this](const CollisionService::Message& m) {
             if (m.data == Enemy::CID) {
                 std::cerr << "Dead :(" << std::endl;
+                CollisionService::triggerImmunity(this, 1000);
             }
         },
         CollisionService::Collided);

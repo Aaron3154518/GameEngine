@@ -20,7 +20,6 @@ class Entity : public Messages::Messager {
    public:
     virtual ~Entity();
 
-   protected:
     template <class CompManT, class... ArgTs>
     void addComponent(ArgTs&&... args) {
         GameObjects::Get<CompManT>().newComponent(id(),

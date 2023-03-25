@@ -21,6 +21,8 @@ class CollisionService
 
     static bool NewType(const Entities::UUID& idA, const Entities::UUID& idB);
 
+    static void triggerImmunity(Entities::Entity* e, int len_ms);
+
    private:
     void manager_init();
 

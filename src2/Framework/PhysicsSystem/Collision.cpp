@@ -11,6 +11,12 @@ bool CollisionService::NewType(const Entities::UUID& idA,
     return true;
 }
 
+void CollisionService::triggerImmunity(Entities::Entity* e, int len_ms) {
+    e->getComponent<CollisionService>().setActive(false);
+    e->startTimer(
+        len_ms, [e]() { e->getComponent<CollisionService>().setActive(true); });
+}
+
 void CollisionService::manager_init() {
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const auto& m) { onUpdate(); }, EventSystem::Update);

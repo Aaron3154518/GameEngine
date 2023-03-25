@@ -49,7 +49,6 @@ class Messager {
             GetMessageBus().subscribe<MsgT>(callback, id()));
     }
 
-   protected:
     void startTimer(int len_ms, const std::function<void()>& callback);
 
    private:
