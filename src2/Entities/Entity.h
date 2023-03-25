@@ -38,6 +38,8 @@ class Entity : public Messages::Messager {
     }
 };
 
+typedef std::unique_ptr<Entity> EntityPtr;
+
 class EntityUnsubService : public Services::Service<> {
    public:
     DATA_MESSAGE(Message, UUID, Unsub);

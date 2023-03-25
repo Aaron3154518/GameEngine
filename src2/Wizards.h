@@ -24,9 +24,11 @@ ROOT_NODE(WizState, bool, Wizards::_3);
 class TargetComponent
     : public Components::ComponentManager<Components::DataComponent<Rect>> {};
 
-class Fireball : public Entities::Entity {
+class Fireball : public Entities::Entity, public Entities::EntityContainee {
    public:
     static const Entities::UUID CID;
+
+    using Entities::EntityContainee::EntityContainee;
 
     void update(Time dt);
 
@@ -39,7 +41,7 @@ class Fireball : public Entities::Entity {
 class FireballList : public Entities::EntityContainer<Fireball> {
    public:
    private:
-    void container_init();
+    void init();
 };
 
 class FireballListComponent : public Components::ComponentManager<
@@ -48,6 +50,8 @@ class FireballListComponent : public Components::ComponentManager<
 
 class Wizard : public Entities::Entity {
    public:
+    static const Entities::UUID CID;
+
    private:
     void init();
 
@@ -62,10 +66,14 @@ class Crystal : public Entities::Entity {
     void init();
 };
 
-class Enemy : public Entities::Entity {
+class Enemy : public Entities::Entity, public Entities::EntityContainee {
     friend class EnemyHandler;
 
    public:
+    static const Entities::UUID CID;
+
+    using Entities::EntityContainee::EntityContainee;
+
    private:
     void init();
 };
@@ -73,7 +81,7 @@ class Enemy : public Entities::Entity {
 class EnemyHandler : public Entities::EntityContainer<Enemy> {
    public:
    private:
-    void container_init();
+    void init();
 
     void spawnEnemy();
 };

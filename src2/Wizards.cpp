@@ -56,14 +56,13 @@ void Fireball::init() {
 
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
-            Messages::GetMessageBus().sendMessage(
-                FireballList::Message(FireballList::Remove, id()));
+            removeFromContainer(id());
         },
         CollisionService::Collided);
 }
 
 // FireballList
-void FireballList::container_init() {
+void FireballList::init() {
     subscribeTo<EventSystem::UpdateMessage>(
         [this](const EventSystem::UpdateMessage& m) {
             forEach(Fireball::update, m.data);
@@ -72,6 +71,8 @@ void FireballList::container_init() {
 }
 
 // Wizard
+const Entities::UUID Wizard::CID = Entities::generateUUID();
+
 void Wizard::init() {
     WizPos pos(Wizards::Wizard);
     pos(Rect(25, -25, 50, 50));
@@ -83,12 +84,21 @@ void Wizard::init() {
 
     addComponent<RenderService>();
     addComponent<PhysicsService>(PhysicsData{});
+    addComponent<CollisionService>(Wizard::CID);
 
     subscribeTo<EventSystem::UpdateMessage>(
         [this, pos](const auto& m) {
             pos(getComponent<PositionComponent>().get());
         },
         EventSystem::Update);
+
+    subscribeTo<CollisionService::Message>(
+        [this](const CollisionService::Message& m) {
+            if (m.data == Enemy::CID) {
+                std::cerr << "Dead :(" << std::endl;
+            }
+        },
+        CollisionService::Collided);
 
     const static float V = 100;
     subscribeTo<EventSystem::KeyboardMessage>(
@@ -128,7 +138,7 @@ void Wizard::shootFireball() {
     if (WizState(Wizards::InCircle)()) {
         auto& fList = getComponent<FireballListComponent>().get();
         fList.add();
-        fList.back()->launch(
+        fList.back().launch(
             getComponent<PositionComponent>().get().getPos(Rect::Align::CENTER),
             250, WizPos(Wizards::Crystal));
     }
@@ -205,6 +215,8 @@ void Crystal::init() {
 }
 
 // Enemy
+const Entities::UUID Enemy::CID = Entities::generateUUID();
+
 void Enemy::init() {
     addComponent<ElevationComponent>(0);
     addComponent<PositionComponent>(Rect(0, 0, 40, 40));
@@ -212,10 +224,19 @@ void Enemy::init() {
 
     addComponent<RenderService>();
     addComponent<PhysicsService>(PhysicsData{});
+    addComponent<CollisionService>(Enemy::CID);
+
+    subscribeTo<CollisionService::Message>(
+        [this](const CollisionService::Message& m) {
+            if (m.data == Fireball::CID) {
+                removeFromContainer(id());
+            }
+        },
+        CollisionService::Collided);
 }
 
 // EnemyHandler
-void EnemyHandler::container_init() {
+void EnemyHandler::init() {
     Observables::subscribe(
         this,
         [this](bool in) {
@@ -252,7 +273,7 @@ void EnemyHandler::spawnEnemy() {
     if (!WizState(Wizards::InCircle)() && rand() % 10 == 0) {
         add();
         SDL_FPoint tPos = WizPos(Wizards::Wizard)().getPos(Rect::Align::CENTER);
-        auto& posComp = back()->getComponent<PositionComponent>();
+        auto& posComp = back().getComponent<PositionComponent>();
         Rect r = posComp.get();
         // TODO: Not in circle
         // TODO: Random sign
@@ -291,6 +312,13 @@ void Boundary::init() {
         pos);
 }
 
+// Collision types
 namespace {
-const bool _ = CollisionService::NewType(Crystal::CID, Fireball::CID);
+const bool _ = []() {
+    CollisionService::NewType(Crystal::CID, Fireball::CID);
+    CollisionService::NewType(Enemy::CID, Fireball::CID);
+    CollisionService::NewType(Enemy::CID, Wizard::CID);
+    return true;
+}();
+
 }
