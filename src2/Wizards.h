@@ -24,18 +24,27 @@ ROOT_NODE(WizState, bool, Wizards::_3);
 class TargetComponent
     : public Components::ComponentManager<Components::DataComponent<Rect>> {};
 
+void track_ai(const Rect& pos, const Rect& tPos, PhysicsData& pd);
+void beeline_ai(const Rect& pos, const Rect& tPos, PhysicsData& pd);
+
 class Fireball : public Entities::Entity, public Entities::EntityContainee {
    public:
+    enum AI : uint8_t { Track = 0, Beeline };
+
     static const Entities::UUID CID;
 
     using Entities::EntityContainee::EntityContainee;
 
     void update(Time dt);
 
-    void launch(SDL_FPoint from, float v, const Observables::Node<Rect>& to);
+    void launch(SDL_FPoint from, float v, const Rect& to, AI ai);
+    void launch(SDL_FPoint from, float v, const Observables::Node<Rect>& to,
+                AI ai);
 
    private:
     void init();
+
+    AI mAi = AI::Track;
 };
 
 class FireballList : public Entities::EntityContainer<Fireball> {
@@ -61,6 +70,7 @@ class Wizard : public Entities::Entity {
 class Crystal : public Entities::Entity {
    public:
     static const Entities::UUID CID;
+    static const int RAD;
 
    private:
     void init();
@@ -80,6 +90,8 @@ class Enemy : public Entities::Entity, public Entities::EntityContainee {
 
 class EnemyHandler : public Entities::EntityContainer<Enemy> {
    public:
+    Rect getClosest(const Rect& r);
+
    private:
     void init();
 

@@ -21,8 +21,10 @@ EntityContainee::EntityContainee(EntityContainerBase* container)
 
 void EntityContainee::removeFromContainer(const UUID& eId) {
     if (!mContainer) {
-        throw std::runtime_error(
-            "EntityContainee::removeFromContainer(): Container is null");
+        // std::cerr << "EntityContainee::removeFromContainer(): Container is
+        // null"
+        //<< std::endl;
+        return;
     }
     mContainer->remove(eId);
     mContainer = nullptr;

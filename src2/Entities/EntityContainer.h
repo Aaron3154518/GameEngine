@@ -31,13 +31,14 @@ class EntityContainer : public EntityContainerBase {
 
    public:
     template <class... ArgTs>
-    void add(ArgTs&&... args) {
+    EntityT& add(ArgTs&&... args) {
         static_assert(std::is_constructible<EntityT, EntityContainerBase*,
                                             ArgTs...>::value,
                       "EntityContainer::add<>: Containee is not constructible "
                       "with the given arguments");
         mEntities.push_back(
             GameObjects::New<EntityT>(this, std::forward<ArgTs>(args)...));
+        return back();
     }
 
     EntityT& back() const { return static_cast<EntityT&>(*mEntities.back()); }

@@ -1,5 +1,36 @@
 #include "Wizards.h"
 
+void track_ai(const Rect& pos, const Rect& tPos, PhysicsData& pd) {
+    float dx = tPos.cX() - pos.cX(), dy = tPos.cY() - pos.cY();
+    float r = fminf(sqrtf(dx * dx + dy * dy) / 2, pd.maxV);
+
+    if (fabsf(r) < 1e-5) {
+        pd.a = {0, 0};
+        return;
+    }
+
+    float frac =
+        fmaxf(pd.v.x * pd.v.x + pd.v.y * pd.v.y, pd.maxV * pd.maxV / 4) / r / r;
+    pd.a.x = dx * frac;
+    pd.a.y = dy * frac;
+}
+
+void beeline_ai(const Rect& pos, const Rect& tPos, PhysicsData& pd) {
+    float dx = tPos.cX() - pos.cX(), dy = tPos.cY() - pos.cY();
+    float r = fminf(sqrtf(dx * dx + dy * dy) / 2, pd.maxV);
+
+    pd.a = {0, 0};
+
+    if (fabsf(r) < 1e-5) {
+        pd.v = {0, 0};
+        return;
+    }
+
+    float frac = pd.maxV / r;
+    pd.v.x = dx * frac;
+    pd.v.y = dy * frac;
+}
+
 // Fireball
 const Entities::UUID Fireball::CID = Entities::generateUUID();
 
@@ -8,39 +39,42 @@ void Fireball::update(Time dt) {
     auto& pos = getComponent<PositionComponent>().get();
     auto& p = getComponent<PhysicsService>();
 
-    float dx = t.cX() - pos.cX(), dy = t.cY() - pos.cY();
-    float r = fminf(sqrtf(dx * dx + dy * dy) / 2, p.maxV);
-
-    if (fabsf(r) < 1e-5) {
-        p.a = {0, 0};
-        return;
+    switch (mAi) {
+        case AI::Track:
+            track_ai(pos, t, p);
+            break;
+        case AI::Beeline:
+            break;
     }
-
-    float frac =
-        fmaxf(p.v.x * p.v.x + p.v.y * p.v.y, p.maxV * p.maxV / 4) / r / r;
-    p.a.x = dx * frac;
-    p.a.y = dy * frac;
 }
 
-void Fireball::launch(SDL_FPoint from, float v,
-                      const Observables::Node<Rect>& to) {
+void Fireball::launch(SDL_FPoint from, float v, const Rect& to, AI ai) {
+    mAi = ai;
+
     auto& posComp = getComponent<PositionComponent>();
     Rect r = posComp.get();
     r.setPos(from.x, from.y, Rect::Align::CENTER);
     posComp.set(r);
-    const Rect& t = to();
-    float dx = t.cX() - from.x, dy = t.cY() - from.y;
+    float dx = to.cX() - from.x, dy = to.cY() - from.y;
     float theta = atan2f(dy, dx);
 
     static std::random_device rd;
     static std::mt19937_64 mt(rd());
     static std::uniform_real_distribution<float> dist(0, 1);
 
-    theta += (dist(mt) - 0.5f) * M_PI * 3 / 2;
+    if (mAi == AI::Track) {
+        theta += (dist(mt) - 0.5f) * M_PI * 3 / 2;
+    }
 
     auto& p = getComponent<PhysicsService>();
     p.v = {v * cosf(theta), v * sinf(theta)};
     p.maxV = v;
+    getComponent<TargetComponent>().setSource(to);
+}
+
+void Fireball::launch(SDL_FPoint from, float v,
+                      const Observables::Node<Rect>& to, AI ai) {
+    launch(from, v, to(), ai);
     getComponent<TargetComponent>().setSource(to);
 }
 
@@ -59,6 +93,8 @@ void Fireball::init() {
             removeFromContainer(id());
         },
         CollisionService::Collided);
+
+    startTimer(5000, [this]() { removeFromContainer(id()); });
 }
 
 // FireballList
@@ -95,8 +131,20 @@ void Wizard::init() {
     subscribeTo<CollisionService::Message>(
         [this](const CollisionService::Message& m) {
             if (m.data == Enemy::CID) {
-                std::cerr << "Dead :(" << std::endl;
+                Rect r = WizPos(Wizards::Wizard)();
+                Rect cPos = WizPos(Wizards::Crystal)();
+                r.setPos(
+                    cPos.cX() + Crystal::RAD * ((rand() % 100) / 200 + .3) *
+                                    (rand() % 2 * 2 - 1),
+                    cPos.cY() + Crystal::RAD * ((rand() % 100) / 200 + .3) *
+                                    (rand() % 2 * 2 - 1),
+                    Rect::Align::CENTER);
+                WizPos(Wizards::Wizard)(r);
                 CollisionService::triggerImmunity(this, 1000);
+                getComponent<PhysicsService>().setActive(false);
+                startTimer(5000, [this]() {
+                    getComponent<PhysicsService>().setActive(true);
+                });
             }
         },
         CollisionService::Collided);
@@ -132,6 +180,26 @@ void Wizard::init() {
             };
         });
 
+    subscribeTo<EventSystem::KeyboardMessage>(
+        [this](const EventSystem::KeyboardMessage& k) {
+            switch (k.data.key) {
+                case SDLK_SPACE:
+                    if (!WizState(Wizards::InCircle)()) {
+                        auto& fList =
+                            getComponent<FireballListComponent>().get();
+                        auto& r = getComponent<PositionComponent>().get();
+                        fList.add().launch(
+                            r.getPos(Rect::Align::CENTER), 100,
+                            GameObjects::Get<EnemyHandler>().getClosest(r),
+                            Fireball::AI::Beeline);
+                    }
+                    break;
+                default:
+                    break;
+            };
+        },
+        Event::PRESSED);
+
     startTimer(2000, [this]() { shootFireball(); });
 }
 
@@ -141,13 +209,14 @@ void Wizard::shootFireball() {
         fList.add();
         fList.back().launch(
             getComponent<PositionComponent>().get().getPos(Rect::Align::CENTER),
-            250, WizPos(Wizards::Crystal));
+            250, WizPos(Wizards::Crystal), Fireball::AI::Track);
     }
     startTimer(2000, [this]() { shootFireball(); });
 }
 
 // Crystal
 const Entities::UUID Crystal::CID = Entities::generateUUID();
+const int Crystal::RAD = 250;
 
 void Crystal::init() {
     WizPos pos(Wizards::Crystal);
@@ -180,11 +249,11 @@ void Crystal::init() {
 
             auto wiz = GameObjects::Get<Wizard>().id();
             auto crys = GameObjects::Get<Crystal>().id();
-            if ((id != crys && id != wiz) || (id == wiz && mag <= 245)) {
+            if ((id != crys && id != wiz) || (id == wiz && mag <= RAD - 5)) {
                 camera.track(crys,
                              std::make_unique<Camera::ConstantTracker>(250));
                 WizState(Wizards::InCircle)(true);
-            } else if (id == crys && mag > 255) {
+            } else if (id == crys && mag > RAD + 5) {
                 camera.track(wiz, std::make_unique<Camera::ScaleTracker>(2));
                 WizState(Wizards::InCircle)(false);
             }
@@ -236,6 +305,22 @@ void Enemy::init() {
         CollisionService::Collided);
 }
 
+Rect EnemyHandler::getClosest(const Rect& r) {
+    float minD = -1;
+    Rect minR;
+    forEach([&minD, &minR, r](Enemy& e) {
+        SDL_FPoint ePos = e.getComponent<PositionComponent>().get().getPos(
+            Rect::Align::CENTER);
+        float dx = ePos.x - r.cX(), dy = ePos.y - r.cY();
+        float d = sqrtf(dx * dx + dy * dy);
+        if (minD == -1 || d < minD) {
+            minD = d;
+            minR = e.getComponent<PositionComponent>().get();
+        }
+    });
+    return minR;
+}
+
 // EnemyHandler
 void EnemyHandler::init() {
     Observables::subscribe(
@@ -277,9 +362,9 @@ void EnemyHandler::spawnEnemy() {
         auto& posComp = back().getComponent<PositionComponent>();
         Rect r = posComp.get();
         // TODO: Not in circle
-        // TODO: Random sign
-        r.setPos(tPos.x + (rand() % 200 + 50) * (rand() % 2 * 2 - 1),
-                 tPos.y + (rand() % 200 - 50) * (rand() % 2 * 2 - 1),
+        // TODO: Random utils
+        r.setPos(tPos.x + (rand() % 200 + 100) * (rand() % 2 * 2 - 1),
+                 tPos.y + (rand() % 200 + 100) * (rand() % 2 * 2 - 1),
                  Rect::Align::CENTER);
         posComp.set(r);
     }
