@@ -29,5 +29,9 @@ export class ParametersComponent implements OnInit {
   selectParam(list: ParamList, i: number) {
     this.currParam = new ParamInfo(list, i);
   }
+
+  codegen() {
+    this.parameterService.codegen();
+  }
 }
 export { Param };

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+const fs = (window as any).require('fs');
+
 export interface Param {
   name: string;
   callbacks: { [key: string]: string };
@@ -66,5 +68,9 @@ export class ParameterService {
   constructor() {
     this.paramLists.value[0].params[0].callbacks['Test'] = 'doThing();';
     this.paramLists.next(this.paramLists.value);
+  }
+
+  codegen() {
+    fs.writeFileSync('files/params.cpp', 'Hello World');
   }
 }
