@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import {
   newParam,
   newParamList,
@@ -15,7 +15,7 @@ export class ParameterComponent implements OnInit {
   @Input() param: ParamInfo = new ParamInfo(newParamList(), 0);
   code: string = '';
   name: string = '';
-  idxs: number[] = [0, 0];
+  idxs: number[][] = [[0, 0]];
 
   ngOnInit(): void {}
 
@@ -46,18 +46,24 @@ export class ParameterComponent implements OnInit {
     return this.name in this.param.param.callbacks;
   }
 
-  getVarIdxs(): number[] {
+  getVarIdxs(): number[][] {
     let var_name: string = this.param.name;
-    let i: number = this.code.indexOf(var_name);
-    //let i: number = this.code.search(`${var_name}|\n`);
-    let idxs: number[] = [0];
-    while (i !== -1) {
-      idxs.push(i);
-      i += var_name.length;
-      idxs.push(i);
-      i = this.code.indexOf(var_name, i);
-    }
-    idxs.push(this.code.length);
-    return idxs;
+    let lines: string[] = this.code.split('\n');
+    let global_idx: number = 0;
+    return lines.map((l: string) => {
+      let idx: number = l.indexOf(var_name);
+      //let i: number = this.code.search(`${var_name}|\n`);
+      let idxs: number[] = [global_idx];
+      while (idx !== -1) {
+        idxs.push(global_idx + idx);
+        idx += var_name.length;
+        idxs.push(global_idx + idx);
+        idx = l.indexOf(var_name, idx);
+      }
+      global_idx += l.length;
+      idxs.push(global_idx);
+      global_idx += 1;
+      return idxs;
+    });
   }
 }

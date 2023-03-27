@@ -7,12 +7,15 @@
     <br />
     <div class="code-input">
       <div class="code-div">
-        <span
-          class="code chunk"
-          *ngFor="let idx of idxs; let i = index"
-          [ngClass]="{ var: i % 2 === 0 }"
-          >{{ i !== 0 ? code.substring(idxs[i - 1], idx) : "" }}</span
-        >
+        <div class="chunk" *ngFor="let line of idxs">
+          <span
+            class="code"
+            *ngFor="let idx of line; let i = index"
+            [ngClass]="{ var: i % 2 === 0 }"
+            >{{ i !== 0 ? code.substring(line[i - 1], line[i]) : "" }}</span
+          >
+        </div>
+        <div class="code">&nbsp;</div>
       </div>
       <textarea
         class="code-div hide-code code"
