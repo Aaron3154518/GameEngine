@@ -1,0 +1,52 @@
+.box {
+  border: 1px dashed black;
+  position: relative;
+}
+
+.type {
+  color: red;
+}
+
+.var {
+  color: green;
+}
+
+.code-input {
+  resize: both;
+  width: 100%;
+  max-width: calc(100% - 5em);
+  height: 10em;
+}
+
+.indent {
+  margin-left: 2em;
+}
+
+.col {
+  display: inline-block;
+}
+
+.left {
+  width: 75%;
+}
+
+.right {
+  width: 25%;
+  right: 0;
+  position: absolute;
+}
+
+.scroll {
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+.item {
+  margin-top: 2px;
+  display: block;
+  background-color: rgb(230, 230, 230);
+}
+
+.selected {
+  background-color: rgba(175, 175, 255, 0.6);
+}

@@ -1,0 +1,35 @@
+<div class="box">
+  <div class="col left">
+    <span class="type">{{ param.type }} </span>
+    <span class="var">{{ param.name }}</span>
+    <br />
+    <span>void OnUpdate({{ param.type }} {{ param.name }}) {{ "{" }}</span>
+    <br />
+    <textarea
+      class="code-input indent"
+      type="text"
+      [value]="code"
+      (input)="onCodeChanged($event)"
+    ></textarea>
+    <br />
+    <span>}</span>
+    <br />
+    <input type="text" [value]="name" (input)="onNameChanged($event)" />
+    <button (click)="update()">
+      {{ isNameUsed() ? "Update" : "Add" }} Callback Function
+    </button>
+    <button (click)="code = name = ''">Reset</button>
+  </div>
+  <div class="col right scroll">
+    <span>Existing Callbacks:</span>
+    <br />
+    <button
+      class="item"
+      *ngFor="let cb of param.param.callbacks | keyvalue"
+      [ngClass]="{ selected: name === cb.key }"
+      (click)="name = cb.key; code = cb.value"
+    >
+      {{ cb.key }}
+    </button>
+  </div>
+</div>

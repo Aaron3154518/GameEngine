@@ -1,0 +1,13 @@
+<div>
+  <div class="list" *ngFor="let list of paramLists">
+    <h5 class="name">{{ list.name }}</h5>
+    <button
+      class="btn"
+      *ngFor="let param of list.params; let i = index"
+      (click)="selectParam(list, i)"
+    >
+      {{ param.name }}
+    </button>
+  </div>
+  <app-parameter [param]="currParam"></app-parameter>
+</div>
