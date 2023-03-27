@@ -9,7 +9,8 @@
 // #include <Test.h>
 #include <Services/CommandService.h>
 #include <Windows.h>
-#include <Wizards.h>
+//#include <Wizards.h>
+#include "../frontend/files/code.cpp"
 
 #include <iostream>
 
@@ -49,10 +50,14 @@ int main(int argc, char* argv[]) {
     // auto currency = GameObjects::New<Currency>();
     // auto tierList = GameObjects::New<TierList>();
 
-    GameObjects::Get<Wizard>();
-    GameObjects::Get<Crystal>();
-    auto b = GameObjects::New<Boundary>();
-    GameObjects::Get<EnemyHandler>();
+    // GameObjects::Get<Wizard>();
+    // GameObjects::Get<Crystal>();
+    // auto b = GameObjects::New<Boundary>();
+    // GameObjects::Get<EnemyHandler>();
+
+    GameObjects::Get<Dummy>();
+    Pos(PosNamespace::PosEnum::Wizard)(Rect(10, 5, 40, 76));
+    Gens(GensNamespace::GensEnum::T1)(800);
 
     // Create CLI thread
     if (!InitializeCriticalSectionAndSpinCount(&msgQueue, 0x00000400)) {
