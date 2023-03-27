@@ -3,21 +3,6 @@
   position: relative;
 }
 
-.type {
-  color: red;
-}
-
-.var {
-  color: green;
-}
-
-.code-input {
-  resize: both;
-  width: 100%;
-  max-width: calc(100% - 5em);
-  height: 10em;
-}
-
 .indent {
   margin-left: 2em;
 }
@@ -49,4 +34,41 @@
 
 .selected {
   background-color: rgba(175, 175, 255, 0.6);
+}
+
+.code-input {
+  resize: both;
+  width: 100%;
+  max-width: calc(100% - 5em);
+  height: 10em;
+  position: relative;
+  border: 3px solid black;
+  border-radius: 5px;
+}
+
+.code-div {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  white-space: pre-line;
+  display: inline;
+}
+
+.hide-code {
+  color: transparent;
+  background-color: transparent;
+  caret-color: black;
+}
+
+.code {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+}
+
+.type {
+  color: red;
+}
+
+.var {
+  color: blue;
 }

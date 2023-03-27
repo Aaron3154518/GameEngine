@@ -16,6 +16,8 @@ export class ParametersComponent implements OnInit {
   paramLists: ParamList[] = [];
   currParam: ParamInfo = new ParamInfo(newParamList(), 0);
 
+  search: string = '';
+
   constructor(private parameterService: ParameterService) {}
 
   ngOnInit(): void {
@@ -28,6 +30,10 @@ export class ParametersComponent implements OnInit {
 
   selectParam(list: ParamList, i: number) {
     this.currParam = new ParamInfo(list, i);
+  }
+
+  onSearchChanged(event: Event) {
+    this.search = (event.target as HTMLInputElement).value;
   }
 
   codegen() {

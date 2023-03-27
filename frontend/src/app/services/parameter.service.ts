@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-const fs = (window as any).require('fs');
+const fs: any = undefined; //(window as any).require('fs');
 
 export interface Param {
   name: string;
@@ -74,6 +74,10 @@ export class ParameterService {
   }
 
   codegen() {
+    if (!fs) {
+      return;
+    }
+
     let file: number = fs.openSync('files/code.cpp', 'w');
     // Imports
     let imports: string[] = [

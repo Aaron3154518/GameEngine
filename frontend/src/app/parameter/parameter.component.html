@@ -1,20 +1,34 @@
 <div class="box">
   <div class="col left">
-    <span class="type">{{ param.type }} </span>
-    <span class="var">{{ param.name }}</span>
+    <span class="code">void OnUpdate(</span>
+    <span class="code type">{{ param.type }} </span>
+    <span class="code var">{{ param.name }}</span>
+    <span class="code">) {{ "{" }}</span>
     <br />
-    <span>void OnUpdate({{ param.type }} {{ param.name }}) {{ "{" }}</span>
+    <div class="code-input">
+      <div class="code-div">
+        <span
+          class="code chunk"
+          *ngFor="let idx of idxs; let i = index"
+          [ngClass]="{ var: i % 2 === 0 }"
+          >{{ i !== 0 ? code.substring(idxs[i - 1], idx) : "" }}</span
+        >
+      </div>
+      <textarea
+        class="code-div hide-code code"
+        (input)="onCodeChanged($event)"
+        spellcheck="false"
+      ></textarea>
+    </div>
     <br />
-    <textarea
-      class="code-input indent"
+    <span class="code">}</span>
+    <br />
+    <input
       type="text"
-      [value]="code"
-      (input)="onCodeChanged($event)"
-    ></textarea>
-    <br />
-    <span>}</span>
-    <br />
-    <input type="text" [value]="name" (input)="onNameChanged($event)" />
+      placeholder="Callback Name"
+      [value]="name"
+      (input)="onNameChanged($event)"
+    />
     <button (click)="update()">
       {{ isNameUsed() ? "Update" : "Add" }} Callback Function
     </button>
@@ -27,7 +41,7 @@
       class="item"
       *ngFor="let cb of param.param.callbacks | keyvalue"
       [ngClass]="{ selected: name === cb.key }"
-      (click)="name = cb.key; code = cb.value"
+      (click)="select(cb.key, cb.value)"
     >
       {{ cb.key }}
     </button>

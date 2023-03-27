@@ -18,3 +18,8 @@
 .btn:hover {
   background-color: lightgray;
 }
+
+.search {
+  margin-bottom: 2px;
+  width: calc(100% - 5em);
+}

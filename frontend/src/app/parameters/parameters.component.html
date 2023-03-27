@@ -1,5 +1,13 @@
-<div>
-  <div class="list" *ngFor="let list of paramLists">
+<div class="list">
+  <input
+    class="search"
+    type="text"
+    [value]="search"
+    (input)="onSearchChanged($event)"
+  />
+  <button><fa-icon [icon]="['fas', 'search']" class="fa-xl"></fa-icon></button>
+  <button><fa-icon [icon]="['fas', 'plus']" class="fa-xl"></fa-icon></button>
+  <div *ngFor="let list of paramLists">
     <h5 class="name">{{ list.name }}</h5>
     <button
       class="btn"
@@ -9,6 +17,6 @@
       {{ param.name }}
     </button>
   </div>
-  <app-parameter [param]="currParam"></app-parameter>
-  <button (click)="codegen()">Generate Code</button>
 </div>
+<app-parameter [param]="currParam"></app-parameter>
+<button (click)="codegen()">Generate Code</button>
