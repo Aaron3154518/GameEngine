@@ -53,24 +53,30 @@ export function newParamList(
   providedIn: 'root',
 })
 export class ParameterService {
-  private paramLists: BehaviorSubject<ParamList[]> = new BehaviorSubject<
-    ParamList[]
-  >([
+  private paramLists: ParamList[] = [
     newParamList('Rect', 'Pos', ['Wizard', 'Crystal', 'Catalyst']),
     newParamList(
       'Number',
       'Gens',
       [...Array(5).keys()].map((i) => `T${i}`)
     ),
-  ]);
-  $paramLists: Observable<ParamList[]> = this.paramLists.asObservable();
+  ];
+  private paramListsSubject: BehaviorSubject<ParamList[]> = new BehaviorSubject<
+    ParamList[]
+  >(this.paramLists);
+  $paramLists: Observable<ParamList[]> = this.paramListsSubject.asObservable();
 
   constructor() {
-    this.paramLists.value[0].params[0].callbacks['Test'] =
+    this.paramLists[0].params[0].callbacks['Test'] =
       'std::cerr << Pos_Wizard << std::endl;';
-    this.paramLists.value[1].params[1].callbacks['Inc'] =
+    this.paramLists[1].params[1].callbacks['Inc'] =
       'std::cerr << (Gens_T1 + 1) << std::endl;';
-    this.paramLists.next(this.paramLists.value);
+    this.paramListsSubject.next(this.paramLists);
+  }
+
+  newList(type: string, name: string) {
+    this.paramLists.push(newParamList(type, name));
+    this.paramListsSubject.next(this.paramLists);
   }
 
   codegen() {
@@ -91,7 +97,7 @@ export class ParameterService {
       imports.map((i: string) => `#include <${i}>\n`).join('')
     );
     // Parameters
-    this.paramLists.value.forEach((pl: ParamList, j: number) => {
+    this.paramLists.forEach((pl: ParamList, j: number) => {
       let enum_name: string = pl.name + 'Enum';
       let namespace: string = pl.name + 'Namespace';
       // Create enum in namespace to avoid enum name conflicts
@@ -110,7 +116,7 @@ export class ParameterService {
       file,
       'class Dummy:public Entities::Entity{private:void init() {'
     );
-    this.paramLists.value.forEach((pl: ParamList) => {
+    this.paramLists.forEach((pl: ParamList) => {
       let enum_name: string = pl.name + 'Enum';
       let namespace: string = pl.name + 'Namespace';
       pl.params.forEach((p: Param) =>

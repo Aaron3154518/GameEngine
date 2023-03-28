@@ -8,13 +8,13 @@
     <input
       type="text"
       class="form-control"
-      id="search"
+      maxlength="20"
       placeholder="Search/Create Parameter Lists"
       autocomplete="off"
       [value]="search"
       (input)="onSearchChanged($event)"
     />
-    <div class="input-group-append" *ngIf="search && !listExists(search)">
+    <div class="input-group-append">
       <button class="input-group-text" (click)="createParamList()">
         <fa-icon [icon]="['fas', 'plus']"></fa-icon>
       </button>
@@ -24,9 +24,9 @@
   <table class="table table-sm">
     <thead>
       <tr>
-        <th class="w-auto p-0 pe-1 text-end">Type</th>
-        <th class="w-auto p-0 ps-1">Name</th>
-        <th class="w-100 p-0 ps-2">Parameters</th>
+        <th class="w-auto p-0 pe-1 text-end"></th>
+        <th class="w-auto p-0 ps-1"></th>
+        <th class="w-100 p-0 ps-2"></th>
       </tr>
     </thead>
     <tbody>

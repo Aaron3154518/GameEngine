@@ -1,0 +1,42 @@
+<div class="modal-header">
+  <h5 class="modal-title">New Parameter Set</h5>
+  <button class="btn" (click)="close()">
+    <fa-icon [icon]="['fas', 'x']"></fa-icon>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="input-group mb-2 mr-sm-2">
+    <div class="input-group-prepend">
+      <div class="input-group-text">Name:</div>
+    </div>
+    <input
+      type="text"
+      class="form-control"
+      maxlength="20"
+      [value]="name"
+      (input)="onNameChanged($event)"
+    />
+  </div>
+  <div class="input-group mb-2 mr-sm-2">
+    <div class="input-group-prepend">
+      <div class="input-group-text">Type:</div>
+    </div>
+    <input
+      type="text"
+      class="form-control"
+      maxlength="20"
+      placeholder="Enter Parameter Data Type"
+      autocomplete="off"
+      [value]="type"
+      (input)="onTypeChanged($event)"
+    />
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn" (click)="close()">
+    <fa-icon [icon]="['fas', 'x']"></fa-icon>
+  </button>
+  <button class="btn" (click)="submit()" [hidden]="!validInputs()">
+    <fa-icon [icon]="['fas', 'check']"></fa-icon>
+  </button>
+</div>

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import {
   newParamList,
   Param,
@@ -6,6 +7,7 @@ import {
   ParamInfo,
   ParamList,
 } from '../services/parameter.service';
+import { TypeModalComponent } from '../type-modal/type-modal.component';
 
 @Component({
   selector: 'app-parameters',
@@ -17,7 +19,10 @@ export class ParametersComponent implements OnInit {
   _search: string = '';
   currParam: ParamInfo = new ParamInfo(newParamList(), 0);
 
-  constructor(private parameterService: ParameterService) {}
+  constructor(
+    private parameterService: ParameterService,
+    private modalService: MdbModalService
+  ) {}
 
   get paramLists(): ParamList[] {
     return this._paramLists;
@@ -71,7 +76,9 @@ export class ParametersComponent implements OnInit {
   }
 
   createParamList() {
-    console.log('New List');
+    this.modalService.open(TypeModalComponent, {
+      data: { name: this.search },
+    });
   }
 
   codegen() {
