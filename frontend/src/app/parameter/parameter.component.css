@@ -70,16 +70,3 @@
 .chunk {
   line-height: 1em;
 }
-
-.code {
-  font-family: "Courier New", Courier, monospace;
-  font-weight: bold;
-}
-
-.type {
-  color: red;
-}
-
-.var {
-  color: blue;
-}

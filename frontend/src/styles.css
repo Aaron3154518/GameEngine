@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+.btn:hover {
+  background-color: lightgray;
+}
+
+.type {
+  color: rgb(200, 0, 0);
+}
+
+.var {
+  color: rgb(25, 25, 255);
+}
+
+.code {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+}

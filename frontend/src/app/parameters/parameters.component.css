@@ -4,22 +4,7 @@
   padding: 2px;
 }
 
-.name {
-  margin: 0;
-  border: 1px solid black;
-  border-radius: 2px;
-}
-
-.btn {
-  border-radius: 2px;
-  margin-right: 2px;
-}
-
-.btn:hover {
-  background-color: lightgray;
-}
-
 .search {
+  margin-left: 2px;
   margin-bottom: 2px;
-  width: calc(100% - 5em);
 }

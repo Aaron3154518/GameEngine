@@ -13,12 +13,29 @@ import {
   styleUrls: ['./parameters.component.css'],
 })
 export class ParametersComponent implements OnInit {
-  paramLists: ParamList[] = [];
+  _paramLists: ParamList[] = [];
+  _search: string = '';
   currParam: ParamInfo = new ParamInfo(newParamList(), 0);
 
-  search: string = '';
-
   constructor(private parameterService: ParameterService) {}
+
+  get paramLists(): ParamList[] {
+    return this._paramLists;
+  }
+
+  set paramLists(list: ParamList[]) {
+    this._paramLists = [...list];
+    this.sortParamLists();
+  }
+
+  get search(): string {
+    return this._search;
+  }
+
+  set search(text: string) {
+    this._search = text;
+    this.sortParamLists();
+  }
 
   ngOnInit(): void {
     this.parameterService.$paramLists.subscribe(
@@ -34,6 +51,27 @@ export class ParametersComponent implements OnInit {
 
   onSearchChanged(event: Event) {
     this.search = (event.target as HTMLInputElement).value;
+  }
+
+  score(l: ParamList): number {
+    return (
+      +(l.name.indexOf(this.search) !== -1) +
+      +(l.type.indexOf(this.search) !== -1)
+    );
+  }
+
+  sortParamLists() {
+    this._paramLists.sort(
+      (a: ParamList, b: ParamList) => this.score(b) - this.score(a)
+    );
+  }
+
+  listExists(name: string) {
+    return this.paramLists.findIndex((l: ParamList) => l.name === name) !== -1;
+  }
+
+  createParamList() {
+    console.log('New List');
   }
 
   codegen() {
