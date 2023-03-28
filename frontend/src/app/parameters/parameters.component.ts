@@ -8,6 +8,7 @@ import {
   ParamList,
 } from '../services/parameter.service';
 import { TypeModalComponent } from '../type-modal/type-modal.component';
+import { searchScore, sortListAscending } from '../utils';
 
 @Component({
   selector: 'app-parameters',
@@ -58,16 +59,10 @@ export class ParametersComponent implements OnInit {
     this.search = (event.target as HTMLInputElement).value;
   }
 
-  score(l: ParamList): number {
-    return (
-      +(l.name.indexOf(this.search) !== -1) +
-      +(l.type.indexOf(this.search) !== -1)
-    );
-  }
-
   sortParamLists() {
-    this._paramLists.sort(
-      (a: ParamList, b: ParamList) => this.score(b) - this.score(a)
+    sortListAscending(
+      this._paramLists,
+      searchScore(this.search, ['name', 'type'])
     );
   }
 
