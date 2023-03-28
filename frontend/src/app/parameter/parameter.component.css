@@ -37,10 +37,10 @@
 }
 
 .code-input {
-  width: 100%;
-  max-width: calc(100% - 5em);
-  min-height: 10em;
   position: relative;
+  width: calc(100% - 5em);
+  height: 25em;
+  overflow-y: auto;
   border: 2px solid black;
   border-radius: 5px;
 }
@@ -52,19 +52,27 @@
   display: inline;
   white-space: pre-wrap;
   padding: 0;
-  text-indent: 3px;
 }
 
 .hide-code {
   position: absolute;
   left: 0;
   top: 0;
+  min-height: 25em;
   color: transparent;
   background-color: transparent;
   font-size: medium;
   overflow: hidden;
   line-height: 1.15em;
   caret-color: black;
+  padding-left: 3em;
+  outline: none;
+}
+
+.line-num {
+  display: inline-block;
+  width: 3em;
+  color: gray;
 }
 
 .chunk {

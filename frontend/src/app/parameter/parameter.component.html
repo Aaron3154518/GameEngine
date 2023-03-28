@@ -7,7 +7,8 @@
     <br />
     <div class="code-input">
       <div class="code-div">
-        <div class="chunk" *ngFor="let line of idxs">
+        <div class="chunk" *ngFor="let line of idxs; let i = index">
+          <span class="code line-num">{{ i + 1 }}</span>
           <span
             class="code"
             *ngFor="let idx of line; let i = index"
@@ -18,7 +19,8 @@
         <div class="code">&nbsp;</div>
       </div>
       <textarea
-        class="code-div hide-code code"
+        class="code-div hide-code code border-0 outline-none"
+        oninput='this.style.height = ""; this.style.height = this.scrollHeight + "px"'
         (input)="onCodeChanged($event)"
         spellcheck="false"
       ></textarea>
