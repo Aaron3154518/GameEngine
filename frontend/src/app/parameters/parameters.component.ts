@@ -61,7 +61,7 @@ export class ParametersComponent implements OnInit {
 
   sortParamLists() {
     sortListAscending(
-      this._paramLists,
+      this.paramLists,
       searchScore(this.search, ['name', 'type'])
     );
   }

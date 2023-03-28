@@ -14,6 +14,7 @@ import { AppComponent } from './app.component';
 import { ParametersComponent } from './parameters/parameters.component';
 import { ParameterComponent } from './parameter/parameter.component';
 import { TypeModalComponent } from './type-modal/type-modal.component';
+import { EnumSearchComponent } from './enum-search/enum-search.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { TypeModalComponent } from './type-modal/type-modal.component';
     ParametersComponent,
     ParameterComponent,
     TypeModalComponent,
+    EnumSearchComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FontAwesomeModule, MdbModalModule],
   providers: [],
