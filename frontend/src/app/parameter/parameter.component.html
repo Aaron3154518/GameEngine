@@ -1,5 +1,20 @@
 <div class="border border-dark position-relative">
   <div class="d-inline-block w-75">
+    <div>
+      <input
+        type="text"
+        placeholder="Callback Name"
+        [value]="name"
+        (input)="onNameChanged($event)"
+      />
+      <button
+        class="btn py-0 px-2 ms-1 rounded border border-secondary"
+        title="Save Ctrl+S"
+        (click)="save()"
+      >
+        <fa-icon [icon]="['fas', 'save']"></fa-icon>
+      </button>
+    </div>
     <div class="signature">
       <span
         class="code"
@@ -11,7 +26,10 @@
         >{{ data[0] }}</span
       >
     </div>
-    <div class="code-input border border-dark rounded position-relative">
+    <div
+      class="code-input border border-dark rounded position-relative"
+      [ngClass]="[code === callback.code ? 'saved' : 'unsaved']"
+    >
       <div class="line-nums border-end border-dark border-2" #lineNums>
         <div class="line" *ngFor="let line of getVarIdxs(); let i = index">
           <span class="code line-num">{{ i + 1 }}</span>
@@ -23,6 +41,7 @@
         [value]="code"
         (input)="onCodeChanged($event)"
         (scroll)="onScroll($event)"
+        (keydown)="onCodeKeyPress($event)"
         spellcheck="false"
       ></textarea>
       <div class="code-div" #codeDisplay>
@@ -47,17 +66,6 @@
       </div>
     </div>
     <span class="code">}</span>
-    <br />
-    <input
-      type="text"
-      placeholder="Callback Name"
-      [value]="name"
-      (input)="onNameChanged($event)"
-    />
-    <button (click)="update()">
-      {{ isNameUsed() ? "Update" : "Add" }} Callback Function
-    </button>
-    <button (click)="code = name = ''">Reset</button>
   </div>
   <div class="d-inline-block position-absolute w-25 pe-0 scroll">
     <span>Parameters:</span>

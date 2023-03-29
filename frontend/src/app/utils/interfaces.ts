@@ -68,8 +68,8 @@ type IParametersOpt = {
 
 export class Parameters implements IParameters {
   readonly uuid: UUID;
-  readonly name: string;
-  readonly type: string;
+  name: string;
+  type: string;
   group: ParameterGroup;
   groups: Set<UUID>;
 
@@ -140,7 +140,7 @@ export enum CodeType {
 
 export class Callback implements ICallback {
   readonly uuid: UUID;
-  readonly name: string;
+  name: string;
   code: string;
   params: CallbackParameters;
 

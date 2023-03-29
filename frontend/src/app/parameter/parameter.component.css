@@ -14,8 +14,15 @@
 .code-input {
   width: 95%;
   height: 25em;
-  background-color: rgba(200, 200, 255, 0.2);
   overflow-y: auto;
+}
+
+.saved {
+  background-color: rgba(200, 200, 255, 0.2);
+}
+
+.unsaved {
+  background-color: rgba(255, 200, 200, 0.5);
 }
 
 .line-nums {
@@ -43,6 +50,7 @@
 .hide-code {
   z-index: 1;
   padding: 0;
+  height: 100%;
   color: transparent;
   background-color: transparent;
   caret-color: black;

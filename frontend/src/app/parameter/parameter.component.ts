@@ -10,14 +10,8 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { stringify } from 'uuid';
 import { ParameterService } from '../services/parameter.service';
-import {
-  Callback,
-  CodeType,
-  Parameters,
-  StringDict,
-} from '../utils/interfaces';
+import { Callback, CodeType, Parameters } from '../utils/interfaces';
 import { UUID } from '../utils/utils';
 
 @Component({
@@ -54,7 +48,8 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.code = this.callback.code + '\n';
+    this.name = this.callback.name;
+    this.code = this.callback.code;
     this.parameters = Object.entries(this.callback.params).map(
       ([uuid, params]: [string, Set<string>]) => ({
         set: this.parameterService.getParamSet(uuid),
@@ -119,6 +114,18 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
     if (this.lineNums) {
       this.lineNums.nativeElement.scrollTo(scrollX, scrollY);
     }
+  }
+
+  onCodeKeyPress(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's') {
+      this.save();
+      event.preventDefault();
+    }
+  }
+
+  save() {
+    this.callback.name = this.name;
+    this.callback.code = this.code;
   }
 
   select(pid: UUID, name: string) {
