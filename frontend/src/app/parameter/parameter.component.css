@@ -12,12 +12,13 @@
   height: 25em;
   font-size: medium;
   background-color: rgba(200, 200, 255, 0.2);
+  overflow: auto;
 }
 
 .line-nums {
   display: inline-block;
-  width: 3em;
-  height: 100%;
+  width: 2.75em;
+  margin-right: 0.25em;
   line-height: 1em;
   overflow: hidden;
 }
@@ -27,23 +28,20 @@
   left: 3em;
   top: 0;
   width: calc(100% - 3em);
-  height: 100%;
-  max-height: 100%;
   padding: 0;
   line-height: 1em;
   display: inline;
-  resize: none;
   white-space: pre;
   overflow: hidden;
 }
 
 .hide-code {
   z-index: 1;
+  height: 100%;
   color: transparent;
   background-color: transparent;
   caret-color: black;
   outline: none;
-  overflow: auto;
 }
 
 .line-num {
