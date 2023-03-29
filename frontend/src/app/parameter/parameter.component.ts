@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { left } from '@popperjs/core';
 import { Callback, CodeType } from '../utils/interfaces';
 
 @Component({
@@ -6,7 +7,7 @@ import { Callback, CodeType } from '../utils/interfaces';
   templateUrl: './parameter.component.html',
   styleUrls: ['./parameter.component.css'],
 })
-export class ParameterComponent implements OnInit {
+export class ParameterComponent implements OnChanges {
   @Input() callback: Callback = new Callback();
   code: string = '';
   name: string = '';
@@ -14,7 +15,7 @@ export class ParameterComponent implements OnInit {
 
   CodeType = CodeType;
 
-  ngOnInit(): void {
+  ngOnChanges(changes: SimpleChanges) {
     this.code = this.callback.code;
   }
 
@@ -28,7 +29,6 @@ export class ParameterComponent implements OnInit {
 
   onCodeChanged(event: Event) {
     this.code = (event.target as HTMLTextAreaElement).value;
-    this.idxs = this.getVarIdxs();
   }
 
   onNameChanged(event: Event) {
@@ -44,20 +44,23 @@ export class ParameterComponent implements OnInit {
   }
 
   getVarIdxs(): number[][] {
-    let var_name: string = Object.values(
-      Object.values(this.callback.params)[0]
-    )[0];
-    let lines: string[] = this.code.split('\n');
+    let vars: string[] = Object.values(this.callback.params).reduce(
+      (arr: string[], params: Set<string>) => arr.concat([...params]),
+      []
+    );
+    let regex: RegExp = new RegExp(vars.join('|'));
     let global_idx: number = 0;
-    return lines.map((l: string) => {
-      let idx: number = l.indexOf(var_name);
-      //let i: number = this.code.search(`${var_name}|\n`);
+    return this.code.split('\n').map((l: string) => {
+      let res: RegExpMatchArray | null = l.match(regex);
       let idxs: number[] = [global_idx];
-      while (idx !== -1) {
+      while (res && res.index !== undefined) {
+        let idx: number = res.index;
         idxs.push(global_idx + idx);
-        idx += var_name.length;
+        idx += res[0].length;
         idxs.push(global_idx + idx);
-        idx = l.indexOf(var_name, idx);
+        global_idx += idx;
+        l = l.slice(idx);
+        res = l.match(regex);
       }
       global_idx += l.length;
       idxs.push(global_idx);

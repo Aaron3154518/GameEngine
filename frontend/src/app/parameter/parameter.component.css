@@ -26,14 +26,8 @@
   overflow-y: auto;
 }
 
-.item {
-  margin-top: 2px;
-  display: block;
-  background-color: rgb(230, 230, 230);
-}
-
-.selected {
-  background-color: rgba(175, 175, 255, 0.6);
+.param-btn {
+  background-color: rgba(230, 230, 230, 230);
 }
 
 .code-input {

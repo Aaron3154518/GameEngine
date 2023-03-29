@@ -13,7 +13,7 @@
     <br />
     <div class="code-input">
       <div class="code-div">
-        <div class="chunk" *ngFor="let line of idxs; let i = index">
+        <div class="chunk" *ngFor="let line of getVarIdxs(); let i = index">
           <span class="code line-num">{{ i + 1 }}</span>
           <span
             class="code"
@@ -27,6 +27,7 @@
       <textarea
         class="code-div hide-code code border-0 outline-none"
         oninput='this.style.height = ""; this.style.height = this.scrollHeight + "px"'
+        [value]="code"
         (input)="onCodeChanged($event)"
         spellcheck="false"
       ></textarea>
@@ -50,13 +51,15 @@
     <br />
     <ng-container *ngFor="let params of callback.params | keyvalue">
       <span>{{ params.key }}</span>
+      <br />
       <button
-        class="item"
+        class="btn param-btn me-1"
         *ngFor="let param of params.value"
         (click)="select(params.key, param)"
       >
         {{ param }}
       </button>
+      <br />
     </ng-container>
   </div>
 </div>

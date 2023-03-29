@@ -65,17 +65,17 @@ export class ParameterService {
   private _callbacks: Callback[] = [
     new Callback({
       name: 'Test',
-      code: 'std::cerr << Pos_Wizard << std::endl;',
+      code: 'std::cerr << Wizard << std::endl;',
       params: Callback.getParametersFromList([
         [this._paramSets[0].uuid, ['Wizard']],
       ]),
     }),
     new Callback({
       name: 'Inc',
-      code: 'std::cerr << Pos_Wizard << std::endl;',
+      code: 'std::cerr << (T1 + T2 + T3) << std::endl;',
       params: Callback.getParametersFromList([
         [this._paramSets[1].uuid, ['T1']],
-        [this._paramSets[2].uuid, ['T2, T3']],
+        [this._paramSets[2].uuid, ['T2', 'T3']],
       ]),
     }),
   ];

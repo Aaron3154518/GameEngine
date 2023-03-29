@@ -62,6 +62,14 @@
     </tbody>
   </table>
 </div>
+<button
+  class="btn"
+  *ngFor="let cb of parameterService.callbacks"
+  (click)="selectCallback(cb)"
+>
+  {{ cb.name }}
+</button>
+<br />
 <app-parameter *ngIf="currCallback" [callback]="currCallback"></app-parameter>
 <button (click)="codegen()">Generate Code</button>
 <app-enum-search></app-enum-search>
