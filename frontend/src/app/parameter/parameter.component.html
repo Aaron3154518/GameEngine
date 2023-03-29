@@ -1,16 +1,16 @@
 <div class="border border-dark position-relative">
   <div class="d-inline-block w-75">
-    <span
-      class="code"
-      *ngFor="let data of callback.signatureSplit"
-      [ngClass]="{
-        type: data[1] === CodeType.Type,
-        var: data[1] === CodeType.Var
-      }"
-    >
-      {{ data[0] }}
-    </span>
-    <br />
+    <div class="signature">
+      <span
+        class="code"
+        *ngFor="let data of signature"
+        [ngClass]="{
+          type: data[1] === CodeType.Type,
+          var: data[1] === CodeType.Var
+        }"
+        >{{ data[0] }}</span
+      >
+    </div>
     <div class="code-input border border-dark rounded position-relative">
       <div class="line-nums border-end border-dark border-2" #lineNums>
         <div class="line" *ngFor="let line of getVarIdxs(); let i = index">

@@ -134,8 +134,8 @@ type ICallbackOpt = {
 
 export enum CodeType {
   Code = 0,
-  Type = 0,
-  Var = 0,
+  Type = 1,
+  Var = 2,
 }
 
 export class Callback implements ICallback {
@@ -166,27 +166,26 @@ export class Callback implements ICallback {
       .join(', ')})`;
   }
 
-  get signatureSplit(): [string, CodeType][] {
+  getSignatureSplit(parameters: StringDict<Parameters>): [string, CodeType][] {
+    let first: boolean = true;
     return [
       ['void onUpdate(', CodeType.Code],
       ...Object.entries(this.params).reduce(
-        (
-          arr: [string, CodeType][],
-          [id, params]: [string, Set<string>],
-          j: number
-        ) => {
-          Object.values(params).forEach((p: string, i: number) => {
-            if (i !== 0) {
+        (arr: [string, CodeType][], [id, params]: [string, Set<string>]) => {
+          params.forEach((p: string) => {
+            if (!first) {
               arr.push([', ', CodeType.Code]);
+            } else {
+              first = false;
             }
-            arr.push([`Type${j}`, CodeType.Type]);
+            arr.push([`${parameters[id].type} `, CodeType.Type]);
             arr.push([p, CodeType.Var]);
           });
           return arr;
         },
         []
       ),
-      [')', CodeType.Code],
+      [') {', CodeType.Code],
     ];
   }
 

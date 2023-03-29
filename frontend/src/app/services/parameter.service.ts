@@ -94,23 +94,27 @@ export class ParameterService {
     return this._paramGroups;
   }
 
+  get paramGroupDict(): Readonly<StringDict<ParameterGroup>> {
+    return this._paramGroupDict;
+  }
+
   getParamGroup(i: number): ParameterGroup;
   getParamGroup(uuid: UUID): ParameterGroup;
   getParamGroup(uuid: string): ParameterGroup;
   getParamGroup(idx: number | UUID | string): ParameterGroup {
     if (typeof idx === 'number') {
-      return this._paramGroups[idx];
+      return this.paramGroups[idx];
     }
 
     let id: string = typeof idx !== 'string' ? stringify(idx) : idx;
     let uuid: UUID = typeof idx === 'string' ? parse(idx) : idx;
-    let group: ParameterGroup = this._paramGroupDict[id];
+    let group: ParameterGroup = this.paramGroupDict[id];
     if (!group) {
-      let i: number = this._paramSets.findIndex(
+      let i: number = this.paramSets.findIndex(
         (set: Parameters) => uuid === set.group.uuid
       );
       if (i !== -1) {
-        group = this._paramSets[i].group;
+        group = this.paramSets[i].group;
       }
     }
     return group;
@@ -126,14 +130,18 @@ export class ParameterService {
     return this._paramSets;
   }
 
+  get paramSetDict(): Readonly<StringDict<Parameters>> {
+    return this._paramSetDict;
+  }
+
   getParamSet(i: number): Parameters;
   getParamSet(uuid: UUID): Parameters;
   getParamSet(uuid: string): Parameters;
   getParamSet(idx: number | UUID | string): Parameters {
     if (typeof idx === 'number') {
-      return this._paramSets[idx];
+      return this.paramSets[idx];
     }
-    return this._paramSetDict[typeof idx === 'string' ? idx : stringify(idx)];
+    return this.paramSetDict[typeof idx === 'string' ? idx : stringify(idx)];
   }
 
   newParamSet(set: Parameters) {
@@ -146,14 +154,18 @@ export class ParameterService {
     return this._callbacks;
   }
 
+  get callbackDict(): Readonly<StringDict<Callback>> {
+    return this._callbackDict;
+  }
+
   getCallback(i: number): Callback;
   getCallback(uuid: UUID): Callback;
   getCallback(uuid: string): Callback;
   getCallback(idx: number | UUID | string): Callback {
     if (typeof idx === 'number') {
-      return this._callbacks[idx];
+      return this.callbacks[idx];
     }
-    return this._callbackDict[typeof idx === 'string' ? idx : stringify(idx)];
+    return this.callbackDict[typeof idx === 'string' ? idx : stringify(idx)];
   }
 
   codegen() {

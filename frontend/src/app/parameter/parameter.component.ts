@@ -10,8 +10,14 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
+import { stringify } from 'uuid';
 import { ParameterService } from '../services/parameter.service';
-import { Callback, CodeType, Parameters } from '../utils/interfaces';
+import {
+  Callback,
+  CodeType,
+  Parameters,
+  StringDict,
+} from '../utils/interfaces';
 import { UUID } from '../utils/utils';
 
 @Component({
@@ -28,6 +34,7 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
 
   @Input() callback: Callback = new Callback();
   parameters: { set: Parameters; params: Set<string> }[] = [];
+  signature: [string, CodeType][] = [];
   code: string = '';
   name: string = '';
   idxs: number[][] = [[0, 0]];
@@ -53,6 +60,9 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
         set: this.parameterService.getParamSet(uuid),
         params: params,
       })
+    );
+    this.signature = this.callback.getSignatureSplit(
+      this.parameterService.paramSetDict
     );
   }
 
