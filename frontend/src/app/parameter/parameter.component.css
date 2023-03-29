@@ -10,38 +10,40 @@
 .code-input {
   width: calc(100% - 5em);
   height: 25em;
-  font-size: medium;
   background-color: rgba(200, 200, 255, 0.2);
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .line-nums {
   display: inline-block;
   width: 2.75em;
   margin-right: 0.25em;
-  line-height: 1em;
   overflow: hidden;
 }
 
 .code-div {
   position: absolute;
   left: 3em;
+  right: 0;
   top: 0;
-  width: calc(100% - 3em);
-  padding: 0;
-  line-height: 1em;
-  display: inline;
   white-space: pre;
   overflow: hidden;
 }
 
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
 .hide-code {
   z-index: 1;
-  height: 100%;
   color: transparent;
   background-color: transparent;
   caret-color: black;
   outline: none;
+  overflow-x: scroll;
+  line-height: 1em;
 }
 
 .line-num {
