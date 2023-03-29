@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MdbModalRef } from 'mdb-angular-ui-kit/modal';
 import { ParameterService } from '../services/parameter.service';
+import { Parameters } from '../utils/interfaces';
 
 @Component({
   selector: 'app-type-modal',
@@ -21,7 +22,9 @@ export class TypeModalComponent {
   }
 
   submit() {
-    this.parameterService.newList(this.type, this.name);
+    this.parameterService.newParamSet(
+      new Parameters({ name: this.name, type: this.type })
+    );
     this.close();
   }
 

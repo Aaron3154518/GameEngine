@@ -30,13 +30,13 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let list of paramLists">
+      <tr *ngFor="let params of parameters">
         <td class="p-0">
           <div
             class="input-group-text d-inline-block text-end py-0 px-1 w-100 border-end-0 rounded-0 rounded-start"
           >
             <span class="align-middle fw-bold fs-6 type code"
-              >{{ list.type }}
+              >{{ params.type }}
             </span>
           </div>
         </td>
@@ -44,22 +44,24 @@
           <div
             class="input-group-text d-inline-block text-start py-0 px-1 w-100 border-start-0 rounded-0 rounded-end"
           >
-            <span class="align-middle fw-bold fs-6 code">{{ list.name }}</span>
+            <span class="align-middle fw-bold fs-6 code">{{
+              params.name
+            }}</span>
           </div>
         </td>
         <td class="p-0 ps-2">
-          <button
-            class="btn border border-top-0 border-bottom-0 border-dark py-0 px-1 me-1 code"
-            *ngFor="let param of list.params; let i = index"
-            (click)="selectParam(list, i)"
-          >
-            {{ param.name }}
-          </button>
+          <ng-container *ngFor="let gid of params.groups">
+            <span
+              class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 me-1 code"
+              *ngFor="let param of parameterService.getParamGroup(gid).params"
+              >{{ param }}</span
+            >
+          </ng-container>
         </td>
       </tr>
     </tbody>
   </table>
 </div>
-<app-parameter [param]="currParam"></app-parameter>
+<app-parameter *ngIf="currCallback" [callback]="currCallback"></app-parameter>
 <button (click)="codegen()">Generate Code</button>
 <app-enum-search></app-enum-search>

@@ -1,10 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import {
-  newParam,
-  newParamList,
-  Param,
-  ParamInfo,
-} from '../services/parameter.service';
+import { Callback, CodeType } from '../utils/interfaces';
 
 @Component({
   selector: 'app-parameter',
@@ -12,19 +7,23 @@ import {
   styleUrls: ['./parameter.component.css'],
 })
 export class ParameterComponent implements OnInit {
-  @Input() param: ParamInfo = new ParamInfo(newParamList(), 0);
+  @Input() callback: Callback = new Callback();
   code: string = '';
   name: string = '';
   idxs: number[][] = [[0, 0]];
 
-  ngOnInit(): void {}
+  CodeType = CodeType;
+
+  ngOnInit(): void {
+    this.code = this.callback.code;
+  }
 
   update() {
     if (!this.name || !this.code) {
       return;
     }
 
-    this.param.param.callbacks[this.name] = this.code;
+    this.callback.code = this.code;
   }
 
   onCodeChanged(event: Event) {
@@ -36,18 +35,18 @@ export class ParameterComponent implements OnInit {
     this.name = (event.target as HTMLInputElement).value;
   }
 
-  select(name: string, code: string) {
-    this.name = name;
-    this.code = code;
-    this.idxs = this.getVarIdxs();
+  select(pid: string, name: string) {
+    console.log('Show Parameters:', pid, name);
   }
 
   isNameUsed(): boolean {
-    return this.name in this.param.param.callbacks;
+    return false;
   }
 
   getVarIdxs(): number[][] {
-    let var_name: string = this.param.name;
+    let var_name: string = Object.values(
+      Object.values(this.callback.params)[0]
+    )[0];
     let lines: string[] = this.code.split('\n');
     let global_idx: number = 0;
     return lines.map((l: string) => {

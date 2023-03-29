@@ -1,14 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MdbModalService } from 'mdb-angular-ui-kit/modal';
-import {
-  newParamList,
-  Param,
-  ParameterService,
-  ParamInfo,
-  ParamList,
-} from '../services/parameter.service';
+import { ParameterService } from '../services/parameter.service';
 import { TypeModalComponent } from '../type-modal/type-modal.component';
-import { searchScore, sortListAscending } from '../utils';
+import { searchScore, sortListAscending } from '../utils/utils';
+import { Callback, Parameters } from '../utils/interfaces';
 
 @Component({
   selector: 'app-parameters',
@@ -16,21 +11,21 @@ import { searchScore, sortListAscending } from '../utils';
   styleUrls: ['./parameters.component.css'],
 })
 export class ParametersComponent implements OnInit {
-  _paramLists: ParamList[] = [];
+  _parameters: Parameters[] = [];
   _search: string = '';
-  currParam: ParamInfo = new ParamInfo(newParamList(), 0);
+  currCallback?: Callback;
 
   constructor(
-    private parameterService: ParameterService,
+    protected parameterService: ParameterService,
     private modalService: MdbModalService
   ) {}
 
-  get paramLists(): ParamList[] {
-    return this._paramLists;
+  get parameters(): Parameters[] {
+    return this._parameters;
   }
 
-  set paramLists(list: ParamList[]) {
-    this._paramLists = [...list];
+  set parameters(list: Parameters[]) {
+    this._parameters = [...list];
     this.sortParamLists();
   }
 
@@ -44,15 +39,13 @@ export class ParametersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.parameterService.$paramLists.subscribe(
-      (paramLists: ParamList[]) => (this.paramLists = paramLists)
+    this.parameterService.$paramSetsChanged.subscribe(
+      () => (this.parameters = [...this.parameterService.paramSets])
     );
-
-    this.selectParam(this.paramLists[0], 0);
   }
 
-  selectParam(list: ParamList, i: number) {
-    this.currParam = new ParamInfo(list, i);
+  selectCallback(cb: Callback) {
+    this.currCallback = cb;
   }
 
   onSearchChanged(event: Event) {
@@ -61,13 +54,13 @@ export class ParametersComponent implements OnInit {
 
   sortParamLists() {
     sortListAscending(
-      this.paramLists,
+      this.parameters,
       searchScore(this.search, ['name', 'type'])
     );
   }
 
   listExists(name: string) {
-    return this.paramLists.findIndex((l: ParamList) => l.name === name) !== -1;
+    return this.parameters.findIndex((l: Parameters) => l.name === name) !== -1;
   }
 
   createParamList() {
@@ -80,4 +73,3 @@ export class ParametersComponent implements OnInit {
     this.parameterService.codegen();
   }
 }
-export { Param };

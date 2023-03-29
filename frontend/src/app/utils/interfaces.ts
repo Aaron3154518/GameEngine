@@ -1,6 +1,15 @@
 import { parse, stringify } from 'uuid';
 import { UUID, newUUID } from './utils';
 
+export type StringDict<T> = { [key: string]: T };
+
+export function toDict<T>(list: T[], getKey: (t: T) => string): StringDict<T> {
+  return list.reduce((dict: StringDict<T>, t: T) => {
+    dict[getKey(t)] = t;
+    return dict;
+  }, {});
+}
+
 // Parameter Group
 export interface IParameterGroup {
   uuid: UUID;
@@ -50,12 +59,12 @@ export interface IParameters {
   groups: Set<UUID>;
 }
 
-interface IParametersOpt {
+type IParametersOpt = {
   uuid?: UUID;
   name?: string;
   type?: string;
   groups?: Set<UUID>;
-}
+};
 
 export class Parameters implements IParameters {
   readonly uuid: UUID;
@@ -105,7 +114,7 @@ export class Parameters implements IParameters {
 }
 
 // Callbacks
-type CallbackParameters = { [key: string]: Set<string> };
+export type CallbackParameters = StringDict<Set<string>>;
 
 export interface ICallback {
   uuid: UUID;
@@ -115,12 +124,18 @@ export interface ICallback {
   params: CallbackParameters;
 }
 
-interface ICallbackOpt {
+type ICallbackOpt = {
   uuid?: UUID;
   name?: string;
   code?: string;
   // Parameters uuid (as string) : set of parameters names
   params?: CallbackParameters;
+};
+
+export enum CodeType {
+  Code = 0,
+  Type = 0,
+  Var = 0,
 }
 
 export class Callback implements ICallback {
@@ -151,6 +166,30 @@ export class Callback implements ICallback {
       .join(', ')})`;
   }
 
+  get signatureSplit(): [string, CodeType][] {
+    return [
+      ['void onUpdate(', CodeType.Code],
+      ...Object.entries(this.params).reduce(
+        (
+          arr: [string, CodeType][],
+          [id, params]: [string, Set<string>],
+          j: number
+        ) => {
+          Object.values(params).forEach((p: string, i: number) => {
+            if (i !== 0) {
+              arr.push([', ', CodeType.Code]);
+            }
+            arr.push([`Type${j}`, CodeType.Type]);
+            arr.push([p, CodeType.Var]);
+          });
+          return arr;
+        },
+        []
+      ),
+      [')', CodeType.Code],
+    ];
+  }
+
   addParameter(uuid: UUID, name: string) {
     let id: string = stringify(uuid);
     let params: Set<string> = this.params[id];
@@ -162,5 +201,15 @@ export class Callback implements ICallback {
 
   removeParameter(uuid: UUID, name: string) {
     this.params[stringify(uuid)]?.delete(name);
+  }
+
+  static getParametersFromList(data: [UUID, string[]][]): CallbackParameters {
+    return data.reduce(
+      (params: CallbackParameters, [uuid, names]: [UUID, string[]]) => {
+        params[stringify(uuid)] = new Set<string>(names);
+        return params;
+      },
+      {}
+    );
   }
 }

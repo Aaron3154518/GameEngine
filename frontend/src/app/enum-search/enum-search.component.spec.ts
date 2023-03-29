@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EnumSearchComponent } from './enum-search.component';
+import { ParameterGroupSearchComponent } from './enum-search.component';
 
-describe('EnumSearchComponent', () => {
-  let component: EnumSearchComponent;
-  let fixture: ComponentFixture<EnumSearchComponent>;
+describe('ParameterGroupSearchComponent', () => {
+  let component: ParameterGroupSearchComponent;
+  let fixture: ComponentFixture<ParameterGroupSearchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EnumSearchComponent ]
-    })
-    .compileComponents();
+      declarations: [ParameterGroupSearchComponent],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(EnumSearchComponent);
+    fixture = TestBed.createComponent(ParameterGroupSearchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

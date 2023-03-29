@@ -1,24 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-import { Enum, EnumService } from '../services/enum.service';
-import { searchScore, sortListAscending } from '../utils';
+import { ParameterService } from '../services/parameter.service';
+import { ParameterGroup } from '../utils/interfaces';
+import { searchScore, sortListAscending } from '../utils/utils';
 
 @Component({
   selector: 'app-enum-search',
   templateUrl: './enum-search.component.html',
   styleUrls: ['./enum-search.component.css'],
 })
-export class EnumSearchComponent implements OnInit {
-  _enumList: Enum[] = [];
+export class ParameterGroupSearchComponent implements OnInit {
+  _groups: ParameterGroup[] = [];
   _search: string = '';
 
-  constructor(private enumService: EnumService) {}
+  constructor(private parameterService: ParameterService) {}
 
-  get enumList(): Enum[] {
-    return this._enumList;
+  get groups(): ParameterGroup[] {
+    return this._groups;
   }
 
-  set enumList(list: Enum[]) {
-    this._enumList = [...list];
+  set groups(list: ParameterGroup[]) {
+    this._groups = [...list];
     this.sortParamLists();
   }
 
@@ -32,8 +33,8 @@ export class EnumSearchComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.enumService.$enumLists.subscribe(
-      (enumList: Enum[]) => (this.enumList = enumList)
+    this.parameterService.$paramGroupsChanged.subscribe(
+      () => (this.groups = [...this.parameterService.paramGroups])
     );
   }
 
@@ -41,9 +42,9 @@ export class EnumSearchComponent implements OnInit {
     this.search = (event.target as HTMLInputElement).value;
   }
 
-  createEnum() {}
+  createParameterGroup() {}
 
   sortParamLists() {
-    sortListAscending(this.enumList, searchScore(this.search, ['name']));
+    sortListAscending(this.groups, searchScore(this.search, ['name']));
   }
 }

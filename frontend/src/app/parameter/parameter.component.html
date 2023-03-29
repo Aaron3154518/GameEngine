@@ -1,9 +1,15 @@
 <div class="box">
   <div class="col left">
-    <span class="code">void OnUpdate(</span>
-    <span class="code type">{{ param.type }} </span>
-    <span class="code var">{{ param.name }}</span>
-    <span class="code">) {{ "{" }}</span>
+    <span
+      class="code"
+      *ngFor="let data of callback.signatureSplit"
+      [ngClass]="{
+        type: data[1] === CodeType.Type,
+        var: data[1] === CodeType.Var
+      }"
+    >
+      {{ data[0] }}
+    </span>
     <br />
     <div class="code-input">
       <div class="code-div">
@@ -40,15 +46,17 @@
     <button (click)="code = name = ''">Reset</button>
   </div>
   <div class="col right scroll">
-    <span>Existing Callbacks:</span>
+    <span>Parameters:</span>
     <br />
-    <button
-      class="item"
-      *ngFor="let cb of param.param.callbacks | keyvalue"
-      [ngClass]="{ selected: name === cb.key }"
-      (click)="select(cb.key, cb.value)"
-    >
-      {{ cb.key }}
-    </button>
+    <ng-container *ngFor="let params of callback.params | keyvalue">
+      <span>{{ params.key }}</span>
+      <button
+        class="item"
+        *ngFor="let param of params.value"
+        (click)="select(params.key, param)"
+      >
+        {{ param }}
+      </button>
+    </ng-container>
   </div>
 </div>

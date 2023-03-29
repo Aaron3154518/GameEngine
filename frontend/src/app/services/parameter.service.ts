@@ -1,86 +1,158 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import {
+  Callback,
+  ParameterGroup,
+  Parameters,
+  StringDict,
+  toDict,
+} from '../utils/interfaces';
+import { stringify } from 'uuid';
+import { UUID } from '../utils/utils';
 
 const fs: any = undefined; //(window as any).require('fs');
-
-export interface Param {
-  name: string;
-  callbacks: { [key: string]: string };
-}
-
-export function newParam(name: string = ''): Param {
-  return {
-    name: name,
-    callbacks: {},
-  };
-}
-
-export class ParamInfo {
-  constructor(readonly list: ParamList, readonly i: number) {}
-
-  get name(): string {
-    return `${this.list.name}_${this.list.params[this.i].name}`;
-  }
-
-  get type(): string {
-    return this.list.type;
-  }
-
-  get param(): Param {
-    return this.list.params[this.i];
-  }
-}
-
-export interface ParamList {
-  type: string;
-  name: string;
-  params: Param[];
-}
-
-export function newParamList(
-  type: string = '',
-  name: string = '',
-  paramNames: string[] = []
-): ParamList {
-  return {
-    type: type,
-    name: name,
-    params: paramNames.map((n: string) => newParam(n)),
-  };
-}
 
 @Injectable({
   providedIn: 'root',
 })
 export class ParameterService {
-  private paramLists: ParamList[] = [
-    newParamList('Rect', 'Pos', ['Wizard', 'Crystal', 'Catalyst']),
-    newParamList(
-      'Number',
-      'Gens',
-      [...Array(5).keys()].map((i) => `T${i}`)
-    ),
+  private _paramGroups: ParameterGroup[] = [
+    new ParameterGroup({
+      name: 'Wizards',
+      params: new Set(['Wizard', 'Crystal', 'Catalyst']),
+    }),
+    new ParameterGroup({
+      name: 'Generators',
+      params: new Set([...Array(5).keys()].map((i) => `T${i}`)),
+    }),
   ];
-  private paramListsSubject: BehaviorSubject<ParamList[]> = new BehaviorSubject<
-    ParamList[]
-  >(this.paramLists);
-  $paramLists: Observable<ParamList[]> = this.paramListsSubject.asObservable();
+  private _paramGroupDict: StringDict<ParameterGroup> = toDict(
+    this._paramGroups,
+    (pg: ParameterGroup) => stringify(pg.uuid)
+  );
+  private paramGroupsChanged: BehaviorSubject<null> = new BehaviorSubject<null>(
+    null
+  );
+  $paramGroupsChanged: Observable<null> =
+    this.paramGroupsChanged.asObservable();
 
-  constructor() {
-    this.paramLists[0].params[0].callbacks['Test'] =
-      'std::cerr << Pos_Wizard << std::endl;';
-    this.paramLists[1].params[1].callbacks['Inc'] =
-      'std::cerr << (Gens_T1 + 1) << std::endl;';
-    this.paramListsSubject.next(this.paramLists);
+  private _paramSets: Parameters[] = [
+    new Parameters({
+      name: 'Pos',
+      type: 'Rect',
+      groups: new Set([this._paramGroups[0].uuid]),
+    }),
+    new Parameters({
+      name: 'Gens',
+      type: 'Number',
+      groups: new Set([this._paramGroups[1].uuid]),
+    }),
+    new Parameters({
+      name: 'Gens',
+      type: 'std::string',
+      groups: new Set([this._paramGroups[1].uuid]),
+    }),
+  ];
+  private _paramSetDict: StringDict<Parameters> = toDict(
+    this._paramSets,
+    (ps: Parameters) => stringify(ps.uuid)
+  );
+  private paramSetsChanged: BehaviorSubject<null> = new BehaviorSubject<null>(
+    null
+  );
+  $paramSetsChanged: Observable<null> = this.paramSetsChanged.asObservable();
+
+  private _callbacks: Callback[] = [
+    new Callback({
+      name: 'Test',
+      code: 'std::cerr << Pos_Wizard << std::endl;',
+      params: Callback.getParametersFromList([
+        [this._paramSets[0].uuid, ['Wizard']],
+      ]),
+    }),
+    new Callback({
+      name: 'Inc',
+      code: 'std::cerr << Pos_Wizard << std::endl;',
+      params: Callback.getParametersFromList([
+        [this._paramSets[1].uuid, ['T1']],
+        [this._paramSets[2].uuid, ['T2, T3']],
+      ]),
+    }),
+  ];
+  private _callbackDict: StringDict<Callback> = toDict(
+    this._callbacks,
+    (cb: Callback) => stringify(cb.uuid)
+  );
+  private callbacksChanged: BehaviorSubject<null> = new BehaviorSubject<null>(
+    null
+  );
+  $callbacksChanged: Observable<null> = this.callbacksChanged.asObservable();
+
+  constructor() {}
+
+  get paramGroups(): Readonly<ParameterGroup[]> {
+    return this._paramGroups;
   }
 
-  newList(type: string, name: string) {
-    this.paramLists.push(newParamList(type, name));
-    this.paramListsSubject.next(this.paramLists);
+  getParamGroup(i: number): ParameterGroup;
+  getParamGroup(uuid: UUID): ParameterGroup;
+  getParamGroup(idx: number | UUID): ParameterGroup {
+    if (typeof idx === 'number') {
+      return this._paramGroups[idx];
+    }
+
+    let group: ParameterGroup = this._paramGroupDict[stringify(idx)];
+    if (!group) {
+      let i: number = this._paramSets.findIndex(
+        (set: Parameters) => idx === set.group.uuid
+      );
+      if (i !== -1) {
+        group = this._paramSets[i].group;
+      }
+    }
+    return group;
+  }
+
+  newParamGroup(group: ParameterGroup) {
+    this._paramGroups.push(group);
+    this._paramGroupDict[stringify(group.uuid)] = group;
+    this.paramGroupsChanged.next(null);
+  }
+
+  get paramSets(): Readonly<Parameters[]> {
+    return this._paramSets;
+  }
+
+  getParamSet(i: number): Parameters;
+  getParamSet(uuid: UUID): Parameters;
+  getParamSet(idx: number | UUID): Parameters {
+    if (typeof idx === 'number') {
+      return this._paramSets[idx];
+    }
+    return this._paramSetDict[stringify(idx)];
+  }
+
+  newParamSet(set: Parameters) {
+    this._paramSets.push(set);
+    this._paramSetDict[stringify(set.uuid)] = set;
+    this.paramSetsChanged.next(null);
+  }
+
+  get callbacks(): Readonly<Callback[]> {
+    return this._callbacks;
+  }
+
+  getCallback(i: number): Callback;
+  getCallback(uuid: UUID): Callback;
+  getCallback(idx: number | UUID): Callback {
+    if (typeof idx === 'number') {
+      return this._callbacks[idx];
+    }
+    return this._callbackDict[stringify(idx)];
   }
 
   codegen() {
-    if (!fs) {
+    /*if (!fs) {
       return;
     }
 
@@ -97,14 +169,14 @@ export class ParameterService {
       imports.map((i: string) => `#include <${i}>\n`).join('')
     );
     // Parameters
-    this.paramLists.forEach((pl: ParamList, j: number) => {
-      let enum_name: string = pl.name + 'Enum';
+    this.parameters.forEach((pl: Parameters, j: number) => {
+      let enum_name: string = pl.name + 'ParameterGroup';
       let namespace: string = pl.name + 'Namespace';
       // Create enum in namespace to avoid enum name conflicts
       // Declare parameter set
       fs.appendFileSync(
         file,
-        `namespace ${namespace}{ enum ${enum_name} : Observables::EnumT {${pl.params
+        `namespace ${namespace}{ enum ${enum_name} : Observables::ParameterGroupT {${pl.params
           .map((p: Param, i: number) => (i === 0 ? `${p.name}=0` : p.name))
           .join(',')}};}ROOT_NODE(${pl.name},${
           pl.type
@@ -116,8 +188,8 @@ export class ParameterService {
       file,
       'class Dummy:public Entities::Entity{private:void init() {'
     );
-    this.paramLists.forEach((pl: ParamList) => {
-      let enum_name: string = pl.name + 'Enum';
+    this.parameters.forEach((pl: Parameters) => {
+      let enum_name: string = pl.name + 'ParameterGroup';
       let namespace: string = pl.name + 'Namespace';
       pl.params.forEach((p: Param) =>
         Object.values(p.callbacks).forEach((cb: string) =>
@@ -131,6 +203,6 @@ export class ParameterService {
       );
     });
     fs.appendFileSync(file, `}};`);
-    fs.closeSync(file);
+    fs.closeSync(file);*/
   }
 }

@@ -14,7 +14,7 @@
     (input)="onSearchChanged($event)"
   />
   <div class="input-group-append">
-    <button class="input-group-text" (click)="createEnum()">
+    <button class="input-group-text" (click)="createParameterGroup()">
       <fa-icon [icon]="['fas', 'plus']"></fa-icon>
     </button>
   </div>
@@ -28,19 +28,19 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let enum of enumList">
+    <tr *ngFor="let group of groups">
       <td class="p-0">
         <div
           class="input-group-text d-inline-block text-start py-0 px-1 w-100 border-start-0 rounded-0 rounded-end"
         >
-          <span class="align-middle fw-bold fs-6 code">{{ enum.name }}</span>
+          <span class="align-middle fw-bold fs-6 code">{{ group.name }}</span>
         </div>
       </td>
       <td class="p-0 ps-2">
         <span
           class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 me-1 code"
-          *ngFor="let val of enum.vals"
-          >{{ val }}</span
+          *ngFor="let param of group.params"
+          >{{ param }}</span
         >
       </td>
     </tr>
