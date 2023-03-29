@@ -10,7 +10,9 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { Callback, CodeType } from '../utils/interfaces';
+import { ParameterService } from '../services/parameter.service';
+import { Callback, CodeType, Parameters } from '../utils/interfaces';
+import { UUID } from '../utils/utils';
 
 @Component({
   selector: 'app-parameter',
@@ -18,18 +20,22 @@ import { Callback, CodeType } from '../utils/interfaces';
   styleUrls: ['./parameter.component.css'],
 })
 export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
-  @Input() callback: Callback = new Callback();
   @ViewChild('codeDisplay', { static: true })
   codeDisplay?: ElementRef<HTMLDivElement>;
   @ViewChild('lineNums', { static: true })
   lineNums?: ElementRef<HTMLDivElement>;
   @ViewChildren('codeLine') codeLines?: QueryList<ElementRef<HTMLDivElement>>;
+
+  @Input() callback: Callback = new Callback();
+  parameters: { set: Parameters; params: Set<string> }[] = [];
   code: string = '';
   name: string = '';
   idxs: number[][] = [[0, 0]];
   x_offs: number[][] = [];
 
   CodeType = CodeType;
+
+  constructor(protected parameterService: ParameterService) {}
 
   ngOnInit() {}
 
@@ -42,6 +48,12 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     this.code = this.callback.code + '\n';
+    this.parameters = Object.entries(this.callback.params).map(
+      ([uuid, params]: [string, Set<string>]) => ({
+        set: this.parameterService.getParamSet(uuid),
+        params: params,
+      })
+    );
   }
 
   update() {
@@ -99,7 +111,7 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  select(pid: string, name: string) {
+  select(pid: UUID, name: string) {
     console.log('Show Parameters:', pid, name);
   }
 

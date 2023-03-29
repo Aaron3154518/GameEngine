@@ -62,13 +62,13 @@
   <div class="d-inline-block position-absolute w-25 pe-0 scroll">
     <span>Parameters:</span>
     <br />
-    <ng-container *ngFor="let params of callback.params | keyvalue">
-      <span>{{ params.key }}</span>
+    <ng-container *ngFor="let param_set of parameters">
+      <span>{{ param_set.set.type }} {{ param_set.set.name }}</span>
       <br />
       <button
         class="btn param-btn me-1"
-        *ngFor="let param of params.value"
-        (click)="select(params.key, param)"
+        *ngFor="let param of param_set.params"
+        (click)="select(param_set.set.uuid, param)"
       >
         {{ param }}
       </button>

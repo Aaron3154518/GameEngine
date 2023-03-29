@@ -7,7 +7,7 @@ import {
   StringDict,
   toDict,
 } from '../utils/interfaces';
-import { stringify } from 'uuid';
+import { parse, stringify } from 'uuid';
 import { UUID } from '../utils/utils';
 
 const fs: any = undefined; //(window as any).require('fs');
@@ -96,15 +96,18 @@ export class ParameterService {
 
   getParamGroup(i: number): ParameterGroup;
   getParamGroup(uuid: UUID): ParameterGroup;
-  getParamGroup(idx: number | UUID): ParameterGroup {
+  getParamGroup(uuid: string): ParameterGroup;
+  getParamGroup(idx: number | UUID | string): ParameterGroup {
     if (typeof idx === 'number') {
       return this._paramGroups[idx];
     }
 
-    let group: ParameterGroup = this._paramGroupDict[stringify(idx)];
+    let id: string = typeof idx !== 'string' ? stringify(idx) : idx;
+    let uuid: UUID = typeof idx === 'string' ? parse(idx) : idx;
+    let group: ParameterGroup = this._paramGroupDict[id];
     if (!group) {
       let i: number = this._paramSets.findIndex(
-        (set: Parameters) => idx === set.group.uuid
+        (set: Parameters) => uuid === set.group.uuid
       );
       if (i !== -1) {
         group = this._paramSets[i].group;
@@ -125,11 +128,12 @@ export class ParameterService {
 
   getParamSet(i: number): Parameters;
   getParamSet(uuid: UUID): Parameters;
-  getParamSet(idx: number | UUID): Parameters {
+  getParamSet(uuid: string): Parameters;
+  getParamSet(idx: number | UUID | string): Parameters {
     if (typeof idx === 'number') {
       return this._paramSets[idx];
     }
-    return this._paramSetDict[stringify(idx)];
+    return this._paramSetDict[typeof idx === 'string' ? idx : stringify(idx)];
   }
 
   newParamSet(set: Parameters) {
@@ -144,11 +148,12 @@ export class ParameterService {
 
   getCallback(i: number): Callback;
   getCallback(uuid: UUID): Callback;
-  getCallback(idx: number | UUID): Callback {
+  getCallback(uuid: string): Callback;
+  getCallback(idx: number | UUID | string): Callback {
     if (typeof idx === 'number') {
       return this._callbacks[idx];
     }
-    return this._callbackDict[stringify(idx)];
+    return this._callbackDict[typeof idx === 'string' ? idx : stringify(idx)];
   }
 
   codegen() {
