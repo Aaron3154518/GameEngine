@@ -1,5 +1,5 @@
-<div class="box">
-  <div class="col left">
+<div class="border border-dark position-relative">
+  <div class="d-inline-block w-75">
     <span
       class="code"
       *ngFor="let data of callback.signatureSplit"
@@ -11,28 +11,41 @@
       {{ data[0] }}
     </span>
     <br />
-    <div class="code-input">
-      <div class="code-div">
-        <div class="chunk" *ngFor="let line of getVarIdxs(); let i = index">
+    <div class="code-input border border-dark rounded position-relative">
+      <div class="line-nums border-end border-dark border-2" #lineNums>
+        <div class="line" *ngFor="let line of getVarIdxs(); let i = index">
           <span class="code line-num">{{ i + 1 }}</span>
-          <span
-            class="code"
-            *ngFor="let idx of line; let i = index"
-            [ngClass]="{ var: i % 2 === 0 }"
-            >{{ i !== 0 ? code.substring(line[i - 1], line[i]) : "" }}</span
-          >
         </div>
-        <div class="code">&nbsp;</div>
       </div>
       <textarea
-        class="code-div hide-code code border-0 outline-none"
+        class="code-div hide-code code border-0"
         oninput='this.style.height = ""; this.style.height = this.scrollHeight + "px"'
         [value]="code"
         (input)="onCodeChanged($event)"
+        (scroll)="onScroll($event)"
         spellcheck="false"
       ></textarea>
+      <div class="code-div" #codeDisplay>
+        <div
+          class="line"
+          *ngFor="let line of getVarIdxs(); let i = index"
+          [attr.id]="i"
+          #codeLine
+        >
+          <span
+            class="code small"
+            *ngFor="let idx of line; let j = index"
+            [ngClass]="{ var: j % 2 === 0 }"
+            [ngStyle]="{
+              left:
+                (x_offs[i] ? (x_offs[i][j] ? x_offs[i][j] : '0') : '0') + 'px'
+            }"
+            >{{ j !== 0 ? code.substring(line[j - 1], line[j]) : "" }}</span
+          >
+          <span class="code" *ngIf="line.length === 0">&nbsp;</span>
+        </div>
+      </div>
     </div>
-    <br />
     <span class="code">}</span>
     <br />
     <input
@@ -46,7 +59,7 @@
     </button>
     <button (click)="code = name = ''">Reset</button>
   </div>
-  <div class="col right scroll">
+  <div class="d-inline-block position-absolute w-25 pe-0 scroll">
     <span>Parameters:</span>
     <br />
     <ng-container *ngFor="let params of callback.params | keyvalue">

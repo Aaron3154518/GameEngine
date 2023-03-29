@@ -1,5 +1,15 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { left } from '@popperjs/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnInit,
+  QueryList,
+  SimpleChanges,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { Callback, CodeType } from '../utils/interfaces';
 
 @Component({
@@ -7,16 +17,31 @@ import { Callback, CodeType } from '../utils/interfaces';
   templateUrl: './parameter.component.html',
   styleUrls: ['./parameter.component.css'],
 })
-export class ParameterComponent implements OnChanges {
+export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() callback: Callback = new Callback();
+  @ViewChild('codeDisplay', { static: true })
+  codeDisplay?: ElementRef<HTMLDivElement>;
+  @ViewChild('lineNums', { static: true })
+  lineNums?: ElementRef<HTMLDivElement>;
+  @ViewChildren('codeLine') codeLines?: QueryList<ElementRef<HTMLDivElement>>;
   code: string = '';
   name: string = '';
   idxs: number[][] = [[0, 0]];
+  x_offs: number[][] = [];
 
   CodeType = CodeType;
 
+  ngOnInit() {}
+
+  ngAfterViewInit(): void {
+    this.codeLines?.changes.subscribe(() => {
+      this.updateText();
+    });
+    this.updateText();
+  }
+
   ngOnChanges(changes: SimpleChanges) {
-    this.code = this.callback.code;
+    this.code = this.callback.code + '\n';
   }
 
   update() {
@@ -27,12 +52,51 @@ export class ParameterComponent implements OnChanges {
     this.callback.code = this.code;
   }
 
+  updateText() {
+    if (this.codeLines) {
+      let x_offs: number[][] = [...Array(this.codeLines.length)].map(() => []);
+      this.codeLines.forEach((el: ElementRef<HTMLDivElement>) => {
+        let div: HTMLDivElement = el.nativeElement;
+        let id: number = +div.id;
+        let x: number = 0;
+        Object.values(div.children).forEach((child: Element) => {
+          x_offs[id].push(x);
+          x += child.clientWidth;
+        });
+      });
+      if (
+        x_offs.findIndex((row: number[], r: number) => {
+          return (
+            this.x_offs[r] === undefined ||
+            row.findIndex((v: Number, c: number) => v !== this.x_offs[r][c]) !==
+              -1
+          );
+        }) !== -1
+      ) {
+        setTimeout(() => {
+          this.x_offs = x_offs;
+        }, 0);
+      }
+    }
+  }
+
   onCodeChanged(event: Event) {
     this.code = (event.target as HTMLTextAreaElement).value;
   }
 
   onNameChanged(event: Event) {
     this.name = (event.target as HTMLInputElement).value;
+  }
+
+  onScroll(event: Event) {
+    let scrollX: number = (event.target as HTMLTextAreaElement).scrollLeft;
+    let scrollY: number = (event.target as HTMLTextAreaElement).scrollTop;
+    if (this.codeDisplay) {
+      this.codeDisplay.nativeElement.scrollTo(scrollX, scrollY);
+    }
+    if (this.lineNums) {
+      this.lineNums.nativeElement.scrollTo(scrollX, scrollY);
+    }
   }
 
   select(pid: string, name: string) {
@@ -44,13 +108,15 @@ export class ParameterComponent implements OnChanges {
   }
 
   getVarIdxs(): number[][] {
-    let vars: string[] = Object.values(this.callback.params).reduce(
-      (arr: string[], params: Set<string>) => arr.concat([...params]),
-      []
-    );
-    let regex: RegExp = new RegExp(vars.join('|'));
+    let regex: string = Object.values(this.callback.params)
+      .map((params: Set<string>) => [...params].join('|'))
+      .join('|');
     let global_idx: number = 0;
     return this.code.split('\n').map((l: string) => {
+      if (!l) {
+        global_idx += 1;
+        return [];
+      }
       let res: RegExpMatchArray | null = l.match(regex);
       let idxs: number[] = [global_idx];
       while (res && res.index !== undefined) {

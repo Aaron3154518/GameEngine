@@ -1,26 +1,3 @@
-.box {
-  border: 1px dashed black;
-  position: relative;
-}
-
-.indent {
-  margin-left: 2em;
-}
-
-.col {
-  display: inline-block;
-}
-
-.left {
-  width: 75%;
-}
-
-.right {
-  width: 25%;
-  right: 0;
-  position: absolute;
-}
-
 .scroll {
   max-height: 90%;
   overflow-y: auto;
@@ -31,44 +8,66 @@
 }
 
 .code-input {
-  position: relative;
   width: calc(100% - 5em);
   height: 25em;
-  overflow-y: auto;
-  border: 2px solid black;
-  border-radius: 5px;
+  font-size: medium;
+  background-color: rgba(200, 200, 255, 0.2);
+}
+
+.line-nums {
+  display: inline-block;
+  width: 3em;
+  height: 100%;
+  line-height: 1em;
+  overflow: hidden;
 }
 
 .code-div {
-  resize: none;
-  width: 100%;
+  position: absolute;
+  left: 3em;
+  top: 0;
+  width: calc(100% - 3em);
   height: 100%;
-  display: inline;
-  white-space: pre-wrap;
+  max-height: 100%;
   padding: 0;
+  line-height: 1em;
+  display: inline;
+  resize: none;
+  white-space: pre;
+  overflow: hidden;
 }
 
 .hide-code {
-  position: absolute;
-  left: 0;
-  top: 0;
-  min-height: 25em;
+  z-index: 1;
   color: transparent;
   background-color: transparent;
-  font-size: medium;
-  overflow: hidden;
-  line-height: 1.15em;
   caret-color: black;
-  padding-left: 3em;
   outline: none;
+  overflow: auto;
 }
 
 .line-num {
-  display: inline-block;
-  width: 3em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1em;
+  vertical-align: middle;
   color: gray;
 }
 
-.chunk {
+.line {
+  position: relative;
+  font-size: medium;
+  height: 1em;
   line-height: 1em;
+}
+
+.small {
+  position: absolute;
+  top: 0;
+  height: 1em;
+  line-height: 1em;
+  font-size: medium;
+  vertical-align: middle;
 }
