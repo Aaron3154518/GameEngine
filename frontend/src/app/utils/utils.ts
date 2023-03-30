@@ -10,11 +10,11 @@ export function newUUID(): UUID {
 // Search filtering
 export function searchScore<T>(
   search: string,
-  keys: string[]
+  getSearchStrings: (t: T) => string[]
 ): (item: T) => number {
   return (item: T) =>
-    keys.reduce((s: number, k: string) => {
-      let idx: number = (item as any)[k].indexOf(search);
+    getSearchStrings(item).reduce((s: number, str: string) => {
+      let idx: number = str.indexOf(search);
       return s + (idx === -1 ? 0 : idx === 0 ? 1 : 0.5);
     }, 0);
 }
