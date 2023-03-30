@@ -20,8 +20,12 @@ import { UUID } from '../utils/utils';
   styleUrls: ['./parameter.component.css'],
 })
 export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
+  @ViewChild('codeDiv', { static: true })
+  codeDiv?: ElementRef<HTMLDivElement>;
   @ViewChild('codeDisplay', { static: true })
   codeDisplay?: ElementRef<HTMLDivElement>;
+  @ViewChild('codeInput', { static: true })
+  codeInput?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('lineNums', { static: true })
   lineNums?: ElementRef<HTMLDivElement>;
   @ViewChildren('codeLine') codeLines?: QueryList<ElementRef<HTMLDivElement>>;
@@ -49,6 +53,9 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     this.name = this.callback.name;
+    if (!this.callback.code.endsWith('\n')) {
+      this.callback.code += '\n';
+    }
     this.code = this.callback.code;
     this.parameters = Object.entries(this.callback.params).map(
       ([uuid, params]: [string, Set<string>]) => ({
@@ -59,6 +66,13 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
     this.signature = this.callback.getSignatureSplit(
       this.parameterService.paramSetDict
     );
+    setTimeout(() => {
+      if (this.codeInput && this.codeDisplay && this.codeDiv) {
+        this.codeInput.nativeElement.style.height = `${this.codeDisplay.nativeElement.offsetHeight}px`;
+        this.codeInput.nativeElement.scrollTo(0, 0);
+        this.codeDiv.nativeElement.scrollTo(0, 0);
+      }
+    }, 0);
   }
 
   update() {
@@ -124,7 +138,12 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   save() {
-    this.callback.name = this.name;
+    if (this.name) {
+      this.callback.name = this.name;
+    }
+    if (!this.code.endsWith('\n')) {
+      this.code += '\n';
+    }
     this.callback.code = this.code;
   }
 

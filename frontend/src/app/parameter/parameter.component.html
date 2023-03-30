@@ -29,6 +29,7 @@
     <div
       class="code-input border border-dark rounded position-relative"
       [ngClass]="[code === callback.code ? 'saved' : 'unsaved']"
+      #codeDiv
     >
       <div class="line-nums border-end border-dark border-2" #lineNums>
         <div class="line" *ngFor="let line of getVarIdxs(); let i = index">
@@ -43,6 +44,7 @@
         (scroll)="onScroll($event)"
         (keydown)="onCodeKeyPress($event)"
         spellcheck="false"
+        #codeInput
       ></textarea>
       <div class="code-div" #codeDisplay>
         <div
