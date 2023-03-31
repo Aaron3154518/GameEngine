@@ -21,7 +21,8 @@ import { StringDict } from '../utils/interfaces';
 import { sanitizeVar } from '../utils/utils';
 
 export interface ColComponent {
-  value: any;
+  row?: any;
+  value?: any;
 }
 
 @Component({
@@ -52,7 +53,6 @@ interface IColumn {
   getter?: (row: any) => string;
   component: Type<any>;
   width?: ColWidth;
-  input?: (row: any, val: string) => void;
   requireInput?: boolean;
   inputPlaceholder?: string;
   validateInput?: (val: string) => boolean;
@@ -64,7 +64,6 @@ export class Column implements IColumn {
   getter?: (row: any) => string;
   component: Type<any>;
   width: ColWidth;
-  input?: (row: any, val: string) => void;
   requireInput: boolean;
   inputPlaceholder: string;
   validateInput: (val: string) => boolean;
@@ -75,7 +74,6 @@ export class Column implements IColumn {
     component,
     getter,
     width = ColWidth.Fill,
-    input,
     requireInput = false,
     inputPlaceholder = '',
     validateInput = () => true,
@@ -85,7 +83,6 @@ export class Column implements IColumn {
     this.getter = getter;
     this.component = component;
     this.width = width;
-    this.input = input;
     this.requireInput = requireInput;
     this.inputPlaceholder = inputPlaceholder;
     this.validateInput = validateInput;
@@ -144,6 +141,7 @@ export class SearchComponent implements DoCheck, AfterViewInit {
 
     const componentRef: ComponentRef<ColComponent> =
       viewContainerRef.createComponent<ColComponent>(col.component);
+    componentRef.instance.row = row;
     componentRef.instance.value = this.getCol(row, col);
   }
 
@@ -157,13 +155,6 @@ export class SearchComponent implements DoCheck, AfterViewInit {
 
   onInput(col: Column) {
     this.newRowErrs[col.key] = !col.validateInput(this.colInputs[col.key]);
-  }
-
-  onColEnter(row: any, col: Column, input: InputComponent) {
-    if (col.input) {
-      col.input(row, input.value);
-      input.value = '';
-    }
   }
 
   onEnter() {

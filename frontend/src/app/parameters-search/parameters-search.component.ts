@@ -78,7 +78,7 @@ export class NameColHeaderComponent extends ColHeaderComponent {
         class="hover"
         [ngClass]="[first ? 'ms-2 me-1' : 'mx-1']"
         [title]="group.name"
-        ><app-var [value]="group.params"></app-var></span
+        ><app-var [value]="group.params" [input]="false"></app-var></span
     ></ng-container>
   `,
   styles: [
@@ -90,6 +90,7 @@ export class NameColHeaderComponent extends ColHeaderComponent {
   ],
 })
 export class GroupComponent implements ColComponent {
+  @Input() row?: Parameters;
   @Input() value: Set<UUID> = new Set<UUID>();
 
   constructor(protected parameterService: ParameterService) {}
