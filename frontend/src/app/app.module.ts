@@ -15,7 +15,7 @@ import { AppComponent } from './app.component';
 import { ParametersComponent } from './parameters/parameters.component';
 import { ParameterComponent } from './parameter/parameter.component';
 import { TypeModalComponent } from './type-modal/type-modal.component';
-import { ParameterGroupSearchComponent } from './enum-search/enum-search.component';
+import { ParameterGroupSearchComponent } from './parameter-group-search/parameter-group-search.component';
 import { OnInitDirective } from './directives/on-init.directive';
 
 @NgModule({

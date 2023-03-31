@@ -10,9 +10,9 @@ import { ParameterGroup } from '../utils/interfaces';
 import { searchScore, sortListAscending } from '../utils/utils';
 
 @Component({
-  selector: 'app-enum-search',
-  templateUrl: './enum-search.component.html',
-  styleUrls: ['./enum-search.component.css'],
+  selector: 'app-parameter-group-search',
+  templateUrl: './parameter-group-search.component.html',
+  styleUrls: ['./parameter-group-search.component.css'],
 })
 export class ParameterGroupSearchComponent implements OnInit {
   _groups: ParameterGroup[] = [];

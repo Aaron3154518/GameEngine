@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ParameterGroupSearchComponent } from './enum-search.component';
+import { ParameterGroupSearchComponent } from './parameter-group-search.component';
 
 describe('ParameterGroupSearchComponent', () => {
   let component: ParameterGroupSearchComponent;
