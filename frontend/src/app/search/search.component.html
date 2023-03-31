@@ -10,7 +10,7 @@
       type="text"
       class="form-control"
       maxlength="20"
-      placeholder="Search Variable Lists"
+      [placeholder]="searchPlaceholder"
       autocomplete="off"
       (input)="onSearchChanged(search.value)"
     />
@@ -30,6 +30,7 @@
       <tr *ngFor="let row of rows">
         <td *ngFor="let col of cols" class="p-0">
           <app-input
+            #colInput
             *ngIf="col.input"
             [classes]="[
               'py-0',
@@ -43,7 +44,7 @@
               'fw-bold'
             ]"
             placeholder="+ New"
-            (enter)="col.input(row, $event)"
+            (enter)="onColEnter(row, col, colInput)"
             [sanitize]="sanitizeVar"
           >
           </app-input>
@@ -56,16 +57,18 @@
         </td>
       </tr>
       <tr>
-        <td *ngFor="let col of cols">
+        <td *ngFor="let col of cols" class="p-0">
           <app-input
-            #colInput
+            #rowInput
             *ngIf="col.requireInput"
             [id]="col.key"
             [(value)]="colInputs[col.key]"
             [classes]="[
+              'm-0',
               'py-0',
               'px-1',
-              'border-0',
+              'border',
+              'rounded',
               'fw-bold',
               newRowErrs[col.key] ? 'bg-danger' : 'bg-transparent',
               'bg-opacity-25'

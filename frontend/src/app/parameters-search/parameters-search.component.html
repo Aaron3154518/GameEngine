@@ -3,65 +3,6 @@
   [cols]="cols"
   [allowNew]="true"
   (newRow)="newSet($event)"
+  searchPlaceholder="Search Parameter Sets"
   [sort]="sortParamSets"
 ></app-search>
-
-<div class="list">
-  <div class="input-group mb-2 mr-sm-2">
-    <div class="input-group-prepend">
-      <div class="input-group-text">
-        <fa-icon [icon]="['fas', 'search']"></fa-icon>
-      </div>
-    </div>
-    <input
-      type="text"
-      class="form-control"
-      maxlength="20"
-      placeholder="Search Parameter Lists"
-      autocomplete="off"
-      [value]="search"
-      (input)="onSearchChanged($event)"
-    />
-  </div>
-
-  <table class="table table-sm">
-    <thead>
-      <tr>
-        <th class="w-auto p-0 pe-1 text-end"></th>
-        <th class="w-auto p-0 ps-1"></th>
-        <th class="w-100 p-0 ps-2"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let params of parameters">
-        <td class="p-0">
-          <div
-            class="input-group-text d-inline-block text-end py-0 px-1 w-100 border-end-0 rounded-0 rounded-start"
-          >
-            <span class="align-middle fw-bold fs-6 type code"
-              >{{ params.type }}
-            </span>
-          </div>
-        </td>
-        <td class="p-0">
-          <div
-            class="input-group-text d-inline-block text-start py-0 px-1 w-100 border-start-0 rounded-0 rounded-end"
-          >
-            <span class="align-middle fw-bold fs-6 code">{{
-              params.name
-            }}</span>
-          </div>
-        </td>
-        <td class="p-0 ps-2">
-          <ng-container *ngFor="let gid of params.groups">
-            <span
-              class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 me-1 code"
-              *ngFor="let param of parameterService.getParamGroup(gid).params"
-              >{{ param }}</span
-            >
-          </ng-container>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>

@@ -103,11 +103,12 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() cols: Column[] = [];
   @Input() allowNew: boolean = false;
   @Input() sort: (rows: any[], query: string) => void = () => {};
+  @Input() searchPlaceholder: string = '';
 
   @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
 
   @ViewChild('search', { static: true }) search?: ElementRef<HTMLInputElement>;
-  @ViewChildren(InputComponent) colInputComps?: QueryList<InputComponent>;
+  @ViewChildren('rowInput') colInputComps?: QueryList<InputComponent>;
 
   rows: any[] = [];
 
@@ -156,6 +157,13 @@ export class SearchComponent implements DoCheck, AfterViewInit {
 
   onInput(col: Column) {
     this.newRowErrs[col.key] = !col.validateInput(this.colInputs[col.key]);
+  }
+
+  onColEnter(row: any, col: Column, input: InputComponent) {
+    if (col.input) {
+      col.input(row, input.value);
+      input.value = '';
+    }
   }
 
   onEnter() {
