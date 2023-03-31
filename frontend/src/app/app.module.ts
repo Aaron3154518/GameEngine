@@ -17,6 +17,7 @@ import { ParameterComponent } from './parameter/parameter.component';
 import { TypeModalComponent } from './type-modal/type-modal.component';
 import { ParameterGroupSearchComponent } from './parameter-group-search/parameter-group-search.component';
 import { OnInitDirective } from './directives/on-init.directive';
+import { ParametersSearchComponent } from './parameters-search/parameters-search.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { OnInitDirective } from './directives/on-init.directive';
     TypeModalComponent,
     ParameterGroupSearchComponent,
     OnInitDirective,
+    ParametersSearchComponent,
   ],
   imports: [
     BrowserModule,

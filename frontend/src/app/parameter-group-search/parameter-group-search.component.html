@@ -9,16 +9,11 @@
       type="text"
       class="form-control"
       maxlength="20"
-      placeholder="Search/Create Variable Lists"
+      placeholder="Search Variable Lists"
       autocomplete="off"
       [value]="search"
       (input)="onSearchChanged($event)"
     />
-    <div class="input-group-append">
-      <button class="input-group-text" (click)="createParameterGroup()">
-        <fa-icon [icon]="['fas', 'plus']"></fa-icon>
-      </button>
-    </div>
   </div>
 
   <table class="table table-sm code">

@@ -54,8 +54,6 @@ export class ParameterGroupSearchComponent implements OnInit {
     this.search = (event.target as HTMLInputElement).value;
   }
 
-  createParameterGroup() {}
-
   sortParamLists() {
     sortListAscending(
       this.groups,

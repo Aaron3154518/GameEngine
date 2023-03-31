@@ -1,0 +1,10 @@
+.list {
+  border: 2px solid black;
+  margin: 2px 0;
+  padding: 2px;
+}
+
+.search {
+  margin-left: 2px;
+  margin-bottom: 2px;
+}
