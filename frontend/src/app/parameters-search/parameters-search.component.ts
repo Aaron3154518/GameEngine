@@ -174,4 +174,18 @@ export class ParametersSearchComponent implements OnInit {
       })
     );
   }
+
+  newSetValidator: (args: StringDict<string>) => string[] = (
+    args: StringDict<string>
+  ): string[] => {
+    let errs: string[] = [];
+    if (
+      this.parameterService.paramSets.findIndex(
+        (set: Parameters) => set.name === args['name']
+      ) !== -1
+    ) {
+      errs.push('name');
+    }
+    return errs;
+  };
 }

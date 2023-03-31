@@ -22,19 +22,21 @@ export class InputComponent {
 
   @Input() sanitize: (value: string) => string = (s: string) => s;
 
+  @Output() input: EventEmitter<void> = new EventEmitter();
   @Output() enter: EventEmitter<string> = new EventEmitter();
 
-  @ViewChild('input', { static: true }) input?: ElementRef<HTMLInputElement>;
-  @ViewChild('dummy', { static: true }) dummy?: ElementRef<HTMLSpanElement>;
+  @ViewChild('input', { static: true })
+  inputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('dummy', { static: true })
+  dummyRef?: ElementRef<HTMLSpanElement>;
 
   protected _value: string = '';
   @Input() set value(s: string) {
     this._value = s;
-    setTimeout(() => {
-      if (this.input && this.dummy) {
-        this.sizeInput(this.input.nativeElement, this.dummy.nativeElement);
-      }
-    }, 0);
+    if (this.inputRef && this.dummyRef) {
+      this.inputRef.nativeElement.value = this.value;
+      this.sizeInput(this.inputRef.nativeElement, this.dummyRef.nativeElement);
+    }
   }
   get value(): string {
     return this._value;
@@ -42,7 +44,7 @@ export class InputComponent {
   @Output() valueChange: EventEmitter<string> = new EventEmitter();
 
   select() {
-    this.input?.nativeElement.focus();
+    this.inputRef?.nativeElement.focus();
   }
 
   sizeInput(input: HTMLInputElement, dummy: HTMLSpanElement) {
@@ -51,21 +53,15 @@ export class InputComponent {
     input.style.width = `${dummy.offsetWidth}px`;
   }
 
-  onInput(input: HTMLInputElement, dummy: HTMLSpanElement) {
-    this.value = input.value = this.sanitize(input.value);
+  onInput(inputRef: HTMLInputElement, dummy: HTMLSpanElement) {
+    this.value = inputRef.value = this.sanitize(inputRef.value);
     this.valueChange.next(this.value);
-    this.sizeInput(input, dummy);
+    this.sizeInput(inputRef, dummy);
   }
 
-  onKeyPress(
-    event: KeyboardEvent,
-    input: HTMLInputElement,
-    dummy: HTMLSpanElement
-  ) {
+  onKeyPress(event: KeyboardEvent, input: HTMLInputElement) {
     if (event.key === 'Enter' && input.value) {
       this.enter.next(input.value);
-      input.value = '';
-      this.sizeInput(input, dummy);
     }
   }
 }

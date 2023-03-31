@@ -65,10 +65,12 @@
               'py-0',
               'px-1',
               'border-0',
-              'bg-transparent',
-              'fw-bold'
+              'fw-bold',
+              newRowErrs[col.key] ? 'bg-danger' : 'bg-transparent',
+              'bg-opacity-25'
             ]"
             [placeholder]="col.inputPlaceholder"
+            (input)="onInput(col.key)"
             (enter)="onEnter()"
             [outline]="true"
           ></app-input>

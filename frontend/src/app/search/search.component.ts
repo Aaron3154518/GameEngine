@@ -99,6 +99,7 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() sort: (rows: any[], query: string) => void = () => {};
 
   @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
+  @Input() newRowValidator: (args: StringDict<string>) => string[] = () => [];
 
   @ViewChild('search', { static: true }) search?: ElementRef<HTMLInputElement>;
   @ViewChildren(InputComponent) colInputComps?: QueryList<InputComponent>;
@@ -106,6 +107,7 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   rows: any[] = [];
 
   colInputs: StringDict<string> = {};
+  newRowErrs: { [key: string]: boolean } = {};
 
   iterableDiffer: IterableDiffer<any>;
 
@@ -145,7 +147,17 @@ export class SearchComponent implements DoCheck, AfterViewInit {
     this.sort(this.rows, query);
   }
 
+  onInput(key: string) {
+    this.newRowErrs[key] = false;
+  }
+
   onEnter() {
+    let errs: string[] = this.newRowValidator(this.colInputs);
+    if (errs.length > 0) {
+      errs.forEach((key: string) => (this.newRowErrs[key] = true));
+      return;
+    }
+
     this.newRow.next(this.colInputs);
     this.colInputComps?.forEach((ic: InputComponent, i: number) => {
       ic.value = '';
