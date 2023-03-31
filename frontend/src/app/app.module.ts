@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { MdbModalModule } from 'mdb-angular-ui-kit/modal';
+import { FormsModule } from '@angular/forms';
 
 import {
   FaIconLibrary,
@@ -15,6 +16,7 @@ import { ParametersComponent } from './parameters/parameters.component';
 import { ParameterComponent } from './parameter/parameter.component';
 import { TypeModalComponent } from './type-modal/type-modal.component';
 import { ParameterGroupSearchComponent } from './enum-search/enum-search.component';
+import { OnInitDirective } from './directives/on-init.directive';
 
 @NgModule({
   declarations: [
@@ -23,8 +25,15 @@ import { ParameterGroupSearchComponent } from './enum-search/enum-search.compone
     ParameterComponent,
     TypeModalComponent,
     ParameterGroupSearchComponent,
+    OnInitDirective,
   ],
-  imports: [BrowserModule, AppRoutingModule, FontAwesomeModule, MdbModalModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FontAwesomeModule,
+    MdbModalModule,
+    FormsModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })

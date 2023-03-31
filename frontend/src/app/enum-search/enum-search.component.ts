@@ -14,11 +14,9 @@ import { searchScore, sortListAscending } from '../utils/utils';
   templateUrl: './enum-search.component.html',
   styleUrls: ['./enum-search.component.css'],
 })
-export class ParameterGroupSearchComponent implements OnInit, AfterViewInit {
+export class ParameterGroupSearchComponent implements OnInit {
   _groups: ParameterGroup[] = [];
   _search: string = '';
-  newList: string = '';
-  newVar: string = '';
   currGroup?: ParameterGroup;
 
   @ViewChild('listDummy', { static: true })
@@ -52,19 +50,6 @@ export class ParameterGroupSearchComponent implements OnInit, AfterViewInit {
     );
   }
 
-  ngAfterViewInit(): void {
-    this.sizeInput(
-      document.getElementById('dumb') as HTMLInputElement,
-      this.listDummy
-    );
-    this.groups.forEach((g: ParameterGroup) =>
-      this.sizeInput(
-        document.getElementById(g.name) as HTMLInputElement,
-        this.varDummy
-      )
-    );
-  }
-
   onSearchChanged(event: Event) {
     this.search = (event.target as HTMLInputElement).value;
   }
@@ -78,43 +63,52 @@ export class ParameterGroupSearchComponent implements OnInit, AfterViewInit {
     );
   }
 
-  sizeInput(input: HTMLInputElement, dummy?: ElementRef<HTMLSpanElement>) {
-    if (dummy) {
-      let txt: string = input.value ? input.value : input.placeholder;
-      dummy.nativeElement.innerHTML = txt.replaceAll(' ', '&nbsp;');
-      input.style.width = `${dummy.nativeElement.offsetWidth}px`;
+  sizeInput(input: HTMLInputElement, dummy: HTMLSpanElement, val?: string) {
+    if (val !== undefined) {
+      input.value = val;
     }
+    let txt: string = input.value ? input.value : input.placeholder;
+    dummy.innerHTML = txt.replaceAll(' ', '&nbsp;');
+    input.style.width = `${dummy.offsetWidth}px`;
   }
 
-  onInput(event: Event) {
-    let input: HTMLInputElement = event.target as HTMLInputElement;
-    this.newList = input.value;
-    this.sizeInput(input, this.listDummy);
-  }
-
-  onKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && this.newList) {
+  onKeyPress(event: KeyboardEvent, input: HTMLInputElement) {
+    if (event.key === 'Enter' && input.value) {
       this.parameterService.newParamGroup(
         new ParameterGroup({
-          name: this.newList,
+          name: input.value,
         })
       );
-      this.newList = '';
+      input.value = '';
     }
   }
 
-  onVarInput(event: Event) {
-    let input: HTMLInputElement = event.target as HTMLInputElement;
-    this.newVar = input.value = `1${input.value}`
+  onVarInput(input: HTMLInputElement, dummy: HTMLSpanElement) {
+    input.value = `1${input.value}`
       .replace(RegExp('[^0-9a-zA-Z_]', 'g'), '')
       .replace(RegExp('[0-9]+'), '');
-    this.sizeInput(input, this.varDummy);
+    this.sizeInput(input, dummy);
   }
 
-  onVarKeyPress(event: KeyboardEvent, group: ParameterGroup) {
-    if (event.key === 'Enter' && this.newVar) {
-      group.addParam(this.newVar);
-      this.newVar = '';
+  onVarKeyPress(
+    event: KeyboardEvent,
+
+    input: HTMLInputElement,
+    dummy: HTMLSpanElement,
+    group: ParameterGroup
+  ) {
+    if (event.key === 'Enter' && input.value) {
+      group.addParam(input.value);
+      this.sizeInput(input, dummy, '');
     }
+  }
+
+  selectGroup(
+    input: HTMLInputElement,
+    dummy: HTMLSpanElement,
+    group: ParameterGroup
+  ) {
+    this.currGroup = group;
+    this.sizeInput(input, dummy);
   }
 }

@@ -39,14 +39,17 @@
         </td>
         <td class="p-0 ps-2">
           <input
-            [attr.id]="group.name"
-            class="rounded-1 border border-top-0 border-bottom-0 border-dark align-middle fw-bold py-0 px-1 me-1 bg-transparent list-input"
-            placeholder="New"
+            #varInput
+            class="rounded-1 border border-top-0 border-bottom-0 border-secondary align-middle fw-bold py-0 px-1 me-2 bg-transparent list-input"
+            placeholder="+ New"
             type="text"
             maxlength="20"
-            [value]="currGroup === group ? newVar : ''"
-            (input)="onVarInput($event)"
-            (keypress)="onVarKeyPress($event, group)"
+            (input)="onVarInput(varInput, varDummy)"
+            (keypress)="onVarKeyPress($event, varInput, varDummy, group)"
+            (focus)="selectGroup(varInput, varDummy, group)"
+            init
+            [onInit]="sizeInput"
+            [args]="[varInput, varDummy]"
           />
           <span
             class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 me-1"
@@ -62,14 +65,17 @@
             class="input-group-text d-inline-block text-start py-0 px-1 w-100 border-start-0 rounded-0 rounded-end bg-white fw-bold fs-6"
           >
             <input
+              #listInput
               id="dumb"
               class="align-middle fw-bold p-0 border-0 bg-transparent list-input"
-              placeholder="New List"
+              placeholder="+ New List"
               type="text"
               maxlength="20"
-              [value]="newList"
-              (input)="onInput($event)"
-              (keypress)="onKeyPress($event)"
+              (input)="sizeInput(listInput, listDummy)"
+              (keypress)="onKeyPress($event, listInput)"
+              init
+              [onInit]="sizeInput"
+              [args]="[listInput, listDummy]"
             />
           </div>
         </td>
