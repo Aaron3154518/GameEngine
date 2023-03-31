@@ -1,16 +1,14 @@
-<div class="input-group-text text-start bg-white" [ngClass]="classes">
-  <input
-    #input
-    class="input"
-    [ngClass]="inputClasses"
-    [placeholder]="placeholder"
-    type="text"
-    maxlength="20"
-    (input)="sizeInput(input, dummy)"
-    (keypress)="onKeyPress($event, input)"
-    init
-    [onInit]="sizeInput"
-    [args]="[input, dummy]"
-  />
-</div>
-<span class="position-absolute dummy" [ngClass]="inputClasses" #dummy></span>
+<input
+  #input
+  class="input"
+  [ngClass]="classes.concat([outline ? '' : 'no'])"
+  [placeholder]="placeholder"
+  type="text"
+  maxlength="20"
+  (input)="sizeInput(input, dummy)"
+  (keypress)="onKeyPress($event, input, dummy)"
+  init
+  [onInit]="sizeInput"
+  [args]="[input, dummy]"
+/>
+<span class="position-absolute dummy" [ngClass]="classes" #dummy></span>

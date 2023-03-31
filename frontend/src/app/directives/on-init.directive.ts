@@ -10,7 +10,7 @@ export class OnInitDirective {
 
   constructor() {}
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.onInit(...this.args);
   }
 }
