@@ -1,6 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { UUID, searchScore, sortList } from '../utils/utils';
+import {
+  UUID,
+  sanitizeType,
+  sanitizeVar,
+  searchScore,
+  sortList,
+  validateType,
+  validateVar,
+} from '../utils/utils';
 import { ParameterGroup, Parameters, StringDict } from '../utils/interfaces';
 import {
   ColComponent,
@@ -103,6 +111,8 @@ export class ParametersSearchComponent implements OnInit {
       width: ColWidth.Fit,
       requireInput: true,
       inputPlaceholder: '+ New Type',
+      validateInput: validateType,
+      sanitizeInput: sanitizeType,
       component: TypeColHeaderComponent,
     }),
     new Column({
@@ -110,6 +120,12 @@ export class ParametersSearchComponent implements OnInit {
       width: ColWidth.Fit,
       requireInput: true,
       inputPlaceholder: 'Name',
+      validateInput: (s: string): boolean =>
+        validateVar(s) &&
+        this.parameterService.paramSets.findIndex(
+          (set: Parameters) => set.name === s
+        ) === -1,
+      sanitizeInput: sanitizeVar,
       component: NameColHeaderComponent,
     }),
     new Column({
@@ -174,18 +190,4 @@ export class ParametersSearchComponent implements OnInit {
       })
     );
   }
-
-  newSetValidator: (args: StringDict<string>) => string[] = (
-    args: StringDict<string>
-  ): string[] => {
-    let errs: string[] = [];
-    if (
-      this.parameterService.paramSets.findIndex(
-        (set: Parameters) => set.name === args['name']
-      ) !== -1
-    ) {
-      errs.push('name');
-    }
-    return errs;
-  };
 }

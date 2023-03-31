@@ -43,12 +43,12 @@ export class ParameterService {
       groups: new Set([this._paramGroups[0].uuid]),
     }),
     new Parameters({
-      name: 'Gens',
+      name: 'GenVals',
       type: 'Number',
       groups: new Set([this._paramGroups[1].uuid]),
     }),
     new Parameters({
-      name: 'Gens',
+      name: 'GenNames',
       type: 'std::string',
       groups: new Set([this._paramGroups[1].uuid]),
     }),

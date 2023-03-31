@@ -28,3 +28,26 @@ export function sortList<T>(
     (a: T, b: T) => (scoreFunc(b) - scoreFunc(a)) * (ascending ? 1 : -1)
   );
 }
+
+// Variable/type regexes
+export const alphanum_: string = '0-9a-zA-Z_';
+
+export function validateVar(s: string): boolean {
+  return RegExp(`[a-zA-Z_][${alphanum_}]*`).test(s);
+}
+
+export function sanitizeVar(s: string): string {
+  return `1${s}`
+    .replace(RegExp(`[^${alphanum_}]`, 'g'), '')
+    .replace(RegExp('[0-9]+'), '');
+}
+
+export function validateType(s: string): boolean {
+  return RegExp(`[a-zA-Z_][${alphanum_}]*(::[${alphanum_}]+)*`).test(s);
+}
+
+export function sanitizeType(s: string): string {
+  return `1${s}`
+    .replace(RegExp(`[^${alphanum_}:]`, 'g'), '')
+    .replace(RegExp('[0-9]+'), '');
+}

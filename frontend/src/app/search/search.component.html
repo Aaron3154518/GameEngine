@@ -60,6 +60,7 @@
           <app-input
             #colInput
             *ngIf="col.requireInput"
+            [id]="col.key"
             [(value)]="colInputs[col.key]"
             [classes]="[
               'py-0',
@@ -70,8 +71,9 @@
               'bg-opacity-25'
             ]"
             [placeholder]="col.inputPlaceholder"
-            (input)="onInput(col.key)"
+            (input)="onInput(col)"
             (enter)="onEnter()"
+            [sanitize]="col.sanitizeInput"
             [outline]="true"
           ></app-input>
         </td>

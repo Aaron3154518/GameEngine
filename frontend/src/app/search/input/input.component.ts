@@ -3,10 +3,7 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  OnChanges,
   Output,
-  SimpleChange,
-  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 
@@ -16,6 +13,7 @@ import {
   styleUrls: ['./input.component.css'],
 })
 export class InputComponent {
+  @Input() id: string = '';
   @Input() classes: string[] = [];
   @Input() placeholder: string = '';
   @Input() outline: boolean = true;

@@ -8,11 +8,8 @@ import {
   Input,
   IterableDiffer,
   IterableDiffers,
-  OnChanges,
   Output,
   QueryList,
-  SimpleChange,
-  SimpleChanges,
   Type,
   ViewChild,
   ViewChildren,
@@ -21,6 +18,7 @@ import {
 import { ContainerDirective } from '../directives/container.directive';
 import { InputComponent } from './input/input.component';
 import { StringDict } from '../utils/interfaces';
+import { sanitizeVar } from '../utils/utils';
 
 export interface ColComponent {
   value: any;
@@ -57,6 +55,8 @@ interface IColumn {
   input?: (row: any, val: string) => void;
   requireInput?: boolean;
   inputPlaceholder?: string;
+  validateInput?: (val: string) => boolean;
+  sanitizeInput?: (val: string) => string;
 }
 
 export class Column implements IColumn {
@@ -67,6 +67,8 @@ export class Column implements IColumn {
   input?: (row: any, val: string) => void;
   requireInput: boolean;
   inputPlaceholder: string;
+  validateInput: (val: string) => boolean;
+  sanitizeInput: (val: string) => string;
 
   constructor({
     key,
@@ -76,6 +78,8 @@ export class Column implements IColumn {
     input,
     requireInput = false,
     inputPlaceholder = '',
+    validateInput = () => true,
+    sanitizeInput = (s: string) => s,
   }: IColumn) {
     this.key = key;
     this.getter = getter;
@@ -84,6 +88,8 @@ export class Column implements IColumn {
     this.input = input;
     this.requireInput = requireInput;
     this.inputPlaceholder = inputPlaceholder;
+    this.validateInput = validateInput;
+    this.sanitizeInput = sanitizeInput;
   }
 }
 
@@ -99,7 +105,6 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() sort: (rows: any[], query: string) => void = () => {};
 
   @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
-  @Input() newRowValidator: (args: StringDict<string>) => string[] = () => [];
 
   @ViewChild('search', { static: true }) search?: ElementRef<HTMLInputElement>;
   @ViewChildren(InputComponent) colInputComps?: QueryList<InputComponent>;
@@ -110,6 +115,8 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   newRowErrs: { [key: string]: boolean } = {};
 
   iterableDiffer: IterableDiffer<any>;
+
+  sanitizeVar: (s: string) => string = sanitizeVar;
 
   constructor(iterableDiffers: IterableDiffers) {
     this.iterableDiffer = iterableDiffers.find([]).create(undefined);
@@ -147,29 +154,19 @@ export class SearchComponent implements DoCheck, AfterViewInit {
     this.sort(this.rows, query);
   }
 
-  onInput(key: string) {
-    this.newRowErrs[key] = false;
+  onInput(col: Column) {
+    this.newRowErrs[col.key] = !col.validateInput(this.colInputs[col.key]);
   }
 
   onEnter() {
-    let errs: string[] = this.newRowValidator(this.colInputs);
-    if (errs.length > 0) {
-      errs.forEach((key: string) => (this.newRowErrs[key] = true));
+    if (Object.values(this.newRowErrs).findIndex((b: boolean) => b) !== -1) {
       return;
     }
 
     this.newRow.next(this.colInputs);
-    this.colInputComps?.forEach((ic: InputComponent, i: number) => {
+    this.colInputComps?.forEach((ic: InputComponent) => {
       ic.value = '';
-      if (i === 0) {
-        ic.select();
-      }
     });
-  }
-
-  sanitizeVar(s: string): string {
-    return `1${s}`
-      .replace(RegExp('[^0-9a-zA-Z_]', 'g'), '')
-      .replace(RegExp('[0-9]+'), '');
+    this.colInputComps?.first.select();
   }
 }
