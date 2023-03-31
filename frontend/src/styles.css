@@ -14,3 +14,7 @@
   font-family: "Courier New", Courier, monospace;
   font-weight: bold;
 }
+
+.vertical-line {
+  border-left: 3px solid black;
+}

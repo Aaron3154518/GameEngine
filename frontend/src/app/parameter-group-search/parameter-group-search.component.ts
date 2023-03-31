@@ -1,12 +1,26 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterGroup } from '../utils/interfaces';
 import { searchScore, sortListAscending } from '../utils/utils';
 import {
+  ColComponent,
   ColHeaderComponent,
   Column,
-  VarComponent,
 } from '../search/search.component';
+
+@Component({
+  selector: 'app-var',
+  template: `
+    <span
+      *ngFor="let str of data; let first = first"
+      class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 mx-1 fst-normal"
+      >{{ str }}</span
+    >
+  `,
+})
+export class VarComponent implements ColComponent {
+  @Input() data: Set<string> = new Set<string>();
+}
 
 @Component({
   selector: 'app-parameter-group-search',

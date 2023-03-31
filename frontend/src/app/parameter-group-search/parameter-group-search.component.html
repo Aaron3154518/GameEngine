@@ -1,6 +1,7 @@
 <app-search
   [data]="parameterService.paramGroups"
   [cols]="cols"
+  [allowNew]="true"
   (newRow)="newGroup($event)"
 ></app-search>
 

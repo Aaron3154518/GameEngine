@@ -1,3 +1,10 @@
+<app-search
+  [data]="parameterService.paramSets"
+  [cols]="cols"
+  [allowNew]="true"
+  (newRow)="newSet($event)"
+></app-search>
+
 <div class="list">
   <div class="input-group mb-2 mr-sm-2">
     <div class="input-group-prepend">
