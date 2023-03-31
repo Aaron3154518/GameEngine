@@ -1,15 +1,26 @@
 import {
+  AfterViewInit,
   Component,
   ComponentRef,
+  DoCheck,
+  ElementRef,
   EventEmitter,
   Input,
+  IterableDiffer,
+  IterableDiffers,
   OnChanges,
   Output,
+  QueryList,
+  SimpleChange,
   SimpleChanges,
   Type,
+  ViewChild,
+  ViewChildren,
   ViewContainerRef,
 } from '@angular/core';
 import { ContainerDirective } from '../directives/container.directive';
+import { InputComponent } from './input/input.component';
+import { StringDict } from '../utils/interfaces';
 
 export interface ColComponent {
   value: any;
@@ -17,14 +28,19 @@ export interface ColComponent {
 
 @Component({
   selector: 'col-header',
-  template: ` <div
-    class="input-group-text d-inline-block text-start py-0 px-1 w-100 border-start-0 rounded-0 rounded-end"
-  >
-    <span class="align-middle fw-bold">{{ value }}</span>
-  </div>`,
+  templateUrl: './col-header.component.html',
 })
 export class ColHeaderComponent implements ColComponent {
   @Input() value: string = '';
+
+  classes: string[] = [
+    'input-group-text',
+    'd-inline-block',
+    'text-start',
+    'py-0',
+    'px-1',
+    'w-100',
+  ];
 }
 
 export enum ColWidth {
@@ -32,11 +48,43 @@ export enum ColWidth {
   Fill = 'w-100',
 }
 
-export interface Column {
-  key: string | ((row: any) => string);
+interface IColumn {
+  id?: string;
+  key: string;
+  getter?: (row: any) => string;
   component: Type<any>;
   width?: ColWidth;
   input?: (row: any, val: string) => void;
+  requireInput?: boolean;
+  inputPlaceholder?: string;
+}
+
+export class Column implements IColumn {
+  key: string;
+  getter?: (row: any) => string;
+  component: Type<any>;
+  width: ColWidth;
+  input?: (row: any, val: string) => void;
+  requireInput: boolean;
+  inputPlaceholder: string;
+
+  constructor({
+    key,
+    component,
+    getter,
+    width = ColWidth.Fill,
+    input,
+    requireInput = false,
+    inputPlaceholder = '',
+  }: IColumn) {
+    this.key = key;
+    this.getter = getter;
+    this.component = component;
+    this.width = width;
+    this.input = input;
+    this.requireInput = requireInput;
+    this.inputPlaceholder = inputPlaceholder;
+  }
 }
 
 @Component({
@@ -44,20 +92,40 @@ export interface Column {
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.css'],
 })
-export class SearchComponent implements OnChanges {
+export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() data: readonly any[] = [];
   @Input() cols: Column[] = [];
   @Input() allowNew: boolean = false;
   @Input() sort: (rows: any[], query: string) => void = () => {};
 
-  @Output() newRow: EventEmitter<string> = new EventEmitter<string>();
+  @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
+
+  @ViewChild('search', { static: true }) search?: ElementRef<HTMLInputElement>;
+  @ViewChildren(InputComponent) colInputComps?: QueryList<InputComponent>;
 
   rows: any[] = [];
 
-  protected ColWidth = ColWidth;
+  colInputs: StringDict<string> = {};
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.rows = [...this.data];
+  iterableDiffer: IterableDiffer<any>;
+
+  constructor(iterableDiffers: IterableDiffers) {
+    this.iterableDiffer = iterableDiffers.find([]).create(undefined);
+  }
+
+  ngDoCheck(): void {
+    if (this.iterableDiffer.diff(this.data)) {
+      this.rows = [...this.data];
+      if (this.search) {
+        this.onSearchChanged(this.search.nativeElement.value);
+      }
+    }
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.colInputComps?.forEach((ic: InputComponent) => (ic.value = ''));
+    }, 0);
   }
 
   init(container: ContainerDirective, row: any, col: Column): void {
@@ -70,11 +138,21 @@ export class SearchComponent implements OnChanges {
   }
 
   getCol(row: any, col: Column): string {
-    return typeof col.key === 'string' ? row[col.key] : col.key(row);
+    return col.getter ? col.getter(row) : row[col.key];
   }
 
   onSearchChanged(query: string) {
     this.sort(this.rows, query);
+  }
+
+  onEnter() {
+    this.newRow.next(this.colInputs);
+    this.colInputComps?.forEach((ic: InputComponent, i: number) => {
+      ic.value = '';
+      if (i === 0) {
+        ic.select();
+      }
+    });
   }
 
   sanitizeVar(s: string): string {

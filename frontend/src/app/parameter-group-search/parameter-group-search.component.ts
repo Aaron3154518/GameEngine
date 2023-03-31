@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { ParameterGroup } from '../utils/interfaces';
+import { ParameterGroup, StringDict } from '../utils/interfaces';
 import { searchScore, sortList } from '../utils/utils';
 import {
   ColComponent,
@@ -39,12 +39,16 @@ export class ParameterGroupSearchComponent implements OnInit {
   varDummy?: ElementRef<HTMLSpanElement>;
 
   cols: Column[] = [
-    { key: 'name', width: ColWidth.Fit, component: ColHeaderComponent },
-    {
+    new Column({
+      key: 'name',
+      width: ColWidth.Fit,
+      component: ColHeaderComponent,
+    }),
+    new Column({
       key: 'params',
       component: VarComponent,
       input: this.addParam,
-    },
+    }),
   ];
 
   constructor(protected parameterService: ParameterService) {}
@@ -127,8 +131,10 @@ export class ParameterGroupSearchComponent implements OnInit {
     group.addParam(name);
   }
 
-  newGroup(name: string) {
-    this.parameterService.newParamGroup(new ParameterGroup({ name: name }));
+  newGroup(args: StringDict<string>) {
+    this.parameterService.newParamGroup(
+      new ParameterGroup({ name: args['name'] })
+    );
   }
 
   selectGroup(

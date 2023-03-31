@@ -22,7 +22,7 @@
         <th
           *ngFor="let col of cols; let first = first"
           class="p-0 m-0"
-          [ngClass]="[col.width ? col.width : ColWidth.Fill]"
+          [ngClass]="[col.width]"
         ></th>
       </tr>
     </thead>
@@ -53,28 +53,26 @@
             init
             (init)="init(container, row, col)"
           ></ng-template>
-          <!-- *ngFor="let param of group.params" -->
         </td>
       </tr>
-
-      <tr *ngIf="allowNew">
-        <td class="p-0">
-          <div class="input-group-text py-0 px-1 bg-white">
-            <app-input
-              [classes]="[
-                'p-0',
-                'pe-1',
-                'border-0',
-                'bg-transparent',
-                'fw-bold'
-              ]"
-              placeholder="+ New List"
-              (enter)="newRow.next($event)"
-              [outline]="false"
-            ></app-input>
-          </div>
+      <tr>
+        <td *ngFor="let col of cols">
+          <app-input
+            #colInput
+            *ngIf="col.requireInput"
+            [(value)]="colInputs[col.key]"
+            [classes]="[
+              'py-0',
+              'px-1',
+              'border-0',
+              'bg-transparent',
+              'fw-bold'
+            ]"
+            [placeholder]="col.inputPlaceholder"
+            (enter)="onEnter()"
+            [outline]="true"
+          ></app-input>
         </td>
-        <td class="p-0 ps-2"></td>
       </tr>
     </tbody>
     <span class="position-absolute align-middle dummy" #listDummy></span>

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { UUID, searchScore, sortList } from '../utils/utils';
-import { ParameterGroup, Parameters } from '../utils/interfaces';
+import { ParameterGroup, Parameters, StringDict } from '../utils/interfaces';
 import {
   ColComponent,
   ColHeaderComponent,
@@ -22,6 +22,38 @@ export class ParameterGroupPipe implements PipeTransform {
     return [...items]
       .map((id: UUID) => parameterService.getParamGroup(id))
       .filter((g: ParameterGroup) => g.params.size > 0);
+  }
+}
+
+@Component({
+  selector: 'type-col-header',
+  templateUrl: '../search/col-header.component.html',
+})
+export class TypeColHeaderComponent extends ColHeaderComponent {
+  constructor() {
+    super();
+    this.classes = this.classes.concat([
+      'type',
+      'border-end-0',
+      'rounded-0',
+      'rounded-start',
+      'text-end',
+    ]);
+  }
+}
+
+@Component({
+  selector: 'type-col-header',
+  templateUrl: '../search/col-header.component.html',
+})
+export class NameColHeaderComponent extends ColHeaderComponent {
+  constructor() {
+    super();
+    this.classes = this.classes.concat([
+      'border-start-0',
+      'rounded-0',
+      'rounded-end',
+    ]);
   }
 }
 
@@ -66,20 +98,24 @@ export class ParametersSearchComponent implements OnInit {
   _search: string = '';
 
   cols: Column[] = [
-    {
+    new Column({
       key: 'type',
       width: ColWidth.Fit,
-      component: ColHeaderComponent,
-    },
-    {
+      requireInput: true,
+      inputPlaceholder: '+ New Type',
+      component: TypeColHeaderComponent,
+    }),
+    new Column({
       key: 'name',
       width: ColWidth.Fit,
-      component: ColHeaderComponent,
-    },
-    {
+      requireInput: true,
+      inputPlaceholder: 'Name',
+      component: NameColHeaderComponent,
+    }),
+    new Column({
       key: 'groups',
       component: GroupComponent,
-    },
+    }),
   ];
 
   constructor(protected parameterService: ParameterService) {}
@@ -130,10 +166,11 @@ export class ParametersSearchComponent implements OnInit {
     return this.parameters.findIndex((l: Parameters) => l.name === name) !== -1;
   }
 
-  newSet(type: string) {
+  newSet(args: StringDict<string>) {
     this.parameterService.newParamSet(
       new Parameters({
-        type: type,
+        type: args['type'],
+        name: args['name'],
       })
     );
   }

@@ -22,8 +22,10 @@ import {
 import { OnInitDirective } from './directives/on-init.directive';
 import {
   GroupComponent,
+  NameColHeaderComponent,
   ParameterGroupPipe,
   ParametersSearchComponent,
+  TypeColHeaderComponent,
 } from './parameters-search/parameters-search.component';
 import { SearchComponent, ColHeaderComponent } from './search/search.component';
 import { InputComponent } from './search/input/input.component';
@@ -45,6 +47,8 @@ import { ContainerDirective } from './directives/container.directive';
     GroupComponent,
     ColHeaderComponent,
     ParameterGroupPipe,
+    TypeColHeaderComponent,
+    NameColHeaderComponent,
   ],
   imports: [
     BrowserModule,
