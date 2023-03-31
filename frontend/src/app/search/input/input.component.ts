@@ -11,11 +11,17 @@ export class InputComponent {
   @Input() outline: boolean = true;
 
   @Input() onEnter: (value: string) => void = () => {};
+  @Input() sanitize: (value: string) => string = (s: string) => s;
 
   sizeInput(input: HTMLInputElement, dummy: HTMLSpanElement) {
     let txt: string = input.value ? input.value : input.placeholder;
     dummy.innerHTML = txt.replaceAll(' ', '&nbsp;');
     input.style.width = `${dummy.offsetWidth}px`;
+  }
+
+  onInput(input: HTMLInputElement, dummy: HTMLSpanElement) {
+    input.value = this.sanitize(input.value);
+    this.sizeInput(input, dummy);
   }
 
   onKeyPress(
@@ -24,11 +30,6 @@ export class InputComponent {
     dummy: HTMLSpanElement
   ) {
     if (event.key === 'Enter' && input.value) {
-      // this.parameterService.newParamGroup(
-      //   new ParameterGroup({
-      //     name: input.value,
-      //   })
-      // );
       this.onEnter(input.value);
       input.value = '';
       this.sizeInput(input, dummy);
