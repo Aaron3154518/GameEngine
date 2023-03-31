@@ -1,10 +1,11 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterGroup } from '../utils/interfaces';
-import { searchScore, sortListAscending } from '../utils/utils';
+import { searchScore, sortList } from '../utils/utils';
 import {
   ColComponent,
   ColHeaderComponent,
+  ColWidth,
   Column,
 } from '../search/search.component';
 
@@ -12,14 +13,14 @@ import {
   selector: 'app-var',
   template: `
     <span
-      *ngFor="let str of data; let first = first"
+      *ngFor="let str of value; let first = first"
       class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 mx-1 fst-normal"
       >{{ str }}</span
     >
   `,
 })
 export class VarComponent implements ColComponent {
-  @Input() data: Set<string> = new Set<string>();
+  @Input() value: Set<string> = new Set<string>();
 }
 
 @Component({
@@ -38,7 +39,7 @@ export class ParameterGroupSearchComponent implements OnInit {
   varDummy?: ElementRef<HTMLSpanElement>;
 
   cols: Column[] = [
-    { key: 'name', component: ColHeaderComponent },
+    { key: 'name', width: ColWidth.Fit, component: ColHeaderComponent },
     {
       key: 'params',
       component: VarComponent,
@@ -77,7 +78,7 @@ export class ParameterGroupSearchComponent implements OnInit {
   }
 
   sortParamLists() {
-    sortListAscending(
+    sortList(
       this.groups,
       searchScore(this.search, (pg: ParameterGroup) => [pg.name, ...pg.params])
     );

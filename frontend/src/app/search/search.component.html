@@ -6,14 +6,14 @@
       </div>
     </div>
     <input
+      #search
       type="text"
       class="form-control"
       maxlength="20"
       placeholder="Search Variable Lists"
       autocomplete="off"
+      (input)="onSearchChanged(search.value)"
     />
-    <!-- [value]="search"
-      (input)="onSearchChanged($event)" -->
   </div>
 
   <table class="table table-sm code">
@@ -22,12 +22,12 @@
         <th
           *ngFor="let col of cols; let first = first"
           class="p-0 m-0"
-          [ngClass]="[first ? 'w-auto' : 'w-100']"
+          [ngClass]="[col.width ? col.width : ColWidth.Fill]"
         ></th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of data">
+      <tr *ngFor="let row of rows">
         <td *ngFor="let col of cols" class="p-0">
           <app-input
             *ngIf="col.input"

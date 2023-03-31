@@ -19,12 +19,12 @@ export function searchScore<T>(
     }, 0);
 }
 
-export function sortListAscending<T>(
+export function sortList<T>(
   list: T[],
   scoreFunc: (a: T) => number,
-  reversed: boolean = false
+  ascending: boolean = true
 ) {
   list.sort(
-    (a: T, b: T) => (scoreFunc(b) - scoreFunc(a)) * (reversed ? -1 : 1)
+    (a: T, b: T) => (scoreFunc(b) - scoreFunc(a)) * (ascending ? 1 : -1)
   );
 }

@@ -1,11 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { UUID, searchScore, sortListAscending } from '../utils/utils';
+import { UUID, searchScore, sortList } from '../utils/utils';
 import { ParameterGroup, Parameters } from '../utils/interfaces';
 import {
   ColComponent,
   ColHeaderComponent,
   Column,
+  ColWidth,
 } from '../search/search.component';
 import { Pipe, PipeTransform } from '@angular/core';
 
@@ -29,7 +30,7 @@ export class ParameterGroupPipe implements PipeTransform {
   template: `
     <ng-container
       *ngFor="
-        let group of data | parametergroup : parameterService;
+        let group of value | parametergroup : parameterService;
         let first = first
       "
       ><span *ngIf="!first" class="vertical-line h-100"></span
@@ -37,7 +38,7 @@ export class ParameterGroupPipe implements PipeTransform {
         class="hover"
         [ngClass]="[first ? 'ms-2 me-1' : 'mx-1']"
         [title]="group.name"
-        ><app-var [data]="group.params"></app-var></span
+        ><app-var [value]="group.params"></app-var></span
     ></ng-container>
   `,
   styles: [
@@ -49,7 +50,7 @@ export class ParameterGroupPipe implements PipeTransform {
   ],
 })
 export class GroupComponent implements ColComponent {
-  @Input() data: Set<UUID> = new Set<UUID>();
+  @Input() value: Set<UUID> = new Set<UUID>();
 
   constructor(protected parameterService: ParameterService) {}
 }
@@ -65,7 +66,16 @@ export class ParametersSearchComponent implements OnInit {
   _search: string = '';
 
   cols: Column[] = [
-    { key: 'type', component: ColHeaderComponent },
+    {
+      key: 'type',
+      width: ColWidth.Fit,
+      component: ColHeaderComponent,
+    },
+    {
+      key: 'name',
+      width: ColWidth.Fit,
+      component: ColHeaderComponent,
+    },
     {
       key: 'groups',
       component: GroupComponent,
@@ -103,9 +113,16 @@ export class ParametersSearchComponent implements OnInit {
   }
 
   sortParamLists() {
-    sortListAscending(
+    sortList(
       this.parameters,
       searchScore(this.search, (set: Parameters) => [set.name, set.type])
+    );
+  }
+
+  sortParamSets(rows: Parameters[], query: string) {
+    sortList(
+      rows,
+      searchScore(query, (set: Parameters) => [set.name, set.type])
     );
   }
 
