@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import { searchScore, sortListAscending } from '../utils/utils';
-import { TypeModalComponent } from '../type-modal/type-modal.component';
 import { Parameters } from '../utils/interfaces';
+
+// TODO: delete type-modal
 
 @Component({
   selector: 'app-parameters-search',
@@ -14,10 +14,7 @@ export class ParametersSearchComponent implements OnInit {
   _parameters: Parameters[] = [];
   _search: string = '';
 
-  constructor(
-    protected parameterService: ParameterService,
-    private modalService: MdbModalService
-  ) {}
+  constructor(protected parameterService: ParameterService) {}
 
   get parameters(): Parameters[] {
     return this._parameters;
@@ -56,11 +53,5 @@ export class ParametersSearchComponent implements OnInit {
 
   listExists(name: string) {
     return this.parameters.findIndex((l: Parameters) => l.name === name) !== -1;
-  }
-
-  createParamList() {
-    this.modalService.open(TypeModalComponent, {
-      data: { name: this.search },
-    });
   }
 }

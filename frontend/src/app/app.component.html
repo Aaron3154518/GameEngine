@@ -1,3 +1,8 @@
 <app-parameter-group-search></app-parameter-group-search>
 <app-parameters-search></app-parameters-search>
+<app-search
+  [data]="parameterService.paramSets"
+  [idCol]="'type'"
+  [cols]="['name']"
+></app-search>
 <app-parameters></app-parameters>

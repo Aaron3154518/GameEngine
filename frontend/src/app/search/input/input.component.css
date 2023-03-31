@@ -1,0 +1,9 @@
+.input {
+  width: 1px;
+  outline: 0;
+}
+
+.dummy {
+  left: -9999px;
+  word-wrap: pre;
+}

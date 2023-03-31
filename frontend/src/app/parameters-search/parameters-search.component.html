@@ -9,16 +9,11 @@
       type="text"
       class="form-control"
       maxlength="20"
-      placeholder="Search/Create Parameter Lists"
+      placeholder="Search Parameter Lists"
       autocomplete="off"
       [value]="search"
       (input)="onSearchChanged($event)"
     />
-    <div class="input-group-append">
-      <button class="input-group-text" (click)="createParamList()">
-        <fa-icon [icon]="['fas', 'plus']"></fa-icon>
-      </button>
-    </div>
   </div>
 
   <table class="table table-sm">
