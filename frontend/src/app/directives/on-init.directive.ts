@@ -1,16 +1,15 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, EventEmitter, Input, Output } from '@angular/core';
 
 @Directive({
   selector: '[init]',
   exportAs: 'init',
 })
 export class OnInitDirective {
-  @Input() args: any[] = [];
-  @Input() onInit: (...args: any[]) => void = () => {};
+  @Output() init: EventEmitter<void> = new EventEmitter();
 
   constructor() {}
 
   ngAfterViewInit() {
-    this.onInit(...this.args);
+    setTimeout(() => this.init.next(), 0);
   }
 }

@@ -1,8 +1,6 @@
 <app-search
   [data]="parameterService.paramGroups"
-  [idCol]="'name'"
-  [cols]="['params']"
-  [colInputs]="{ params: addParam }"
+  [cols]="cols"
   (newRow)="newGroup($event)"
 ></app-search>
 
@@ -51,8 +49,7 @@
             (keypress)="onVarKeyPress($event, varInput, varDummy, group)"
             (focus)="selectGroup(varInput, varDummy, group)"
             init
-            [onInit]="sizeInput"
-            [args]="[varInput, varDummy]"
+            (init)="sizeInput(varInput, varDummy)"
           />
           <span
             class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 me-1"
@@ -77,8 +74,7 @@
               (input)="sizeInput(listInput, listDummy)"
               (keypress)="onKeyPress($event, listInput)"
               init
-              [onInit]="sizeInput"
-              [args]="[listInput, listDummy]"
+              (init)="sizeInput(listInput, listDummy)"
             />
           </div>
         </td>

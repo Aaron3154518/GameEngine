@@ -19,26 +19,22 @@
   <table class="table table-sm code">
     <thead>
       <tr>
-        <th *ngIf="idCol" class="w-auto p-0 ps-1"></th>
-        <th *ngFor="let col of cols" class="w-100 p-0 ps-2"></th>
+        <th
+          *ngFor="let col of cols; let first = first"
+          class="p-0 m-0"
+          [ngClass]="[first ? 'w-auto' : 'w-100']"
+        ></th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let row of data">
-        <td *ngIf="idCol" class="p-0">
-          <div
-            class="input-group-text d-inline-block text-start py-0 px-1 w-100 border-start-0 rounded-0 rounded-end"
-          >
-            <span class="align-middle fw-bold">{{ row[idCol] }}</span>
-          </div>
-        </td>
-        <td *ngFor="let col of cols" class="p-0 ps-2">
+        <td *ngFor="let col of cols" class="p-0">
           <app-input
-            *ngIf="colInputs[col]"
-            class="me-2"
+            *ngIf="col.input"
             [classes]="[
               'py-0',
               'px-1',
+              'ms-2',
               'rounded-1',
               'border',
               'border-top-0',
@@ -47,15 +43,21 @@
               'fw-bold'
             ]"
             placeholder="+ New"
-            (enter)="this.colInputs[col](row, $event)"
+            (enter)="col.input(row, $event)"
             [sanitize]="sanitizeVar"
           >
           </app-input>
+          <ng-template
+            appContainer
+            #container="container"
+            init
+            (init)="init(container, row, col)"
+          ></ng-template>
           <!-- *ngFor="let param of group.params" -->
         </td>
       </tr>
 
-      <tr *ngIf="idCol">
+      <tr>
         <td class="p-0">
           <div class="input-group-text py-0 px-1 bg-white">
             <app-input

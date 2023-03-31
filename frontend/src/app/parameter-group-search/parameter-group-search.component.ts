@@ -2,6 +2,11 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterGroup } from '../utils/interfaces';
 import { searchScore, sortListAscending } from '../utils/utils';
+import {
+  ColHeaderComponent,
+  Column,
+  VarComponent,
+} from '../search/search.component';
 
 @Component({
   selector: 'app-parameter-group-search',
@@ -17,6 +22,15 @@ export class ParameterGroupSearchComponent implements OnInit {
   listDummy?: ElementRef<HTMLSpanElement>;
   @ViewChild('varDummy', { static: true })
   varDummy?: ElementRef<HTMLSpanElement>;
+
+  cols: Column[] = [
+    { key: 'name', component: ColHeaderComponent },
+    {
+      key: 'params',
+      component: VarComponent,
+      input: this.addParam,
+    },
+  ];
 
   constructor(protected parameterService: ParameterService) {}
 

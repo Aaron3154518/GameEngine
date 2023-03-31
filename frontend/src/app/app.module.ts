@@ -18,8 +18,13 @@ import { TypeModalComponent } from './type-modal/type-modal.component';
 import { ParameterGroupSearchComponent } from './parameter-group-search/parameter-group-search.component';
 import { OnInitDirective } from './directives/on-init.directive';
 import { ParametersSearchComponent } from './parameters-search/parameters-search.component';
-import { SearchComponent } from './search/search.component';
+import {
+  SearchComponent,
+  VarComponent,
+  ColHeaderComponent,
+} from './search/search.component';
 import { InputComponent } from './search/input/input.component';
+import { ContainerDirective } from './directives/container.directive';
 
 @NgModule({
   declarations: [
@@ -32,6 +37,9 @@ import { InputComponent } from './search/input/input.component';
     ParametersSearchComponent,
     SearchComponent,
     InputComponent,
+    ContainerDirective,
+    VarComponent,
+    ColHeaderComponent,
   ],
   imports: [
     BrowserModule,

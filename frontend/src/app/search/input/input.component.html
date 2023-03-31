@@ -8,7 +8,6 @@
   (input)="onInput(input, dummy)"
   (keypress)="onKeyPress($event, input, dummy)"
   init
-  [onInit]="sizeInput"
-  [args]="[input, dummy]"
+  (init)="sizeInput(input, dummy)"
 />
 <span class="position-absolute dummy" [ngClass]="classes" #dummy></span>
