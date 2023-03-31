@@ -34,6 +34,7 @@
         </td>
         <td *ngFor="let col of cols" class="p-0 ps-2">
           <app-input
+            *ngIf="colInputs[col]"
             class="me-2"
             [classes]="[
               'py-0',
@@ -46,7 +47,7 @@
               'fw-bold'
             ]"
             placeholder="+ New"
-            [onEnter]="foo"
+            (enter)="this.colInputs[col](row, $event)"
             [sanitize]="sanitizeVar"
           >
           </app-input>
@@ -58,9 +59,15 @@
         <td class="p-0">
           <div class="input-group-text py-0 px-1 bg-white">
             <app-input
-              [classes]="['p-0', 'border-0', 'bg-transparent', 'fw-bold']"
+              [classes]="[
+                'p-0',
+                'pe-1',
+                'border-0',
+                'bg-transparent',
+                'fw-bold'
+              ]"
               placeholder="+ New List"
-              [onEnter]="foo"
+              (enter)="newRow.next($event)"
               [outline]="false"
             ></app-input>
           </div>

@@ -1,4 +1,4 @@
-import { Component, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-input',
@@ -10,8 +10,9 @@ export class InputComponent {
   @Input() placeholder: string = '';
   @Input() outline: boolean = true;
 
-  @Input() onEnter: (value: string) => void = () => {};
   @Input() sanitize: (value: string) => string = (s: string) => s;
+
+  @Output() enter: EventEmitter<string> = new EventEmitter();
 
   sizeInput(input: HTMLInputElement, dummy: HTMLSpanElement) {
     let txt: string = input.value ? input.value : input.placeholder;
@@ -30,7 +31,7 @@ export class InputComponent {
     dummy: HTMLSpanElement
   ) {
     if (event.key === 'Enter' && input.value) {
-      this.onEnter(input.value);
+      this.enter.next(input.value);
       input.value = '';
       this.sizeInput(input, dummy);
     }

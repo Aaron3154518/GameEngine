@@ -1,3 +1,11 @@
+<app-search
+  [data]="parameterService.paramGroups"
+  [idCol]="'name'"
+  [cols]="['params']"
+  [colInputs]="{ params: addParam }"
+  (newRow)="newGroup($event)"
+></app-search>
+
 <div class="border border-dark border-2">
   <div class="input-group mb-2 mr-sm-2">
     <div class="input-group-prepend">

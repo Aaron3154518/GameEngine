@@ -8,6 +8,4 @@ import { ParameterService } from './services/parameter.service';
 })
 export class AppComponent {
   title = 'frontend';
-
-  constructor(protected parameterService: ParameterService) {}
 }

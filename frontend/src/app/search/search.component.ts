@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-search',
@@ -9,6 +9,9 @@ export class SearchComponent {
   @Input() data: readonly any[] = [];
   @Input() idCol: string = '';
   @Input() cols: string[] = [];
+  @Input() colInputs: { [key: string]: (row: any, val: string) => void } = {};
+
+  @Output() newRow: EventEmitter<string> = new EventEmitter<string>();
 
   sanitizeVar(s: string): string {
     return `1${s}`

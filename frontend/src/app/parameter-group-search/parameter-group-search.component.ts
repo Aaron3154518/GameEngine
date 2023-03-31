@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterGroup } from '../utils/interfaces';
 import { searchScore, sortListAscending } from '../utils/utils';
@@ -24,7 +18,7 @@ export class ParameterGroupSearchComponent implements OnInit {
   @ViewChild('varDummy', { static: true })
   varDummy?: ElementRef<HTMLSpanElement>;
 
-  constructor(private parameterService: ParameterService) {}
+  constructor(protected parameterService: ParameterService) {}
 
   get groups(): ParameterGroup[] {
     return this._groups;
@@ -90,7 +84,6 @@ export class ParameterGroupSearchComponent implements OnInit {
 
   onVarKeyPress(
     event: KeyboardEvent,
-
     input: HTMLInputElement,
     dummy: HTMLSpanElement,
     group: ParameterGroup
@@ -99,6 +92,14 @@ export class ParameterGroupSearchComponent implements OnInit {
       group.addParam(input.value);
       this.sizeInput(input, dummy, '');
     }
+  }
+
+  addParam(group: ParameterGroup, name: string) {
+    group.addParam(name);
+  }
+
+  newGroup(name: string) {
+    this.parameterService.newParamGroup(new ParameterGroup({ name: name }));
   }
 
   selectGroup(
