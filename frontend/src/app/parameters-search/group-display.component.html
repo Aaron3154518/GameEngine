@@ -1,7 +1,7 @@
 <div
   class="d-inline-block w-100"
-  (drop)="onDrop($event, row)"
-  (dragover)="onDragOver($event)"
+  (drop)="parameterDragService.dropOnSet($event, row)"
+  (dragover)="parameterDragService.onDragOver($event)"
 >
   <ng-container
     *ngFor="

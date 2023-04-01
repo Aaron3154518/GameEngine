@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Injectable, Input } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import {
   sanitizeType,
@@ -12,35 +12,81 @@ import { ParameterGroup, Parameters, StringDict } from '../utils/interfaces';
 import { ColComponent, Column, ColWidth } from '../search/search.component';
 import { Pipe, PipeTransform } from '@angular/core';
 
-export namespace ParameterGroupDrag {
-  export function onDropOnGroup(event: DragEvent, row: ParameterGroup) {
+@Injectable({
+  providedIn: 'root',
+})
+export class ParameterDragService {
+  readonly format: string = 'applicaton/json';
+
+  constructor(private parameterService: ParameterService) {}
+
+  onDragStart(event: DragEvent, data: ParameterDragService.DragData) {
+    event.dataTransfer?.setData(this.format, JSON.stringify(data));
+  }
+
+  dropInTrash(event: DragEvent) {
     event.preventDefault();
     if (event.dataTransfer) {
-      let data: string[] = event.dataTransfer.getData('text/plain').split(' ');
-      let name: string = data[1];
-      if (name) {
-        row.addParam(name);
+      let data: ParameterDragService.DragData = JSON.parse(
+        event.dataTransfer.getData(this.format)
+      );
+      if (data.type === ParameterDragService.DataType.Group) {
+        this.parameterService.removeParamGroup(data.value);
+      } else if (
+        data.type === ParameterDragService.DataType.Var &&
+        data.srcUUID
+      ) {
+        this.parameterService
+          .getParamGroup(data.srcUUID)
+          ?.removeParam(data.value);
       }
     }
   }
 
-  export function onDropOnSet(event: DragEvent, row: Parameters) {
+  dropOnGroup(event: DragEvent, group: ParameterGroup) {
     event.preventDefault();
     if (event.dataTransfer) {
-      let data: string[] = event.dataTransfer.getData('text/plain').split(' ');
-      let uuid: string = data[0];
-      let name: string = data[1];
-      if (name) {
-        row.addParam(name);
-      } else {
-        row.addGroup(uuid);
+      let data: ParameterDragService.DragData = JSON.parse(
+        event.dataTransfer.getData(this.format)
+      );
+      if (data.type === ParameterDragService.DataType.Var) {
+        group.addParam(data.value);
       }
     }
   }
 
-  export function onDragOver(event: DragEvent) {
+  dropOnSet(event: DragEvent, set: Parameters) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      let data: ParameterDragService.DragData = JSON.parse(
+        event.dataTransfer.getData(this.format)
+      );
+      if (data.type === ParameterDragService.DataType.Group) {
+        set.addGroup(data.value);
+      } else if (data.type === ParameterDragService.DataType.Var) {
+        set.addParam(data.value);
+      }
+    }
+  }
+
+  onDragOver(event: DragEvent) {
     event.stopPropagation();
     event.preventDefault();
+  }
+}
+
+export namespace ParameterDragService {
+  export enum DataType {
+    Var = 0,
+    Group = 1,
+    Set = 2,
+    Callback = 3,
+  }
+
+  export interface DragData {
+    type: DataType;
+    value: string;
+    srcUUID?: string;
   }
 }
 
@@ -69,8 +115,8 @@ export class ParameterGroupPipe implements PipeTransform {
   template: `<col-header
     [value]="value"
     [classes]="classes"
-    (drop)="onDrop($event, row)"
-    (dragover)="onDragOver($event)"
+    (drop)="parameterDragService.dropOnSet($event, row)"
+    (dragover)="parameterDragService.onDragOver($event)"
   ></col-header>`,
 })
 export class TypeColHeaderComponent implements ColComponent {
@@ -85,8 +131,7 @@ export class TypeColHeaderComponent implements ColComponent {
     'text-end',
   ];
 
-  onDrop = ParameterGroupDrag.onDropOnSet;
-  onDragOver = ParameterGroupDrag.onDragOver;
+  constructor(protected parameterDragService: ParameterDragService) {}
 }
 
 @Component({
@@ -94,8 +139,8 @@ export class TypeColHeaderComponent implements ColComponent {
   template: `<col-header
     [value]="value"
     [classes]="classes"
-    (drop)="onDrop($event, row)"
-    (dragover)="onDragOver($event)"
+    (drop)="parameterDragService.dropOnSet($event, row)"
+    (dragover)="parameterDragService.onDragOver($event)"
   ></col-header>`,
 })
 export class NameColHeaderComponent implements ColComponent {
@@ -104,8 +149,7 @@ export class NameColHeaderComponent implements ColComponent {
 
   classes: string[] = ['border-start-0', 'rounded-0', 'rounded-end'];
 
-  onDrop = ParameterGroupDrag.onDropOnSet;
-  onDragOver = ParameterGroupDrag.onDragOver;
+  constructor(protected parameterDragService: ParameterDragService) {}
 }
 
 @Component({
@@ -117,10 +161,10 @@ export class GroupComponent implements ColComponent {
   @Input() row: Parameters = new Parameters();
   @Input() value: Set<string> = new Set<string>();
 
-  constructor(protected parameterService: ParameterService) {}
-
-  onDrop = ParameterGroupDrag.onDropOnSet;
-  onDragOver = ParameterGroupDrag.onDragOver;
+  constructor(
+    protected parameterService: ParameterService,
+    protected parameterDragService: ParameterDragService
+  ) {}
 }
 
 // TODO: delete type-modal

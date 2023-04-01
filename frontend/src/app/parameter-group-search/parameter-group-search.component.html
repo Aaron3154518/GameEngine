@@ -7,5 +7,5 @@
   [sort]="sortParamGroups"
   [dragTarget]="true"
   [trash]="true"
-  (onTrash)="onTrash($event)"
+  (onTrash)="parameterDragService.dropInTrash($event)"
 ></app-search>

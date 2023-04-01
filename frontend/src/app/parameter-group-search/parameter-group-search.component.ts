@@ -4,7 +4,7 @@ import { ParameterGroup, StringDict } from '../utils/interfaces';
 import { sanitizeVar, searchScore, sortList } from '../utils/utils';
 import { ColComponent, ColWidth, Column } from '../search/search.component';
 import { InputComponent } from '../search/input/input.component';
-import { ParameterGroupDrag } from '../parameters-search/parameters-search.component';
+import { ParameterDragService } from '../parameters-search/parameters-search.component';
 
 @Component({
   selector: 'group-col-header',
@@ -12,21 +12,20 @@ import { ParameterGroupDrag } from '../parameters-search/parameters-search.compo
     [value]="value"
     [ngStyle]="{ cursor: row ? 'grab' : 'auto' }"
     [draggable]="row"
-    (dragstart)="onDragStart($event)"
-    (drop)="onDrop($event, row)"
-    (dragover)="onDragOver($event)"
+    (dragstart)="
+      parameterDragService.onDragStart($event, { type: Group, value: row.uuid })
+    "
+    (drop)="parameterDragService.dropOnGroup($event, row)"
+    (dragover)="parameterDragService.onDragOver($event)"
   ></col-header>`,
 })
 export class GroupColHeaderComponent implements ColComponent {
   @Input() row: ParameterGroup = new ParameterGroup();
   @Input() value: string = '';
 
-  onDragStart(event: DragEvent) {
-    event.dataTransfer?.setData('text/plain', this.row ? this.row.uuid : '');
-  }
+  Group = ParameterDragService.DataType.Group;
 
-  onDrop = ParameterGroupDrag.onDropOnGroup;
-  onDragOver = ParameterGroupDrag.onDragOver;
+  constructor(protected parameterDragService: ParameterDragService) {}
 }
 
 @Component({
@@ -34,8 +33,8 @@ export class GroupColHeaderComponent implements ColComponent {
   template: `
     <div
       [ngClass]="inline ? 'd-inline' : 'd-inline-block w-100'"
-      (drop)="onDrop($event, row)"
-      (dragover)="onDragOver($event)"
+      (drop)="parameterDragService.dropOnGroup($event, row)"
+      (dragover)="parameterDragService.onDragOver($event)"
     >
       <app-input
         *ngIf="input"
@@ -51,7 +50,13 @@ export class GroupColHeaderComponent implements ColComponent {
         class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 mx-1 fst-normal"
         [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
         [draggable]="draggable"
-        (dragstart)="onDragStart($event, str)"
+        (dragstart)="
+          parameterDragService.onDragStart($event, {
+            type: Var,
+            value: str,
+            srcUUID: row.uuid
+          })
+        "
         >{{ str }}</span
       >
     </div>
@@ -79,15 +84,9 @@ export class VarComponent implements ColComponent {
 
   sanitizeVar = sanitizeVar;
 
-  onDrop = ParameterGroupDrag.onDropOnGroup;
-  onDragOver = ParameterGroupDrag.onDragOver;
+  Var = ParameterDragService.DataType.Var;
 
-  onDragStart(event: DragEvent, name: string) {
-    event.dataTransfer?.setData(
-      'text/plain',
-      `${this.row ? this.row.uuid : ''} ${name}`
-    );
-  }
+  constructor(protected parameterDragService: ParameterDragService) {}
 
   onEnter(input: InputComponent) {
     this.row?.addParam(input.value);
@@ -115,7 +114,10 @@ export class ParameterGroupSearchComponent {
     }),
   ];
 
-  constructor(protected parameterService: ParameterService) {}
+  constructor(
+    protected parameterService: ParameterService,
+    protected parameterDragService: ParameterDragService
+  ) {}
 
   sortParamGroups(rows: ParameterGroup[], query: string) {
     sortList(
@@ -128,17 +130,5 @@ export class ParameterGroupSearchComponent {
     this.parameterService.newParamGroup(
       new ParameterGroup({ name: args['name'] })
     );
-  }
-
-  onTrash(data: string) {
-    let split: string[] = data.split(' ');
-    let uuid: string = split[0];
-    let name: string = split[1];
-    if (name) {
-      this.parameterService.getParamGroup(uuid)?.removeParam(name);
-    } else {
-      // TODO: confirmation
-      this.parameterService.removeParamGroup(uuid);
-    }
   }
 }

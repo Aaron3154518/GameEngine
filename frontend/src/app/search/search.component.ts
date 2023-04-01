@@ -118,7 +118,7 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() dragTarget: boolean = false;
   @Input() trash: boolean = false;
 
-  @Output() onTrash: EventEmitter<string> = new EventEmitter();
+  @Output() onTrash: EventEmitter<DragEvent> = new EventEmitter();
 
   @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
 
@@ -206,7 +206,7 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   onTrashDrop(event: DragEvent) {
     event.preventDefault();
     if (event.dataTransfer) {
-      this.onTrash.next(event.dataTransfer.getData('text/plain'));
+      this.onTrash.next(event);
     }
   }
 
