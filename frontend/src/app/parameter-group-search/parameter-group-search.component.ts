@@ -2,14 +2,9 @@ import { Component, Input } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterGroup, StringDict } from '../utils/interfaces';
 import { sanitizeVar, searchScore, sortList } from '../utils/utils';
-import {
-  ColComponent,
-  ColHeaderComponent,
-  ColWidth,
-  Column,
-} from '../search/search.component';
+import { ColComponent, ColWidth, Column } from '../search/search.component';
 import { InputComponent } from '../search/input/input.component';
-import { stringify } from 'uuid';
+import { ParameterGroupDrag } from '../parameters-search/parameters-search.component';
 
 @Component({
   selector: 'group-col-header',
@@ -18,45 +13,57 @@ import { stringify } from 'uuid';
     [ngStyle]="{ cursor: row ? 'grab' : 'auto' }"
     [draggable]="row"
     (dragstart)="onDragStart($event)"
+    (drop)="onDrop($event, row)"
+    (dragover)="onDragOver($event)"
   ></col-header>`,
 })
 export class GroupColHeaderComponent implements ColComponent {
-  @Input() row?: ParameterGroup;
+  @Input() row: ParameterGroup = new ParameterGroup();
   @Input() value: string = '';
 
   onDragStart(event: DragEvent) {
     event.dataTransfer?.setData('text/plain', this.row ? this.row.uuid : '');
   }
+
+  onDrop = ParameterGroupDrag.onDropOnGroup;
+  onDragOver = ParameterGroupDrag.onDragOver;
 }
 
 @Component({
   selector: 'app-var',
   template: `
-    <app-input
-      *ngIf="input"
-      #colInput
-      [classes]="classes"
-      placeholder="+ New"
-      (enter)="onEnter(colInput)"
-      [sanitize]="sanitizeVar"
+    <div
+      [ngClass]="inline ? 'd-inline' : 'd-inline-block w-100'"
+      (drop)="onDrop($event, row)"
+      (dragover)="onDragOver($event)"
     >
-    </app-input
-    ><span
-      *ngFor="let str of value; let first = first"
-      class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 mx-1 fst-normal"
-      [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
-      [draggable]="draggable"
-      (dragstart)="onDragStart($event, str)"
-      >{{ str }}</span
-    >
+      <app-input
+        *ngIf="input"
+        #colInput
+        [classes]="classes"
+        placeholder="+ New"
+        (enter)="onEnter(colInput)"
+        [sanitize]="sanitizeVar"
+      >
+      </app-input
+      ><span
+        *ngFor="let str of value; let first = first"
+        class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 mx-1 fst-normal"
+        [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
+        [draggable]="draggable"
+        (dragstart)="onDragStart($event, str)"
+        >{{ str }}</span
+      >
+    </div>
   `,
 })
 export class VarComponent implements ColComponent {
-  @Input() row?: ParameterGroup;
+  @Input() row: ParameterGroup = new ParameterGroup();
   @Input() value: Set<string> = new Set<string>();
 
   @Input() input: boolean = true;
   @Input() draggable: boolean = true;
+  @Input() inline: boolean = false;
 
   readonly classes: string[] = [
     'py-0',
@@ -71,6 +78,9 @@ export class VarComponent implements ColComponent {
   ];
 
   sanitizeVar = sanitizeVar;
+
+  onDrop = ParameterGroupDrag.onDropOnGroup;
+  onDragOver = ParameterGroupDrag.onDragOver;
 
   onDragStart(event: DragEvent, name: string) {
     event.dataTransfer?.setData(

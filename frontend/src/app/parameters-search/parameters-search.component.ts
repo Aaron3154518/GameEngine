@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import {
   sanitizeType,
@@ -13,7 +13,18 @@ import { ColComponent, Column, ColWidth } from '../search/search.component';
 import { Pipe, PipeTransform } from '@angular/core';
 
 export namespace ParameterGroupDrag {
-  export function onDrop(event: DragEvent, row: Parameters) {
+  export function onDropOnGroup(event: DragEvent, row: ParameterGroup) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      let data: string[] = event.dataTransfer.getData('text/plain').split(' ');
+      let name: string = data[1];
+      if (name) {
+        row.addParam(name);
+      }
+    }
+  }
+
+  export function onDropOnSet(event: DragEvent, row: Parameters) {
     event.preventDefault();
     if (event.dataTransfer) {
       let data: string[] = event.dataTransfer.getData('text/plain').split(' ');
@@ -69,7 +80,7 @@ export class TypeColHeaderComponent implements ColComponent {
     'text-end',
   ];
 
-  onDrop = ParameterGroupDrag.onDrop;
+  onDrop = ParameterGroupDrag.onDropOnSet;
   onDragOver = ParameterGroupDrag.onDragOver;
 }
 
@@ -88,7 +99,7 @@ export class NameColHeaderComponent implements ColComponent {
 
   classes: string[] = ['border-start-0', 'rounded-0', 'rounded-end'];
 
-  onDrop = ParameterGroupDrag.onDrop;
+  onDrop = ParameterGroupDrag.onDropOnSet;
   onDragOver = ParameterGroupDrag.onDragOver;
 }
 
@@ -103,7 +114,7 @@ export class GroupComponent implements ColComponent {
 
   constructor(protected parameterService: ParameterService) {}
 
-  onDrop = ParameterGroupDrag.onDrop;
+  onDrop = ParameterGroupDrag.onDropOnSet;
   onDragOver = ParameterGroupDrag.onDragOver;
 }
 
