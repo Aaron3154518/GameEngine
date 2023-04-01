@@ -96,9 +96,9 @@ export class ParameterService {
     return this._paramGroupDict;
   }
 
-  getParamGroup(idx: number): ParameterGroup;
-  getParamGroup(uuid: string): ParameterGroup;
-  getParamGroup(idx: number | string): ParameterGroup {
+  getParamGroup(idx: number): ParameterGroup | undefined;
+  getParamGroup(uuid: string): ParameterGroup | undefined;
+  getParamGroup(idx: number | string): ParameterGroup | undefined {
     if (typeof idx === 'number') {
       return this.paramGroups[idx];
     }
@@ -115,6 +115,21 @@ export class ParameterService {
     return group;
   }
 
+  removeParamGroup(idx: number): void;
+  removeParamGroup(uuid: string): void;
+  removeParamGroup(idx: number | string): void {
+    let i: number =
+      typeof idx === 'number'
+        ? idx
+        : this.paramGroups.findIndex((g: ParameterGroup) => g.uuid === idx);
+    if (i !== -1) {
+      let uuid: string = this._paramGroups.splice(i, 1)[0].uuid;
+      delete this._paramGroupDict[uuid];
+      this.paramSets.forEach((set: Parameters) => set.removeGroup(uuid));
+      // TODO: invalidate callbacks
+    }
+  }
+
   newParamGroup(group: ParameterGroup) {
     this._paramGroups.push(group);
     this._paramGroupDict[group.uuid] = group;
@@ -129,13 +144,26 @@ export class ParameterService {
     return this._paramSetDict;
   }
 
-  getParamSet(idx: number): Parameters;
-  getParamSet(uuid: string): Parameters;
-  getParamSet(idx: number | string): Parameters {
+  getParamSet(idx: number): Parameters | undefined;
+  getParamSet(uuid: string): Parameters | undefined;
+  getParamSet(idx: number | string): Parameters | undefined {
     if (typeof idx === 'number') {
       return this.paramSets[idx];
     }
     return this.paramSetDict[idx];
+  }
+
+  removeParamSet(idx: number): void;
+  removeParamSet(uuid: string): void;
+  removeParamSet(idx: number | string): void {
+    let i: number =
+      typeof idx === 'number'
+        ? idx
+        : this.paramSets.findIndex((s: Parameters) => s.uuid === idx);
+    if (i !== -1) {
+      delete this._paramSetDict[this._paramSets.splice(i, 1)[0].uuid];
+      // TODO: invalidate callbacks
+    }
   }
 
   newParamSet(set: Parameters) {
@@ -152,13 +180,25 @@ export class ParameterService {
     return this._callbackDict;
   }
 
-  getCallback(idx: number): Callback;
-  getCallback(uuid: string): Callback;
-  getCallback(idx: number | string): Callback {
+  getCallback(idx: number): Callback | undefined;
+  getCallback(uuid: string): Callback | undefined;
+  getCallback(idx: number | string): Callback | undefined {
     if (typeof idx === 'number') {
       return this.callbacks[idx];
     }
     return this.callbackDict[idx];
+  }
+
+  removeCallback(idx: number): void;
+  removeCallback(uuid: string): void;
+  removeCallback(idx: number | string): void {
+    let i: number =
+      typeof idx === 'number'
+        ? idx
+        : this.callbacks.findIndex((cb: Callback) => cb.uuid === idx);
+    if (i !== -1) {
+      delete this._callbackDict[this._callbacks.splice(i, 1)[0].uuid];
+    }
   }
 
   codegen() {

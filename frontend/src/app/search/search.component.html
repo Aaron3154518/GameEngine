@@ -1,4 +1,8 @@
-<div class="border border-dark border-2">
+<div
+  class="border border-dark border-2"
+  (dragenter)="dragCnt = dragCnt + 1"
+  (dragleave)="dragCnt = dragCnt - 1"
+>
   <div class="input-group mb-2 mr-sm-2">
     <div class="input-group-prepend">
       <div class="input-group-text">
@@ -14,6 +18,14 @@
       autocomplete="off"
       (input)="onSearchChanged(search.value)"
     />
+    <div
+      *ngIf="trash && dragCnt > 0"
+      class="input-group-append input-group-text"
+      (drop)="onTrashDrop($event)"
+      (dragover)="onTrashDragOver($event)"
+    >
+      <fa-icon [icon]="['fas', 'trash']"></fa-icon>
+    </div>
   </div>
 
   <table class="table table-sm code">

@@ -6,4 +6,6 @@
   searchPlaceholder="Search Name Groups"
   [sort]="sortParamGroups"
   [dragTarget]="true"
+  [trash]="true"
+  (onTrash)="onTrash($event)"
 ></app-search>

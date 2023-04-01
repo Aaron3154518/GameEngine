@@ -129,4 +129,16 @@ export class ParameterGroupSearchComponent {
       new ParameterGroup({ name: args['name'] })
     );
   }
+
+  onTrash(data: string) {
+    let split: string[] = data.split(' ');
+    let uuid: string = split[0];
+    let name: string = split[1];
+    if (name) {
+      this.parameterService.getParamGroup(uuid)?.removeParam(name);
+    } else {
+      // TODO: confirmation
+      this.parameterService.removeParamGroup(uuid);
+    }
+  }
 }

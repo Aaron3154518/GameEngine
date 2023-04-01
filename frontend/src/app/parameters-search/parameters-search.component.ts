@@ -53,9 +53,14 @@ export class ParameterGroupPipe implements PipeTransform {
     items: Set<string>,
     parameterService: ParameterService
   ): ParameterGroup[] {
-    return [...items]
-      .map((id: string) => parameterService.getParamGroup(id))
-      .filter((g: ParameterGroup) => g.params.size > 0);
+    return [...items].reduce((arr: ParameterGroup[], id: string) => {
+      let group: ParameterGroup | undefined =
+        parameterService.getParamGroup(id);
+      if (group && group.params.size > 0) {
+        arr.push(group);
+      }
+      return arr;
+    }, []);
   }
 }
 

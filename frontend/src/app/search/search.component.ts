@@ -116,23 +116,14 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() sort: (rows: any[], query: string) => void = () => {};
   @Input() searchPlaceholder: string = '';
   @Input() dragTarget: boolean = false;
+  @Input() trash: boolean = false;
+
+  @Output() onTrash: EventEmitter<string> = new EventEmitter();
 
   @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
 
   @ViewChild('search', { static: true }) search?: ElementRef<HTMLInputElement>;
   @ViewChildren('rowInput') colInputComps?: QueryList<InputComponent>;
-
-  draggingOver: number[] = [];
-  onDragChange(i: number, v: number) {
-    if (!this.dragTarget) {
-      return;
-    }
-    if (v === 0) {
-      this.draggingOver = this.rows.map(() => 0);
-      return;
-    }
-    this.draggingOver[i] += v;
-  }
 
   rows: any[] = [];
 
@@ -140,6 +131,10 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   newRowErrs: { [key: string]: boolean } = {};
 
   iterableDiffer: IterableDiffer<any>;
+
+  draggingOver: number[] = [];
+
+  dragCnt: number = 0;
 
   sanitizeVar: (s: string) => string = sanitizeVar;
 
@@ -195,5 +190,28 @@ export class SearchComponent implements DoCheck, AfterViewInit {
       ic.value = '';
     });
     this.colInputComps?.first.select();
+  }
+
+  onDragChange(i: number, v: number) {
+    if (!this.dragTarget) {
+      return;
+    }
+    if (v === 0) {
+      this.draggingOver = this.rows.map(() => 0);
+      return;
+    }
+    this.draggingOver[i] += v;
+  }
+
+  onTrashDrop(event: DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      this.onTrash.next(event.dataTransfer.getData('text/plain'));
+    }
+  }
+
+  onTrashDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
   }
 }

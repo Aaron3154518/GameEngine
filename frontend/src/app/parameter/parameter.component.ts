@@ -57,11 +57,22 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
       this.callback.code += '\n';
     }
     this.code = this.callback.code;
-    this.parameters = Object.entries(this.callback.params).map(
-      ([uuid, params]: [string, Set<string>]) => ({
-        set: this.parameterService.getParamSet(uuid),
-        params: params,
-      })
+    this.parameters = Object.entries(this.callback.params).reduce(
+      (
+        arr: { set: Parameters; params: Set<string> }[],
+        [uuid, params]: [string, Set<string>]
+      ) => {
+        let set: Parameters | undefined =
+          this.parameterService.getParamSet(uuid);
+        if (set) {
+          arr.push({
+            set: set,
+            params: params,
+          });
+        }
+        return arr;
+      },
+      []
     );
     this.signature = this.callback.getSignatureSplit(
       this.parameterService.paramSetDict
