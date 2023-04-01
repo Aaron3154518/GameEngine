@@ -27,7 +27,13 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of rows">
+      <tr
+        *ngFor="let row of rows; let i = index"
+        [ngClass]="{ 'bg-dark bg-opacity-25': draggingOver[i] > 0 }"
+        (dragenter)="onDragChange(i, 1)"
+        (dragleave)="onDragChange(i, -1)"
+        (drop)="onDragChange(i, 0)"
+      >
         <td *ngFor="let col of cols" class="p-0">
           <ng-template
             appContainer

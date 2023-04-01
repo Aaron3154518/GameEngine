@@ -147,8 +147,8 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
     this.callback.code = this.code;
   }
 
-  select(pid: UUID, name: string) {
-    console.log('Show Parameters:', pid, name);
+  select(uuid: string, name: string) {
+    console.log('Show Parameters:', uuid, name);
   }
 
   isNameUsed(): boolean {

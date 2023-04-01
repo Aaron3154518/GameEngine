@@ -1,0 +1,24 @@
+<div
+  class="d-inline-block w-100"
+  (drop)="onDrop($event, row)"
+  (dragover)="onDragOver($event)"
+>
+  <ng-container
+    *ngFor="
+      let group of value | parametergroup : parameterService;
+      let first = first
+    "
+  >
+    <span *ngIf="!first" class="vertical-line h-100 border-danger"></span
+    ><span
+      class="hover"
+      [ngClass]="first ? 'ms-2 me-1' : 'mx-1'"
+      [title]="group.name"
+      ><app-var
+        [value]="group.params"
+        [input]="false"
+        [draggable]="false"
+      ></app-var
+    ></span>
+  </ng-container>
+</div>

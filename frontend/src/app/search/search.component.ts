@@ -31,8 +31,22 @@ export interface ColComponent {
 })
 export class ColHeaderComponent implements ColComponent {
   @Input() value: string = '';
+  @Input() replaceClasses: boolean = false;
 
-  classes: string[] = [
+  @Input() set classes(cls: string[]) {
+    if (this.replaceClasses) {
+      this._classes = cls;
+      return;
+    }
+
+    this._classes = this._classes.concat(cls);
+  }
+
+  get classes(): string[] {
+    return this._classes;
+  }
+
+  _classes: string[] = [
     'input-group-text',
     'd-inline-block',
     'text-start',
@@ -101,11 +115,24 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   @Input() allowNew: boolean = false;
   @Input() sort: (rows: any[], query: string) => void = () => {};
   @Input() searchPlaceholder: string = '';
+  @Input() dragTarget: boolean = false;
 
   @Output() newRow: EventEmitter<StringDict<string>> = new EventEmitter();
 
   @ViewChild('search', { static: true }) search?: ElementRef<HTMLInputElement>;
   @ViewChildren('rowInput') colInputComps?: QueryList<InputComponent>;
+
+  draggingOver: number[] = [];
+  onDragChange(i: number, v: number) {
+    if (!this.dragTarget) {
+      return;
+    }
+    if (v === 0) {
+      this.draggingOver = this.rows.map(() => 0);
+      return;
+    }
+    this.draggingOver[i] += v;
+  }
 
   rows: any[] = [];
 
@@ -123,6 +150,7 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   ngDoCheck(): void {
     if (this.iterableDiffer.diff(this.data)) {
       this.rows = [...this.data];
+      this.draggingOver = this.rows.map(() => 0);
       if (this.search) {
         this.onSearchChanged(this.search.nativeElement.value);
       }

@@ -1,5 +1,4 @@
-import { parse, stringify } from 'uuid';
-import { UUID, newUUID } from './utils';
+import { newUUID } from './utils';
 
 export type StringDict<T> = { [key: string]: T };
 
@@ -12,19 +11,19 @@ export function toDict<T>(list: T[], getKey: (t: T) => string): StringDict<T> {
 
 // Parameter Group
 export interface IParameterGroup {
-  uuid: UUID;
+  uuid: string;
   name: string;
   params: Set<string>;
 }
 
 type IParameterGroupOpt = {
-  uuid?: UUID;
+  uuid?: string;
   name?: string;
   params?: Set<string>;
 };
 
 export class ParameterGroup implements IParameterGroup {
-  readonly uuid: UUID;
+  readonly uuid: string;
   readonly name: string;
   params: Set<string>;
 
@@ -53,38 +52,37 @@ export class ParameterGroup implements IParameterGroup {
 
 // Parameters
 export interface IParameters {
-  uuid: UUID;
+  uuid: string;
   name: string;
   type: string;
-  groups: Set<UUID>;
+  groups: Set<string>;
 }
 
 type IParametersOpt = {
-  uuid?: UUID;
+  uuid?: string;
   name?: string;
   type?: string;
-  groups?: Set<UUID>;
+  groups?: Set<string> | string[];
 };
 
 export class Parameters implements IParameters {
-  readonly uuid: UUID;
+  readonly uuid: string;
   name: string;
   type: string;
   group: ParameterGroup;
-  groups: Set<UUID>;
+  groups: Set<string>;
 
   constructor({
     uuid = newUUID(),
     name = '',
     type = '',
-    groups = new Set<UUID>(),
+    groups = [],
   }: IParametersOpt = {}) {
     this.uuid = uuid;
     this.name = name;
     this.type = type;
     this.group = new ParameterGroup();
-    this.groups = groups;
-    this.groups.add(this.group.uuid);
+    this.groups = new Set<string>([this.group.uuid, ...groups]);
   }
 
   addParam(param: string) {
@@ -102,12 +100,12 @@ export class Parameters implements IParameters {
     });
   }
 
-  addGroup(id: UUID) {
+  addGroup(id: string): void {
     this.groups.add(id);
   }
 
-  removeGroup(id: UUID) {
-    if (id != this.group.uuid) {
+  removeGroup(id: string): void {
+    if (id !== this.group.uuid) {
       this.groups.delete(id);
     }
   }
@@ -117,7 +115,7 @@ export class Parameters implements IParameters {
 export type CallbackParameters = StringDict<Set<string>>;
 
 export interface ICallback {
-  uuid: UUID;
+  uuid: string;
   name: string;
   code: string;
   // Parameters uuid (as string) : set of parameters names
@@ -125,7 +123,7 @@ export interface ICallback {
 }
 
 type ICallbackOpt = {
-  uuid?: UUID;
+  uuid?: string;
   name?: string;
   code?: string;
   // Parameters uuid (as string) : set of parameters names
@@ -139,7 +137,7 @@ export enum CodeType {
 }
 
 export class Callback implements ICallback {
-  readonly uuid: UUID;
+  readonly uuid: string;
   name: string;
   code: string;
   params: CallbackParameters;
@@ -189,23 +187,22 @@ export class Callback implements ICallback {
     ];
   }
 
-  addParameter(uuid: UUID, name: string) {
-    let id: string = stringify(uuid);
-    let params: Set<string> = this.params[id];
+  addParameter(uuid: string, name: string) {
+    let params: Set<string> = this.params[uuid];
     if (!params) {
-      params = this.params[id] = new Set<string>();
+      params = this.params[uuid] = new Set<string>();
     }
     params.add(name);
   }
 
-  removeParameter(uuid: UUID, name: string) {
-    this.params[stringify(uuid)]?.delete(name);
+  removeParameter(uuid: string, name: string) {
+    this.params[uuid]?.delete(name);
   }
 
-  static getParametersFromList(data: [UUID, string[]][]): CallbackParameters {
+  static getParametersFromList(data: [string, string[]][]): CallbackParameters {
     return data.reduce(
-      (params: CallbackParameters, [uuid, names]: [UUID, string[]]) => {
-        params[stringify(uuid)] = new Set<string>(names);
+      (params: CallbackParameters, [uuid, names]: [string, string[]]) => {
+        params[uuid] = new Set<string>(names);
         return params;
       },
       {}

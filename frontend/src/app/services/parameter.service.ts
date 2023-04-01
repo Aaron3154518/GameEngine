@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {
   Callback,
   ParameterGroup,
@@ -7,8 +7,6 @@ import {
   StringDict,
   toDict,
 } from '../utils/interfaces';
-import { parse, stringify } from 'uuid';
-import { UUID } from '../utils/utils';
 
 const fs: any = undefined; //(window as any).require('fs');
 
@@ -28,7 +26,7 @@ export class ParameterService {
   ];
   private _paramGroupDict: StringDict<ParameterGroup> = toDict(
     this._paramGroups,
-    (pg: ParameterGroup) => stringify(pg.uuid)
+    (pg: ParameterGroup) => pg.uuid
   );
   private paramGroupsChanged: BehaviorSubject<null> = new BehaviorSubject<null>(
     null
@@ -55,7 +53,7 @@ export class ParameterService {
   ];
   private _paramSetDict: StringDict<Parameters> = toDict(
     this._paramSets,
-    (ps: Parameters) => stringify(ps.uuid)
+    (ps: Parameters) => ps.uuid
   );
   private paramSetsChanged: BehaviorSubject<null> = new BehaviorSubject<null>(
     null
@@ -81,7 +79,7 @@ export class ParameterService {
   ];
   private _callbackDict: StringDict<Callback> = toDict(
     this._callbacks,
-    (cb: Callback) => stringify(cb.uuid)
+    (cb: Callback) => cb.uuid
   );
   private callbacksChanged: BehaviorSubject<null> = new BehaviorSubject<null>(
     null
@@ -98,20 +96,17 @@ export class ParameterService {
     return this._paramGroupDict;
   }
 
-  getParamGroup(i: number): ParameterGroup;
-  getParamGroup(uuid: UUID): ParameterGroup;
+  getParamGroup(idx: number): ParameterGroup;
   getParamGroup(uuid: string): ParameterGroup;
-  getParamGroup(idx: number | UUID | string): ParameterGroup {
+  getParamGroup(idx: number | string): ParameterGroup {
     if (typeof idx === 'number') {
       return this.paramGroups[idx];
     }
 
-    let id: string = typeof idx !== 'string' ? stringify(idx) : idx;
-    let uuid: UUID = typeof idx === 'string' ? parse(idx) : idx;
-    let group: ParameterGroup = this.paramGroupDict[id];
+    let group: ParameterGroup = this.paramGroupDict[idx];
     if (!group) {
       let i: number = this.paramSets.findIndex(
-        (set: Parameters) => uuid === set.group.uuid
+        (set: Parameters) => idx === set.group.uuid
       );
       if (i !== -1) {
         group = this.paramSets[i].group;
@@ -122,7 +117,7 @@ export class ParameterService {
 
   newParamGroup(group: ParameterGroup) {
     this._paramGroups.push(group);
-    this._paramGroupDict[stringify(group.uuid)] = group;
+    this._paramGroupDict[group.uuid] = group;
     this.paramGroupsChanged.next(null);
   }
 
@@ -134,19 +129,18 @@ export class ParameterService {
     return this._paramSetDict;
   }
 
-  getParamSet(i: number): Parameters;
-  getParamSet(uuid: UUID): Parameters;
+  getParamSet(idx: number): Parameters;
   getParamSet(uuid: string): Parameters;
-  getParamSet(idx: number | UUID | string): Parameters {
+  getParamSet(idx: number | string): Parameters {
     if (typeof idx === 'number') {
       return this.paramSets[idx];
     }
-    return this.paramSetDict[typeof idx === 'string' ? idx : stringify(idx)];
+    return this.paramSetDict[idx];
   }
 
   newParamSet(set: Parameters) {
     this._paramSets.push(set);
-    this._paramSetDict[stringify(set.uuid)] = set;
+    this._paramSetDict[set.uuid] = set;
     this.paramSetsChanged.next(null);
   }
 
@@ -158,14 +152,13 @@ export class ParameterService {
     return this._callbackDict;
   }
 
-  getCallback(i: number): Callback;
-  getCallback(uuid: UUID): Callback;
+  getCallback(idx: number): Callback;
   getCallback(uuid: string): Callback;
-  getCallback(idx: number | UUID | string): Callback {
+  getCallback(idx: number | string): Callback {
     if (typeof idx === 'number') {
       return this.callbacks[idx];
     }
-    return this.callbackDict[typeof idx === 'string' ? idx : stringify(idx)];
+    return this.callbackDict[idx];
   }
 
   codegen() {

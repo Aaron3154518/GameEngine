@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import {
-  UUID,
   sanitizeType,
   sanitizeVar,
   searchScore,
@@ -10,13 +9,29 @@ import {
   validateVar,
 } from '../utils/utils';
 import { ParameterGroup, Parameters, StringDict } from '../utils/interfaces';
-import {
-  ColComponent,
-  ColHeaderComponent,
-  Column,
-  ColWidth,
-} from '../search/search.component';
+import { ColComponent, Column, ColWidth } from '../search/search.component';
 import { Pipe, PipeTransform } from '@angular/core';
+
+export namespace ParameterGroupDrag {
+  export function onDrop(event: DragEvent, row: Parameters) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      let data: string[] = event.dataTransfer.getData('text/plain').split(' ');
+      let uuid: string = data[0];
+      let name: string = data[1];
+      if (name) {
+        row.addParam(name);
+      } else {
+        row.addGroup(uuid);
+      }
+    }
+  }
+
+  export function onDragOver(event: DragEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+}
 
 @Pipe({
   name: 'parametergroup',
@@ -24,76 +39,72 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class ParameterGroupPipe implements PipeTransform {
   transform(
-    items: Set<UUID>,
+    items: Set<string>,
     parameterService: ParameterService
   ): ParameterGroup[] {
     return [...items]
-      .map((id: UUID) => parameterService.getParamGroup(id))
+      .map((id: string) => parameterService.getParamGroup(id))
       .filter((g: ParameterGroup) => g.params.size > 0);
   }
 }
 
 @Component({
   selector: 'type-col-header',
-  templateUrl: '../search/col-header.component.html',
+  template: `<col-header
+    [value]="value"
+    [classes]="classes"
+    (drop)="onDrop($event, row)"
+    (dragover)="onDragOver($event)"
+  ></col-header>`,
 })
-export class TypeColHeaderComponent extends ColHeaderComponent {
-  constructor() {
-    super();
-    this.classes = this.classes.concat([
-      'type',
-      'border-end-0',
-      'rounded-0',
-      'rounded-start',
-      'text-end',
-    ]);
-  }
+export class TypeColHeaderComponent implements ColComponent {
+  @Input() row: Parameters = new Parameters();
+  @Input() value: string = '';
+
+  classes: string[] = [
+    'type',
+    'border-end-0',
+    'rounded-0',
+    'rounded-start',
+    'text-end',
+  ];
+
+  onDrop = ParameterGroupDrag.onDrop;
+  onDragOver = ParameterGroupDrag.onDragOver;
 }
 
 @Component({
   selector: 'type-col-header',
-  templateUrl: '../search/col-header.component.html',
+  template: `<col-header
+    [value]="value"
+    [classes]="classes"
+    (drop)="onDrop($event, row)"
+    (dragover)="onDragOver($event)"
+  ></col-header>`,
 })
-export class NameColHeaderComponent extends ColHeaderComponent {
-  constructor() {
-    super();
-    this.classes = this.classes.concat([
-      'border-start-0',
-      'rounded-0',
-      'rounded-end',
-    ]);
-  }
+export class NameColHeaderComponent implements ColComponent {
+  @Input() row: Parameters = new Parameters();
+  @Input() value: string = '';
+
+  classes: string[] = ['border-start-0', 'rounded-0', 'rounded-end'];
+
+  onDrop = ParameterGroupDrag.onDrop;
+  onDragOver = ParameterGroupDrag.onDragOver;
 }
 
 @Component({
   selector: 'app-group',
-  template: `
-    <ng-container
-      *ngFor="
-        let group of value | parametergroup : parameterService;
-        let first = first
-      "
-      ><span *ngIf="!first" class="vertical-line h-100"></span
-      ><span
-        class="hover"
-        [ngClass]="[first ? 'ms-2 me-1' : 'mx-1']"
-        [title]="group.name"
-        ><app-var [value]="group.params" [input]="false"></app-var></span
-    ></ng-container>
-  `,
-  styles: [
-    `
-      .hover:hover {
-        background-color: rgba(200, 200, 200, 0.25);
-      }
-    `,
-  ],
+  templateUrl: './group-display.component.html',
+  styleUrls: ['./group-display.component.css'],
 })
 export class GroupComponent implements ColComponent {
-  @Input() row?: Parameters;
-  @Input() value: Set<UUID> = new Set<UUID>();
+  @Input() row: Parameters = new Parameters();
+  @Input() value: Set<string> = new Set<string>();
 
   constructor(protected parameterService: ParameterService) {}
+
+  onDrop = ParameterGroupDrag.onDrop;
+  onDragOver = ParameterGroupDrag.onDragOver;
 }
 
 // TODO: delete type-modal
@@ -108,7 +119,7 @@ export class ParametersSearchComponent {
       key: 'type',
       width: ColWidth.Fit,
       requireInput: true,
-      inputPlaceholder: '+ New Type',
+      inputPlaceholder: 'New: Type',
       validateInput: validateType,
       sanitizeInput: sanitizeType,
       component: TypeColHeaderComponent,

@@ -3,8 +3,8 @@ import { parse, v4 } from 'uuid';
 // Random UUID
 export type UUID = Uint8Array;
 
-export function newUUID(): UUID {
-  return parse(v4());
+export function newUUID(): string {
+  return v4();
 }
 
 // Search filtering

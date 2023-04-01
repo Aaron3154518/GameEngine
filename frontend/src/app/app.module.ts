@@ -16,6 +16,7 @@ import { ParametersComponent } from './parameters/parameters.component';
 import { ParameterComponent } from './parameter/parameter.component';
 import { TypeModalComponent } from './type-modal/type-modal.component';
 import {
+  GroupColHeaderComponent,
   ParameterGroupSearchComponent,
   VarComponent,
 } from './parameter-group-search/parameter-group-search.component';
@@ -49,6 +50,7 @@ import { ContainerDirective } from './directives/container.directive';
     ParameterGroupPipe,
     TypeColHeaderComponent,
     NameColHeaderComponent,
+    GroupColHeaderComponent,
   ],
   imports: [
     BrowserModule,
