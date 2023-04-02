@@ -167,7 +167,6 @@ export class GroupComponent implements ColComponent {
   ) {}
 }
 
-// TODO: delete type-modal
 @Component({
   selector: 'app-parameters-search',
   templateUrl: './parameters-search.component.html',
@@ -179,6 +178,7 @@ export class ParametersSearchComponent {
       key: 'type',
       width: ColWidth.Fit,
       requireInput: true,
+      inputClasses: ['float-end', 'type'],
       inputPlaceholder: 'New: Type',
       validateInput: validateType,
       sanitizeInput: sanitizeType,

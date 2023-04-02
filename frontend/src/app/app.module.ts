@@ -14,7 +14,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ParametersComponent } from './parameters/parameters.component';
 import { ParameterComponent } from './parameter/parameter.component';
-import { TypeModalComponent } from './type-modal/type-modal.component';
 import {
   GroupColHeaderComponent,
   ParameterGroupSearchComponent,
@@ -37,7 +36,6 @@ import { ContainerDirective } from './directives/container.directive';
     AppComponent,
     ParametersComponent,
     ParameterComponent,
-    TypeModalComponent,
     ParameterGroupSearchComponent,
     OnInitDirective,
     ParametersSearchComponent,

@@ -23,6 +23,10 @@ export class ParameterService {
       name: 'Generators',
       params: new Set([...Array(5).keys()].map((i) => `T${i}`)),
     }),
+    new ParameterGroup({
+      name: 'Fruits',
+      params: new Set(['Banana', 'Apple', 'Orange', 'Lemon', 'Mango', 'Papaya']),
+    }),
   ];
   private _paramGroupDict: StringDict<ParameterGroup> = toDict(
     this._paramGroups,
@@ -38,7 +42,7 @@ export class ParameterService {
     new Parameters({
       name: 'Pos',
       type: 'Rect',
-      groups: new Set([this._paramGroups[0].uuid]),
+      groups: new Set(this._paramGroups.map((g: ParameterGroup) => g.uuid)),
     }),
     new Parameters({
       name: 'GenVals',

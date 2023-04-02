@@ -28,59 +28,61 @@
     </div>
   </div>
 
-  <table class="table table-sm code">
-    <thead>
-      <tr>
-        <th
-          *ngFor="let col of cols; let first = first"
-          class="p-0 m-0"
-          [ngClass]="[col.width]"
-        ></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        *ngFor="let row of rows; let i = index"
-        [ngClass]="{ 'bg-dark bg-opacity-25': draggingOver[i] > 0 }"
-        (dragenter)="onDragChange(i, 1)"
-        (dragleave)="onDragChange(i, -1)"
-        (drop)="onDragChange(i, 0)"
-      >
-        <td *ngFor="let col of cols" class="p-0">
-          <ng-template
-            appContainer
-            #container="container"
-            init
-            (init)="init(container, row, col)"
-          ></ng-template>
-        </td>
-      </tr>
-      <tr>
-        <td *ngFor="let col of cols" class="p-0">
-          <app-input
-            #rowInput
-            *ngIf="col.requireInput"
-            [id]="col.key"
-            [(value)]="colInputs[col.key]"
-            [classes]="[
-              'm-0',
-              'py-0',
-              'px-1',
-              'border',
-              'rounded',
-              'fw-bold',
-              newRowErrs[col.key] ? 'bg-danger' : 'bg-transparent',
-              'bg-opacity-25'
-            ]"
-            [placeholder]="col.inputPlaceholder"
-            (input)="onInput(col)"
-            (enter)="onEnter()"
-            [sanitize]="col.sanitizeInput"
-            [outline]="true"
-          ></app-input>
-        </td>
-      </tr>
-    </tbody>
-    <span class="position-absolute align-middle dummy" #listDummy></span>
-  </table>
+  <div class="overflow-auto">
+    <table class="table table-sm code">
+      <thead>
+        <tr>
+          <th
+            *ngFor="let col of cols; let first = first"
+            class="p-0 m-0"
+            [ngClass]="[col.width]"
+          ></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let row of rows; let i = index"
+          [ngClass]="{ 'bg-dark bg-opacity-25': draggingOver[i] > 0 }"
+          (dragenter)="onDragChange(i, 1)"
+          (dragleave)="onDragChange(i, -1)"
+          (drop)="onDragChange(i, 0)"
+        >
+          <td *ngFor="let col of cols" class="p-0">
+            <ng-template
+              appContainer
+              #container="container"
+              init
+              (init)="init(container, row, col)"
+            ></ng-template>
+          </td>
+        </tr>
+        <tr>
+          <td *ngFor="let col of cols" class="p-0">
+            <app-input
+              #rowInput
+              *ngIf="col.requireInput"
+              [(value)]="colInputs[col.key]"
+              [classes]="
+                [
+                  'py-0',
+                  'px-1',
+                  'border-0',
+                  'rounded',
+                  'fw-bold',
+                  newRowErrs[col.key] ? 'bg-danger' : 'bg-transparent',
+                  'bg-opacity-25'
+                ].concat(col.inputClasses)
+              "
+              [placeholder]="col.inputPlaceholder"
+              (input)="onInput(col)"
+              (enter)="onEnter()"
+              [sanitize]="col.sanitizeInput"
+              [outline]="true"
+            ></app-input>
+          </td>
+        </tr>
+      </tbody>
+      <span class="position-absolute align-middle dummy" #listDummy></span>
+    </table>
+  </div>
 </div>

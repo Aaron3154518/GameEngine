@@ -68,6 +68,7 @@ interface IColumn {
   component: Type<any>;
   width?: ColWidth;
   requireInput?: boolean;
+  inputClasses?: string[];
   inputPlaceholder?: string;
   validateInput?: (val: string) => boolean;
   sanitizeInput?: (val: string) => string;
@@ -79,6 +80,7 @@ export class Column implements IColumn {
   component: Type<any>;
   width: ColWidth;
   requireInput: boolean;
+  inputClasses: string[];
   inputPlaceholder: string;
   validateInput: (val: string) => boolean;
   sanitizeInput: (val: string) => string;
@@ -89,6 +91,7 @@ export class Column implements IColumn {
     getter,
     width = ColWidth.Fill,
     requireInput = false,
+    inputClasses = [],
     inputPlaceholder = '',
     validateInput = () => true,
     sanitizeInput = (s: string) => s,
@@ -98,6 +101,7 @@ export class Column implements IColumn {
     this.component = component;
     this.width = width;
     this.requireInput = requireInput;
+    this.inputClasses = inputClasses;
     this.inputPlaceholder = inputPlaceholder;
     this.validateInput = validateInput;
     this.sanitizeInput = sanitizeInput;
@@ -177,7 +181,8 @@ export class SearchComponent implements DoCheck, AfterViewInit {
   }
 
   onInput(col: Column) {
-    this.newRowErrs[col.key] = !col.validateInput(this.colInputs[col.key]);
+    this.newRowErrs[col.key] =
+      !!this.colInputs[col.key] && !col.validateInput(this.colInputs[col.key]);
   }
 
   onEnter() {
