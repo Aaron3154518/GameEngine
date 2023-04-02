@@ -30,37 +30,7 @@ export class GroupColHeaderComponent implements ColComponent {
 
 @Component({
   selector: 'app-var',
-  template: `
-    <div
-      [ngClass]="inline ? 'd-inline' : 'd-inline-block w-100'"
-      (drop)="parameterDragService.dropOnGroup($event, row)"
-      (dragover)="parameterDragService.onDragOver($event)"
-    >
-      <app-input
-        *ngIf="input"
-        #colInput
-        [classes]="classes"
-        placeholder="+ New"
-        (enter)="onEnter(colInput)"
-        [sanitize]="sanitizeVar"
-      >
-      </app-input
-      ><span
-        *ngFor="let str of value; let first = first"
-        class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 mx-1 fst-normal"
-        [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
-        [draggable]="draggable"
-        (dragstart)="
-          parameterDragService.onDragStart($event, {
-            type: Var,
-            value: str,
-            srcUUID: row.uuid
-          })
-        "
-        >{{ str }}</span
-      >
-    </div>
-  `,
+  templateUrl: './group-variable.component.html',
 })
 export class VarComponent implements ColComponent {
   @Input() row: ParameterGroup = new ParameterGroup();
@@ -73,7 +43,7 @@ export class VarComponent implements ColComponent {
   readonly classes: string[] = [
     'py-0',
     'px-1',
-    'mx-2',
+    'mx-1',
     'rounded-1',
     'border',
     'border-top-0',
