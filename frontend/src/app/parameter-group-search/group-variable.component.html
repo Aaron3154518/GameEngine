@@ -1,3 +1,5 @@
+<!-- style="white-space: break-spaces" -->
+
 <div
   [ngClass]="inline ? 'd-inline' : 'd-inline-block w-100'"
   (drop)="parameterDragService.dropOnGroup($event, row)"
@@ -11,20 +13,20 @@
     (enter)="onEnter(colInput)"
     [sanitize]="sanitizeVar"
   >
-  </app-input
-  ><span
-    *ngFor="let str of value; let first = first"
-    class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 fst-normal"
-    [ngClass]="first ? '' : 'ms-1'"
-    [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
-    [draggable]="draggable"
-    (dragstart)="
-      parameterDragService.onDragStart($event, {
-        type: Var,
-        value: str,
-        srcUUID: row.uuid
-      })
-    "
-    >{{ str }}</span
+  </app-input>
+  <ng-container *ngFor="let str of value | sorted; let first = first"
+    ><span
+      class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 fst-normal"
+      [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
+      [draggable]="draggable"
+      (dragstart)="
+        parameterDragService.onDragStart($event, {
+          type: Var,
+          value: str,
+          srcUUID: row.uuid
+        })
+      "
+      >{{ str }}</span
+    ><span style="font-size: 0.5em">{{ " " }}</span></ng-container
   >
 </div>

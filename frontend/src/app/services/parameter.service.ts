@@ -25,7 +25,14 @@ export class ParameterService {
     }),
     new ParameterGroup({
       name: 'Fruits',
-      params: new Set(['Banana', 'Apple', 'Orange', 'Lemon', 'Mango', 'Papaya']),
+      params: new Set([
+        'Banana',
+        'Apple',
+        'Orange',
+        'Lemon',
+        'Mango',
+        'Papaya',
+      ]),
     }),
   ];
   private _paramGroupDict: StringDict<ParameterGroup> = toDict(

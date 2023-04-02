@@ -33,9 +33,9 @@
       <thead>
         <tr>
           <th
-            *ngFor="let col of cols; let first = first"
+            *ngFor="let col of cols"
             class="p-0 m-0"
-            [ngClass]="[col.width]"
+            [ngStyle]="{ width: getWidthStyle(col.width) }"
           ></th>
         </tr>
       </thead>
@@ -47,7 +47,7 @@
           (dragleave)="onDragChange(i, -1)"
           (drop)="onDragChange(i, 0)"
         >
-          <td *ngFor="let col of cols" class="p-0">
+          <td *ngFor="let col of cols" class="p-0" [ngClass]="col.cellClasses">
             <ng-template
               appContainer
               #container="container"

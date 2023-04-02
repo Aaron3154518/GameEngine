@@ -82,7 +82,12 @@ export class Parameters implements IParameters {
     this.name = name;
     this.type = type;
     this.group = new ParameterGroup();
-    this.groups = new Set<string>([this.group.uuid, ...groups]);
+    this.groups = new Set<string>(groups);
+
+    let al = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    [...Array(al.length).keys()].forEach((i: number) =>
+      this.group.addParam(al.substring(0, i + 1))
+    );
   }
 
   addParam(param: string) {
@@ -105,9 +110,7 @@ export class Parameters implements IParameters {
   }
 
   removeGroup(id: string): void {
-    if (id !== this.group.uuid) {
-      this.groups.delete(id);
-    }
+    this.groups.delete(id);
   }
 }
 

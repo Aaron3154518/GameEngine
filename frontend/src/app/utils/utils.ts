@@ -7,6 +7,11 @@ export function newUUID(): string {
   return v4();
 }
 
+// Access attribute by string
+export function getAttr(obj: any, attrs: string): any {
+  return attrs.split('.').reduce((obj: any, attr: string) => obj[attr], obj);
+}
+
 // Search filtering
 export function searchScore<T>(
   search: string,

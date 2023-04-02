@@ -22,14 +22,15 @@ import {
 import { OnInitDirective } from './directives/on-init.directive';
 import {
   GroupComponent,
+  GroupNamesPipe,
   NameColHeaderComponent,
-  ParameterGroupPipe,
   ParametersSearchComponent,
   TypeColHeaderComponent,
 } from './parameters-search/parameters-search.component';
 import { SearchComponent, ColHeaderComponent } from './search/search.component';
 import { InputComponent } from './search/input/input.component';
 import { ContainerDirective } from './directives/container.directive';
+import { SortPipe } from './utils/angular-utils';
 
 @NgModule({
   declarations: [
@@ -45,10 +46,12 @@ import { ContainerDirective } from './directives/container.directive';
     VarComponent,
     GroupComponent,
     ColHeaderComponent,
-    ParameterGroupPipe,
     TypeColHeaderComponent,
     NameColHeaderComponent,
     GroupColHeaderComponent,
+
+    GroupNamesPipe,
+    SortPipe,
   ],
   imports: [
     BrowserModule,

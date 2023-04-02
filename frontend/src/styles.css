@@ -18,3 +18,16 @@
 .vertical-line {
   border-left: 3px solid black;
 }
+
+.w-0 {
+  width: 0 !important;
+}
+
+.h-0 {
+  height: 0 !important;
+}
+
+.fit {
+  width: 1% !important;
+  white-space: nowrap !important;
+}

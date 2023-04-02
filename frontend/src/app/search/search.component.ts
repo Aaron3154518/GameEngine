@@ -8,8 +8,10 @@ import {
   Input,
   IterableDiffer,
   IterableDiffers,
+  OnChanges,
   Output,
   QueryList,
+  SimpleChanges,
   Type,
   ViewChild,
   ViewChildren,
@@ -18,7 +20,7 @@ import {
 import { ContainerDirective } from '../directives/container.directive';
 import { InputComponent } from './input/input.component';
 import { StringDict } from '../utils/interfaces';
-import { sanitizeVar } from '../utils/utils';
+import { getAttr, sanitizeVar } from '../utils/utils';
 
 export interface ColComponent {
   row?: any;
@@ -56,17 +58,13 @@ export class ColHeaderComponent implements ColComponent {
   ];
 }
 
-export enum ColWidth {
-  Fit = 'w-auto',
-  Fill = 'w-100',
-}
-
 interface IColumn {
   id?: string;
   key: string;
   getter?: (row: any) => string;
   component: Type<any>;
-  width?: ColWidth;
+  width?: number;
+  cellClasses?: string[];
   requireInput?: boolean;
   inputClasses?: string[];
   inputPlaceholder?: string;
@@ -76,9 +74,10 @@ interface IColumn {
 
 export class Column implements IColumn {
   key: string;
-  getter?: (row: any) => string;
+  getter: (row: any) => string;
   component: Type<any>;
-  width: ColWidth;
+  width: number;
+  cellClasses: string[];
   requireInput: boolean;
   inputClasses: string[];
   inputPlaceholder: string;
@@ -88,8 +87,9 @@ export class Column implements IColumn {
   constructor({
     key,
     component,
-    getter,
-    width = ColWidth.Fill,
+    getter = (row: any) => getAttr(row, key),
+    width = 1,
+    cellClasses = [],
     requireInput = false,
     inputClasses = [],
     inputPlaceholder = '',
@@ -100,6 +100,7 @@ export class Column implements IColumn {
     this.getter = getter;
     this.component = component;
     this.width = width;
+    this.cellClasses = cellClasses;
     this.requireInput = requireInput;
     this.inputClasses = inputClasses;
     this.inputPlaceholder = inputPlaceholder;
@@ -113,7 +114,7 @@ export class Column implements IColumn {
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.css'],
 })
-export class SearchComponent implements DoCheck, AfterViewInit {
+export class SearchComponent implements DoCheck, AfterViewInit, OnChanges {
   @Input() data: readonly any[] = [];
   @Input() cols: Column[] = [];
   @Input() allowNew: boolean = false;
@@ -131,19 +132,29 @@ export class SearchComponent implements DoCheck, AfterViewInit {
 
   rows: any[] = [];
 
-  colInputs: StringDict<string> = {};
-  newRowErrs: { [key: string]: boolean } = {};
+  protected colInputs: StringDict<string> = {};
+  protected newRowErrs: { [key: string]: boolean } = {};
 
-  iterableDiffer: IterableDiffer<any>;
+  private colWidthSum: number = 0;
 
-  draggingOver: number[] = [];
+  protected iterableDiffer: IterableDiffer<any>;
 
-  dragCnt: number = 0;
+  protected draggingOver: number[] = [];
+
+  protected dragCnt: number = 0;
 
   sanitizeVar: (s: string) => string = sanitizeVar;
 
   constructor(iterableDiffers: IterableDiffers) {
     this.iterableDiffer = iterableDiffers.find([]).create(undefined);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['cols']) {
+      this.colWidthSum = this.cols
+        .filter((col: Column) => col.width >= 0)
+        .reduce((s: number, col: Column) => s + col.width, 0);
+    }
   }
 
   ngDoCheck(): void {
@@ -169,11 +180,11 @@ export class SearchComponent implements DoCheck, AfterViewInit {
     const componentRef: ComponentRef<ColComponent> =
       viewContainerRef.createComponent<ColComponent>(col.component);
     componentRef.instance.row = row;
-    componentRef.instance.value = this.getCol(row, col);
+    componentRef.instance.value = col.getter(row);
   }
 
-  getCol(row: any, col: Column): string {
-    return col.getter ? col.getter(row) : row[col.key];
+  getWidthStyle(w: number): string {
+    return w === 0 ? 'auto' : `${(w * 100) / this.colWidthSum}%`;
   }
 
   onSearchChanged(query: string) {

@@ -9,8 +9,9 @@ import {
   validateVar,
 } from '../utils/utils';
 import { ParameterGroup, Parameters, StringDict } from '../utils/interfaces';
-import { ColComponent, Column, ColWidth } from '../search/search.component';
+import { ColComponent, Column } from '../search/search.component';
 import { Pipe, PipeTransform } from '@angular/core';
+import { VarComponent } from '../parameter-group-search/parameter-group-search.component';
 
 @Injectable({
   providedIn: 'root',
@@ -91,22 +92,22 @@ export namespace ParameterDragService {
 }
 
 @Pipe({
-  name: 'parametergroup',
+  name: 'group_names',
   pure: false,
 })
-export class ParameterGroupPipe implements PipeTransform {
+export class GroupNamesPipe implements PipeTransform {
   transform(
     items: Set<string>,
     parameterService: ParameterService
-  ): ParameterGroup[] {
-    return [...items].reduce((arr: ParameterGroup[], id: string) => {
+  ): Set<string> {
+    return [...items].reduce((set: Set<string>, id: string) => {
       let group: ParameterGroup | undefined =
         parameterService.getParamGroup(id);
       if (group && group.params.size > 0) {
-        arr.push(group);
+        set.add(group.name);
       }
-      return arr;
-    }, []);
+      return set;
+    }, new Set<string>());
   }
 }
 
@@ -176,7 +177,7 @@ export class ParametersSearchComponent {
   cols: Column[] = [
     new Column({
       key: 'type',
-      width: ColWidth.Fit,
+      width: 0,
       requireInput: true,
       inputClasses: ['float-end', 'type'],
       inputPlaceholder: 'New: Type',
@@ -186,7 +187,7 @@ export class ParametersSearchComponent {
     }),
     new Column({
       key: 'name',
-      width: ColWidth.Fit,
+      width: 0,
       requireInput: true,
       inputPlaceholder: 'Name',
       validateInput: (s: string): boolean =>
@@ -198,7 +199,14 @@ export class ParametersSearchComponent {
       component: NameColHeaderComponent,
     }),
     new Column({
+      key: 'group.params',
+      width: 2,
+      component: VarComponent,
+    }),
+    new Column({
       key: 'groups',
+      width: 1,
+      cellClasses: ['border-start'],
       component: GroupComponent,
     }),
   ];

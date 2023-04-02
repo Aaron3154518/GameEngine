@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { ParameterGroup, StringDict } from '../utils/interfaces';
+import { ParameterGroup, StringDict, Parameters } from '../utils/interfaces';
 import { sanitizeVar, searchScore, sortList } from '../utils/utils';
-import { ColComponent, ColWidth, Column } from '../search/search.component';
+import { ColComponent, Column } from '../search/search.component';
 import { InputComponent } from '../search/input/input.component';
 import { ParameterDragService } from '../parameters-search/parameters-search.component';
 
@@ -33,12 +33,19 @@ export class GroupColHeaderComponent implements ColComponent {
   templateUrl: './group-variable.component.html',
 })
 export class VarComponent implements ColComponent {
-  @Input() row: ParameterGroup = new ParameterGroup();
+  _row: ParameterGroup = new ParameterGroup();
   @Input() value: Set<string> = new Set<string>();
 
   @Input() input: boolean = true;
   @Input() draggable: boolean = true;
   @Input() inline: boolean = false;
+
+  @Input() set row(p: ParameterGroup | Parameters) {
+    this._row = p instanceof ParameterGroup ? p : p.group;
+  }
+  get row(): ParameterGroup {
+    return this._row;
+  }
 
   readonly classes: string[] = [
     'py-0',
@@ -73,7 +80,7 @@ export class ParameterGroupSearchComponent {
   cols: Column[] = [
     new Column({
       key: 'name',
-      width: ColWidth.Fit,
+      width: 0,
       requireInput: true,
       inputPlaceholder: 'New: Group',
       component: GroupColHeaderComponent,
