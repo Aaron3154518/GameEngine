@@ -25,11 +25,13 @@
         }"
         >{{ data[0] }}</span
       >
-      <span class="code">onUpdate(</span>
-      <ng-container *ngFor="let set of parameters; let firstSet = first">
-        <ng-container *ngFor="let param of set.params; let firstParam = first">
+      <span class="code"
+        >{{ retParamSet ? retParamSet.type : "void" }} onUpdate(</span
+      >
+      <ng-container *ngFor="let data of parameters; let firstSet = first">
+        <ng-container *ngFor="let param of data.params; let firstParam = first">
           <span class="code" *ngIf="!firstSet || !firstParam">, </span>
-          <span class="code type">{{ set.type }}</span>
+          <span class="code type">{{ data.set.type }}</span>
           <app-input
             #paramInput
             [classes]="['py-0', 'px-1', 'ms-1', 'border-0', 'code', 'var']"
@@ -84,19 +86,39 @@
         </div>
       </div>
     </div>
+    <ng-container *ngIf="callback.retParam">
+      <span class="code">return </span>
+      <input />
+      <br />
+    </ng-container>
     <span class="code">}</span>
   </div>
   <div class="d-inline-block position-absolute w-25 pe-0 scroll">
-    <span>Parameters:</span>
+    <span>Return:</span>
     <br />
-    <ng-container *ngFor="let set of parameters">
-      <span class="code type">{{ set.type }}</span>
-      <span class="code"> {{ set.name }}</span>
+    <ng-container *ngIf="retParamSet && callback.retParam">
+      <span class="code type">{{ retParamSet.type }}</span>
+      <span class="code"> {{ retParamSet.name }}</span>
       <br />
       <button
         class="btn param-btn me-1 py-1 px-2 code var"
-        *ngFor="let param of set.params"
-        (click)="select(set.uuid, param.name)"
+        (click)="select(retParamSet.uuid, callback.retParam.name)"
+      >
+        {{ callback.retParam.name }}
+      </button>
+      <br />
+    </ng-container>
+    <br />
+    <span>Parameters:</span>
+    <br />
+    <ng-container *ngFor="let data of parameters">
+      <span class="code type">{{ data.set.type }}</span>
+      <span class="code"> {{ data.set.name }}</span>
+      <br />
+      <button
+        class="btn param-btn me-1 py-1 px-2 code var"
+        *ngFor="let param of data.params"
+        (click)="select(data.set.uuid, param.name)"
       >
         {{ param.alias }}
       </button>

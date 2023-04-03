@@ -41,6 +41,7 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
 
   @Input() callback: Callback = new Callback();
   parameters: CallbackParameterList[] = [];
+  retParamSet?: Parameters;
   signature: [string, CodeType][] = [];
   code: string = '';
   name: string = '';
@@ -69,9 +70,9 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
       }
       this.code = this.callback.code;
       this.callback.$changes.subscribe(() => {
-        this.parameters = this.callback.getParameters(this.parameterService);
+        this.getParameters();
       });
-      this.parameters = this.callback.getParameters(this.parameterService);
+      this.getParameters();
 
       setTimeout(() => {
         if (this.codeInput && this.codeDisplay && this.codeDiv) {
@@ -117,6 +118,15 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
         }, 0);
       }
     }
+  }
+
+  getParameters() {
+    this.parameters = this.parameterService.getCallbackParameters(
+      this.callback
+    );
+    this.retParamSet = this.callback.retParam
+      ? this.parameterService.getParamSet(this.callback.retParam.uuid)
+      : undefined;
   }
 
   onCodeChanged(event: Event) {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import {
   Callback,
+  CallbackParameterList,
   ParameterGroup,
   Parameters,
   StringDict,
@@ -85,6 +86,10 @@ export class ParameterService {
         [this._paramSets[1].uuid, ['T1']],
         [this._paramSets[2].uuid, ['T2', 'T3']],
       ]),
+      retParam: {
+        uuid: this._paramSets[0].uuid,
+        name: 'Papaya',
+      },
     }),
   ];
   private _callbackDict: StringDict<Callback> = toDict(
@@ -215,6 +220,28 @@ export class ParameterService {
     if (i !== -1) {
       delete this._callbackDict[this._callbacks.splice(i, 1)[0].uuid];
     }
+  }
+
+  getCallbackParameters(cb: Callback): CallbackParameterList[] {
+    return Object.entries(cb.params).reduce(
+      (
+        arr: CallbackParameterList[],
+        [uuid, params]: [string, StringDict<string>]
+      ) => {
+        let set: Parameters | undefined = this.getParamSet(uuid);
+        if (set) {
+          arr.push({
+            set: set,
+            params: Object.entries(params).map(([p, a]: [string, string]) => ({
+              name: p,
+              alias: a,
+            })),
+          });
+        }
+        return arr;
+      },
+      []
+    );
   }
 
   codegen() {

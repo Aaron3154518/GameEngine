@@ -124,12 +124,25 @@ export class Parameters implements IParameters {
 // Callbacks
 // Parameters uuid (as string) : {parameter name : parameter alias}
 export type CallbackParameters = StringDict<StringDict<string>>;
+export interface CallbackParameter {
+  name: string;
+  alias: string;
+}
+export interface CallbackParameterList {
+  set: Parameters;
+  params: CallbackParameter[];
+}
+export interface CallbackReturn {
+  uuid: string;
+  name: string;
+}
 
 export interface ICallback {
   uuid: string;
   name: string;
   code: string;
   params: CallbackParameters;
+  retParam?: CallbackReturn;
 }
 
 type ICallbackOpt = {
@@ -137,6 +150,7 @@ type ICallbackOpt = {
   name?: string;
   code?: string;
   params?: CallbackParameters;
+  retParam?: CallbackReturn;
 };
 
 export enum CodeType {
@@ -145,23 +159,12 @@ export enum CodeType {
   Var = 2,
 }
 
-export interface CallbackParameter {
-  name: string;
-  alias: string;
-}
-
-export interface CallbackParameterList {
-  uuid: string;
-  type: string;
-  name: string;
-  params: CallbackParameter[];
-}
-
 export class Callback implements ICallback {
   readonly uuid: string;
   name: string;
   code: string;
   params: CallbackParameters;
+  retParam?: CallbackReturn;
 
   private changeSubject: Subject<void> = new Subject();
   $changes: Observable<void> = this.changeSubject.asObservable();
@@ -171,11 +174,13 @@ export class Callback implements ICallback {
     name = '',
     code = '',
     params = {},
+    retParam = undefined,
   }: ICallbackOpt = {}) {
     this.uuid = uuid;
     this.name = name;
     this.code = code;
     this.params = params;
+    this.retParam = retParam;
   }
 
   addParameter(uuid: string, name: string) {
@@ -193,30 +198,6 @@ export class Callback implements ICallback {
     }
     delete this.params[uuid][name];
     this.changeSubject.next();
-  }
-
-  getParameters(parameterService: ParameterService): CallbackParameterList[] {
-    return Object.entries(this.params).reduce(
-      (
-        arr: CallbackParameterList[],
-        [uuid, params]: [string, StringDict<string>]
-      ) => {
-        let set: Parameters | undefined = parameterService.getParamSet(uuid);
-        if (set) {
-          arr.push({
-            uuid: uuid,
-            type: set.type,
-            name: set.name,
-            params: Object.entries(params).map(([p, a]: [string, string]) => ({
-              name: p,
-              alias: a,
-            })),
-          });
-        }
-        return arr;
-      },
-      []
-    );
   }
 
   getParameterAlias(uuid: string, name: string): string {
@@ -237,7 +218,7 @@ export class Callback implements ICallback {
       ? _plists
       : [_plists];
     plists.forEach((plist: CallbackParameterList) => {
-      let d: StringDict<string> = this.params[plist.uuid];
+      let d: StringDict<string> = this.params[plist.set.uuid];
       if (d) {
         plist.params.forEach((p: { name: string; alias: string }) => {
           if (p.name in d) {
