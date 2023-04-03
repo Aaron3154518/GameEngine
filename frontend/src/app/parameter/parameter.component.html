@@ -25,6 +25,23 @@
         }"
         >{{ data[0] }}</span
       >
+      <span class="code">onUpdate(</span>
+      <ng-container *ngFor="let set of parameters; let firstSet = first">
+        <ng-container *ngFor="let param of set.params; let firstParam = first">
+          <span class="code" *ngIf="!firstSet || !firstParam">, </span>
+          <span class="code type">{{ set.type }}</span>
+          <app-input
+            #paramInput
+            [classes]="['py-0', 'px-1', 'ms-1', 'border-0', 'code', 'var']"
+            [value]="param.alias"
+            [placeholder]="param.name"
+            [passlist]="'0-9a-zA-Z_'"
+            [validate]="validateVar"
+            (enter)="onParamEnter(param, paramInput)"
+          ></app-input>
+        </ng-container>
+      </ng-container>
+      <span class="code">) {{ "{" }}</span>
     </div>
     <div
       class="code-input border border-dark rounded position-relative"
@@ -72,15 +89,16 @@
   <div class="d-inline-block position-absolute w-25 pe-0 scroll">
     <span>Parameters:</span>
     <br />
-    <ng-container *ngFor="let param_set of parameters">
-      <span>{{ param_set.set.type }} {{ param_set.set.name }}</span>
+    <ng-container *ngFor="let set of parameters">
+      <span class="code type">{{ set.type }}</span>
+      <span class="code"> {{ set.name }}</span>
       <br />
       <button
-        class="btn param-btn me-1"
-        *ngFor="let param of param_set.params"
-        (click)="select(param_set.set.uuid, param)"
+        class="btn param-btn me-1 py-1 px-2 code var"
+        *ngFor="let param of set.params"
+        (click)="select(set.uuid, param.name)"
       >
-        {{ param }}
+        {{ param.alias }}
       </button>
       <br />
     </ng-container>

@@ -1,5 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 import { newUUID } from './utils';
+import { ParameterService } from '../services/parameter.service';
 
 export type StringDict<T> = { [key: string]: T };
 
@@ -121,13 +122,13 @@ export class Parameters implements IParameters {
 }
 
 // Callbacks
-export type CallbackParameters = StringDict<Set<string>>;
+// Parameters uuid (as string) : {parameter name : parameter alias}
+export type CallbackParameters = StringDict<StringDict<string>>;
 
 export interface ICallback {
   uuid: string;
   name: string;
   code: string;
-  // Parameters uuid (as string) : set of parameters names
   params: CallbackParameters;
 }
 
@@ -135,7 +136,6 @@ type ICallbackOpt = {
   uuid?: string;
   name?: string;
   code?: string;
-  // Parameters uuid (as string) : set of parameters names
   params?: CallbackParameters;
 };
 
@@ -143,6 +143,18 @@ export enum CodeType {
   Code = 0,
   Type = 1,
   Var = 2,
+}
+
+export interface CallbackParameter {
+  name: string;
+  alias: string;
+}
+
+export interface CallbackParameterList {
+  uuid: string;
+  type: string;
+  name: string;
+  params: CallbackParameter[];
 }
 
 export class Callback implements ICallback {
@@ -166,57 +178,81 @@ export class Callback implements ICallback {
     this.params = params;
   }
 
-  get signature(): string {
-    return `void onUpdate(${Object.entries(this.params)
-      .map(([id, params]: [string, Set<string>]) =>
-        Object.values(params)
-          .map((p: string) => `Type ${p}`)
-          .join(',')
-      )
-      .join(', ')})`;
-  }
-
-  getSignatureSplit(parameters: StringDict<Parameters>): [string, CodeType][] {
-    let first: boolean = true;
-    return [
-      ['void onUpdate(', CodeType.Code],
-      ...Object.entries(this.params).reduce(
-        (arr: [string, CodeType][], [id, params]: [string, Set<string>]) => {
-          params.forEach((p: string) => {
-            if (!first) {
-              arr.push([', ', CodeType.Code]);
-            } else {
-              first = false;
-            }
-            arr.push([`${parameters[id].type} `, CodeType.Type]);
-            arr.push([p, CodeType.Var]);
-          });
-          return arr;
-        },
-        []
-      ),
-      [') {', CodeType.Code],
-    ];
-  }
-
   addParameter(uuid: string, name: string) {
-    let params: Set<string> = this.params[uuid];
+    let params: StringDict<string> = this.params[uuid];
     if (!params) {
-      params = this.params[uuid] = new Set<string>();
+      params = this.params[uuid] = {};
     }
-    params.add(name);
+    params[name] = name;
     this.changeSubject.next();
   }
 
   removeParameter(uuid: string, name: string) {
-    this.params[uuid]?.delete(name);
+    if (!this.params[uuid]) {
+      return;
+    }
+    delete this.params[uuid][name];
     this.changeSubject.next();
+  }
+
+  getParameters(parameterService: ParameterService): CallbackParameterList[] {
+    return Object.entries(this.params).reduce(
+      (
+        arr: CallbackParameterList[],
+        [uuid, params]: [string, StringDict<string>]
+      ) => {
+        let set: Parameters | undefined = parameterService.getParamSet(uuid);
+        if (set) {
+          arr.push({
+            uuid: uuid,
+            type: set.type,
+            name: set.name,
+            params: Object.entries(params).map(([p, a]: [string, string]) => ({
+              name: p,
+              alias: a,
+            })),
+          });
+        }
+        return arr;
+      },
+      []
+    );
+  }
+
+  getParameterAlias(uuid: string, name: string): string {
+    return this.params[uuid] ? this.params[uuid][name] : '';
+  }
+
+  setParameterAlias(uuid: string, name: string, alias: string) {
+    let d: StringDict<string> = this.params[uuid];
+    if (d && name in d) {
+      d[name] = alias;
+    }
+  }
+
+  setParameterAliases(
+    _plists: CallbackParameterList | CallbackParameterList[]
+  ) {
+    let plists: CallbackParameterList[] = Array.isArray(_plists)
+      ? _plists
+      : [_plists];
+    plists.forEach((plist: CallbackParameterList) => {
+      let d: StringDict<string> = this.params[plist.uuid];
+      if (d) {
+        plist.params.forEach((p: { name: string; alias: string }) => {
+          if (p.name in d) {
+            d[p.name] = p.alias;
+          }
+        });
+      }
+    });
   }
 
   static getParametersFromList(data: [string, string[]][]): CallbackParameters {
     return data.reduce(
       (params: CallbackParameters, [uuid, names]: [string, string[]]) => {
-        params[uuid] = new Set<string>(names);
+        params[uuid] = {};
+        names.forEach((s: string) => (params[uuid][s] = s));
         return params;
       },
       {}

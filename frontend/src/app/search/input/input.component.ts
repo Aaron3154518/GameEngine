@@ -3,7 +3,9 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 
@@ -12,7 +14,7 @@ import {
   templateUrl: './input.component.html',
   styleUrls: ['./input.component.css'],
 })
-export class InputComponent {
+export class InputComponent implements OnChanges {
   @Input() id: string = '';
   @Input() placeholder: string = '';
   @Input() outline: boolean = true;
@@ -47,6 +49,7 @@ export class InputComponent {
     return this._value;
   }
   @Output() valueChange: EventEmitter<string> = new EventEmitter();
+  initialValue: string = '';
 
   @Input() set classes(cls: string | string[]) {
     this._classes = typeof cls === 'string' ? cls : cls.join(' ');
@@ -61,6 +64,13 @@ export class InputComponent {
     return this.value.length > 0 && !this.err;
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['value']) {
+      this.initialValue = this.value;
+      console.log(this.initialValue);
+    }
+  }
+
   select() {
     this.inputRef?.nativeElement.focus();
   }
@@ -71,7 +81,7 @@ export class InputComponent {
     input.style.width = `${dummy.offsetWidth}px`;
   }
 
-  onInput(event: Event, input: HTMLInputElement, dummy: HTMLSpanElement) {
+  onInput(input: HTMLInputElement) {
     let prevLen: number = input.value.length;
     let i: number = input.selectionStart ? input.selectionStart : 1;
     this.value = input.value;
@@ -80,13 +90,15 @@ export class InputComponent {
     }
   }
 
-  onKeyPress(event: KeyboardEvent, input: HTMLInputElement) {
-    if (!this.valid) {
-      return;
+  onKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.submit();
     }
+  }
 
-    if (event.key === 'Enter' && input.value) {
-      this.enter.next(input.value);
+  submit() {
+    if (this.valid && this.value !== this.initialValue) {
+      this.enter.next(this.value);
     }
   }
 }

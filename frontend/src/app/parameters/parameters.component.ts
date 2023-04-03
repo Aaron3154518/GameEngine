@@ -10,7 +10,9 @@ import { Callback } from '../utils/interfaces';
 export class ParametersComponent {
   currCallback?: Callback;
 
-  constructor(protected parameterService: ParameterService) {}
+  constructor(protected parameterService: ParameterService) {
+    this.currCallback = this.parameterService.callbacks[1];
+  }
 
   selectCallback(cb: Callback) {
     this.currCallback = cb;

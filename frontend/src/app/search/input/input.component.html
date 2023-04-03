@@ -10,8 +10,9 @@
   type="text"
   [attr.maxlength]="maxlen"
   [value]="value"
-  (input)="onInput($event, input, dummy)"
-  (keypress)="onKeyPress($event, input)"
+  (input)="onInput(input)"
+  (keypress)="onKeyPress($event)"
+  (blur)="submit()"
   init
   (init)="sizeInput(input, dummy)"
 />

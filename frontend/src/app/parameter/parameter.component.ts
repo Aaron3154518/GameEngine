@@ -11,8 +11,16 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { Callback, CodeType, Parameters } from '../utils/interfaces';
-import { UUID } from '../utils/utils';
+import {
+  Callback,
+  CallbackParameter,
+  CodeType,
+  Parameters,
+  StringDict,
+} from '../utils/interfaces';
+import { alphanum_, validateVar } from '../utils/utils';
+import { InputComponent } from '../search/input/input.component';
+import { CallbackParameterList } from '../utils/interfaces';
 
 @Component({
   selector: 'app-parameter',
@@ -29,9 +37,10 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   @ViewChild('lineNums', { static: true })
   lineNums?: ElementRef<HTMLDivElement>;
   @ViewChildren('codeLine') codeLines?: QueryList<ElementRef<HTMLDivElement>>;
+  @ViewChildren('paramInput') paramInputs?: QueryList<InputComponent>;
 
   @Input() callback: Callback = new Callback();
-  parameters: { set: Parameters; params: Set<string> }[] = [];
+  parameters: CallbackParameterList[] = [];
   signature: [string, CodeType][] = [];
   code: string = '';
   name: string = '';
@@ -39,6 +48,7 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   x_offs: number[][] = [];
 
   CodeType = CodeType;
+  validateVar = validateVar;
 
   constructor(protected parameterService: ParameterService) {}
 
@@ -52,38 +62,25 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.name = this.callback.name;
-    if (!this.callback.code.endsWith('\n')) {
-      this.callback.code += '\n';
-    }
-    this.code = this.callback.code;
-    this.parameters = Object.entries(this.callback.params).reduce(
-      (
-        arr: { set: Parameters; params: Set<string> }[],
-        [uuid, params]: [string, Set<string>]
-      ) => {
-        let set: Parameters | undefined =
-          this.parameterService.getParamSet(uuid);
-        if (set) {
-          arr.push({
-            set: set,
-            params: params,
-          });
-        }
-        return arr;
-      },
-      []
-    );
-    this.signature = this.callback.getSignatureSplit(
-      this.parameterService.paramSetDict
-    );
-    setTimeout(() => {
-      if (this.codeInput && this.codeDisplay && this.codeDiv) {
-        this.codeInput.nativeElement.style.height = `${this.codeDisplay.nativeElement.offsetHeight}px`;
-        this.codeInput.nativeElement.scrollTo(0, 0);
-        this.codeDiv.nativeElement.scrollTo(0, 0);
+    if (changes['callback']) {
+      this.name = this.callback.name;
+      if (!this.callback.code.endsWith('\n')) {
+        this.callback.code += '\n';
       }
-    }, 0);
+      this.code = this.callback.code;
+      this.callback.$changes.subscribe(() => {
+        this.parameters = this.callback.getParameters(this.parameterService);
+      });
+      this.parameters = this.callback.getParameters(this.parameterService);
+
+      setTimeout(() => {
+        if (this.codeInput && this.codeDisplay && this.codeDiv) {
+          this.codeInput.nativeElement.style.height = `${this.codeDisplay.nativeElement.offsetHeight}px`;
+          this.codeInput.nativeElement.scrollTo(0, 0);
+          this.codeDiv.nativeElement.scrollTo(0, 0);
+        }
+      }, 0);
+    }
   }
 
   update() {
@@ -148,6 +145,11 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
+  onParamEnter(param: CallbackParameter, ic: InputComponent) {
+    this.code = this.code.replace(param.alias, ic.value);
+    param.alias = ic.value;
+  }
+
   save() {
     if (this.name) {
       this.callback.name = this.name;
@@ -156,6 +158,7 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
       this.code += '\n';
     }
     this.callback.code = this.code;
+    this.callback.setParameterAliases(this.parameters);
   }
 
   select(uuid: string, name: string) {
@@ -167,9 +170,16 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   getVarIdxs(): number[][] {
-    let regex: string = Object.values(this.callback.params)
-      .map((params: Set<string>) => [...params].join('|'))
-      .join('|');
+    let regex: string =
+      `(^|[^${alphanum_}])(` +
+      Object.values(this.callback.params)
+        .map((params: StringDict<string>) =>
+          Object.entries(params)
+            .map(([p, a]: [string, string]) => (a ? a : p))
+            .join('|')
+        )
+        .join('|') +
+      `)([^${alphanum_}]|$)`;
     let global_idx: number = 0;
     return this.code.split('\n').map((l: string) => {
       if (!l) {
@@ -179,9 +189,9 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
       let res: RegExpMatchArray | null = l.match(regex);
       let idxs: number[] = [global_idx];
       while (res && res.index !== undefined) {
-        let idx: number = res.index;
+        let idx: number = res.index + res[1].length;
         idxs.push(global_idx + idx);
-        idx += res[0].length;
+        idx += res[2].length;
         idxs.push(global_idx + idx);
         global_idx += idx;
         l = l.slice(idx);
