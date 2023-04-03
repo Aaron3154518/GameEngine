@@ -182,6 +182,12 @@ export class ParameterService {
     this.paramSetsChanged.next(null);
   }
 
+  paramSetNameExists(name: string): boolean {
+    return (
+      this.paramSets.find((set: Parameters) => set.name === name) !== undefined
+    );
+  }
+
   get callbacks(): Readonly<Callback[]> {
     return this._callbacks;
   }

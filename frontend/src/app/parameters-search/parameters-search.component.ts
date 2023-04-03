@@ -22,7 +22,7 @@ import {
 export class ParametersSearchComponent {
   cols: Column[] = [
     new Column({
-      key: 'type',
+      key: 'type var',
       getter: (set: Parameters) => ({ type: set.type, name: set.name }),
       width: 0,
       requireInput: true,
@@ -30,7 +30,9 @@ export class ParametersSearchComponent {
       inputMaxlen: 30,
       inputClasses: ['type'],
       inputPlaceholder: 'New: Type Name',
-      validateInput: validateTypeVar,
+      validateInput: (s: string) =>
+        validateTypeVar(s) &&
+        !this.parameterService.paramSetNameExists(s.split(' ')[1]),
       component: SetColHeaderComponent,
     }),
     new Column({
@@ -56,10 +58,11 @@ export class ParametersSearchComponent {
   }
 
   newSet(args: StringDict<string>) {
+    let split: string[] = args['type var'].split(' ');
     this.parameterService.newParamSet(
       new Parameters({
-        type: args['type'],
-        name: args['name'],
+        type: split[0],
+        name: split[1],
       })
     );
   }
