@@ -7,12 +7,7 @@
   background-color: rgba(230, 230, 230, 230);
 }
 
-.signature {
-  width: 95%;
-}
-
 .code-input {
-  width: 95%;
   height: 25em;
   overflow-y: auto;
 }
@@ -27,14 +22,14 @@
 
 .line-nums {
   display: inline-block;
-  width: 2.75em;
+  width: 4em;
   margin-right: 0.25em;
   overflow: hidden;
 }
 
 .code-div {
   position: absolute;
-  left: 3em;
+  left: 4.25em;
   right: 0;
   top: 0;
   white-space: pre;
@@ -67,7 +62,6 @@
   height: 1em;
   line-height: 1em;
   vertical-align: middle;
-  color: gray;
 }
 
 .line {

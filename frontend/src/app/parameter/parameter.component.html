@@ -1,5 +1,5 @@
 <div class="border border-dark position-relative">
-  <div class="d-inline-block w-75">
+  <div class="d-inline-block w-75 pe-3">
     <div>
       <input
         type="text"
@@ -15,7 +15,7 @@
         <fa-icon [icon]="['fas', 'save']"></fa-icon>
       </button>
     </div>
-    <div class="signature">
+    <div>
       <span
         class="code"
         *ngFor="let data of signature"
@@ -25,9 +25,10 @@
         }"
         >{{ data[0] }}</span
       >
-      <span class="code"
-        >{{ retParamSet ? retParamSet.type : "void" }} onUpdate(</span
-      >
+      <span class="code ret">{{
+        retParamSet ? retParamSet.type : "void"
+      }}</span>
+      <span class="code"> onUpdate(</span>
       <ng-container *ngFor="let data of parameters; let firstSet = first">
         <ng-container *ngFor="let param of data.params; let firstParam = first">
           <span class="code" *ngIf="!firstSet || !firstParam">, </span>
@@ -47,12 +48,16 @@
     </div>
     <div
       class="code-input border border-dark rounded position-relative"
-      [ngClass]="[code === callback.code ? 'saved' : 'unsaved']"
+      [ngClass]="[saved ? 'saved' : 'unsaved']"
       #codeDiv
     >
       <div class="line-nums border-end border-dark border-2" #lineNums>
-        <div class="line" *ngFor="let line of getVarIdxs(); let i = index">
-          <span class="code line-num">{{ i + 1 }}</span>
+        <div class="line" *ngFor="let i of getLineNumbers()">
+          <span
+            class="code line-num opacity-50"
+            [ngClass]="{ 'ret opacity-100': i === -1 }"
+            >{{ i === -1 ? "return" : i + 1 }}</span
+          >
         </div>
       </div>
       <textarea
@@ -86,11 +91,6 @@
         </div>
       </div>
     </div>
-    <ng-container *ngIf="callback.retParam">
-      <span class="code">return </span>
-      <input />
-      <br />
-    </ng-container>
     <span class="code">}</span>
   </div>
   <div class="d-inline-block position-absolute w-25 pe-0 scroll">

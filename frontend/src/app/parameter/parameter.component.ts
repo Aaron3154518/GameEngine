@@ -51,6 +51,10 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
   CodeType = CodeType;
   validateVar = validateVar;
 
+  get saved(): boolean {
+    return this.code === this.callback.code;
+  }
+
   constructor(protected parameterService: ParameterService) {}
 
   ngOnInit() {}
@@ -177,6 +181,20 @@ export class ParameterComponent implements OnInit, AfterViewInit, OnChanges {
 
   isNameUsed(): boolean {
     return false;
+  }
+
+  getLineNumbers(): number[] {
+    let split: string[] = this.code.split('\n');
+    let nums: number[] = [...split.keys()];
+    nums[
+      split.length -
+        Math.max(
+          0,
+          split.reverse().findIndex((s: string) => s.trim().length > 0)
+        ) -
+        1
+    ] = -1;
+    return nums;
   }
 
   getVarIdxs(): number[][] {
