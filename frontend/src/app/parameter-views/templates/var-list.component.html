@@ -1,5 +1,3 @@
-<!-- style="white-space: break-spaces" -->
-
 <div
   [ngClass]="inline ? 'd-inline' : 'd-inline-block w-100'"
   (drop)="parameterDragService.dropOnGroup($event, row)"
@@ -21,9 +19,9 @@
       [draggable]="draggable"
       (dragstart)="
         parameterDragService.onDragStart($event, {
-          type: Var,
+          type: type,
           value: str,
-          srcUUID: row.uuid
+          srcUUID: uuid ? uuid : row.uuid
         })
       "
       >{{ str }}</span

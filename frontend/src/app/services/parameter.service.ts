@@ -59,7 +59,6 @@ export class ParameterService {
     new Parameters({
       name: 'GenNames',
       type: 'std::string',
-      groups: new Set([this._paramGroups[1].uuid]),
     }),
   ];
   private _paramSetDict: StringDict<Parameters> = toDict(

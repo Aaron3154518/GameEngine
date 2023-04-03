@@ -14,38 +14,35 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ParametersComponent } from './parameters/parameters.component';
 import { ParameterComponent } from './parameter/parameter.component';
-import {
-  GroupColHeaderComponent,
-  ParameterGroupSearchComponent,
-  VarComponent,
-} from './parameter-group-search/parameter-group-search.component';
+import { ParameterGroupSearchComponent } from './parameter-group-search/parameter-group-search.component';
 import { OnInitDirective } from './directives/on-init.directive';
-import {
-  GroupComponent,
-  GroupNamesPipe,
-  NameColHeaderComponent,
-  ParametersSearchComponent,
-  TypeColHeaderComponent,
-} from './parameters-search/parameters-search.component';
-import { SearchComponent, ColHeaderComponent } from './search/search.component';
+import { ParametersSearchComponent } from './parameters-search/parameters-search.component';
+import { SearchComponent } from './search/search.component';
 import { InputComponent } from './search/input/input.component';
 import { ContainerDirective } from './directives/container.directive';
 import { SortPipe } from './utils/angular-utils';
+import {
+  GroupColHeaderComponent,
+  GroupListComponent,
+  GroupNamesPipe,
+  NameColHeaderComponent,
+  TypeColHeaderComponent,
+  VarListComponent,
+} from './parameter-views/parameter-views.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ParametersComponent,
     ParameterComponent,
-    ParameterGroupSearchComponent,
     OnInitDirective,
+    ParameterGroupSearchComponent,
     ParametersSearchComponent,
     SearchComponent,
     InputComponent,
     ContainerDirective,
-    VarComponent,
-    GroupComponent,
-    ColHeaderComponent,
+    VarListComponent,
+    GroupListComponent,
     TypeColHeaderComponent,
     NameColHeaderComponent,
     GroupColHeaderComponent,

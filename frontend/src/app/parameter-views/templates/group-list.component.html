@@ -3,10 +3,12 @@
   (drop)="parameterDragService.dropOnSet($event, row)"
   (dragover)="parameterDragService.onDragOver($event)"
 >
-  <app-var
+  <var-list
     [value]="value | group_names : parameterService | sorted"
+    [uuid]="row.uuid"
     [input]="false"
-    [draggable]="false"
+    [draggable]="true"
+    [type]="Group"
     [inline]="true"
-  ></app-var>
+  ></var-list>
 </div>

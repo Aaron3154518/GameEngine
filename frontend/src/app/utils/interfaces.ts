@@ -84,7 +84,7 @@ export class Parameters implements IParameters {
     this.group = new ParameterGroup();
     this.groups = new Set<string>(groups);
 
-    let al = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let al = 'ABCDEFGHIJ';
     [...Array(al.length).keys()].forEach((i: number) =>
       this.group.addParam(al.substring(0, i + 1))
     );

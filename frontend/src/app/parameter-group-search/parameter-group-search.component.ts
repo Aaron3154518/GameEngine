@@ -1,75 +1,13 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
-import { ParameterGroup, StringDict, Parameters } from '../utils/interfaces';
-import { sanitizeVar, searchScore, sortList } from '../utils/utils';
-import { ColComponent, Column } from '../search/search.component';
-import { InputComponent } from '../search/input/input.component';
-import { ParameterDragService } from '../parameters-search/parameters-search.component';
-
-@Component({
-  selector: 'group-col-header',
-  template: `<col-header
-    [value]="value"
-    [ngStyle]="{ cursor: row ? 'grab' : 'auto' }"
-    [draggable]="row"
-    (dragstart)="
-      parameterDragService.onDragStart($event, { type: Group, value: row.uuid })
-    "
-    (drop)="parameterDragService.dropOnGroup($event, row)"
-    (dragover)="parameterDragService.onDragOver($event)"
-  ></col-header>`,
-})
-export class GroupColHeaderComponent implements ColComponent {
-  @Input() row: ParameterGroup = new ParameterGroup();
-  @Input() value: string = '';
-
-  Group = ParameterDragService.DataType.Group;
-
-  constructor(protected parameterDragService: ParameterDragService) {}
-}
-
-@Component({
-  selector: 'app-var',
-  templateUrl: './group-variable.component.html',
-})
-export class VarComponent implements ColComponent {
-  _row: ParameterGroup = new ParameterGroup();
-  @Input() value: Set<string> = new Set<string>();
-
-  @Input() input: boolean = true;
-  @Input() draggable: boolean = true;
-  @Input() inline: boolean = false;
-
-  @Input() set row(p: ParameterGroup | Parameters) {
-    this._row = p instanceof ParameterGroup ? p : p.group;
-  }
-  get row(): ParameterGroup {
-    return this._row;
-  }
-
-  readonly classes: string[] = [
-    'py-0',
-    'px-1',
-    'mx-1',
-    'rounded-1',
-    'border',
-    'border-top-0',
-    'border-bottom-0',
-    'border-secondary',
-    'fw-bold',
-  ];
-
-  sanitizeVar = sanitizeVar;
-
-  Var = ParameterDragService.DataType.Var;
-
-  constructor(protected parameterDragService: ParameterDragService) {}
-
-  onEnter(input: InputComponent) {
-    this.row?.addParam(input.value);
-    input.value = '';
-  }
-}
+import { ParameterGroup, StringDict } from '../utils/interfaces';
+import { searchScore, sortList } from '../utils/utils';
+import { Column } from '../search/search.component';
+import {
+  GroupColHeaderComponent,
+  VarListComponent,
+} from '../parameter-views/parameter-views.component';
+import { ParameterDragService } from '../services/parameter-drag.service';
 
 @Component({
   selector: 'app-parameter-group-search',
@@ -87,7 +25,7 @@ export class ParameterGroupSearchComponent {
     }),
     new Column({
       key: 'params',
-      component: VarComponent,
+      component: VarListComponent,
     }),
   ];
 
