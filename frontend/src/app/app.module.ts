@@ -20,11 +20,9 @@ import { ParametersSearchComponent } from './parameters-search/parameters-search
 import { SearchComponent } from './search/search.component';
 import { InputComponent } from './search/input/input.component';
 import { ContainerDirective } from './directives/container.directive';
-import { SortPipe } from './utils/angular-utils';
 import {
   GroupColHeaderComponent,
   GroupListComponent,
-  GroupNamesPipe,
   NameColHeaderComponent,
   TypeColHeaderComponent,
   VarListComponent,
@@ -46,9 +44,6 @@ import {
     TypeColHeaderComponent,
     NameColHeaderComponent,
     GroupColHeaderComponent,
-
-    GroupNamesPipe,
-    SortPipe,
   ],
   imports: [
     BrowserModule,

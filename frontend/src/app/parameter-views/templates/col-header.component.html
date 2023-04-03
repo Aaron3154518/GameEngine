@@ -1,6 +1,6 @@
 <div
   [ngClass]="classes"
-  (drop)="parameterDragService.dropOnSet($event, row)"
+  (drop)="parameterDragService.drop($event, row)"
   (dragover)="parameterDragService.onDragOver($event)"
 >
   <span class="fw-bold">{{ value }}</span>

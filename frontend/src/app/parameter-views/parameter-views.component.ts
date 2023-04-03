@@ -1,36 +1,20 @@
 import {
   Component,
-  EventEmitter,
+  DoCheck,
   Input,
-  Output,
+  IterableDiffer,
+  IterableDiffers,
+  OnChanges,
+  OnInit,
   Pipe,
   PipeTransform,
+  SimpleChanges,
 } from '@angular/core';
 import { ParameterGroup, Parameters } from '../utils/interfaces';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterDragService } from '../services/parameter-drag.service';
 import { sanitizeVar } from '../utils/utils';
 import { InputComponent } from '../search/input/input.component';
-
-@Pipe({
-  name: 'group_names',
-  pure: false,
-})
-export class GroupNamesPipe implements PipeTransform {
-  transform(
-    items: Set<string>,
-    parameterService: ParameterService
-  ): Set<string> {
-    return [...items].reduce((set: Set<string>, id: string) => {
-      let group: ParameterGroup | undefined =
-        parameterService.getParamGroup(id);
-      if (group && group.params.size > 0) {
-        set.add(group.name);
-      }
-      return set;
-    }, new Set<string>());
-  }
-}
 
 export interface ColComponent {
   row?: any;
@@ -56,15 +40,10 @@ export class GroupColHeaderComponent implements ColComponent {
   @Input() value: string = '';
 
   classes: string[] = colHeaderClasses;
+  dataGroup = ParameterDragService.DataType.Group;
+  srcGroup = ParameterDragService.SrcType.Group;
 
   constructor(protected parameterDragService: ParameterDragService) {}
-
-  onDragStart(event: DragEvent) {
-    this.parameterDragService.onDragStart(event, {
-      type: ParameterDragService.DataType.Group,
-      value: this.row.uuid,
-    });
-  }
 }
 
 @Component({
@@ -104,33 +83,32 @@ export class NameColHeaderComponent implements ColComponent {
 }
 
 // Variable lists
+interface Variable {
+  name: string;
+  id: string;
+}
+
 @Component({
   selector: 'var-list',
   templateUrl: './templates/var-list.component.html',
 })
-export class VarListComponent implements ColComponent {
-  @Input() value: Set<string> = new Set<string>();
-  @Input() set row(p: ParameterGroup | Parameters) {
-    this._row = p instanceof ParameterGroup ? p : p.group;
-  }
-  @Input() uuid: string = '';
+export class VarListComponent implements ColComponent, OnInit, OnChanges {
+  @Input() row: ParameterGroup | Parameters = new ParameterGroup();
   @Input() type: ParameterDragService.DataType =
     ParameterDragService.DataType.Var;
 
   @Input() input: boolean = true;
   @Input() draggable: boolean = true;
-  @Input() inline: boolean = false;
 
-  get row(): ParameterGroup {
-    return this._row;
-  }
-
-  private _row: ParameterGroup = new ParameterGroup();
+  srcType: ParameterDragService.SrcType = ParameterDragService.SrcType.Group;
+  group: ParameterGroup = new ParameterGroup();
+  set: Parameters | undefined;
+  vals: Variable[] = [];
 
   readonly classes: string[] = [
     'py-0',
     'px-1',
-    'mx-1',
+    'me-1',
     'rounded-1',
     'border',
     'border-top-0',
@@ -142,10 +120,59 @@ export class VarListComponent implements ColComponent {
 
   sanitizeVar = sanitizeVar;
 
-  constructor(protected parameterDragService: ParameterDragService) {}
+  protected iterableDiffer: IterableDiffer<any>;
+
+  get groups(): Set<string> {
+    return this.row instanceof Parameters ? this.row.groups : new Set<string>();
+  }
+
+  constructor(
+    protected parameterService: ParameterService,
+    protected parameterDragService: ParameterDragService,
+    iterableDiffers: IterableDiffers
+  ) {
+    this.iterableDiffer = iterableDiffers.find([]).create(undefined);
+  }
+
+  ngOnInit(): void {
+    this.computeVals();
+
+    this.row.$changes.subscribe(() => this.computeVals());
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.computeVals();
+
+    this.row.$changes.subscribe(() => this.computeVals());
+  }
+
+  computeVals() {
+    this.srcType =
+      this.row instanceof ParameterGroup
+        ? ParameterDragService.SrcType.Group
+        : ParameterDragService.SrcType.Set;
+    this.group = this.row instanceof ParameterGroup ? this.row : this.row.group;
+    this.set = this.row instanceof Parameters ? this.row : undefined;
+    this.vals =
+      this.type === ParameterDragService.DataType.Var
+        ? [...this.group.params].sort().map((s: string) => ({ name: s, id: s }))
+        : this.set
+        ? [...this.set.groups]
+            .map((uuid: string) => this.parameterService.getParamGroup(uuid))
+            .reduce((arr: Variable[], g?: ParameterGroup) => {
+              if (g) {
+                arr.push({ name: g.name, id: g.uuid });
+              }
+              return arr;
+            }, [])
+            .sort((a: Variable, b: Variable) =>
+              a.name < b.name ? -1 : b.name < a.name ? 1 : 0
+            )
+        : [];
+  }
 
   onEnter(input: InputComponent) {
-    this.row?.addParam(input.value);
+    this.row.addParam(input.value);
     input.value = '';
   }
 }

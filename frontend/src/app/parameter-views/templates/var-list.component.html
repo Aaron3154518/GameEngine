@@ -1,6 +1,6 @@
 <div
-  [ngClass]="inline ? 'd-inline' : 'd-inline-block w-100'"
-  (drop)="parameterDragService.dropOnGroup($event, row)"
+  class="ps-1 d-inline-block w-100"
+  (drop)="parameterDragService.drop($event, row)"
   (dragover)="parameterDragService.onDragOver($event)"
 >
   <app-input
@@ -12,19 +12,20 @@
     [sanitize]="sanitizeVar"
   >
   </app-input>
-  <ng-container *ngFor="let str of value | sorted; let first = first"
+  <ng-container *ngFor="let v of vals; let first = first"
     ><span
       class="rounded-1 border border-top-0 border-bottom-0 border-dark py-0 px-1 fst-normal"
       [ngStyle]="{ cursor: draggable ? 'grab' : 'auto' }"
-      [draggable]="draggable"
+      [draggable]="true"
       (dragstart)="
         parameterDragService.onDragStart($event, {
           type: type,
-          value: str,
-          srcUUID: uuid ? uuid : row.uuid
+          value: v.id,
+          srcType: srcType,
+          srcUUID: row.uuid
         })
       "
-      >{{ str }}</span
+      >{{ v.name }}</span
     ><span style="font-size: 0.5em">{{ " " }}</span></ng-container
   >
 </div>

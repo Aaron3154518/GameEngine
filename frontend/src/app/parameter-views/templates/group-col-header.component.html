@@ -2,8 +2,15 @@
   [ngClass]="classes"
   [ngStyle]="{ cursor: row ? 'grab' : 'auto' }"
   [draggable]="row"
-  (dragstart)="onDragStart($event)"
-  (drop)="parameterDragService.dropOnGroup($event, row)"
+  (dragstart)="
+    parameterDragService.onDragStart($event, {
+      type: dataGroup,
+      value: row.uuid,
+      srcType: srcGroup,
+      srcUUID: row.uuid
+    })
+  "
+  (drop)="parameterDragService.drop($event, row)"
   (dragover)="parameterDragService.onDragOver($event)"
 >
   <span class="fw-bold">{{ value }}</span>

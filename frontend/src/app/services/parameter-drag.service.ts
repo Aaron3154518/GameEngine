@@ -20,41 +20,44 @@ export class ParameterDragService {
       let data: ParameterDragService.DragData = JSON.parse(
         event.dataTransfer.getData(this.format)
       );
-      if (data.type === ParameterDragService.DataType.Group) {
-        this.parameterService.removeParamGroup(data.value);
-      } else if (
-        data.type === ParameterDragService.DataType.Var &&
-        data.srcUUID
-      ) {
-        this.parameterService
-          .getParamGroup(data.srcUUID)
-          ?.removeParam(data.value);
+      if (data.srcType === undefined || data.srcUUID === undefined) {
+        return;
       }
-    }
-  }
-
-  dropOnGroup(event: DragEvent, group: ParameterGroup) {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      let data: ParameterDragService.DragData = JSON.parse(
-        event.dataTransfer.getData(this.format)
-      );
-      if (data.type === ParameterDragService.DataType.Var) {
-        group.addParam(data.value);
-      }
-    }
-  }
-
-  dropOnSet(event: DragEvent, set: Parameters) {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      let data: ParameterDragService.DragData = JSON.parse(
-        event.dataTransfer.getData(this.format)
-      );
       if (data.type === ParameterDragService.DataType.Group) {
-        set.addGroup(data.value);
+        if (data.srcType === ParameterDragService.SrcType.Group) {
+          this.parameterService.removeParamGroup(data.value);
+        } else if (data.srcType === ParameterDragService.SrcType.Set) {
+          this.parameterService
+            .getParamSet(data.srcUUID)
+            ?.removeGroup(data.value);
+        }
       } else if (data.type === ParameterDragService.DataType.Var) {
-        set.addParam(data.value);
+        if (data.srcType === ParameterDragService.SrcType.Group) {
+          this.parameterService
+            .getParamGroup(data.srcUUID)
+            ?.removeParam(data.value);
+        } else if (data.srcType === ParameterDragService.SrcType.Set) {
+          this.parameterService
+            .getParamSet(data.srcUUID)
+            ?.removeParam(data.value);
+        }
+      }
+    }
+  }
+
+  drop(event: DragEvent, target: ParameterGroup | Parameters) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      let data: ParameterDragService.DragData = JSON.parse(
+        event.dataTransfer.getData(this.format)
+      );
+      if (
+        data.type === ParameterDragService.DataType.Group &&
+        target instanceof Parameters
+      ) {
+        target.addGroup(data.value);
+      } else if (data.type === ParameterDragService.DataType.Var) {
+        target.addParam(data.value);
       }
     }
   }
@@ -73,9 +76,16 @@ export namespace ParameterDragService {
     Callback = 3,
   }
 
+  export enum SrcType {
+    Group = 0,
+    Set = 1,
+  }
+
   export interface DragData {
     type: DataType;
     value: string;
+    // For trashing
+    srcType?: SrcType;
     srcUUID?: string;
   }
 }

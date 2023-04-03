@@ -1,3 +1,4 @@
+import { Observable, Subject } from 'rxjs';
 import { newUUID } from './utils';
 
 export type StringDict<T> = { [key: string]: T };
@@ -27,6 +28,9 @@ export class ParameterGroup implements IParameterGroup {
   readonly name: string;
   params: Set<string>;
 
+  private changeSubject: Subject<void> = new Subject();
+  $changes: Observable<void> = this.changeSubject.asObservable();
+
   constructor({
     uuid = newUUID(),
     name = '',
@@ -43,10 +47,12 @@ export class ParameterGroup implements IParameterGroup {
 
   addParam(param: string) {
     this.params.add(param);
+    this.changeSubject.next();
   }
 
   removeParam(param: string) {
     this.params.delete(param);
+    this.changeSubject.next();
   }
 }
 
@@ -72,6 +78,9 @@ export class Parameters implements IParameters {
   group: ParameterGroup;
   groups: Set<string>;
 
+  private changeSubject: Subject<void> = new Subject();
+  $changes: Observable<void> = this.changeSubject.asObservable();
+
   constructor({
     uuid = newUUID(),
     name = '',
@@ -92,25 +101,22 @@ export class Parameters implements IParameters {
 
   addParam(param: string) {
     this.group.addParam(param);
+    this.changeSubject.next();
   }
 
   removeParam(param: string) {
     this.group.removeParam(param);
-  }
-
-  removeGroupParam(group: ParameterGroup, name: string) {
-    this.removeGroup(group.uuid);
-    group.params.forEach((p: string) => {
-      if (p !== name) this.group.addParam(p);
-    });
+    this.changeSubject.next();
   }
 
   addGroup(id: string): void {
     this.groups.add(id);
+    this.changeSubject.next();
   }
 
   removeGroup(id: string): void {
     this.groups.delete(id);
+    this.changeSubject.next();
   }
 }
 
@@ -144,6 +150,9 @@ export class Callback implements ICallback {
   name: string;
   code: string;
   params: CallbackParameters;
+
+  private changeSubject: Subject<void> = new Subject();
+  $changes: Observable<void> = this.changeSubject.asObservable();
 
   constructor({
     uuid = newUUID(),
@@ -196,10 +205,12 @@ export class Callback implements ICallback {
       params = this.params[uuid] = new Set<string>();
     }
     params.add(name);
+    this.changeSubject.next();
   }
 
   removeParameter(uuid: string, name: string) {
     this.params[uuid]?.delete(name);
+    this.changeSubject.next();
   }
 
   static getParametersFromList(data: [string, string[]][]): CallbackParameters {

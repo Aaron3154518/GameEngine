@@ -1,14 +1,12 @@
 <div
-  class="d-inline-block w-100 ps-1"
-  (drop)="parameterDragService.dropOnSet($event, row)"
+  class="d-inline-block w-100"
+  (drop)="parameterDragService.drop($event, row)"
   (dragover)="parameterDragService.onDragOver($event)"
 >
   <var-list
-    [value]="value | group_names : parameterService | sorted"
-    [uuid]="row.uuid"
+    [row]="row"
     [input]="false"
     [draggable]="true"
     [type]="Group"
-    [inline]="true"
   ></var-list>
 </div>

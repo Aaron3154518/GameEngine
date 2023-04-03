@@ -28,7 +28,6 @@ interface IColumn {
   key: string;
   getter?: (row: any) => string;
   component: Type<any>;
-  componentInit?: (comp: any) => void;
   width?: number;
   cellClasses?: string[];
   requireInput?: boolean;
@@ -42,7 +41,6 @@ export class Column implements IColumn {
   key: string;
   getter: (row: any) => string;
   readonly component: Type<any>;
-  componentInit: (comp: typeof this.component) => void;
   width: number;
   cellClasses: string[];
   requireInput: boolean;
@@ -54,7 +52,6 @@ export class Column implements IColumn {
   constructor({
     key,
     component,
-    componentInit = () => {},
     getter = (row: any) => getAttr(row, key),
     width = 1,
     cellClasses = [],
@@ -67,7 +64,6 @@ export class Column implements IColumn {
     this.key = key;
     this.getter = getter;
     this.component = component;
-    this.componentInit = componentInit;
     this.width = width;
     this.cellClasses = cellClasses;
     this.requireInput = requireInput;
