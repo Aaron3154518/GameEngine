@@ -47,37 +47,16 @@ export class GroupColHeaderComponent implements ColComponent {
 }
 
 @Component({
-  selector: 'type-col-header',
-  templateUrl: './templates/col-header.component.html',
+  selector: 'set-col-header',
+  templateUrl: './templates/set-col-header.component.html',
 })
-export class TypeColHeaderComponent implements ColComponent {
+export class SetColHeaderComponent implements ColComponent {
   @Input() row: Parameters = new Parameters();
-  @Input() value: string = '';
+  @Input() value: { type: string; name: string } = { type: '', name: '' };
 
-  classes: string[] = colHeaderClasses.concat([
-    'type',
-    'border-end-0',
-    'rounded-0',
-    'rounded-start',
-    'text-end',
-  ]);
-
-  constructor(protected parameterDragService: ParameterDragService) {}
-}
-
-@Component({
-  selector: 'name-col-header',
-  templateUrl: './templates/col-header.component.html',
-})
-export class NameColHeaderComponent implements ColComponent {
-  @Input() row: Parameters = new Parameters();
-  @Input() value: string = '';
-
-  classes: string[] = colHeaderClasses.concat([
-    'border-start-0',
-    'rounded-0',
-    'rounded-end',
-  ]);
+  classes: string[] = colHeaderClasses;
+  dataSet = ParameterDragService.DataType.Set;
+  srcSet = ParameterDragService.SrcType.Set;
 
   constructor(protected parameterDragService: ParameterDragService) {}
 }

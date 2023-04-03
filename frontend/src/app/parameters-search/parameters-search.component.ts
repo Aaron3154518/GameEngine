@@ -1,19 +1,16 @@
 import { Component } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import {
-  sanitizeType,
-  sanitizeVar,
+  sanitizeTypeVar,
   searchScore,
   sortList,
-  validateType,
-  validateVar,
+  validateTypeVar,
 } from '../utils/utils';
 import { Parameters, StringDict } from '../utils/interfaces';
 import { Column } from '../search/search.component';
 import {
   GroupListComponent,
-  NameColHeaderComponent,
-  TypeColHeaderComponent,
+  SetColHeaderComponent,
   VarListComponent,
 } from '../parameter-views/parameter-views.component';
 
@@ -26,26 +23,14 @@ export class ParametersSearchComponent {
   cols: Column[] = [
     new Column({
       key: 'type',
+      getter: (set: Parameters) => ({ type: set.type, name: set.name }),
       width: 0,
       requireInput: true,
-      inputClasses: ['float-end', 'type'],
-      inputPlaceholder: 'New: Type',
-      validateInput: validateType,
-      sanitizeInput: sanitizeType,
-      component: TypeColHeaderComponent,
-    }),
-    new Column({
-      key: 'name',
-      width: 0,
-      requireInput: true,
-      inputPlaceholder: 'Name',
-      validateInput: (s: string): boolean =>
-        validateVar(s) &&
-        this.parameterService.paramSets.findIndex(
-          (set: Parameters) => set.name === s
-        ) === -1,
-      sanitizeInput: sanitizeVar,
-      component: NameColHeaderComponent,
+      inputClasses: ['type'],
+      inputPlaceholder: 'New: Type Name',
+      validateInput: validateTypeVar,
+      sanitizeInput: sanitizeTypeVar,
+      component: SetColHeaderComponent,
     }),
     new Column({
       key: 'group.params',

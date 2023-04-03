@@ -23,7 +23,12 @@ export class ParameterDragService {
       if (data.srcType === undefined || data.srcUUID === undefined) {
         return;
       }
-      if (data.type === ParameterDragService.DataType.Group) {
+      if (
+        data.type === ParameterDragService.DataType.Set &&
+        data.srcType === ParameterDragService.SrcType.Set
+      ) {
+        this.parameterService.removeParamSet(data.value);
+      } else if (data.type === ParameterDragService.DataType.Group) {
         if (data.srcType === ParameterDragService.SrcType.Group) {
           this.parameterService.removeParamGroup(data.value);
         } else if (data.srcType === ParameterDragService.SrcType.Set) {

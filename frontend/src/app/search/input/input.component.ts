@@ -18,7 +18,7 @@ export class InputComponent {
   @Input() placeholder: string = '';
   @Input() outline: boolean = true;
 
-  @Input() sanitize: (value: string) => string = (s: string) => s;
+  @Input() sanitize: (s: string, i: number) => string = (s: string) => s;
 
   @Output() input: EventEmitter<void> = new EventEmitter();
   @Output() enter: EventEmitter<string> = new EventEmitter();
@@ -51,10 +51,15 @@ export class InputComponent {
     input.style.width = `${dummy.offsetWidth}px`;
   }
 
-  onInput(inputRef: HTMLInputElement, dummy: HTMLSpanElement) {
-    this.value = inputRef.value = this.sanitize(inputRef.value);
+  onInput(event: Event, input: HTMLInputElement, dummy: HTMLSpanElement) {
+    let prevLen: number = input.value.length;
+    let i: number = input.selectionStart ? input.selectionStart : 1;
+    this.value = input.value = this.sanitize(input.value, i - 1);
+    if (prevLen !== input.value.length) {
+      input.selectionStart = input.selectionEnd = i - 1;
+    }
     this.valueChange.next(this.value);
-    this.sizeInput(inputRef, dummy);
+    this.sizeInput(input, dummy);
   }
 
   onKeyPress(event: KeyboardEvent, input: HTMLInputElement) {

@@ -1,17 +1,19 @@
 <div
+  class="position-relative"
   [ngClass]="classes"
   [ngStyle]="{ cursor: 'grab' }"
   [draggable]="true"
   (dragstart)="
     parameterDragService.onDragStart($event, {
-      type: dataGroup,
+      type: dataSet,
       value: row.uuid,
-      srcType: srcGroup,
+      srcType: srcSet,
       srcUUID: row.uuid
     })
   "
   (drop)="parameterDragService.drop($event, row)"
   (dragover)="parameterDragService.onDragOver($event)"
 >
-  <span class="fw-bold">{{ value }}</span>
+  <span class="m-0 p-0 fw-bold type">{{ value.type }}</span>
+  <span class="m-0 p-0 fw-bold">&nbsp;{{ value.name }}</span>
 </div>

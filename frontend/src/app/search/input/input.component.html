@@ -6,7 +6,7 @@
   type="text"
   maxlength="20"
   [value]="value"
-  (input)="onInput(input, dummy)"
+  (input)="onInput($event, input, dummy)"
   (keypress)="onKeyPress($event, input)"
   init
   (init)="sizeInput(input, dummy)"

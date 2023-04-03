@@ -23,8 +23,7 @@ import { ContainerDirective } from './directives/container.directive';
 import {
   GroupColHeaderComponent,
   GroupListComponent,
-  NameColHeaderComponent,
-  TypeColHeaderComponent,
+  SetColHeaderComponent,
   VarListComponent,
 } from './parameter-views/parameter-views.component';
 
@@ -41,9 +40,8 @@ import {
     ContainerDirective,
     VarListComponent,
     GroupListComponent,
-    TypeColHeaderComponent,
-    NameColHeaderComponent,
     GroupColHeaderComponent,
+    SetColHeaderComponent,
   ],
   imports: [
     BrowserModule,

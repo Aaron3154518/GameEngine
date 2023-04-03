@@ -26,7 +26,7 @@ import { ColComponent } from '../parameter-views/parameter-views.component';
 interface IColumn {
   id?: string;
   key: string;
-  getter?: (row: any) => string;
+  getter?: (row: any) => any;
   component: Type<any>;
   width?: number;
   cellClasses?: string[];
@@ -34,12 +34,12 @@ interface IColumn {
   inputClasses?: string[];
   inputPlaceholder?: string;
   validateInput?: (val: string) => boolean;
-  sanitizeInput?: (val: string) => string;
+  sanitizeInput?: (val: string, i: number) => string;
 }
 
 export class Column implements IColumn {
   key: string;
-  getter: (row: any) => string;
+  getter: (row: any) => any;
   readonly component: Type<any>;
   width: number;
   cellClasses: string[];
@@ -47,7 +47,7 @@ export class Column implements IColumn {
   inputClasses: string[];
   inputPlaceholder: string;
   validateInput: (val: string) => boolean;
-  sanitizeInput: (val: string) => string;
+  sanitizeInput: (val: string, i: number) => string;
 
   constructor({
     key,
@@ -107,8 +107,6 @@ export class SearchComponent implements DoCheck, AfterViewInit, OnChanges {
   protected draggingOver: number[] = [];
 
   protected dragCnt: number = 0;
-
-  sanitizeVar: (s: string) => string = sanitizeVar;
 
   constructor(iterableDiffers: IterableDiffers) {
     this.iterableDiffer = iterableDiffers.find([]).create(undefined);
