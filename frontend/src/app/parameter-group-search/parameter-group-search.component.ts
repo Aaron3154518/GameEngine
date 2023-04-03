@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterGroup, StringDict } from '../utils/interfaces';
-import { searchScore, sortList } from '../utils/utils';
+import { alphanum_, searchScore, sortList, validateVar } from '../utils/utils';
 import { Column } from '../search/search.component';
 import {
   GroupColHeaderComponent,
@@ -20,7 +20,9 @@ export class ParameterGroupSearchComponent {
       key: 'name',
       width: 0,
       requireInput: true,
+      inputPasslist: alphanum_,
       inputPlaceholder: 'New: Group',
+      validateInput: validateVar,
       component: GroupColHeaderComponent,
     }),
     new Column({

@@ -14,11 +14,14 @@ import {
 })
 export class InputComponent {
   @Input() id: string = '';
-  @Input() classes: string[] = [];
   @Input() placeholder: string = '';
   @Input() outline: boolean = true;
+  @Input() passlist: string = '';
+  @Input() maxlen: number = 20;
+  @Input() data: any;
 
   @Input() sanitize: (s: string, i: number) => string = (s: string) => s;
+  @Input() validate: (s: string) => boolean = () => true;
 
   @Output() input: EventEmitter<void> = new EventEmitter();
   @Output() enter: EventEmitter<string> = new EventEmitter();
@@ -30,16 +33,33 @@ export class InputComponent {
 
   protected _value: string = '';
   @Input() set value(s: string) {
-    this._value = s;
+    this._value = this.passlist
+      ? s.replace(RegExp(`[^${this.passlist}]`), '')
+      : s;
+    this.err = this.value.length > 0 && !this.validate(this.value);
     if (this.inputRef && this.dummyRef) {
       this.inputRef.nativeElement.value = this.value;
       this.sizeInput(this.inputRef.nativeElement, this.dummyRef.nativeElement);
     }
+    this.valueChange.next(this.value);
   }
   get value(): string {
     return this._value;
   }
   @Output() valueChange: EventEmitter<string> = new EventEmitter();
+
+  @Input() set classes(cls: string | string[]) {
+    this._classes = typeof cls === 'string' ? cls : cls.join(' ');
+  }
+  get classes(): string {
+    return this._classes;
+  }
+  private _classes: string = '';
+
+  protected err: boolean = false;
+  get valid(): boolean {
+    return this.value.length > 0 && !this.err;
+  }
 
   select() {
     this.inputRef?.nativeElement.focus();
@@ -54,15 +74,17 @@ export class InputComponent {
   onInput(event: Event, input: HTMLInputElement, dummy: HTMLSpanElement) {
     let prevLen: number = input.value.length;
     let i: number = input.selectionStart ? input.selectionStart : 1;
-    this.value = input.value = this.sanitize(input.value, i - 1);
+    this.value = input.value;
     if (prevLen !== input.value.length) {
       input.selectionStart = input.selectionEnd = i - 1;
     }
-    this.valueChange.next(this.value);
-    this.sizeInput(input, dummy);
   }
 
   onKeyPress(event: KeyboardEvent, input: HTMLInputElement) {
+    if (!this.valid) {
+      return;
+    }
+
     if (event.key === 'Enter' && input.value) {
       this.enter.next(input.value);
     }

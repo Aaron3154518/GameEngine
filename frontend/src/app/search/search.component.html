@@ -61,22 +61,17 @@
             <app-input
               #rowInput
               *ngIf="col.requireInput"
-              [(value)]="colInputs[col.key]"
+              [data]="col"
               [classes]="
-                [
-                  'py-0',
-                  'px-1',
-                  'border-0',
-                  'rounded',
-                  'fw-bold',
-                  newRowErrs[col.key] ? 'bg-danger' : 'bg-transparent',
-                  'bg-opacity-25'
-                ].concat(col.inputClasses)
+                ['py-0', 'px-1', 'border-0', 'rounded', 'fw-bold'].concat(
+                  col.inputClasses
+                )
               "
               [placeholder]="col.inputPlaceholder"
-              (input)="onInput(col)"
               (enter)="onEnter()"
-              [sanitize]="col.sanitizeInput"
+              [maxlen]="col.inputMaxlen"
+              [passlist]="col.inputPasslist"
+              [validate]="col.validateInput"
               [outline]="true"
             ></app-input>
           </td>

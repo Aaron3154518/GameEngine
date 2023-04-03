@@ -1,10 +1,14 @@
 <input
   #input
   class="input"
-  [ngClass]="classes.concat([outline ? '' : 'no'])"
+  [ngClass]="[
+    classes,
+    outline ? '' : 'no',
+    err ? 'bg-danger bg-opacity-25' : 'bg-transparent'
+  ]"
   [placeholder]="placeholder"
   type="text"
-  maxlength="20"
+  [attr.maxlength]="maxlen"
   [value]="value"
   (input)="onInput($event, input, dummy)"
   (keypress)="onKeyPress($event, input)"

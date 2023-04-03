@@ -1,19 +1,16 @@
 import {
   Component,
-  DoCheck,
   Input,
   IterableDiffer,
   IterableDiffers,
   OnChanges,
   OnInit,
-  Pipe,
-  PipeTransform,
   SimpleChanges,
 } from '@angular/core';
 import { ParameterGroup, Parameters } from '../utils/interfaces';
 import { ParameterService } from '../services/parameter.service';
 import { ParameterDragService } from '../services/parameter-drag.service';
-import { sanitizeVar } from '../utils/utils';
+import { validateVar } from '../utils/utils';
 import { InputComponent } from '../search/input/input.component';
 
 export interface ColComponent {
@@ -94,10 +91,9 @@ export class VarListComponent implements ColComponent, OnInit, OnChanges {
     'border-bottom-0',
     'border-secondary',
     'fw-bold',
-    'bg-transparent',
   ];
 
-  sanitizeVar = sanitizeVar;
+  validateVar = validateVar;
 
   protected iterableDiffer: IterableDiffer<any>;
 

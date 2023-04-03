@@ -20,7 +20,7 @@ import {
 import { ContainerDirective } from '../directives/container.directive';
 import { InputComponent } from './input/input.component';
 import { StringDict } from '../utils/interfaces';
-import { getAttr, sanitizeVar } from '../utils/utils';
+import { getAttr } from '../utils/utils';
 import { ColComponent } from '../parameter-views/parameter-views.component';
 
 interface IColumn {
@@ -31,10 +31,11 @@ interface IColumn {
   width?: number;
   cellClasses?: string[];
   requireInput?: boolean;
+  inputMaxlen?: number;
+  inputPasslist?: string;
   inputClasses?: string[];
   inputPlaceholder?: string;
   validateInput?: (val: string) => boolean;
-  sanitizeInput?: (val: string, i: number) => string;
 }
 
 export class Column implements IColumn {
@@ -44,10 +45,11 @@ export class Column implements IColumn {
   width: number;
   cellClasses: string[];
   requireInput: boolean;
+  inputMaxlen: number;
+  inputPasslist: string;
   inputClasses: string[];
   inputPlaceholder: string;
   validateInput: (val: string) => boolean;
-  sanitizeInput: (val: string, i: number) => string;
 
   constructor({
     key,
@@ -56,10 +58,11 @@ export class Column implements IColumn {
     width = 1,
     cellClasses = [],
     requireInput = false,
+    inputMaxlen = 20,
+    inputPasslist = '',
     inputClasses = [],
     inputPlaceholder = '',
     validateInput = () => true,
-    sanitizeInput = (s: string) => s,
   }: IColumn) {
     this.key = key;
     this.getter = getter;
@@ -67,10 +70,11 @@ export class Column implements IColumn {
     this.width = width;
     this.cellClasses = cellClasses;
     this.requireInput = requireInput;
+    this.inputMaxlen = inputMaxlen;
+    this.inputPasslist = inputPasslist;
     this.inputClasses = inputClasses;
     this.inputPlaceholder = inputPlaceholder;
     this.validateInput = validateInput;
-    this.sanitizeInput = sanitizeInput;
   }
 }
 
@@ -96,9 +100,6 @@ export class SearchComponent implements DoCheck, AfterViewInit, OnChanges {
   @ViewChildren('rowInput') colInputComps?: QueryList<InputComponent>;
 
   rows: any[] = [];
-
-  protected colInputs: StringDict<string> = {};
-  protected newRowErrs: { [key: string]: boolean } = {};
 
   private colWidthSum: number = 0;
 
@@ -154,21 +155,19 @@ export class SearchComponent implements DoCheck, AfterViewInit, OnChanges {
     this.sort(this.rows, query);
   }
 
-  onInput(col: Column) {
-    this.newRowErrs[col.key] =
-      !!this.colInputs[col.key] && !col.validateInput(this.colInputs[col.key]);
-  }
-
   onEnter() {
-    if (Object.values(this.newRowErrs).findIndex((b: boolean) => b) !== -1) {
+    if (!this.colInputComps) {
       return;
     }
 
-    this.newRow.next(this.colInputs);
-    this.colInputComps?.forEach((ic: InputComponent) => {
-      ic.value = '';
-    });
-    this.colInputComps?.first.select();
+    this.newRow.next(
+      this.colInputComps.reduce((d: StringDict<string>, ic: InputComponent) => {
+        d[ic.data.key] = ic.value;
+        ic.value = '';
+        return d;
+      }, {})
+    );
+    this.colInputComps.first.select();
   }
 
   onDragChange(i: number, v: number) {

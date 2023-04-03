@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import {
-  sanitizeTypeVar,
+  alphanum_,
   searchScore,
   sortList,
   validateTypeVar,
@@ -26,10 +26,11 @@ export class ParametersSearchComponent {
       getter: (set: Parameters) => ({ type: set.type, name: set.name }),
       width: 0,
       requireInput: true,
+      inputPasslist: `${alphanum_}: `,
+      inputMaxlen: 30,
       inputClasses: ['type'],
       inputPlaceholder: 'New: Type Name',
       validateInput: validateTypeVar,
-      sanitizeInput: sanitizeTypeVar,
       component: SetColHeaderComponent,
     }),
     new Column({
