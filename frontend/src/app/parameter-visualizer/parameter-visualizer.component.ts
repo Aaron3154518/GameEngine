@@ -1,10 +1,12 @@
-import { Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { Edge, Vertex } from '../utils/interfaces';
 
 interface VData {
   depth: number;
   width: number;
+  cx: number;
+  cy: number;
 }
 
 @Component({
@@ -12,39 +14,55 @@ interface VData {
   templateUrl: './parameter-visualizer.component.html',
   styleUrls: ['./parameter-visualizer.component.css'],
 })
-export class ParameterVisualizerComponent {
+export class ParameterVisualizerComponent implements AfterViewInit {
+  edges: Edge[] = [];
   vertices: Vertex[] = [];
+  isolated: Vertex[] = [];
+  connected: Vertex[] = [];
+  dragging?: Vertex;
 
   readonly W: number = 1000;
   readonly R: number = 25;
   readonly W_R: number = this.W / 2 / this.R;
+  readonly A_W: number = 7;
+  readonly A_STR: string = `M0,0 V${this.A_W * 2} L${this.A_W},${this.A_W} Z`;
+
+  @ViewChild('dummy', { static: true }) dummy?: ElementRef<HTMLElement>;
 
   constructor(private parameterService: ParameterService) {
-    console.log(this.getTextWidth('AB', 'bold 1.25em Courier New monospace'));
-    this.vertices = this.parameterService.createGraph();
+    [this.vertices, this.edges] = this.parameterService.createGraph();
     this.vertices.forEach(
       (v: Vertex) =>
         (v.data = <VData>{
           depth: -1,
-          width: this.getTextWidth(v.name, 'bold 1.25em Courier New monospace'),
+          width: 0,
         })
     );
     this.calcDepths(this.vertices);
     this.vertices.sort((a: Vertex, b: Vertex) => a.data.depth - b.data.depth);
+
+    // Get subarrays
+    this.isolated = this.vertices.filter((v: Vertex) => !v.in && !v.out);
+    this.connected = this.vertices.filter(
+      (v: Vertex) => v.in.length > 0 || v.out.length > 0
+    );
+
+    this.connected.forEach((v: Vertex, i: number) => {
+      v.data.cx = this.getCX(v, i);
+      v.data.cy = this.getCY(v, i);
+    });
   }
 
-  canvas: HTMLCanvasElement = document.createElement('canvas');
-
-  getTextWidth(text: string, font: string): number {
-    // if given, use cached canvas for better performance
-    // else, create new canvas
-    let context: CanvasRenderingContext2D | null = this.canvas.getContext('2d');
-    if (!context) {
-      return 0;
+  ngAfterViewInit(): void {
+    if (!this.dummy) {
+      return;
     }
-    context.font = font;
-    var metrics = context.measureText(text);
-    return metrics.width;
+    let dummy: SVGTextElement = this.dummy
+      .nativeElement as any as SVGTextElement;
+    this.vertices.forEach((v: Vertex) => {
+      dummy.textContent = v.name;
+      return Math.min(dummy.getBBox().width, this.R * 2 - 2);
+    });
   }
 
   calcDepth(v: Vertex): number {
@@ -63,17 +81,27 @@ export class ParameterVisualizerComponent {
     vs.forEach((v: Vertex) => this.calcDepth(v));
   }
 
-  getWidth(v: Vertex, dummy: HTMLElement): number {
-    dummy.textContent = v.name;
-    let w: number = (dummy as any as SVGTextElement).getBBox().width;
-    return Math.min(w, this.R * 2 - 2);
-  }
-
   getCX(v: Vertex, i: number): number {
     return (((i % this.W_R) + 0.5) * this.W) / this.W_R;
   }
 
   getCY(v: Vertex, i: number): number {
     return ((Math.floor(i / this.W_R) + 0.5) * this.W) / this.W_R;
+  }
+
+  startDrag(v: Vertex) {
+    this.dragging = v;
+  }
+
+  drag(event: Event, svg: HTMLElement) {
+    if (this.dragging) {
+      let e: DragEvent = event as DragEvent;
+      this.dragging.data.cx = (e.pageX * this.W) / svg.clientWidth;
+      this.dragging.data.cy = (e.pageY * this.W) / svg.clientHeight;
+    }
+  }
+
+  endDrag() {
+    this.dragging = undefined;
   }
 }

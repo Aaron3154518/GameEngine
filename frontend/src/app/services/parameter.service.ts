@@ -302,7 +302,7 @@ export class ParameterService {
   }
 
   // TODO: dupe accross groups
-  createGraph(): Vertex[] {
+  createGraph(): [Vertex[], Edge[]] {
     let vertices: StringDict<Vertex> = {};
     this.paramSets.forEach((set: Parameters) =>
       [set.group.uuid, ...set.groups].forEach((guuid: string) =>
@@ -318,6 +318,7 @@ export class ParameterService {
         )
       )
     );
+    let edges: Edge[] = [];
     this.callbacks.forEach((cb: Callback) => {
       if (!cb.retParam) {
         return;
@@ -334,10 +335,10 @@ export class ParameterService {
             };
             to.in.push(edge);
             from.out.push(edge);
+            edges.push(edge);
           })
       );
     });
-    console.log(Object.values(vertices));
-    return Object.values(vertices);
+    return [Object.values(vertices), edges];
   }
 }

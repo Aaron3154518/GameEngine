@@ -1,21 +1,52 @@
-<svg class="border w-100" [attr.viewBox]="'0 0 ' + W + ' ' + W">
+<svg
+  #svg
+  class="border w-100"
+  [attr.viewBox]="'0 0 ' + W + ' ' + W"
+  (mousemove)="drag($event, svg)"
+  (mouseup)="endDrag()"
+>
+  <g *ngFor="let edge of edges">
+    <defs>
+      <marker
+        id="head"
+        orient="auto"
+        [attr.markerWidth]="A_W"
+        [attr.markerHeight]="A_W * 2"
+        [attr.refX]="A_W + R"
+        [attr.refY]="A_W"
+      >
+        <path [attr.d]="A_STR" fill="black" />
+      </marker>
+    </defs>
+    <line
+      marker-end="url(#head)"
+      [attr.x1]="edge.from.data.cx"
+      [attr.x2]="edge.to.data.cx"
+      [attr.y1]="edge.from.data.cy"
+      [attr.y2]="edge.to.data.cy"
+      stroke="black"
+    ></line>
+  </g>
   <text class="code" style="font-size: 0.75em" x="-9999" #dummy></text>
-  <g *ngFor="let v of vertices; let i = index">
+  <g *ngFor="let v of connected; let i = index">
     <circle
-      [attr.cx]="getCX(v, i)"
-      [attr.cy]="getCY(v, i)"
+      #circle
+      [attr.cx]="v.data.cx"
+      [attr.cy]="v.data.cy"
       [attr.r]="R"
       fill="lightgray"
       stroke="black"
+      (mousedown)="startDrag(v)"
     ></circle>
     <text
       class="code"
       style="font-size: 0.75em"
-      [attr.x]="getCX(v, i)"
-      [attr.y]="getCY(v, i)"
-      [attr.textLength]="getWidth(v, dummy)"
+      [attr.x]="v.data.cx"
+      [attr.y]="v.data.cy"
+      [attr.textLength]="v.data.width"
       text-anchor="middle"
       dominant-baseline="middle"
+      (mousedown)="startDrag(v)"
     >
       {{ v.name }}
     </text>
