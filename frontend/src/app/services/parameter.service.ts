@@ -3,9 +3,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import {
   Callback,
   CallbackParameterList,
+  Edge,
   ParameterGroup,
   Parameters,
   StringDict,
+  Vertex,
   toDict,
 } from '../utils/interfaces';
 
@@ -84,7 +86,7 @@ export class ParameterService {
       code: 'std::cerr << (T1 + T2 + T3) << std::endl;',
       params: Callback.getParametersFromList([
         [this._paramSets[1].uuid, ['T1']],
-        [this._paramSets[2].uuid, ['T2', 'T3']],
+        [this._paramSets[0].uuid, ['T2', 'T3']],
       ]),
       retParam: {
         uuid: this._paramSets[0].uuid,
@@ -297,5 +299,45 @@ export class ParameterService {
     });
     fs.appendFileSync(file, `}};`);
     fs.closeSync(file);*/
+  }
+
+  // TODO: dupe accross groups
+  createGraph(): Vertex[] {
+    let vertices: StringDict<Vertex> = {};
+    this.paramSets.forEach((set: Parameters) =>
+      [set.group.uuid, ...set.groups].forEach((guuid: string) =>
+        this.getParamGroup(guuid)?.params.forEach(
+          (p: string) =>
+            (vertices[`${set.uuid}${p}`] = {
+              suuid: set.uuid,
+              guuid: guuid,
+              name: p,
+              in: [],
+              out: [],
+            })
+        )
+      )
+    );
+    this.callbacks.forEach((cb: Callback) => {
+      if (!cb.retParam) {
+        return;
+      }
+      let to: Vertex = vertices[`${cb.retParam.uuid}${cb.retParam.name}`];
+      Object.entries(cb.params).forEach(
+        ([suuid, params]: [string, StringDict<string>]) =>
+          Object.keys(params).forEach((p: string) => {
+            let from: Vertex = vertices[`${suuid}${p}`];
+            let edge: Edge = {
+              uuid: cb.uuid,
+              from: from,
+              to: to,
+            };
+            to.in.push(edge);
+            from.out.push(edge);
+          })
+      );
+    });
+    console.log(Object.values(vertices));
+    return Object.values(vertices);
   }
 }

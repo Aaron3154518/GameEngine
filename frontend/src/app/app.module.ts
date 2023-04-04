@@ -26,6 +26,7 @@ import {
   SetColHeaderComponent,
   VarListComponent,
 } from './parameter-views/parameter-views.component';
+import { ParameterVisualizerComponent } from './parameter-visualizer/parameter-visualizer.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import {
     GroupListComponent,
     GroupColHeaderComponent,
     SetColHeaderComponent,
+    ParameterVisualizerComponent,
   ],
   imports: [
     BrowserModule,

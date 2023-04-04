@@ -1,0 +1,24 @@
+<svg class="border w-100" [attr.viewBox]="'0 0 ' + W + ' ' + W">
+  <text class="code" style="font-size: 0.75em" x="-9999" #dummy></text>
+  <g *ngFor="let v of vertices; let i = index">
+    <circle
+      [attr.cx]="getCX(v, i)"
+      [attr.cy]="getCY(v, i)"
+      [attr.r]="R"
+      fill="lightgray"
+      stroke="black"
+    ></circle>
+    <text
+      class="code"
+      style="font-size: 0.75em"
+      [attr.x]="getCX(v, i)"
+      [attr.y]="getCY(v, i)"
+      [attr.textLength]="getWidth(v, dummy)"
+      text-anchor="middle"
+      dominant-baseline="middle"
+    >
+      {{ v.name }}
+    </text>
+  </g>
+</svg>
+<br />

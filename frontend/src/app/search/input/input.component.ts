@@ -67,7 +67,6 @@ export class InputComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value']) {
       this.initialValue = this.value;
-      console.log(this.initialValue);
     }
   }
 

@@ -11,6 +11,22 @@ export function toDict<T>(list: T[], getKey: (t: T) => string): StringDict<T> {
   }, {});
 }
 
+export interface Vertex {
+  data?: any;
+  suuid: string;
+  guuid: string;
+  name: string;
+  in: Edge[];
+  out: Edge[];
+}
+
+export interface Edge {
+  data?: any;
+  uuid: string;
+  from: Vertex;
+  to: Vertex;
+}
+
 // Parameter Group
 export interface IParameterGroup {
   uuid: string;
@@ -122,6 +138,7 @@ export class Parameters implements IParameters {
 }
 
 // Callbacks
+// TODO: duplicated accross guuid
 // Parameters uuid (as string) : {parameter name : parameter alias}
 export type CallbackParameters = StringDict<StringDict<string>>;
 export interface CallbackParameter {
