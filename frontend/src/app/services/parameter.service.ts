@@ -305,18 +305,23 @@ export class ParameterService {
   createGraph(): [Vertex[], Edge[]] {
     let vertices: StringDict<Vertex> = {};
     this.paramSets.forEach((set: Parameters) =>
-      [set.group.uuid, ...set.groups].forEach((guuid: string) =>
-        this.getParamGroup(guuid)?.params.forEach(
+      [set.group.uuid, ...set.groups].forEach((guuid: string) => {
+        let _group: ParameterGroup | undefined = this.getParamGroup(guuid);
+        if (!_group) {
+          return;
+        }
+        let group: ParameterGroup = _group;
+        group.params.forEach(
           (p: string) =>
             (vertices[`${set.uuid}${p}`] = {
-              suuid: set.uuid,
-              guuid: guuid,
+              set: set,
+              group: group,
               name: p,
               in: [],
               out: [],
             })
-        )
-      )
+        );
+      })
     );
     let edges: Edge[] = [];
     this.callbacks.forEach((cb: Callback) => {
@@ -329,7 +334,7 @@ export class ParameterService {
           Object.keys(params).forEach((p: string) => {
             let from: Vertex = vertices[`${suuid}${p}`];
             let edge: Edge = {
-              uuid: cb.uuid,
+              callback: cb,
               from: from,
               to: to,
             };

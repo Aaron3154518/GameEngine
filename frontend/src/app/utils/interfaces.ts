@@ -13,8 +13,8 @@ export function toDict<T>(list: T[], getKey: (t: T) => string): StringDict<T> {
 
 export interface Vertex {
   data?: any;
-  suuid: string;
-  guuid: string;
+  set: Parameters;
+  group: ParameterGroup;
   name: string;
   in: Edge[];
   out: Edge[];
@@ -22,7 +22,7 @@ export interface Vertex {
 
 export interface Edge {
   data?: any;
-  uuid: string;
+  callback: Callback;
   from: Vertex;
   to: Vertex;
 }

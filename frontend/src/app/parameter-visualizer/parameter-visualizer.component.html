@@ -28,7 +28,16 @@
     ></line>
   </g>
   <text class="code" style="font-size: 0.75em" x="-9999" #dummy></text>
-  <g *ngFor="let v of connected; let i = index">
+  <g
+    *ngFor="let v of connected; let i = index"
+    triggers="mouseenter:mouseleave"
+    [popoverTitle]="v.set.type + ' ' + v.name"
+    [ngbPopover]="content"
+    container="body"
+  >
+    <ng-template #content>
+      <ng-container *ngTemplateOutlet="inner; context: { v: v }"></ng-container>
+    </ng-template>
     <circle
       #circle
       [attr.cx]="v.data.cx"
@@ -37,6 +46,7 @@
       fill="lightgray"
       stroke="black"
       (mousedown)="startDrag(v)"
+      type="button"
     ></circle>
     <text
       class="code"
@@ -53,3 +63,7 @@
   </g>
 </svg>
 <br />
+
+<ng-template #inner let-v="v">
+  <div [innerHTML]="getPopoverContent(v)"></div>
+</ng-template>

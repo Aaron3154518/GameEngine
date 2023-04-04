@@ -27,6 +27,7 @@ import {
   VarListComponent,
 } from './parameter-views/parameter-views.component';
 import { ParameterVisualizerComponent } from './parameter-visualizer/parameter-visualizer.component';
+import { NgbModule, NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,8 @@ import { ParameterVisualizerComponent } from './parameter-visualizer/parameter-v
     FontAwesomeModule,
     MdbModalModule,
     FormsModule,
+    NgbModule,
+    NgbPopoverModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

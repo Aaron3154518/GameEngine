@@ -96,12 +96,20 @@ export class ParameterVisualizerComponent implements AfterViewInit {
   drag(event: Event, svg: HTMLElement) {
     if (this.dragging) {
       let e: DragEvent = event as DragEvent;
-      this.dragging.data.cx = (e.pageX * this.W) / svg.clientWidth;
-      this.dragging.data.cy = (e.pageY * this.W) / svg.clientHeight;
+      this.dragging.data.cx = (e.x * this.W) / svg.clientWidth;
+      this.dragging.data.cy = (e.y * this.W) / svg.clientHeight;
     }
   }
 
   endDrag() {
     this.dragging = undefined;
+  }
+
+  getPopoverContent(v: Vertex): string {
+    return `<span class="code">Parameter Set: ${
+      v.set.name
+    }</span><br><span class="code">${
+      v.group.name !== ' ' ? `Parameter Group: ${v.group.name}\n` : ''
+    }</span>`;
   }
 }
