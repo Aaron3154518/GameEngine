@@ -2,6 +2,9 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { ParameterService } from '../services/parameter.service';
 import { Edge, Vertex } from '../utils/interfaces';
 
+import * as tauri from '@tauri-apps/api';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+
 interface VData {
   depth: number;
   width: number;
@@ -20,6 +23,9 @@ export class ParameterVisualizerComponent implements AfterViewInit {
   isolated: Vertex[] = [];
   connected: Vertex[] = [];
   dragging?: Vertex;
+
+  cont: BehaviorSubject<string> = new BehaviorSubject('');
+  obs: Observable<string> = this.cont.asObservable();
 
   readonly W: number = 1000;
   readonly R: number = 25;
@@ -105,11 +111,14 @@ export class ParameterVisualizerComponent implements AfterViewInit {
     this.dragging = undefined;
   }
 
-  getPopoverContent(v: Vertex): string {
-    return `<span class="code">Parameter Set: ${
-      v.set.name
-    }</span><br><span class="code">${
-      v.group.name !== ' ' ? `Parameter Group: ${v.group.name}\n` : ''
-    }</span>`;
+  async getPopoverContent(v: Vertex) {
+    let str: string = await tauri.invoke('greet', { name: 'World' });
+    this.cont.next(
+      `<span class="code">Parameter Set: ${
+        v.set.name
+      }${str}</span><br><span class="code">${
+        v.group.name !== ' ' ? `Parameter Group: ${v.group.name}\n` : ''
+      }</span>`
+    );
   }
 }

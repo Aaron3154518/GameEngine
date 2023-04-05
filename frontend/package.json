@@ -8,7 +8,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "electron": "ng build && electron ."
+    "electron": "ng build && electron .",
+    "tauri": "tauri"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +27,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "@ng-bootstrap/ng-bootstrap": "^14.1.0",
     "@popperjs/core": "^2.11.7",
+    "@tauri-apps/api": "^1.2.0",
     "@types/uuid": "^9.0.1",
     "bootstrap": "^5.2.3",
     "font-awesome": "^4.7.0",
@@ -41,6 +43,7 @@
     "@angular/cli": "~15.2.4",
     "@angular/compiler-cli": "^15.2.5",
     "@angular/localize": "^15.2.5",
+    "@tauri-apps/cli": "^1.2.3",
     "@types/jasmine": "~4.3.0",
     "electron": "^23.2.0",
     "jasmine-core": "~4.5.0",
