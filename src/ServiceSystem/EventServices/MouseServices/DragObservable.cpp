@@ -47,7 +47,7 @@ void DragObservable::next(const Event &e) {
             }
 
             if (uiData == underMouse) {
-                Uint32 dragDelay = dragData->dragDelay;
+                int dragDelay = dragData->dragDelay;
                 if ((dragDelay < 0 && e.mouseMoved()) ||
                     (dragDelay >= 0 && left.duration >= dragDelay)) {
                     current = sub;
